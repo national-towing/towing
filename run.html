@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=8">
-    <link rel="icon" type="image/png" href="icon-run.png?v=8">
-    <link rel="manifest" href="manifest-run.json?v=8">
+    <link rel="apple-touch-icon" href="icon-run.png?v=9">
+    <link rel="icon" type="image/png" href="icon-run.png?v=9">
+    <link rel="manifest" href="manifest-run.json?v=9">
 
     <style>
         * { box-sizing: border-box; }
@@ -26,7 +26,6 @@
         .vehicle-card { background: #1e1e1e; border-radius: 16px; padding: 18px; border: 2px solid #333; margin-bottom: 14px; }
         .rego-title { font-size: 32px; font-weight: 900; color: #fff; }
         
-        /* DYNAMIC STATUS BUTTONS */
         .action-btn { font-weight: 900; border: none; border-radius: 14px; height: 58px; font-size: 24px; width: 100%; margin-top: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; }
         .btn-red { background: #ff1744; color: #fff; }
         .btn-yellow { background: #ffab00; color: #000; }
@@ -55,24 +54,37 @@
         }
     });
 
-    function getVehicleStatus(item) {
-        const isExempt = item.pass && item.pass.toUpperCase().includes('EXEMPT');
-        if (isExempt) return 'GREEN';
-
-        const now = new Date();
-        const expiryDate = new Date(item.expiryTime);
+    // ROBUST SAFARI-PROOF DATE PARSER
+    function parseToDateObj(str) {
+        if (!str || str === 'N/A' || str === 'Pending') return null;
         
-        // If expiry timestamp parsed correctly and passed, it's ready to TOW (RED)
-        if (!isNaN(expiryDate.getTime()) && now >= expiryDate) {
-            return 'RED';
-        }
-        return 'YELLOW'; // Still in waiting window
+        // Direct parse attempt
+        let d = new Date(str);
+        if (!isNaN(d.getTime())) return d;
+
+        // Custom split for DD/MM/YYYY hh:mm:ss format from Sheets
+        try {
+            const parts = str.trim().split(/[\s/:-]+/);
+            if (parts.length >= 5) {
+                // Day, Month, Year, Hour, Minute
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                let year = parseInt(parts[2], 10);
+                if (year < 100) year += 2000;
+                const hours = parseInt(parts[3], 10);
+                const minutes = parseInt(parts[4], 10);
+                
+                d = new Date(year, month, day, hours, minutes);
+                if (!isNaN(d.getTime())) return d;
+            }
+        } catch(e) {}
+        
+        return null;
     }
 
     function formatDDDhhmm(dateStr) {
-        if (!dateStr) return "N/A";
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return dateStr; // Return raw string if custom text
+        const d = parseToDateObj(dateStr);
+        if (!d) return dateStr || "N/A";
         
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const dayName = days[d.getDay()];
@@ -80,6 +92,19 @@
         const mins = String(d.getMinutes()).padStart(2, '0');
         
         return `${dayName} ${hours}:${mins}`;
+    }
+
+    function getVehicleStatus(item) {
+        const isExempt = item.pass && item.pass.toUpperCase().includes('EXEMPT');
+        if (isExempt) return 'GREEN';
+
+        const now = new Date();
+        const expiryDate = parseToDateObj(item.expiryTime);
+        
+        if (expiryDate && now >= expiryDate) {
+            return 'RED'; // Tow Ready
+        }
+        return 'YELLOW'; // Still in waiting window
     }
 
     function renderDashboard() {
@@ -157,6 +182,9 @@
     }
 
     function escapeJs(str) { return (str || '').replace(/'/g, "\\'"); }
+
+    // Auto update trigger handler
+    if (window.applicationCache) { window.applicationCache.addEventListener('updateready', () => window.location.reload()); }
 </script>
 </body>
 </html>
