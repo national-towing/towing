@@ -4,12 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RUN</title>
+    
+    <link rel="apple-touch-icon" href="icon-run.png?v=13">
+    <link rel="icon" type="image/png" href="icon-run.png?v=13">
+    <link rel="manifest" href="manifest-run.json?v=13">
 
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header h1 { margin: 0 0 10px 0; font-size: 36px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
         
+        .header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; }
+        .refresh-btn { background: #2a2a2a; border: 2px solid #ffab00; color: #ffab00; border-radius: 12px; padding: 8px 16px; font-weight: 900; font-size: 16px; cursor: pointer; }
+        .refresh-btn:active { transform: scale(0.95); }
+
         /* UNIVERSAL TILE HEADER NAVIGATION BAR */
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
@@ -41,7 +49,10 @@
 </head>
 <body>
 
-<div class="header"><h1>RUN</h1></div>
+<div class="header">
+    <h1>RUN</h1>
+    <button class="refresh-btn" id="refreshBtn">🔄 REFRESH</button>
+</div>
 
 <!-- STANDARD NAV BAR -->
 <div class="nav-bar">
@@ -56,9 +67,12 @@
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
     const appContainer = document.getElementById('appContainer');
+    const refreshBtn = document.getElementById('refreshBtn');
     let allRunData = [];
 
-    window.addEventListener('load', async () => {
+    window.addEventListener('load', fetchRunData);
+
+    async function fetchRunData() {
         try {
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_tow_run`);
             allRunData = await res.json();
@@ -66,7 +80,12 @@
         } catch(e) { 
             appContainer.innerHTML = '<div id="status">NO MARKED CARS FOUND</div>'; 
         }
-    });
+    }
+
+    refreshBtn.onclick = async () => {
+        appContainer.innerHTML = '<div id="status">REFRESHING RUN DATA...</div>';
+        await fetchRunData();
+    };
 
     function getVehicleStatus(item) {
         const isExempt = item.pass && item.pass.toUpperCase().includes('EXEMPT');
@@ -144,7 +163,6 @@
             const card = document.createElement('div');
             card.className = 'vehicle-card-v2';
             
-            // SIDE-BY-SIDE FLEX CONTAINER
             card.innerHTML = `
                 <div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; width: 100% !important;">
                     <div style="flex: 1;">
