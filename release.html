@@ -3,136 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RELEASE VEHICLE</title>
+    <title>RELEASE</title>
     
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="RELEASE">
-    
-    <link rel="apple-touch-icon" href="icon-release.png?v=2">
-    <link rel="icon" type="image/png" href="icon-release.png?v=2">
-    <link rel="manifest" href="manifest-release.json?v=2">
-
-    <!-- OCR Engine for License Auto-fill -->
+    <link rel="apple-touch-icon" href="icon-release.png?v=4">
+    <link rel="icon" type="image/png" href="icon-release.png?v=4">
+    <link rel="manifest" href="manifest-release.json?v=4">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 12px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
-        .header { text-align: center; margin-bottom: 12px; }
-        .header h1 { margin: 0; font-size: 30px; font-weight: 900; color: #00e676; letter-spacing: 2px; }
-        
-        .card {
-            background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px;
-            border: 1px solid #2a2a2a; box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header h1 { margin: 0 0 14px 0; font-size: 38px; font-weight: 900; color: #00e676; letter-spacing: 2px; text-align: center; }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
 
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 800; }
+        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 48px; padding: 0 12px; border-radius: 10px; border: 1px solid #333;
-            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 700; margin-top: 4px; outline: none;
+            width: 100%; height: 54px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 22px; font-weight: 900; margin-top: 6px; outline: none;
         }
 
-        .rego-select {
-            height: 56px !important; font-size: 22px !important; font-weight: 900 !important;
-            color: #00e676 !important; border: 2px solid #00e676 !important; text-align: center;
-        }
+        .rego-select { height: 60px !important; font-size: 26px !important; color: #00e676 !important; border: 2px solid #00e676 !important; text-align: center; }
 
-        .ocr-btn {
-            background: #2979ff; color: #fff; border: none; border-radius: 10px; height: 44px;
-            font-size: 14px; font-weight: 800; width: 100%; margin-top: 8px; cursor: pointer;
-        }
+        .ocr-btn { background: #2979ff; color: #fff; border: none; border-radius: 12px; height: 50px; font-size: 18px; font-weight: 900; width: 100%; margin-top: 10px; cursor: pointer; }
+        .sig-container { margin-top: 6px; background: #fff; border-radius: 12px; position: relative; touch-action: none; }
+        canvas.sig-pad { width: 100%; height: 200px; border-radius: 12px; display: block; }
+        .clear-sig { position: absolute; right: 8px; top: 8px; background: #ff1744; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 900; }
 
-        .sig-container { margin-top: 6px; background: #fff; border-radius: 10px; position: relative; touch-action: none; }
-        canvas.sig-pad { width: 100%; height: 220px; border-radius: 10px; display: block; }
-        .clear-sig { position: absolute; right: 8px; top: 8px; background: #ff1744; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 800; }
-
-        .submit-btn {
-            background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
-            height: 58px; font-size: 22px; width: 100%; margin-top: 22px; cursor: pointer;
-        }
+        .submit-btn { background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px; height: 60px; font-size: 28px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px; }
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
-        #status { text-align: center; font-weight: 800; font-size: 14px; margin-top: 14px; color: #00e676; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; color: #00e676; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>RELEASE VEHICLE</h1>
-</div>
+<div class="header"><h1>RELEASE</h1></div>
 
 <div class="card">
-    <label>Select Vehicle in Yard</label>
-    <select id="regoSelect" class="rego-select">
-        <option value="" disabled selected>LOADING YARD VEHICLES...</option>
-    </select>
+    <label>REGO</label>
+    <select id="regoSelect" class="rego-select"><option value="" disabled selected>LOADING YARD...</option></select>
 
-    <!-- LICENSE SCANNER OPTION -->
-    <button class="ocr-btn" id="ocrScanBtn">🪪 SCAN DRIVER LICENSE / ID (AUTO-FILL)</button>
+    <button class="ocr-btn" id="ocrScanBtn">Scan ID</button>
     <input type="file" id="ocrFileInput" accept="image/*" style="display:none;">
 
-    <label>Owner / Claimer Full Name</label>
+    <label>OWNER FULL NAME</label>
     <input type="text" id="ownerName" placeholder="JOHN CITIZEN">
 
-    <label>ID / License Number</label>
-    <input type="text" id="idNumber" placeholder="DL-98765432">
+    <label>ID / LICENSE NUMBER</label>
+    <input type="text" id="idNumber" placeholder="DL-12345678">
 
-    <label>Address</label>
-    <input type="text" id="ownerAddress" placeholder="123 MAIN ST, ASHMORE QLD">
+    <label>ADDRESS</label>
+    <input type="text" id="ownerAddress" placeholder="ADDRESS">
 
     <div class="row-2">
-        <div>
-            <label>Phone</label>
-            <input type="tel" id="ownerPhone" placeholder="0400000000">
-        </div>
-        <div>
-            <label>Email (Tax Invoice)</label>
-            <input type="email" id="ownerEmail" placeholder="owner@email.com">
-        </div>
+        <div><label>PHONE</label><input type="tel" id="ownerPhone" placeholder="PHONE"></div>
+        <div><label>EMAIL</label><input type="email" id="ownerEmail" placeholder="EMAIL"></div>
     </div>
 
-    <!-- OWNER SIGNATURE -->
-    <label style="color:#00e676;">1. Owner Signature (Details Correct)</label>
+    <label style="color:#00e676;">1. Owner Signature</label>
     <div class="sig-container">
         <button class="clear-sig" id="clearOwnerSig">CLEAR</button>
         <canvas id="ownerSigCanvas" class="sig-pad"></canvas>
     </div>
 
-    <!-- UPDATED FEE SECTION -->
     <div class="row-2">
-        <div>
-            <label>Tow Fee ($)</label>
-            <input type="number" id="towFee" value="310.05" step="0.01">
-        </div>
-        <div>
-            <label>Storage / AH Fee ($)</label>
-            <input type="number" id="storageFee" value="140.95" step="0.01">
-        </div>
+        <div><label>TOW FEE ($)</label><input type="number" id="towFee" value="310.05" step="0.01"></div>
+        <div><label>STORAGE ($)</label><input type="number" id="storageFee" value="140.95" step="0.01"></div>
     </div>
 
-    <label>Total Paid ($ incl. GST)</label>
-    <input type="number" id="totalPaid" value="451.00" step="0.01" style="color:#00e676; font-size:22px; font-weight:900;">
+    <label>TOTAL PAID ($ incl. GST)</label>
+    <input type="number" id="totalPaid" value="451.00" step="0.01" style="color:#00e676; font-size:26px;">
 
-    <label>Release Officer</label>
-    <select id="officerSelect">
-        <option value="Brett" selected>Brett</option>
-        <option value="Brian">Brian</option>
-    </select>
+    <label>RELEASE OFFICER</label>
+    <select id="officerSelect"><option value="Brett" selected>Brett</option><option value="Brian">Brian</option></select>
 
-    <!-- OFFICER SIGNATURE -->
-    <label style="color:#00e676;">2. Release Officer Signature (Approved)</label>
+    <label style="color:#00e676;">2. Officer Signature</label>
     <div class="sig-container">
         <button class="clear-sig" id="clearOfficerSig">CLEAR</button>
         <canvas id="officerSigCanvas" class="sig-pad"></canvas>
     </div>
 
-    <button class="submit-btn" id="releaseBtn">PROCESS RELEASE & INVOICE</button>
+    <button class="submit-btn" id="releaseBtn">RELEASE</button>
     <div id="status"></div>
 </div>
 
@@ -156,7 +107,6 @@
 
     let yardVehicles = [];
 
-    // Signature Canvas setup
     function setupCanvas(canvasId, clearBtnId) {
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
@@ -164,8 +114,7 @@
 
         function resize() {
             const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+            canvas.width = rect.width; canvas.height = rect.height;
             ctx.lineWidth = 3; ctx.strokeStyle = "#000"; ctx.lineCap = "round";
         }
         resize();
@@ -190,49 +139,37 @@
         return canvas;
     }
 
-    const ownerCanvas = setupCanvas('ownerSigCanvas', 'clearOwnerSig');
-    const officerCanvas = setupCanvas('officerSigCanvas', 'clearOfficerSig');
+    setupCanvas('ownerSigCanvas', 'clearOwnerSig');
+    setupCanvas('officerSigCanvas', 'clearOfficerSig');
 
     function updateTotal() {
-        const tf = parseFloat(towFee.value) || 0;
-        const sf = parseFloat(storageFee.value) || 0;
-        totalPaid.value = (tf + sf).toFixed(2);
+        totalPaid.value = ((parseFloat(towFee.value) || 0) + (parseFloat(storageFee.value) || 0)).toFixed(2);
     }
     towFee.addEventListener('input', updateTotal);
     storageFee.addEventListener('input', updateTotal);
 
-    // OCR Driver's License Scanner
     ocrScanBtn.onclick = () => ocrFileInput.click();
     ocrFileInput.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        statusDiv.innerText = "READING DRIVER LICENSE / ID...";
-        
+        statusDiv.innerText = "READING ID...";
         try {
             const result = await Tesseract.recognize(file, 'eng');
-            const text = result.data.text;
-            
-            // Basic heuristic auto-fill from OCR text
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const lines = result.data.text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             if (lines.length > 0) ownerName.value = lines[0].toUpperCase();
             if (lines.length > 1) ownerAddress.value = lines.slice(1, 3).join(', ').toUpperCase();
-            
-            statusDiv.innerText = "✔ LICENSE SCANNED & DETAILS FILLED!";
-        } catch(err) {
-            statusDiv.innerText = "MANUAL ENTRY REQUIRED";
-        }
+            statusDiv.innerText = "✔ ID SCANNED!";
+        } catch(err) { statusDiv.innerText = "MANUAL ENTRY REQUIRED"; }
     };
 
     window.addEventListener('load', async () => {
         try {
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_yard_vehicles`);
             yardVehicles = await res.json();
-
-            regoSelect.innerHTML = '<option value="" disabled selected>SELECT REGO FROM YARD</option>';
+            regoSelect.innerHTML = '<option value="" disabled selected>SELECT REGO</option>';
             yardVehicles.forEach(v => {
                 const opt = document.createElement('option');
-                opt.value = v.rego;
-                opt.innerText = `${v.rego} (${v.make} ${v.model})`;
+                opt.value = v.rego; opt.innerText = `${v.rego} (${v.make} ${v.model})`;
                 regoSelect.appendChild(opt);
             });
         } catch(e) {}
@@ -241,30 +178,18 @@
     releaseBtn.addEventListener('click', async () => {
         const selectedRego = regoSelect.value;
         if (!selectedRego) { statusDiv.innerText = "SELECT A VEHICLE"; return; }
-
         const vehicleObj = yardVehicles.find(v => v.rego === selectedRego) || {};
         
         const payload = {
-            action: "process_release",
-            rego: selectedRego,
-            make: vehicleObj.make || "",
-            model: vehicleObj.model || "",
-            colour: vehicleObj.colour || "",
-            bodyType: vehicleObj.bodyType || "",
-            ownerName: ownerName.value.trim(),
-            idNumber: idNumber.value.trim(),
-            ownerAddress: ownerAddress.value.trim(),
-            ownerPhone: ownerPhone.value.trim(),
-            ownerEmail: ownerEmail.value.trim(),
-            towFee: towFee.value,
-            storageFee: storageFee.value,
-            totalPaid: totalPaid.value,
-            officer: officerSelect.value
+            action: "process_release", rego: selectedRego, make: vehicleObj.make || "",
+            model: vehicleObj.model || "", colour: vehicleObj.colour || "", ownerName: ownerName.value.trim(),
+            idNumber: idNumber.value.trim(), ownerAddress: ownerAddress.value.trim(), ownerPhone: ownerPhone.value.trim(),
+            ownerEmail: ownerEmail.value.trim(), towFee: towFee.value, storageFee: storageFee.value, totalPaid: totalPaid.value, officer: officerSelect.value
         };
 
-        statusDiv.innerText = "PROCESSING RELEASE & INVOICE...";
+        statusDiv.innerText = "PROCESSING RELEASE...";
         await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        statusDiv.innerText = "✔ VEHICLE RELEASED & TAX INVOICE SENT!";
+        statusDiv.innerText = "✔ VEHICLE RELEASED & INVOICED!";
     });
 </script>
 </body>
