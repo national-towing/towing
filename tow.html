@@ -5,59 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TOW VEHICLE</title>
     
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="TOW">
-    
-    <link rel="apple-touch-icon" href="icon-tow.png?v=2">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=2">
-    <link rel="manifest" href="manifest-tow.json?v=2">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=3">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=3">
+    <link rel="manifest" href="manifest-tow.json?v=3">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 12px; background: #121212; color: #fff; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-        .header { text-align: center; margin-bottom: 10px; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 900; color: #ff1744; letter-spacing: 1px; }
+        .header h1 { margin: 0 0 12px 0; font-size: 34px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
         
-        .card {
-            background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px;
-            border: 1px solid #2a2a2a; box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-        }
-
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 12px; font-weight: 800; }
+        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 800; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #333;
-            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 700; margin-top: 4px; outline: none;
+            width: 100%; height: 54px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 800; margin-top: 6px; outline: none;
         }
         
-        /* EXPANDED CAMERA FRAME */
         .camera-box {
-            width: 100%; height: 340px; background: #000; border-radius: 12px; border: 2px dashed #444;
-            margin-top: 8px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 320px; background: #000; border-radius: 14px; border: 2px solid #333;
+            margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
-        video, img.preview { width: 100%; height: 100%; object-fit: contain; background: #000; }
-        
-        /* MARKED PIC VERIFICATION THUMBNAIL */
-        .mark-verify-box {
-            background: #2a2a2a; border-radius: 10px; padding: 10px; border: 1px solid #ffab00; margin-bottom: 10px; display: none;
-        }
-        .mark-verify-box img { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; margin-top: 6px; }
+        video, img.preview { width: 100%; height: 100%; object-fit: contain; }
 
-        .row-2 { display: flex; gap: 10px; }
-        .row-2 > div { flex: 1; }
+        /* CIRCLE CAMERA BUTTON */
+        .circle-cam-btn {
+            width: 80px; height: 80px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
+            margin: 14px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5); cursor: pointer; user-select: none;
+        }
+        .circle-cam-btn:active { transform: scale(0.90); }
+        .circle-cam-inner { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #000; }
 
         .submit-btn {
-            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 12px;
-            height: 54px; font-size: 20px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 1px;
+            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 26px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
         }
         .submit-btn:active { transform: scale(0.97); }
-        #status { text-align: center; font-weight: 800; font-size: 13px; margin-top: 12px; min-height: 18px; color: #00e676; }
-        .offline-banner { background: #ffab00; color: #000; padding: 6px; text-align: center; font-weight: 900; font-size: 12px; border-radius: 6px; margin-bottom: 10px; display: none; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
+        .row-2 { display: flex; gap: 10px; }
+        .row-2 > div { flex: 1; }
     </style>
 </head>
 <body>
@@ -67,16 +57,8 @@
 </div>
 
 <div class="card">
-    <div id="offlineBanner" class="offline-banner">⚠️ BASEMENT / OFFLINE MODE (Data will sync when online)</div>
-
-    <!-- MARKED PIC VERIFICATION TILE -->
-    <div id="markVerifyBox" class="mark-verify-box">
-        <div style="font-size:12px; font-weight:900; color:#ffab00;">📷 MARKED PATROL PHOTO VERIFICATION</div>
-        <img id="markPhotoImg" src="" alt="Marked Photo">
-    </div>
-
     <label>Registration</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="font-size:22px; color:#ff1744; text-transform:uppercase;">
+    <input type="text" id="regoInput" placeholder="REGO" style="font-size:28px; color:#ff1744; text-transform:uppercase;">
 
     <div class="row-2">
         <div>
@@ -115,17 +97,21 @@
     <label>Property Location</label>
     <input type="text" id="propertyInput" placeholder="LOCATION">
 
-    <label>Policelink / Authority Ref</label>
+    <label>Policelink Ref</label>
     <input type="text" id="policelinkInput" placeholder="REF #">
 
-    <label>Towing Photo Capture (Full Frame View)</label>
-    <div class="camera-box" id="camBox">
+    <label>Snap Tow Photo</label>
+    <div class="camera-box">
         <video id="videoElem" autoplay playsinline></video>
         <img id="capturedImg" class="preview" style="display:none;">
     </div>
-    <button id="snapBtn" style="margin-top:8px; height:40px; background:#333; color:#fff; border:1px solid #555; border-radius:8px; width:100%; font-weight:800;">📸 SNAP TOW PHOTO</button>
+    
+    <!-- GREEN CIRCLE CAMERA BUTTON -->
+    <div class="circle-cam-btn" id="snapBtn">
+        <div class="circle-cam-inner"></div>
+    </div>
 
-    <button class="submit-btn" id="submitBtn">LOG TOW & MOVE TO YARD</button>
+    <button class="submit-btn" id="submitBtn">TOW</button>
     <div id="status"></div>
 </div>
 
@@ -141,8 +127,6 @@
     const otherBodyInput = document.getElementById('otherBodyInput');
     const propertyInput = document.getElementById('propertyInput');
     const policelinkInput = document.getElementById('policelinkInput');
-    const markVerifyBox = document.getElementById('markVerifyBox');
-    const markPhotoImg = document.getElementById('markPhotoImg');
     const videoElem = document.getElementById('videoElem');
     const capturedImg = document.getElementById('capturedImg');
     const snapBtn = document.getElementById('snapBtn');
@@ -151,43 +135,22 @@
 
     let capturedBase64 = "";
 
-    // Toggle Other Body input
     bodySelect.addEventListener('change', () => {
         otherBodyDiv.style.display = bodySelect.value === 'Other' ? 'block' : 'none';
     });
 
-    // Auto load params from RUN app redirect
-    window.addEventListener('load', async () => {
+    window.addEventListener('load', () => {
         const urlParams = new URLSearchParams(window.location.search);
-        const regoParam = urlParams.get('rego');
-        const propParam = urlParams.get('prop');
-        
-        if (regoParam) regoInput.value = regoParam;
-        if (propParam) propertyInput.value = propParam;
-
-        if (regoParam) fetchMarkedPhoto(regoParam);
+        if (urlParams.get('rego')) regoInput.value = urlParams.get('rego');
+        if (urlParams.get('prop')) propertyInput.value = urlParams.get('prop');
         initCamera();
-        checkNetwork();
     });
-
-    async function fetchMarkedPhoto(rego) {
-        try {
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_mark_photo&rego=${encodeURIComponent(rego)}`);
-            const data = await res.json();
-            if (data.photoUrl) {
-                markPhotoImg.src = data.photoUrl;
-                markVerifyBox.style.display = 'block';
-            }
-        } catch(e) {}
-    }
 
     async function initCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             videoElem.srcObject = stream;
-        } catch(e) {
-            statusDiv.innerText = "CAMERA ACCESS DENIED";
-        }
+        } catch(e) {}
     }
 
     snapBtn.addEventListener('click', () => {
@@ -199,7 +162,6 @@
         capturedImg.src = capturedBase64;
         capturedImg.style.display = 'block';
         videoElem.style.display = 'none';
-        snapBtn.innerText = "🔄 RETAKE PHOTO";
     });
 
     submitBtn.addEventListener('click', async () => {
@@ -209,56 +171,15 @@
         const finalBody = bodySelect.value === 'Other' ? otherBodyInput.value.trim() : bodySelect.value;
         const payload = {
             action: 'log_tow',
-            rego: rego,
-            make: makeInput.value.trim(),
-            model: modelInput.value.trim(),
-            colour: colourInput.value.trim(),
-            bodyType: finalBody,
-            property: propertyInput.value.trim(),
-            policelinkNo: policelinkInput.value.trim(),
-            officer: "Driver"
+            rego: rego, make: makeInput.value.trim(), model: modelInput.value.trim(),
+            colour: colourInput.value.trim(), bodyType: finalBody, property: propertyInput.value.trim(),
+            policelinkNo: policelinkInput.value.trim(), officer: "Driver"
         };
 
-        if (!navigator.onLine) {
-            saveOffline('tow_queue', payload);
-            statusDiv.innerText = "⚠️ SAVED OFFLINE (BASEMENT). WILL AUTO-SYNC ONEXIT.";
-            return;
-        }
-
-        statusDiv.innerText = "LOGGING TOW & MOVING TO YARD...";
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            statusDiv.innerText = "✔ VEHICLE TOWED & YARD LOG UPDATED!";
-        } catch(e) {
-            saveOffline('tow_queue', payload);
-            statusDiv.innerText = "⚠️ SAVED LOCALLY (OFFLINE QUEUE).";
-        }
+        statusDiv.innerText = "LOGGING TOW...";
+        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        statusDiv.innerText = "✔ VEHICLE TOWED SUCCESS!";
     });
-
-    function saveOffline(key, data) {
-        let queue = JSON.parse(localStorage.getItem(key) || "[]");
-        queue.push(data);
-        localStorage.setItem(key, JSON.stringify(queue));
-    }
-
-    function checkNetwork() {
-        if (!navigator.onLine) document.getElementById('offlineBanner').style.display = 'block';
-        window.addEventListener('online', () => {
-            document.getElementById('offlineBanner').style.display = 'none';
-            syncOffline();
-        });
-    }
-
-    async function syncOffline() {
-        let queue = JSON.parse(localStorage.getItem('tow_queue') || "[]");
-        if (queue.length === 0) return;
-        statusDiv.innerText = "SYNCING OFFLINE BASEMENT TOWS...";
-        for (let item of queue) {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
-        }
-        localStorage.removeItem('tow_queue');
-        statusDiv.innerText = "✔ ALL OFFLINE TOWS SYNCED!";
-    }
 </script>
 </body>
 </html>
