@@ -5,93 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>EXEMPT PASSES</title>
     
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="PASSES">
-    
-    <link rel="apple-touch-icon" href="icon-pass.png?v=2">
-    <link rel="icon" type="image/png" href="icon-pass.png?v=2">
-    <link rel="manifest" href="manifest-passes.json?v=2">
+    <link rel="apple-touch-icon" href="icon-pass.png?v=3">
+    <link rel="icon" type="image/png" href="icon-pass.png?v=3">
+    <link rel="manifest" href="manifest-passes.json?v=3">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 12px; background: #121212; color: #fff; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-        .header { text-align: center; margin-bottom: 12px; width: 100%; max-width: 440px; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { margin: 0; font-size: 26px; font-weight: 900; color: #ab47bc; letter-spacing: 1px; }
+        .header { width: 100%; max-width: 440px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .header h1 { margin: 0; font-size: 32px; font-weight: 900; color: #ab47bc; letter-spacing: 1px; }
         
-        .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 10px; }
+        .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; }
 
         .prop-card {
-            background: #1e1e1e; border-radius: 14px; padding: 16px; border: 1px solid #2a2a2a;
+            background: #1e1e1e; border-radius: 16px; padding: 20px; border: 1px solid #333;
             display: flex; justify-content: space-between; align-items: center; cursor: pointer;
         }
-        .prop-card:active { transform: scale(0.98); }
-        .prop-title { font-size: 18px; font-weight: 900; color: #fff; }
-        .pass-count { background: #ab47bc; color: #fff; font-weight: 900; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+        .prop-title { font-size: 22px; font-weight: 900; color: #fff; }
+        .pass-count { background: #ab47bc; color: #fff; font-weight: 900; padding: 6px 14px; border-radius: 20px; font-size: 16px; }
 
         .pass-card {
-            background: #1e1e1e; border-radius: 14px; padding: 14px; border-left: 5px solid #ab47bc;
-            display: flex; flex-direction: column; gap: 6px; position: relative;
+            background: #1e1e1e; border-radius: 16px; padding: 18px; border-left: 6px solid #ab47bc;
+            display: flex; flex-direction: column; gap: 6px;
         }
-        
-        /* FLOATING + ADD BUTTON */
+
         .fab {
-            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: #ab47bc;
-            color: #fff; border-radius: 50%; font-size: 32px; font-weight: 900; border: none;
-            box-shadow: 0 4px 14px rgba(171, 71, 188, 0.5); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            position: fixed; bottom: 24px; right: 24px; width: 68px; height: 68px; background: #ab47bc;
+            color: #fff; border-radius: 50%; font-size: 38px; font-weight: 900; border: none;
+            box-shadow: 0 6px 18px rgba(171, 71, 188, 0.6); cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-
-        .back-btn {
-            background: #2a2a2a; color: #ab47bc; border: 1px solid #ab47bc; border-radius: 10px;
-            height: 44px; font-size: 15px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 8px;
-        }
-
-        /* MODAL */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85);
-            z-index: 100; justify-content: center; align-items: center; padding: 16px;
-        }
-        .modal-content {
-            background: #1e1e1e; border-radius: 16px; padding: 18px; width: 100%; max-width: 400px; border: 1px solid #333;
-        }
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 800; }
-        input { width: 100%; height: 44px; padding: 0 10px; border-radius: 8px; border: 1px solid #333; background: #2a2a2a; color: #fff; margin-top: 4px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>EXEMPT PASSES</h1>
-    <button onclick="loadPasses()" style="background:#2a2a2a; color:#ab47bc; border:1px solid #ab47bc; border-radius:8px; padding:6px 12px; font-weight:800;">🔄 REFRESH</button>
+    <h1>PASSES</h1>
+    <button onclick="loadPasses()" style="background:#2a2a2a; color:#ab47bc; border:2px solid #ab47bc; border-radius:10px; padding:8px 16px; font-weight:900; font-size:16px;">🔄 REFRESH</button>
 </div>
 
 <div class="container" id="passContainer">
-    <div style="text-align:center; color:#aaa; font-weight:800; margin-top:20px;">LOADING PASSES...</div>
+    <div style="text-align:center; color:#aaa; font-weight:900; font-size:18px; margin-top:30px;">LOADING PASSES...</div>
 </div>
 
 <button class="fab" id="addPassFab">+</button>
-
-<!-- ADD PASS MODAL -->
-<div class="modal" id="passModal">
-    <div class="modal-content">
-        <h2 style="margin:0; color:#ab47bc; font-size:20px;">ADD EXEMPTION PASS</h2>
-        <label>Registration</label>
-        <input type="text" id="passRego" placeholder="REGO" style="text-transform:uppercase; font-size:18px; color:#ab47bc; font-weight:900;">
-        <label>Property</label>
-        <input type="text" id="passProp" placeholder="PROPERTY NAME">
-        <label>Expiry Date</label>
-        <input type="date" id="passExpiry">
-        <label>Notes / Unit No.</label>
-        <input type="text" id="passNotes" placeholder="UNIT 12 - AUTHORIZED">
-        <button id="savePassBtn" style="width:100%; height:48px; background:#ab47bc; color:#fff; font-weight:900; border:none; border-radius:10px; margin-top:16px; font-size:16px;">SAVE PASS</button>
-        <button id="closePassBtn" style="width:100%; height:36px; background:transparent; color:#aaa; border:none; margin-top:8px;">CANCEL</button>
-    </div>
-</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
@@ -106,30 +66,20 @@
             passesData = await res.json();
             renderPropertyView();
         } catch(e) {
-            passContainer.innerHTML = '<div style="text-align:center; color:#ff1744;">ERROR LOADING PASSES</div>';
+            passContainer.innerHTML = '<div style="text-align:center; color:#ff1744; font-weight:900; font-size:18px;">ERROR LOADING PASSES</div>';
         }
     }
 
-    function formatDateDDMMMYY(dateStr) {
-        if (!dateStr) return "";
-        const d = new Date(dateStr);
-        if (isNaN(d)) return dateStr;
-        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-        return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${String(d.getFullYear()).slice(-2)}`;
-    }
-
-    // TIER 1: PROPERTY LIST
     function renderPropertyView() {
         passContainer.innerHTML = '';
         const propGroups = {};
-
         passesData.forEach(p => {
             const prop = p.property || 'GENERAL';
             propGroups[prop] = (propGroups[prop] || 0) + 1;
         });
 
         if (Object.keys(propGroups).length === 0) {
-            passContainer.innerHTML = '<div style="text-align:center; color:#aaa;">NO ACTIVE EXEMPTION PASSES</div>';
+            passContainer.innerHTML = '<div style="text-align:center; color:#aaa; font-size:18px; font-weight:800;">NO ACTIVE PASSES</div>';
             return;
         }
 
@@ -145,47 +95,21 @@
         });
     }
 
-    // TIER 2: VEHICLE PASS LIST FOR SELECTED PROPERTY
     function renderPassList(prop) {
         passContainer.innerHTML = '';
-        
-        const backBtn = document.createElement('button');
-        backBtn.className = 'back-btn';
-        backBtn.innerText = '⬅ BACK TO PROPERTIES';
-        backBtn.onclick = renderPropertyView;
-        passContainer.appendChild(backBtn);
-
         const filtered = passesData.filter(p => p.property === prop);
 
         filtered.forEach(p => {
             const card = document.createElement('div');
             card.className = 'pass-card';
             card.innerHTML = `
-                <div style="font-size:22px; font-weight:900; color:#ab47bc;">${p.rego}</div>
-                <div style="font-size:13px; color:#ccc;">📅 Expires: <strong>${formatDateDDMMMYY(p.expiry)}</strong></div>
-                <div style="font-size:12px; color:#888;">📝 ${p.notes || 'No notes'}</div>
+                <div style="font-size:26px; font-weight:900; color:#ab47bc;">${p.rego}</div>
+                <div style="font-size:15px; color:#ccc;">📅 Expires: <strong>${p.expiry}</strong></div>
+                <div style="font-size:14px; color:#888;">📝 ${p.notes || 'No notes'}</div>
             `;
             passContainer.appendChild(card);
         });
     }
-
-    // FAB MODAL CONTROLS
-    document.getElementById('addPassFab').onclick = () => document.getElementById('passModal').style.display = 'flex';
-    document.getElementById('closePassBtn').onclick = () => document.getElementById('passModal').style.display = 'none';
-
-    document.getElementById('savePassBtn').onclick = async () => {
-        const payload = {
-            action: 'add_pass',
-            rego: document.getElementById('passRego').value.trim().toUpperCase(),
-            property: document.getElementById('passProp').value.trim(),
-            expiry: document.getElementById('passExpiry').value,
-            notes: document.getElementById('passNotes').value.trim()
-        };
-
-        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        document.getElementById('passModal').style.display = 'none';
-        loadPasses();
-    };
 </script>
 </body>
 </html>
