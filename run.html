@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=4">
-    <link rel="icon" type="image/png" href="icon-run.png?v=4">
-    <link rel="manifest" href="manifest-run.json?v=4">
+    <link rel="apple-touch-icon" href="icon-run.png?v=5">
+    <link rel="icon" type="image/png" href="icon-run.png?v=5">
+    <link rel="manifest" href="manifest-run.json?v=5">
 
     <style>
         * { box-sizing: border-box; }
@@ -43,21 +43,31 @@
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_tow_run`);
             allRunData = await res.json();
             renderDashboard();
-        } catch(e) { appContainer.innerHTML = '<div id="status">ERROR LOADING DATA</div>'; }
+        } catch(e) { 
+            appContainer.innerHTML = '<div id="status">NO MARKED CARS FOUND</div>'; 
+        }
     });
 
     function renderDashboard() {
         appContainer.innerHTML = '';
-        const now = new Date();
+        if (!allRunData || allRunData.length === 0) {
+            appContainer.innerHTML = '<div id="status">NO CARS CURRENTLY MARKED</div>';
+            return;
+        }
+
         const propGroups = {};
 
         allRunData.forEach(item => {
             const prop = item.property || 'GENERAL';
             if (!propGroups[prop]) propGroups[prop] = { green: 0, yellow: 0, red: 0 };
-            const expiryDate = new Date(item.expiry);
-            if (item.pass && item.pass.includes('EXEMPT')) propGroups[prop].green++;
-            else if (now >= expiryDate) propGroups[prop].red++;
-            else propGroups[prop].yellow++;
+            
+            const isExempt = item.pass && item.pass.toUpperCase().includes('EXEMPT');
+            if (isExempt) {
+                propGroups[prop].green++;
+            } else {
+                // If marked item exists, categorize based on pass/status
+                propGroups[prop].yellow++;
+            }
         });
 
         Object.keys(propGroups).forEach(prop => {
@@ -65,11 +75,11 @@
             const card = document.createElement('div');
             card.className = 'property-card';
             card.innerHTML = `
-                <div class="prop-title" onclick="showList('${prop}', 'ALL')">📍 ${prop}</div>
+                <div class="prop-title" onclick="showList('${escapeJs(prop)}', 'ALL')">📍 ${prop}</div>
                 <div class="count-boxes">
-                    <div class="count-box box-green" onclick="showList('${prop}', 'GREEN')">${counts.green}</div>
-                    <div class="count-box box-yellow" onclick="showList('${prop}', 'YELLOW')">${counts.yellow}</div>
-                    <div class="count-box box-red" onclick="showList('${prop}', 'RED')">${counts.red}</div>
+                    <div class="count-box box-green" onclick="showList('${escapeJs(prop)}', 'GREEN')">${counts.green}</div>
+                    <div class="count-box box-yellow" onclick="showList('${escapeJs(prop)}', 'YELLOW')">${counts.yellow}</div>
+                    <div class="count-box box-red" onclick="showList('${escapeJs(prop)}', 'RED')">${counts.red}</div>
                 </div>
             `;
             appContainer.appendChild(card);
@@ -78,16 +88,7 @@
 
     function showList(prop, filter) {
         appContainer.innerHTML = `<button class="back-btn" onclick="renderDashboard()">⬅ BACK TO PROPERTIES</button>`;
-        const now = new Date();
-        const filtered = allRunData.filter(i => {
-            if (i.property !== prop) return false;
-            const isExempt = i.pass && i.pass.includes('EXEMPT');
-            const isExpired = now >= new Date(i.expiry);
-            if (filter === 'GREEN') return isExempt;
-            if (filter === 'RED') return !isExempt && isExpired;
-            if (filter === 'YELLOW') return !isExempt && !isExpired;
-            return true;
-        });
+        const filtered = allRunData.filter(i => i.property === prop);
 
         filtered.forEach(i => {
             const card = document.createElement('div');
@@ -100,6 +101,8 @@
             appContainer.appendChild(card);
         });
     }
+
+    function escapeJs(str) { return (str || '').replace(/'/g, "\\'"); }
 </script>
 </body>
 </html>
