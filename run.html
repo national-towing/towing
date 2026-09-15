@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RUN</title>
-    
-    <link rel="apple-touch-icon" href="icon-run.png?v=12">
-    <link rel="icon" type="image/png" href="icon-run.png?v=12">
-    <link rel="manifest" href="manifest-run.json?v=12">
 
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header h1 { margin: 0 0 14px 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
+        .header h1 { margin: 0 0 10px 0; font-size: 36px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
+        
+        /* UNIVERSAL TILE HEADER NAVIGATION BAR */
+        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
+        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
+        .nav-run { background: #ffab00; }
+        .nav-tow { background: #ff1744; color: #fff; }
+        .nav-rel { background: #00e676; }
+        .nav-pass { background: #ab47bc; color: #fff; }
+
         .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 10px; }
         .property-card { background: #1e1e1e; border-radius: 18px; padding: 18px; border: 1px solid #333; }
         .prop-title { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 14px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
@@ -23,9 +28,9 @@
         .box-yellow { background: #ffab00; color: #000; }
         .box-green { background: #00e676; color: #000; }
         
-        .back-btn { background: #2a2a2a; color: #ffab00; border: 2px solid #ffab00; border-radius: 12px; height: 48px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 8px; }
+        .back-btn { background: #2a2a2a; color: #ffab00; border: 2px solid #ffab00; border-radius: 12px; height: 48px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 10px; }
         
-        .vehicle-card { background: #1e1e1e; border-radius: 14px; padding: 12px 14px; border: 2px solid #333; margin-bottom: 8px; }
+        .vehicle-card-v2 { background: #1e1e1e; border-radius: 14px; padding: 12px 14px; border: 2px solid #333; margin-bottom: 10px; width: 100%; }
         .action-btn { font-weight: 900; border: none; border-radius: 12px; height: 48px; font-size: 22px; width: 100%; margin-top: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; }
         .btn-red { background: #ff1744; color: #fff; }
         .btn-yellow { background: #ffab00; color: #000; }
@@ -37,6 +42,15 @@
 <body>
 
 <div class="header"><h1>RUN</h1></div>
+
+<!-- STANDARD NAV BAR -->
+<div class="nav-bar">
+    <a href="run.html" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
+</div>
+
 <div class="container" id="appContainer"><div id="status">LOADING RUN DATA...</div></div>
 
 <script>
@@ -96,18 +110,18 @@
             const card = document.createElement('div');
             card.className = 'property-card';
             card.innerHTML = `
-                <div class="prop-title" onclick="showList('${escapeJs(prop)}')">📍 ${prop}</div>
+                <div class="prop-title" onclick="showPropertyList('${escapeJs(prop)}')">📍 ${prop}</div>
                 <div class="count-boxes">
-                    <div class="count-box box-red" onclick="showList('${escapeJs(prop)}')">${counts.red}</div>
-                    <div class="count-box box-yellow" onclick="showList('${escapeJs(prop)}')">${counts.yellow}</div>
-                    <div class="count-box box-green" onclick="showList('${escapeJs(prop)}')">${counts.green}</div>
+                    <div class="count-box box-red" onclick="showPropertyList('${escapeJs(prop)}')">${counts.red}</div>
+                    <div class="count-box box-yellow" onclick="showPropertyList('${escapeJs(prop)}')">${counts.yellow}</div>
+                    <div class="count-box box-green" onclick="showPropertyList('${escapeJs(prop)}')">${counts.green}</div>
                 </div>
             `;
             appContainer.appendChild(card);
         });
     }
 
-    function showList(prop) {
+    function showPropertyList(prop) {
         appContainer.innerHTML = `<button class="back-btn" onclick="renderDashboard()">⬅ BACK TO PROPERTIES</button>`;
         const filtered = allRunData.filter(i => i.property === prop);
 
@@ -128,16 +142,16 @@
             }
 
             const card = document.createElement('div');
-            card.className = 'vehicle-card';
+            card.className = 'vehicle-card-v2';
             
-            // Inline styling ensures side-by-side view overrides any Safari caching
+            // SIDE-BY-SIDE FLEX CONTAINER
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                    <div>
-                        <div style="font-size: 28px; font-weight: 900; color: #fff; line-height: 1.1;">${i.rego}</div>
-                        <div style="color: #aaa; font-weight: 900; font-size: 15px; margin-top: 2px;">📍 ${i.property}</div>
+                <div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; width: 100% !important;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 28px !important; font-weight: 900 !important; color: #fff !important; line-height: 1.1 !important;">${i.rego}</div>
+                        <div style="color: #aaa !important; font-weight: 900 !important; font-size: 14px !important; margin-top: 4px !important;">📍 ${i.property}</div>
                     </div>
-                    <div style="text-align: right; color: #fff; font-weight: 800; font-size: 14px; line-height: 1.35;">
+                    <div style="text-align: right !important; color: #fff !important; font-weight: 800 !important; font-size: 13px !important; line-height: 1.4 !important; flex-shrink: 0 !important;">
                         Marked: ${i.markedTime}<br>
                         Tow Ready: ${i.expiryTime}
                     </div>
@@ -149,8 +163,6 @@
     }
 
     function escapeJs(str) { return (str || '').replace(/'/g, "\\'"); }
-
-    if (window.applicationCache) { window.applicationCache.addEventListener('updateready', () => window.location.reload()); }
 </script>
 </body>
 </html>
