@@ -5,14 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=4">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=4">
-    <link rel="manifest" href="manifest-mark.json?v=4">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=5">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=5">
+    <link rel="manifest" href="manifest-mark.json?v=5">
 
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header h1 { margin: 0 0 14px 0; font-size: 38px; font-weight: 900; color: #2979ff; letter-spacing: 2px; text-align: center; }
+        .header h1 { margin: 0 0 10px 0; font-size: 38px; font-weight: 900; color: #2979ff; letter-spacing: 2px; text-align: center; }
+        
+        /* UNIVERSAL TILE HEADER NAVIGATION BAR */
+        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
+        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
+        .nav-run { background: #ffab00; }
+        .nav-tow { background: #ff1744; color: #fff; }
+        .nav-rel { background: #00e676; }
+        .nav-pass { background: #ab47bc; color: #fff; }
+
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
         
         label { font-size: 14px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
@@ -42,6 +51,14 @@
 <body>
 
 <div class="header"><h1>MARK</h1></div>
+
+<!-- STANDARD NAV BAR -->
+<div class="nav-bar">
+    <a href="run.html" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
+</div>
 
 <div class="card">
     <label>PROPERTY</label>
