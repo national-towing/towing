@@ -3,349 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOW RUN</title>
+    <title>RUN</title>
     
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="RUN">
-    
-    <link rel="apple-touch-icon" href="icon-run.png?v=1">
-    <link rel="icon" type="image/png" href="icon-run.png?v=1">
-    <link rel="manifest" href="manifest-run.json?v=2">
+    <link rel="apple-touch-icon" href="icon-run.png?v=4">
+    <link rel="icon" type="image/png" href="icon-run.png?v=4">
+    <link rel="manifest" href="manifest-run.json?v=4">
 
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; 
-            padding: 12px; 
-            background: #121212; 
-            color: #fff; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .header { text-align: center; margin-top: 4px; margin-bottom: 12px; }
-        .header h1 { margin: 0; font-size: 32px; font-weight: 900; color: #ffab00; letter-spacing: 2px; }
-        
-        .container {
-            width: 100%;
-            max-width: 440px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* DASHBOARD PROPERTY CARDS */
-        .property-card {
-            background: #1e1e1e;
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid #2a2a2a;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-        }
-        .prop-title {
-            font-size: 18px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .prop-title::after {
-            content: "➔";
-            font-size: 16px;
-            color: #ffab00;
-        }
-
-        .count-boxes {
-            display: flex;
-            gap: 10px;
-        }
-        .count-box {
-            flex: 1;
-            height: 64px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 900;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            user-select: none;
-        }
-        .count-box:active { transform: scale(0.95); }
-
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header h1 { margin: 0 0 14px 0; font-size: 36px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
+        .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; }
+        .property-card { background: #1e1e1e; border-radius: 18px; padding: 18px; border: 1px solid #333; }
+        .prop-title { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 12px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
+        .count-boxes { display: flex; gap: 10px; }
+        .count-box { flex: 1; height: 70px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; cursor: pointer; }
         .box-green { background: #00e676; color: #000; }
         .box-yellow { background: #ffab00; color: #000; }
         .box-red { background: #ff1744; color: #fff; }
-
-        /* VEHICLE DETAIL CARDS */
-        .back-btn {
-            background: #2a2a2a;
-            color: #ffab00;
-            border: 1px solid #ffab00;
-            border-radius: 12px;
-            height: 48px;
-            font-size: 16px;
-            font-weight: 900;
-            width: 100%;
-            cursor: pointer;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            letter-spacing: 1px;
-        }
-        .back-btn:active { transform: scale(0.97); }
-
-        .vehicle-card {
-            border-radius: 16px;
-            padding: 16px;
-            background: #1e1e1e;
-            border: 2px solid #333;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .status-yellow { border-color: #ffab00 !important; }
-        .status-yellow .badge { background: #ffab00; color: #000; }
-
-        .status-red { border-color: #ff1744 !important; }
-        .status-red .badge { background: #ff1744; color: #fff; }
-
-        .status-green { border-color: #00e676 !important; }
-        .status-green .badge { background: #00e676; color: #000; }
-
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .rego-title {
-            font-size: 26px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: #fff;
-        }
-        .badge {
-            font-size: 11px;
-            font-weight: 900;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .card-details {
-            font-size: 13px;
-            color: #ccc;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .property-name-tag {
-            font-size: 15px;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        .action-btn {
-            background: #ff1744;
-            color: #fff;
-            font-weight: 900;
-            border: none;
-            border-radius: 10px;
-            height: 44px;
-            font-size: 16px;
-            width: 100%;
-            margin-top: 6px;
-            cursor: pointer;
-            letter-spacing: 1px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(255, 23, 68, 0.4);
-        }
-        .action-btn:active { transform: scale(0.97); }
-
-        #status { text-align: center; font-weight: 800; font-size: 15px; margin-top: 14px; color: #ffab00; }
-        .filter-header { font-size: 14px; font-weight: 800; color: #aaa; text-align: center; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .back-btn { background: #2a2a2a; color: #ffab00; border: 2px solid #ffab00; border-radius: 12px; height: 50px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 10px; }
+        .vehicle-card { background: #1e1e1e; border-radius: 16px; padding: 16px; border: 2px solid #333; margin-bottom: 10px; }
+        .rego-title { font-size: 28px; font-weight: 900; color: #fff; }
+        .action-btn { background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 12px; height: 50px; font-size: 20px; width: 100%; margin-top: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+        #status { text-align: center; font-weight: 900; font-size: 18px; color: #ffab00; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>TOW RUN</h1>
-</div>
-
-<div class="container" id="appContainer">
-    <div id="status">LOADING RUN DATA...</div>
-</div>
+<div class="header"><h1>RUN</h1></div>
+<div class="container" id="appContainer"><div id="status">LOADING RUN DATA...</div></div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-
     const appContainer = document.getElementById('appContainer');
     let allRunData = [];
 
-    window.addEventListener('load', loadRunData);
-
-    async function loadRunData() {
+    window.addEventListener('load', async () => {
         try {
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_tow_run`);
             allRunData = await res.json();
             renderDashboard();
-        } catch (e) {
-            appContainer.innerHTML = '<div id="status">ERROR LOADING RUN DATA</div>';
-        }
-    }
+        } catch(e) { appContainer.innerHTML = '<div id="status">ERROR LOADING DATA</div>'; }
+    });
 
-    // SCREEN 1: SUMMARY DASHBOARD WITH NUMERIC COLOR BOXES
     function renderDashboard() {
         appContainer.innerHTML = '';
         const now = new Date();
-
-        if (!allRunData || allRunData.length === 0) {
-            appContainer.innerHTML = '<div id="status">NO MARKED VEHICLES FOUND</div>';
-            return;
-        }
-
-        // Group counts by Property
         const propGroups = {};
 
         allRunData.forEach(item => {
             const prop = item.property || 'GENERAL';
-            if (!propGroups[prop]) {
-                propGroups[prop] = { green: 0, yellow: 0, red: 0 };
-            }
-
+            if (!propGroups[prop]) propGroups[prop] = { green: 0, yellow: 0, red: 0 };
             const expiryDate = new Date(item.expiry);
-            const isExempt = item.pass && item.pass.includes('EXEMPT');
-            const isExpired = now >= expiryDate;
-
-            if (isExempt) {
-                propGroups[prop].green++;
-            } else if (isExpired) {
-                propGroups[prop].red++;
-            } else {
-                propGroups[prop].yellow++;
-            }
+            if (item.pass && item.pass.includes('EXEMPT')) propGroups[prop].green++;
+            else if (now >= expiryDate) propGroups[prop].red++;
+            else propGroups[prop].yellow++;
         });
 
-        Object.keys(propGroups).sort().forEach(prop => {
+        Object.keys(propGroups).forEach(prop => {
             const counts = propGroups[prop];
             const card = document.createElement('div');
             card.className = 'property-card';
-
             card.innerHTML = `
-                <div class="prop-title" onclick="showVehicleList('${escapeJsString(prop)}', 'ALL')">📍 ${prop}</div>
+                <div class="prop-title" onclick="showList('${prop}', 'ALL')">📍 ${prop}</div>
                 <div class="count-boxes">
-                    <div class="count-box box-green" onclick="showVehicleList('${escapeJsString(prop)}', 'GREEN')">${counts.green}</div>
-                    <div class="count-box box-yellow" onclick="showVehicleList('${escapeJsString(prop)}', 'YELLOW')">${counts.yellow}</div>
-                    <div class="count-box box-red" onclick="showVehicleList('${escapeJsString(prop)}', 'RED')">${counts.red}</div>
+                    <div class="count-box box-green" onclick="showList('${prop}', 'GREEN')">${counts.green}</div>
+                    <div class="count-box box-yellow" onclick="showList('${prop}', 'YELLOW')">${counts.yellow}</div>
+                    <div class="count-box box-red" onclick="showList('${prop}', 'RED')">${counts.red}</div>
                 </div>
             `;
             appContainer.appendChild(card);
         });
     }
 
-    // SCREEN 2: FILTERED VEHICLE LIST WITH BACK BUTTON
-    function showVehicleList(property, colorFilter) {
-        appContainer.innerHTML = '';
+    function showList(prop, filter) {
+        appContainer.innerHTML = `<button class="back-btn" onclick="renderDashboard()">⬅ BACK TO PROPERTIES</button>`;
         const now = new Date();
-
-        // Header and Back Button
-        const backBtn = document.createElement('button');
-        backBtn.className = 'back-btn';
-        backBtn.innerHTML = '⬅ BACK TO DASHBOARD';
-        backBtn.onclick = renderDashboard;
-        appContainer.appendChild(backBtn);
-
-        const filterHeader = document.createElement('div');
-        filterHeader.className = 'filter-header';
-        filterHeader.innerText = `${property} ${colorFilter !== 'ALL' ? '(' + colorFilter + ' ONLY)' : ''}`;
-        appContainer.appendChild(filterHeader);
-
-        const filteredVehicles = allRunData.filter(item => {
-            if (item.property !== property) return false;
-
-            const expiryDate = new Date(item.expiry);
-            const isExempt = item.pass && item.pass.includes('EXEMPT');
-            const isExpired = now >= expiryDate;
-
-            if (colorFilter === 'GREEN') return isExempt;
-            if (colorFilter === 'RED') return !isExempt && isExpired;
-            if (colorFilter === 'YELLOW') return !isExempt && !isExpired;
-
+        const filtered = allRunData.filter(i => {
+            if (i.property !== prop) return false;
+            const isExempt = i.pass && i.pass.includes('EXEMPT');
+            const isExpired = now >= new Date(i.expiry);
+            if (filter === 'GREEN') return isExempt;
+            if (filter === 'RED') return !isExempt && isExpired;
+            if (filter === 'YELLOW') return !isExempt && !isExpired;
             return true;
         });
 
-        if (filteredVehicles.length === 0) {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.id = 'status';
-            emptyMsg.innerText = 'NO VEHICLES IN THIS CATEGORY';
-            appContainer.appendChild(emptyMsg);
-            return;
-        }
-
-        filteredVehicles.forEach(item => {
+        filtered.forEach(i => {
             const card = document.createElement('div');
-            
-            const markedDate = new Date(item.marked);
-            const expiryDate = new Date(item.expiry);
-            
-            const isExempt = item.pass && item.pass.includes('EXEMPT');
-            const isExpired = now >= expiryDate;
-
-            let statusClass = 'status-yellow';
-            let badgeText = 'PENDING (6HR)';
-
-            if (isExempt) {
-                statusClass = 'status-green';
-                badgeText = 'EXEMPT PASS';
-            } else if (isExpired) {
-                statusClass = 'status-red';
-                badgeText = 'READY TO TOW';
-            }
-
-            card.className = `vehicle-card ${statusClass}`;
-
-            const formattedMarked = markedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const formattedExpiry = expiryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
+            card.className = 'vehicle-card';
             card.innerHTML = `
-                <div class="card-top">
-                    <div class="rego-title">${item.rego}</div>
-                    <div class="badge">${badgeText}</div>
-                </div>
-                <div class="card-details">
-                    <div class="property-name-tag">📍 ${item.property}</div>
-                    <div>🕒 Marked: <strong>${formattedMarked}</strong> | Expires: <strong>${formattedExpiry}</strong></div>
-                    ${isExempt ? `<div style="color:#00e676; font-weight:bold;">🛡️ ${item.pass}</div>` : ''}
-                </div>
-                ${!isExempt ? `<a href="tow.html?rego=${encodeURIComponent(item.rego)}&prop=${encodeURIComponent(item.property)}" class="action-btn">🚛 TOW VEHICLE</a>` : ''}
+                <div class="rego-title">${i.rego}</div>
+                <div style="color:#aaa; font-weight:800; margin-top:4px;">📍 ${i.property}</div>
+                <a href="tow.html?rego=${encodeURIComponent(i.rego)}&prop=${encodeURIComponent(i.property)}" class="action-btn">TOW VEHICLE</a>
             `;
-
             appContainer.appendChild(card);
         });
     }
-
-    function escapeJsString(str) {
-        return (str || '').replace(/'/g, "\\'");
-    }
 </script>
-
 </body>
 </html>
