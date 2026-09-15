@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=6">
-    <link rel="icon" type="image/png" href="icon-run.png?v=6">
-    <link rel="manifest" href="manifest-run.json?v=6">
+    <link rel="apple-touch-icon" href="icon-run.png?v=7">
+    <link rel="icon" type="image/png" href="icon-run.png?v=7">
+    <link rel="manifest" href="manifest-run.json?v=7">
 
     <style>
         * { box-sizing: border-box; }
@@ -90,7 +90,10 @@
             card.className = 'vehicle-card';
             card.innerHTML = `
                 <div class="rego-title">${i.rego}</div>
-                <div style="color:#aaa; font-weight:900; font-size:18px; margin-top:6px;">📍 PROPERTY: ${i.property}</div>
+                <div style="color:#aaa; font-weight:900; font-size:16px; margin-top:6px;">📍 ${i.property}</div>
+                <div style="color:#ffab00; font-weight:800; font-size:15px; margin-top:4px;">
+                    🕒 Marked: <strong>${i.markedTime || 'N/A'}</strong> | Ready to Tow: <strong>${i.expiryTime || 'Pending'}</strong>
+                </div>
                 <a href="tow.html?rego=${encodeURIComponent(i.rego)}&prop=${encodeURIComponent(i.property)}" class="action-btn">TOW VEHICLE</a>
             `;
             appContainer.appendChild(card);
