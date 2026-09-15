@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=9">
-    <link rel="icon" type="image/png" href="icon-run.png?v=9">
-    <link rel="manifest" href="manifest-run.json?v=9">
+    <link rel="apple-touch-icon" href="icon-run.png?v=10">
+    <link rel="icon" type="image/png" href="icon-run.png?v=10">
+    <link rel="manifest" href="manifest-run.json?v=10">
 
     <style>
         * { box-sizing: border-box; }
@@ -16,11 +16,13 @@
         .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; }
         .property-card { background: #1e1e1e; border-radius: 18px; padding: 18px; border: 1px solid #333; }
         .prop-title { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 14px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
+        
+        /* ORDERED LEFT TO RIGHT: RED -> YELLOW -> GREEN */
         .count-boxes { display: flex; gap: 10px; }
         .count-box { flex: 1; height: 75px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; cursor: pointer; }
-        .box-green { background: #00e676; color: #000; }
-        .box-yellow { background: #ffab00; color: #000; }
         .box-red { background: #ff1744; color: #fff; }
+        .box-yellow { background: #ffab00; color: #000; }
+        .box-green { background: #00e676; color: #000; }
         
         .back-btn { background: #2a2a2a; color: #ffab00; border: 2px solid #ffab00; border-radius: 12px; height: 52px; font-size: 20px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 12px; }
         .vehicle-card { background: #1e1e1e; border-radius: 16px; padding: 18px; border: 2px solid #333; margin-bottom: 14px; }
@@ -54,57 +56,15 @@
         }
     });
 
-    // ROBUST SAFARI-PROOF DATE PARSER
-    function parseToDateObj(str) {
-        if (!str || str === 'N/A' || str === 'Pending') return null;
-        
-        // Direct parse attempt
-        let d = new Date(str);
-        if (!isNaN(d.getTime())) return d;
-
-        // Custom split for DD/MM/YYYY hh:mm:ss format from Sheets
-        try {
-            const parts = str.trim().split(/[\s/:-]+/);
-            if (parts.length >= 5) {
-                // Day, Month, Year, Hour, Minute
-                const day = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1;
-                let year = parseInt(parts[2], 10);
-                if (year < 100) year += 2000;
-                const hours = parseInt(parts[3], 10);
-                const minutes = parseInt(parts[4], 10);
-                
-                d = new Date(year, month, day, hours, minutes);
-                if (!isNaN(d.getTime())) return d;
-            }
-        } catch(e) {}
-        
-        return null;
-    }
-
-    function formatDDDhhmm(dateStr) {
-        const d = parseToDateObj(dateStr);
-        if (!d) return dateStr || "N/A";
-        
-        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const dayName = days[d.getDay()];
-        const hours = String(d.getHours()).padStart(2, '0');
-        const mins = String(d.getMinutes()).padStart(2, '0');
-        
-        return `${dayName} ${hours}:${mins}`;
-    }
-
     function getVehicleStatus(item) {
         const isExempt = item.pass && item.pass.toUpperCase().includes('EXEMPT');
         if (isExempt) return 'GREEN';
 
-        const now = new Date();
-        const expiryDate = parseToDateObj(item.expiryTime);
-        
-        if (expiryDate && now >= expiryDate) {
-            return 'RED'; // Tow Ready
+        const nowMs = Date.now();
+        if (item.rawExpiryMs && nowMs >= item.rawExpiryMs) {
+            return 'RED'; // Ready to TOW
         }
-        return 'YELLOW'; // Still in waiting window
+        return 'YELLOW'; // Still waiting
     }
 
     function renderDashboard() {
@@ -118,7 +78,7 @@
 
         allRunData.forEach(item => {
             const prop = item.property || 'GENERAL';
-            if (!propGroups[prop]) propGroups[prop] = { green: 0, yellow: 0, red: 0 };
+            if (!propGroups[prop]) propGroups[prop] = { red: 0, yellow: 0, green: 0 };
             
             const status = getVehicleStatus(item);
             if (status === 'GREEN') propGroups[prop].green++;
@@ -126,16 +86,24 @@
             else propGroups[prop].yellow++;
         });
 
-        Object.keys(propGroups).forEach(prop => {
+        // SORT PROPERTIES BY PRIORITY: MOST REDS FIRST, THEN YELLOWS
+        const sortedProperties = Object.keys(propGroups).sort((a, b) => {
+            if (propGroups[b].red !== propGroups[a].red) {
+                return propGroups[b].red - propGroups[a].red;
+            }
+            return propGroups[b].yellow - propGroups[a].yellow;
+        });
+
+        sortedProperties.forEach(prop => {
             const counts = propGroups[prop];
             const card = document.createElement('div');
             card.className = 'property-card';
             card.innerHTML = `
                 <div class="prop-title" onclick="showList('${escapeJs(prop)}')">📍 ${prop}</div>
                 <div class="count-boxes">
-                    <div class="count-box box-green" onclick="showList('${escapeJs(prop)}')">${counts.green}</div>
-                    <div class="count-box box-yellow" onclick="showList('${escapeJs(prop)}')">${counts.yellow}</div>
                     <div class="count-box box-red" onclick="showList('${escapeJs(prop)}')">${counts.red}</div>
+                    <div class="count-box box-yellow" onclick="showList('${escapeJs(prop)}')">${counts.yellow}</div>
+                    <div class="count-box box-green" onclick="showList('${escapeJs(prop)}')">${counts.green}</div>
                 </div>
             `;
             appContainer.appendChild(card);
@@ -146,7 +114,7 @@
         appContainer.innerHTML = `<button class="back-btn" onclick="renderDashboard()">⬅ BACK TO PROPERTIES</button>`;
         const filtered = allRunData.filter(i => i.property === prop);
 
-        // Sort Top to Bottom: RED -> YELLOW -> GREEN
+        // Sort Top to Bottom inside property: RED -> YELLOW -> GREEN
         const weight = { 'RED': 1, 'YELLOW': 2, 'GREEN': 3 };
         filtered.sort((a, b) => weight[getVehicleStatus(a)] - weight[getVehicleStatus(b)]);
 
@@ -163,17 +131,14 @@
                 btnText = "PASS";
             }
 
-            const markedFormatted = formatDDDhhmm(i.markedTime);
-            const towReadyFormatted = formatDDDhhmm(i.expiryTime);
-
             const card = document.createElement('div');
             card.className = 'vehicle-card';
             card.innerHTML = `
                 <div class="rego-title">${i.rego}</div>
                 <div style="color:#aaa; font-weight:900; font-size:18px; margin-top:4px;">📍 ${i.property}</div>
                 <div style="color:#fff; font-weight:800; font-size:16px; margin-top:8px; line-height: 1.4;">
-                    Marked: ${markedFormatted}<br>
-                    Tow Ready: ${towReadyFormatted}
+                    Marked: ${i.markedTime}<br>
+                    Tow Ready: ${i.expiryTime}
                 </div>
                 <a href="tow.html?rego=${encodeURIComponent(i.rego)}&prop=${encodeURIComponent(i.property)}" class="action-btn ${btnClass}">${btnText}</a>
             `;
@@ -182,9 +147,6 @@
     }
 
     function escapeJs(str) { return (str || '').replace(/'/g, "\\'"); }
-
-    // Auto update trigger handler
-    if (window.applicationCache) { window.applicationCache.addEventListener('updateready', () => window.location.reload()); }
 </script>
 </body>
 </html>
