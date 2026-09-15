@@ -3,77 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MARK PATROL</title>
+    <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=3">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=3">
-    <link rel="manifest" href="manifest-mark.json?v=3">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=4">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=4">
+    <link rel="manifest" href="manifest-mark.json?v=4">
 
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
-        .header h1 { margin: 0 0 12px 0; font-size: 34px; font-weight: 900; color: #2979ff; letter-spacing: 2px; text-align: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header h1 { margin: 0 0 14px 0; font-size: 38px; font-weight: 900; color: #2979ff; letter-spacing: 2px; text-align: center; }
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
         
-        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 800; letter-spacing: 1px; }
+        label { font-size: 14px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 54px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 800; margin-top: 6px; outline: none;
+            width: 100%; height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 22px; font-weight: 900; margin-top: 6px; outline: none;
         }
-        input:focus, select:focus { border-color: #2979ff; }
-        
+
         .camera-box {
             width: 100%; height: 280px; background: #000; border-radius: 14px; border: 2px solid #333;
-            margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            margin-top: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* CIRCLE CAMERA BUTTON */
+        /* 150% EXPANDED GREEN CIRCLE BUTTON */
         .circle-cam-btn {
-            width: 80px; height: 80px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
-            margin: 16px auto 0 auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5); cursor: pointer; user-select: none;
+            width: 120px; height: 120px; background: #00e676; border: 6px solid #fff; border-radius: 50%;
+            margin: 20px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 26px rgba(0, 230, 118, 0.6); cursor: pointer; user-select: none;
         }
-        .circle-cam-btn:active { transform: scale(0.90); background: #00c853; }
-        .circle-cam-inner { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #000; }
+        .circle-cam-btn:active { transform: scale(0.90); }
+        .circle-cam-inner { width: 92px; height: 92px; border-radius: 50%; border: 3px solid #000; }
 
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
+        #status { text-align: center; font-weight: 900; font-size: 18px; margin-top: 16px; min-height: 24px; color: #00e676; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>MARK PATROL</h1>
-</div>
+<div class="header"><h1>MARK</h1></div>
 
 <div class="card">
-    <label>Property Location</label>
-    <select id="propSelect">
-        <option value="" disabled selected>LOADING PROPERTIES...</option>
-    </select>
+    <label>PROPERTY</label>
+    <select id="propSelect"><option value="" disabled selected>LOADING PROPERTIES...</option></select>
     
     <div id="otherPropDiv" style="display:none;">
-        <label>Manual Property Name</label>
-        <input type="text" id="otherPropInput" placeholder="ENTER PROPERTY NAME">
+        <label>PROPERTY NAME</label>
+        <input type="text" id="otherPropInput" placeholder="ENTER PROPERTY">
     </div>
 
-    <label>Registration</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="font-size:26px; color:#2979ff; text-transform:uppercase;">
+    <label>REGO</label>
+    <input type="text" id="regoInput" placeholder="REGO" style="font-size:28px; color:#2979ff; text-transform:uppercase;">
 
-    <label>Snap & Auto-Mark Vehicle</label>
-    <div class="camera-box">
-        <video id="videoElem" autoplay playsinline></video>
-    </div>
+    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
 
-    <!-- ONE-TAP GREEN CIRCLE BUTTON -->
-    <div class="circle-cam-btn" id="snapAndMarkBtn">
-        <div class="circle-cam-inner"></div>
-    </div>
-
+    <div class="circle-cam-btn" id="snapAndMarkBtn"><div class="circle-cam-inner"></div></div>
     <div id="status"></div>
 </div>
 
@@ -88,14 +72,9 @@
     const snapAndMarkBtn = document.getElementById('snapAndMarkBtn');
     const statusDiv = document.getElementById('status');
 
-    propSelect.addEventListener('change', () => {
-        otherPropDiv.style.display = propSelect.value === 'OTHER' ? 'block' : 'none';
-    });
+    propSelect.addEventListener('change', () => { otherPropDiv.style.display = propSelect.value === 'OTHER' ? 'block' : 'none'; });
 
-    window.addEventListener('load', () => {
-        initCamera();
-        loadProperties();
-    });
+    window.addEventListener('load', () => { initCamera(); loadProperties(); });
 
     async function loadProperties() {
         try {
@@ -104,13 +83,11 @@
             propSelect.innerHTML = '<option value="" disabled selected>SELECT PROPERTY</option>';
             props.forEach(p => {
                 const opt = document.createElement('option');
-                opt.value = p.name;
-                opt.innerText = p.name;
+                opt.value = p.name; opt.innerText = p.name;
                 propSelect.appendChild(opt);
             });
             const optOther = document.createElement('option');
-            optOther.value = 'OTHER';
-            optOther.innerText = 'OTHER (MANUAL ENTRY)';
+            optOther.value = 'OTHER'; optOther.innerText = 'OTHER (MANUAL ENTRY)';
             propSelect.appendChild(optOther);
         } catch(e) {
             propSelect.innerHTML = '<option value="OTHER">OTHER (MANUAL ENTRY)</option>';
@@ -125,10 +102,9 @@
         } catch(e) {}
     }
 
-    // ONE-TAP CAPTURE & MARK
     snapAndMarkBtn.addEventListener('click', async () => {
         const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.style.color = "#ff1744"; statusDiv.innerText = "PLEASE ENTER REGO FIRST"; return; }
+        if (!rego) { statusDiv.style.color = "#ff1744"; statusDiv.innerText = "ENTER REGO FIRST"; return; }
 
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 640;
@@ -137,8 +113,7 @@
         const photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
 
         const prop = propSelect.value === 'OTHER' ? otherPropInput.value.trim() : propSelect.value;
-        statusDiv.style.color = "#00e676";
-        statusDiv.innerText = "MARKING VEHICLE...";
+        statusDiv.style.color = "#00e676"; statusDiv.innerText = "MARKING VEHICLE...";
 
         const payload = { action: 'log_mark', rego: rego, property: prop, photoBytes: photoBase64 };
         await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
