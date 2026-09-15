@@ -3,81 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOW VEHICLE</title>
+    <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=3">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=3">
-    <link rel="manifest" href="manifest-tow.json?v=3">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=4">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=4">
+    <link rel="manifest" href="manifest-tow.json?v=4">
 
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
-        .header h1 { margin: 0 0 12px 0; font-size: 34px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header h1 { margin: 0 0 14px 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
         
-        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 800; letter-spacing: 1px; }
+        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 54px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 800; margin-top: 6px; outline: none;
+            width: 100%; height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 22px; font-weight: 900; margin-top: 6px; outline: none;
         }
-        
-        .camera-box {
-            width: 100%; height: 320px; background: #000; border-radius: 14px; border: 2px solid #333;
-            margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
-        }
-        video, img.preview { width: 100%; height: 100%; object-fit: contain; }
 
-        /* CIRCLE CAMERA BUTTON */
+        .camera-box {
+            width: 100%; height: 280px; background: #000; border-radius: 14px; border: 2px solid #333;
+            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* THUMBNAILS GALLERY STRIP */
+        .thumb-gallery { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 4px; }
+        .thumb-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #ff1744; cursor: pointer; flex-shrink: 0; }
+
         .circle-cam-btn {
-            width: 80px; height: 80px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
-            margin: 14px auto 0 auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5); cursor: pointer; user-select: none;
+            width: 120px; height: 120px; background: #00e676; border: 6px solid #fff; border-radius: 50%;
+            margin: 16px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 26px rgba(0, 230, 118, 0.6); cursor: pointer; user-select: none;
         }
         .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #000; }
+        .circle-cam-inner { width: 92px; height: 92px; border-radius: 50%; border: 3px solid #000; }
 
         .submit-btn {
             background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 26px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
+            height: 60px; font-size: 28px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
         }
-        .submit-btn:active { transform: scale(0.97); }
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
+
+        /* MODAL ENLARGE IMAGE */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
+        .modal img { max-width: 90%; max-height: 80%; border-radius: 12px; border: 2px solid #fff; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>TOW VEHICLE</h1>
-</div>
+<div class="header"><h1>TOW</h1></div>
 
 <div class="card">
-    <label>Registration</label>
+    <label>REGO</label>
     <input type="text" id="regoInput" placeholder="REGO" style="font-size:28px; color:#ff1744; text-transform:uppercase;">
 
     <div class="row-2">
-        <div>
-            <label>Make</label>
-            <input type="text" id="makeInput" placeholder="TOYOTA">
-        </div>
-        <div>
-            <label>Model</label>
-            <input type="text" id="modelInput" placeholder="COROLLA">
-        </div>
+        <div><label>MAKE</label><input type="text" id="makeInput" placeholder="MAKE"></div>
+        <div><label>MODEL</label><input type="text" id="modelInput" placeholder="MODEL"></div>
     </div>
 
     <div class="row-2">
+        <div><label>COLOUR</label><input type="text" id="colourInput" placeholder="COLOUR"></div>
         <div>
-            <label>Colour</label>
-            <input type="text" id="colourInput" placeholder="WHITE">
-        </div>
-        <div>
-            <label>Body Type</label>
+            <label>BODY</label>
             <select id="bodySelect">
                 <option value="Sedan" selected>Sedan</option>
                 <option value="Hatchback">Hatchback</option>
@@ -88,32 +79,21 @@
             </select>
         </div>
     </div>
+
+    <label>PROPERTY</label>
+    <input type="text" id="propertyInput" placeholder="PROPERTY">
+
+    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
     
-    <div id="otherBodyDiv" style="display:none;">
-        <label>Specify Body Type</label>
-        <input type="text" id="otherBodyInput" value="Other">
-    </div>
+    <div class="thumb-gallery" id="thumbGallery"></div>
 
-    <label>Property Location</label>
-    <input type="text" id="propertyInput" placeholder="LOCATION">
-
-    <label>Policelink Ref</label>
-    <input type="text" id="policelinkInput" placeholder="REF #">
-
-    <label>Snap Tow Photo</label>
-    <div class="camera-box">
-        <video id="videoElem" autoplay playsinline></video>
-        <img id="capturedImg" class="preview" style="display:none;">
-    </div>
-    
-    <!-- GREEN CIRCLE CAMERA BUTTON -->
-    <div class="circle-cam-btn" id="snapBtn">
-        <div class="circle-cam-inner"></div>
-    </div>
+    <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
     <button class="submit-btn" id="submitBtn">TOW</button>
     <div id="status"></div>
 </div>
+
+<div class="modal" id="imgModal" onclick="this.style.display='none'"><img id="modalImg" src=""></div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
@@ -123,21 +103,13 @@
     const modelInput = document.getElementById('modelInput');
     const colourInput = document.getElementById('colourInput');
     const bodySelect = document.getElementById('bodySelect');
-    const otherBodyDiv = document.getElementById('otherBodyDiv');
-    const otherBodyInput = document.getElementById('otherBodyInput');
     const propertyInput = document.getElementById('propertyInput');
-    const policelinkInput = document.getElementById('policelinkInput');
     const videoElem = document.getElementById('videoElem');
-    const capturedImg = document.getElementById('capturedImg');
     const snapBtn = document.getElementById('snapBtn');
+    const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
     const statusDiv = document.getElementById('status');
-
-    let capturedBase64 = "";
-
-    bodySelect.addEventListener('change', () => {
-        otherBodyDiv.style.display = bodySelect.value === 'Other' ? 'block' : 'none';
-    });
+    const photos = [];
 
     window.addEventListener('load', () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -158,22 +130,25 @@
         canvas.width = videoElem.videoWidth || 640;
         canvas.height = videoElem.videoHeight || 480;
         canvas.getContext('2d').drawImage(videoElem, 0, 0);
-        capturedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-        capturedImg.src = capturedBase64;
-        capturedImg.style.display = 'block';
-        videoElem.style.display = 'none';
+        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+        photos.push(b64);
+
+        const img = document.createElement('img');
+        img.src = b64; img.className = 'thumb-img';
+        img.onclick = () => {
+            document.getElementById('modalImg').src = b64;
+            document.getElementById('imgModal').style.display = 'flex';
+        };
+        thumbGallery.appendChild(img);
     });
 
     submitBtn.addEventListener('click', async () => {
         const rego = regoInput.value.trim().toUpperCase();
         if (!rego) { statusDiv.innerText = "ENTER REGO"; return; }
 
-        const finalBody = bodySelect.value === 'Other' ? otherBodyInput.value.trim() : bodySelect.value;
         const payload = {
-            action: 'log_tow',
-            rego: rego, make: makeInput.value.trim(), model: modelInput.value.trim(),
-            colour: colourInput.value.trim(), bodyType: finalBody, property: propertyInput.value.trim(),
-            policelinkNo: policelinkInput.value.trim(), officer: "Driver"
+            action: 'log_tow', rego: rego, make: makeInput.value.trim(), model: modelInput.value.trim(),
+            colour: colourInput.value.trim(), bodyType: bodySelect.value, property: propertyInput.value.trim(), officer: "Driver"
         };
 
         statusDiv.innerText = "LOGGING TOW...";
