@@ -3,359 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MARK CAR</title>
+    <title>MARK PATROL</title>
     
-    <!-- PWA Directives -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MARK">
     
-    <!-- Embedded "MARK" Tile Icon -->
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1">
-    <link rel="manifest" href="manifest-mark.json?v=2">>
+    <link rel="apple-touch-icon" href="icon-mark.png?v=2">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=2">
+    <link rel="manifest" href="manifest-mark.json?v=2">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; 
-            padding: 12px; 
-            background: #121212; 
-            color: #fff; 
-            -webkit-user-select: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            margin: 0; padding: 12px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-        .header {
-            text-align: center;
-            margin-top: 4px;
-            margin-bottom: 8px;
+        .header { text-align: center; margin-bottom: 10px; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 900; color: #2979ff; letter-spacing: 1px; }
+
+        .card {
+            background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px;
+            border: 1px solid #2a2a2a; box-shadow: 0 4px 14px rgba(0,0,0,0.5);
         }
-        .header h1 {
-            margin: 0;
-            font-size: 38px;
-            font-weight: 900;
-            color: #00e676;
-            letter-spacing: 2px;
+
+        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 12px; font-weight: 800; }
+        input, select {
+            width: 100%; height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #333;
+            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 700; margin-top: 4px; outline: none;
         }
-        .location-card {
-            background: #1e1e1e;
-            border-radius: 14px;
-            padding: 10px 14px;
-            width: 100%;
-            max-width: 420px;
-            border: 1px solid #2a2a2a;
-            margin-bottom: 8px;
-            text-align: center;
+
+        .camera-box {
+            width: 100%; height: 260px; background: #000; border-radius: 12px; border: 2px dashed #444;
+            margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
-        .gps-badge {
-            font-size: 10px;
-            text-transform: uppercase;
-            color: #888;
-            font-weight: 700;
-            margin-bottom: 4px;
-            display: block;
+        video, img.preview { width: 100%; height: 100%; object-fit: contain; }
+
+        .submit-btn {
+            background: #2979ff; color: #fff; font-weight: 900; border: none; border-radius: 12px;
+            height: 54px; font-size: 20px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 1px;
         }
-        .select-dropdown {
-            width: 100%;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            background: #2a2a2a;
-            color: #00e676;
-            font-size: 18px;
-            font-weight: 800;
-            outline: none;
-            text-align-last: center;
-        }
-        .viewfinder-box {
-            position: relative;
-            width: 100%;
-            max-width: 420px;
-            flex: 1;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 2px solid #00e676;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        video, img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .result-overlay {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            background: rgba(0,0,0,0.85);
-            border: 2px solid #00e676;
-            border-radius: 12px;
-            padding: 10px;
-            text-align: center;
-            z-index: 10;
-        }
-        .rego-text {
-            font-size: 34px;
-            font-weight: 900;
-            color: #00e676;
-            letter-spacing: 3px;
-        }
-        .status-text {
-            font-size: 12px;
-            color: #fff;
-            font-weight: 700;
-            margin-top: 2px;
-        }
-        .controls {
-            padding: 12px 0;
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-        .shutter-btn {
-            background: #00e676;
-            border: 5px solid #fff;
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 24px rgba(0, 230, 118, 0.6);
-            cursor: pointer;
-            outline: none;
-        }
-        .shutter-btn:active {
-            transform: scale(0.90);
-            background: #00c853;
-        }
-        .shutter-icon {
-            width: 36px;
-            height: 36px;
-            border: 4px solid #000;
-            border-radius: 50%;
-        }
+        .submit-btn:active { transform: scale(0.97); }
+        #status { text-align: center; font-weight: 800; font-size: 13px; margin-top: 12px; color: #00e676; }
+        .offline-banner { background: #ffab00; color: #000; padding: 6px; text-align: center; font-weight: 900; font-size: 12px; border-radius: 6px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>MARK CAR</h1>
+    <h1>MARK PATROL</h1>
 </div>
 
-<div class="location-card">
-    <span class="gps-badge" id="gpsBadge">DETECTING LOCATION...</span>
-    <select id="propertySelect" class="select-dropdown">
-        <option value="GENERAL PATROL">GENERAL PATROL</option>
+<div class="card">
+    <div id="offlineBanner" class="offline-banner">⚠️ BASEMENT / OFFLINE MODE</div>
+
+    <label>Property Location</label>
+    <select id="propSelect">
+        <option value="" disabled selected>DETECTING GPS LOCATION...</option>
+        <option value="OTHER">OTHER (MANUAL ENTRY)</option>
     </select>
-</div>
-
-<div class="viewfinder-box">
-    <video id="webcam" autoplay playsinline muted></video>
-    <img id="freezeFrame" style="display:none;" />
     
-    <div class="result-overlay">
-        <div class="rego-text" id="rego">READY</div>
-        <div class="status-text" id="status">TAP BUTTON TO SNAP</div>
+    <div id="otherPropDiv" style="display:none;">
+        <label>Manual Property Name</label>
+        <input type="text" id="otherPropInput" placeholder="ENTER PROPERTY NAME">
     </div>
-</div>
 
-<div class="controls">
-    <button class="shutter-btn" id="snapBtn">
-        <div class="shutter-icon"></div>
-    </button>
-</div>
+    <label>Vehicle Registration</label>
+    <input type="text" id="regoInput" placeholder="REGO" style="font-size:22px; color:#2979ff; text-transform:uppercase; font-weight:900;">
 
-<canvas id="procCanvas" style="display:none;"></canvas>
-<iframe name="hiddenTarget" id="hiddenTarget" style="display:none;"></iframe>
-<form id="bypassForm" action="https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec" method="POST" target="hiddenTarget" style="display:none;">
-    <input type="hidden" name="payload" id="formPayload">
-</form>
+    <label>Patrol Photo</label>
+    <div class="camera-box">
+        <video id="videoElem" autoplay playsinline></video>
+        <img id="capturedImg" class="preview" style="display:none;">
+    </div>
+    <button id="snapBtn" style="margin-top:8px; height:40px; background:#333; color:#fff; border:1px solid #555; border-radius:8px; width:100%; font-weight:800;">📸 SNAP PATROL PHOTO</button>
+
+    <button class="submit-btn" id="submitBtn">MARK VEHICLE</button>
+    <div id="status"></div>
+</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-    const PLATE_RECOGNIZER_KEY = "74a8bb83a49461eef0266274ce63e1e198b4c888";
-    
-    let propertyDatabase = [];
 
-    const video = document.getElementById('webcam');
-    const freezeFrame = document.getElementById('freezeFrame');
+    const propSelect = document.getElementById('propSelect');
+    const otherPropDiv = document.getElementById('otherPropDiv');
+    const otherPropInput = document.getElementById('otherPropInput');
+    const regoInput = document.getElementById('regoInput');
+    const videoElem = document.getElementById('videoElem');
+    const capturedImg = document.getElementById('capturedImg');
     const snapBtn = document.getElementById('snapBtn');
-    const statusText = document.getElementById('status');
-    const gpsBadge = document.getElementById('gpsBadge');
-    const regoDisplay = document.getElementById('rego');
-    const propertySelect = document.getElementById('propertySelect');
-    const canvas = document.getElementById('procCanvas');
-    const ctx = canvas.getContext('2d');
-    const bypassForm = document.getElementById('bypassForm');
-    const formPayload = document.getElementById('formPayload');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusDiv = document.getElementById('status');
 
-    window.addEventListener('load', async () => {
-        initCamera();
+    let capturedBase64 = "";
 
-        try {
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_properties`);
-            propertyDatabase = await res.json();
-
-            if (propertyDatabase && propertyDatabase.length > 0) {
-                propertySelect.innerHTML = "";
-                propertyDatabase.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.name;
-                    opt.innerText = p.name.toUpperCase();
-                    propertySelect.appendChild(opt);
-                });
-            }
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    
-                    let nearestProp = null;
-                    let shortestDistance = Infinity;
-
-                    propertyDatabase.forEach(p => {
-                        if (p.lat && p.lng) {
-                            const dist = getDistanceMeters(userLat, userLng, p.lat, p.lng);
-                            if (dist < shortestDistance) {
-                                shortestDistance = dist;
-                                nearestProp = p;
-                            }
-                        }
-                    });
-
-                    if (nearestProp && shortestDistance <= (nearestProp.radius || 300)) {
-                        propertySelect.value = nearestProp.name;
-                        gpsBadge.innerText = "GPS LOCKED (NEAREST PROPERTY)";
-                    } else {
-                        gpsBadge.innerText = "GPS ACTIVE";
-                    }
-                });
-            }
-        } catch(e) {
-            gpsBadge.innerText = "LOCATION OFFLINE";
+    propSelect.addEventListener('change', () => {
+        if (propSelect.value === 'OTHER') {
+            otherPropDiv.style.display = 'block';
+        } else {
+            otherPropDiv.style.display = 'none';
+            localStorage.setItem('last_property', propSelect.value);
         }
     });
+
+    window.addEventListener('load', () => {
+        initCamera();
+        loadProperties();
+        checkNetwork();
+    });
+
+    async function loadProperties() {
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_properties`);
+            const props = await res.json();
+            propSelect.innerHTML = '<option value="" disabled>SELECT PROPERTY</option>';
+            props.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.innerText = p.name;
+                propSelect.appendChild(opt);
+            });
+            const optOther = document.createElement('option');
+            optOther.value = 'OTHER';
+            optOther.innerText = 'OTHER (MANUAL ENTRY)';
+            propSelect.appendChild(optOther);
+
+            // Default to last used property if underground/no GPS
+            const lastProp = localStorage.getItem('last_property');
+            if (lastProp) propSelect.value = lastProp;
+        } catch(e) {
+            propSelect.value = 'OTHER';
+            otherPropDiv.style.display = 'block';
+        }
+    }
 
     async function initCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { exact: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
-                audio: false
-            });
-            video.srcObject = stream;
-        } catch (err) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                video.srcObject = stream;
-            } catch(e) {
-                statusText.innerText = "ALLOW CAMERA PERMISSION";
-            }
-        }
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            videoElem.srcObject = stream;
+        } catch(e) {}
     }
 
-    function getDistanceMeters(lat1, lon1, lat2, lon2) {
-        const R = 6371e3;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
+    snapBtn.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElem.videoWidth || 640;
+        canvas.height = videoElem.videoHeight || 480;
+        canvas.getContext('2d').drawImage(videoElem, 0, 0);
+        capturedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        capturedImg.src = capturedBase64;
+        capturedImg.style.display = 'block';
+        videoElem.style.display = 'none';
+    });
 
-    snapBtn.addEventListener('click', async () => {
-        if (!video.videoWidth) return;
+    submitBtn.addEventListener('click', async () => {
+        const rego = regoInput.value.trim().toUpperCase();
+        if (!rego) { statusDiv.innerText = "ENTER REGO"; return; }
 
-        statusText.innerText = "⚡ READING PLATE...";
-        regoDisplay.innerText = "READING...";
-
-        canvas.width = 800;
-        const scale = 800 / video.videoWidth;
-        canvas.height = video.videoHeight * scale;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
-        const compressedBase64 = dataUrl.split(',')[1];
-
-        freezeFrame.src = dataUrl;
-        freezeFrame.style.display = "block";
-        video.style.display = "none";
-
-        let detectedRego = "UNREADABLE";
-        let confidence = "LOW";
-        let makeModel = "GENERAL";
-
-        try {
-            const startTime = performance.now();
-
-            const byteCharacters = atob(compressedBase64);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const blob = new Blob([new Uint8Array(byteNumbers)], {type: 'image/jpeg'});
-
-            let formData = new FormData();
-            formData.append('upload', blob, 'snap.jpg');
-            formData.append('regions', 'au');
-
-            const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
-                method: 'POST',
-                headers: { 'Authorization': `Token ${PLATE_RECOGNIZER_KEY}` },
-                body: formData
-            });
-
-            const anprData = await anprRes.json();
-            const elapsedSeconds = ((performance.now() - startTime) / 1000).toFixed(1);
-
-            if (anprData.results && anprData.results.length > 0) {
-                const topResult = anprData.results[0];
-                detectedRego = topResult.plate.toUpperCase();
-                confidence = (topResult.score > 0.8) ? "HIGH" : "LOW";
-
-                if (topResult.vehicle && topResult.vehicle.make) {
-                    makeModel = `${topResult.vehicle.make} ${topResult.vehicle.model || ''}`.trim().toUpperCase();
-                }
-            }
-
-            regoDisplay.innerText = detectedRego;
-            statusText.innerText = `✔ MARKED (${elapsedSeconds}s)`;
-
-        } catch(err) {
-            regoDisplay.innerText = "UNREADABLE";
-            statusText.innerText = "MARKED (CHECK PLATE)";
-        }
-
-        const payloadObj = {
-            "action": "patrol_upload",
-            "propertyName": propertySelect.value || "GENERAL PATROL",
-            "rego": detectedRego,
-            "confidence": confidence,
-            "makeModel": makeModel,
-            "imageBytes": compressedBase64
+        const prop = propSelect.value === 'OTHER' ? otherPropInput.value.trim() : propSelect.value;
+        const payload = {
+            action: 'log_mark',
+            rego: rego,
+            property: prop,
+            photoBytes: capturedBase64
         };
 
-        formPayload.value = JSON.stringify(payloadObj);
-        bypassForm.submit();
+        if (!navigator.onLine) {
+            saveOffline('mark_queue', payload);
+            statusDiv.innerText = "⚠️ SAVED LOCALLY (OFFLINE BASEMENT). WILL SYNC ONEXIT.";
+            return;
+        }
 
-        setTimeout(() => {
-            freezeFrame.style.display = "none";
-            video.style.display = "block";
-            statusText.innerText = "READY FOR NEXT CAR";
-        }, 1800);
+        statusDiv.innerText = "MARKING VEHICLE...";
+        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
     });
-</script>
 
+    function saveOffline(key, data) {
+        let queue = JSON.parse(localStorage.getItem(key) || "[]");
+        queue.push(data);
+        localStorage.setItem(key, JSON.stringify(queue));
+    }
+
+    function checkNetwork() {
+        if (!navigator.onLine) document.getElementById('offlineBanner').style.display = 'block';
+        window.addEventListener('online', () => {
+            document.getElementById('offlineBanner').style.display = 'none';
+            syncOffline();
+        });
+    }
+
+    async function syncOffline() {
+        let queue = JSON.parse(localStorage.getItem('mark_queue') || "[]");
+        if (queue.length === 0) return;
+        for (let item of queue) {
+            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
+        }
+        localStorage.removeItem('mark_queue');
+        statusDiv.innerText = "✔ OFFLINE MARKS SYNCED!";
+    }
+</script>
 </body>
 </html>
