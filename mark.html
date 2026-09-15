@@ -5,49 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MARK PATROL</title>
     
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MARK">
-    
-    <link rel="apple-touch-icon" href="icon-mark.png?v=2">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=2">
-    <link rel="manifest" href="manifest-mark.json?v=2">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=3">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=3">
+    <link rel="manifest" href="manifest-mark.json?v=3">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 12px; background: #121212; color: #fff; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-        .header { text-align: center; margin-bottom: 10px; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 900; color: #2979ff; letter-spacing: 1px; }
-
-        .card {
-            background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px;
-            border: 1px solid #2a2a2a; box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-        }
-
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 12px; font-weight: 800; }
+        .header h1 { margin: 0 0 12px 0; font-size: 34px; font-weight: 900; color: #2979ff; letter-spacing: 2px; text-align: center; }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
+        
+        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 800; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #333;
-            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 700; margin-top: 4px; outline: none;
+            width: 100%; height: 54px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 800; margin-top: 6px; outline: none;
         }
-
+        input:focus, select:focus { border-color: #2979ff; }
+        
         .camera-box {
-            width: 100%; height: 260px; background: #000; border-radius: 12px; border: 2px dashed #444;
-            margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 280px; background: #000; border-radius: 14px; border: 2px solid #333;
+            margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
-        video, img.preview { width: 100%; height: 100%; object-fit: contain; }
+        video { width: 100%; height: 100%; object-fit: cover; }
 
-        .submit-btn {
-            background: #2979ff; color: #fff; font-weight: 900; border: none; border-radius: 12px;
-            height: 54px; font-size: 20px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 1px;
+        /* CIRCLE CAMERA BUTTON */
+        .circle-cam-btn {
+            width: 80px; height: 80px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
+            margin: 16px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5); cursor: pointer; user-select: none;
         }
-        .submit-btn:active { transform: scale(0.97); }
-        #status { text-align: center; font-weight: 800; font-size: 13px; margin-top: 12px; color: #00e676; }
-        .offline-banner { background: #ffab00; color: #000; padding: 6px; text-align: center; font-weight: 900; font-size: 12px; border-radius: 6px; display: none; }
+        .circle-cam-btn:active { transform: scale(0.90); background: #00c853; }
+        .circle-cam-inner { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #000; }
+
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
     </style>
 </head>
 <body>
@@ -57,12 +51,9 @@
 </div>
 
 <div class="card">
-    <div id="offlineBanner" class="offline-banner">⚠️ BASEMENT / OFFLINE MODE</div>
-
     <label>Property Location</label>
     <select id="propSelect">
-        <option value="" disabled selected>DETECTING GPS LOCATION...</option>
-        <option value="OTHER">OTHER (MANUAL ENTRY)</option>
+        <option value="" disabled selected>LOADING PROPERTIES...</option>
     </select>
     
     <div id="otherPropDiv" style="display:none;">
@@ -70,17 +61,19 @@
         <input type="text" id="otherPropInput" placeholder="ENTER PROPERTY NAME">
     </div>
 
-    <label>Vehicle Registration</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="font-size:22px; color:#2979ff; text-transform:uppercase; font-weight:900;">
+    <label>Registration</label>
+    <input type="text" id="regoInput" placeholder="REGO" style="font-size:26px; color:#2979ff; text-transform:uppercase;">
 
-    <label>Patrol Photo</label>
+    <label>Snap & Auto-Mark Vehicle</label>
     <div class="camera-box">
         <video id="videoElem" autoplay playsinline></video>
-        <img id="capturedImg" class="preview" style="display:none;">
     </div>
-    <button id="snapBtn" style="margin-top:8px; height:40px; background:#333; color:#fff; border:1px solid #555; border-radius:8px; width:100%; font-weight:800;">📸 SNAP PATROL PHOTO</button>
 
-    <button class="submit-btn" id="submitBtn">MARK VEHICLE</button>
+    <!-- ONE-TAP GREEN CIRCLE BUTTON -->
+    <div class="circle-cam-btn" id="snapAndMarkBtn">
+        <div class="circle-cam-inner"></div>
+    </div>
+
     <div id="status"></div>
 </div>
 
@@ -92,33 +85,23 @@
     const otherPropInput = document.getElementById('otherPropInput');
     const regoInput = document.getElementById('regoInput');
     const videoElem = document.getElementById('videoElem');
-    const capturedImg = document.getElementById('capturedImg');
-    const snapBtn = document.getElementById('snapBtn');
-    const submitBtn = document.getElementById('submitBtn');
+    const snapAndMarkBtn = document.getElementById('snapAndMarkBtn');
     const statusDiv = document.getElementById('status');
 
-    let capturedBase64 = "";
-
     propSelect.addEventListener('change', () => {
-        if (propSelect.value === 'OTHER') {
-            otherPropDiv.style.display = 'block';
-        } else {
-            otherPropDiv.style.display = 'none';
-            localStorage.setItem('last_property', propSelect.value);
-        }
+        otherPropDiv.style.display = propSelect.value === 'OTHER' ? 'block' : 'none';
     });
 
     window.addEventListener('load', () => {
         initCamera();
         loadProperties();
-        checkNetwork();
     });
 
     async function loadProperties() {
         try {
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_properties`);
             const props = await res.json();
-            propSelect.innerHTML = '<option value="" disabled>SELECT PROPERTY</option>';
+            propSelect.innerHTML = '<option value="" disabled selected>SELECT PROPERTY</option>';
             props.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.name;
@@ -129,12 +112,8 @@
             optOther.value = 'OTHER';
             optOther.innerText = 'OTHER (MANUAL ENTRY)';
             propSelect.appendChild(optOther);
-
-            // Default to last used property if underground/no GPS
-            const lastProp = localStorage.getItem('last_property');
-            if (lastProp) propSelect.value = lastProp;
         } catch(e) {
-            propSelect.value = 'OTHER';
+            propSelect.innerHTML = '<option value="OTHER">OTHER (MANUAL ENTRY)</option>';
             otherPropDiv.style.display = 'block';
         }
     }
@@ -146,63 +125,27 @@
         } catch(e) {}
     }
 
-    snapBtn.addEventListener('click', () => {
+    // ONE-TAP CAPTURE & MARK
+    snapAndMarkBtn.addEventListener('click', async () => {
+        const rego = regoInput.value.trim().toUpperCase();
+        if (!rego) { statusDiv.style.color = "#ff1744"; statusDiv.innerText = "PLEASE ENTER REGO FIRST"; return; }
+
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 640;
         canvas.height = videoElem.videoHeight || 480;
         canvas.getContext('2d').drawImage(videoElem, 0, 0);
-        capturedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-        capturedImg.src = capturedBase64;
-        capturedImg.style.display = 'block';
-        videoElem.style.display = 'none';
-    });
-
-    submitBtn.addEventListener('click', async () => {
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER REGO"; return; }
+        const photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
 
         const prop = propSelect.value === 'OTHER' ? otherPropInput.value.trim() : propSelect.value;
-        const payload = {
-            action: 'log_mark',
-            rego: rego,
-            property: prop,
-            photoBytes: capturedBase64
-        };
-
-        if (!navigator.onLine) {
-            saveOffline('mark_queue', payload);
-            statusDiv.innerText = "⚠️ SAVED LOCALLY (OFFLINE BASEMENT). WILL SYNC ONEXIT.";
-            return;
-        }
-
+        statusDiv.style.color = "#00e676";
         statusDiv.innerText = "MARKING VEHICLE...";
+
+        const payload = { action: 'log_mark', rego: rego, property: prop, photoBytes: photoBase64 };
         await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+
         statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
+        regoInput.value = "";
     });
-
-    function saveOffline(key, data) {
-        let queue = JSON.parse(localStorage.getItem(key) || "[]");
-        queue.push(data);
-        localStorage.setItem(key, JSON.stringify(queue));
-    }
-
-    function checkNetwork() {
-        if (!navigator.onLine) document.getElementById('offlineBanner').style.display = 'block';
-        window.addEventListener('online', () => {
-            document.getElementById('offlineBanner').style.display = 'none';
-            syncOffline();
-        });
-    }
-
-    async function syncOffline() {
-        let queue = JSON.parse(localStorage.getItem('mark_queue') || "[]");
-        if (queue.length === 0) return;
-        for (let item of queue) {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
-        }
-        localStorage.removeItem('mark_queue');
-        statusDiv.innerText = "✔ OFFLINE MARKS SYNCED!";
-    }
 </script>
 </body>
 </html>
