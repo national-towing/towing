@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=9">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=9">
-    <link rel="manifest" href="manifest-tow.json?v=9">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10">
+    <link rel="manifest" href="manifest-tow.json?v=10">
 
     <style>
         * { box-sizing: border-box; }
@@ -18,7 +18,6 @@
         }
         .header h1 { margin: 0 0 10px 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
         
-        /* UNIVERSAL TILE HEADER NAVIGATION BAR */
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
@@ -78,7 +77,6 @@
 
 <div class="header"><h1>TOW</h1></div>
 
-<!-- STANDARD NAV BAR -->
 <div class="nav-bar">
     <a href="run.html" class="nav-tile nav-run">RUN</a>
     <a href="tow.html" class="nav-tile nav-tow">TOW</a>
@@ -110,8 +108,17 @@
         </div>
     </div>
 
-    <label>PROPERTY</label>
-    <input type="text" id="propertyInput" placeholder="PROPERTY">
+    <div class="row-2">
+        <div>
+            <label>DRIVER</label>
+            <select id="driverSelect">
+                <option value="Brett">Brett</option>
+                <option value="Brian" selected>Brian</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div><label>PROPERTY</label><input type="text" id="propertyInput" placeholder="PROPERTY"></div>
+    </div>
 
     <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
     
@@ -142,6 +149,7 @@
     const modelInput = document.getElementById('modelInput');
     const colourInput = document.getElementById('colourInput');
     const bodySelect = document.getElementById('bodySelect');
+    const driverSelect = document.getElementById('driverSelect');
     const propertyInput = document.getElementById('propertyInput');
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
@@ -194,14 +202,14 @@
             colour: colourInput.value.trim(), 
             bodyType: bodySelect.value, 
             property: propertyInput.value.trim(), 
-            officer: "Driver"
+            officer: driverSelect.value,
+            photos: photos
         };
 
-        statusDiv.innerText = "LOGGING TOW...";
+        statusDiv.innerText = "LOGGING TOW & SAVING PHOTOS...";
         await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         statusDiv.innerText = "✔ VEHICLE TOWED SUCCESS!";
 
-        // CONFIGURE POLICELINK LAUNCH BUTTON WITH PRE-FILLED URL PARAMETERS
         const qpsLaunchUrl = `https://www.police.qld.gov.au/policelink-reporting/tow-notification-launch?rego=${encodeURIComponent(rego)}&make=${encodeURIComponent(makeInput.value.trim())}&model=${encodeURIComponent(modelInput.value.trim())}&colour=${encodeURIComponent(colourInput.value.trim())}&location=${encodeURIComponent(propertyInput.value.trim())}`;
         
         policelinkBtn.href = qpsLaunchUrl;
