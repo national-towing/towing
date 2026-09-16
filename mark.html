@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- OFFLINE PWA & NO-CACHE META TAGS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=17">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=17">
-    <link rel="manifest" href="manifest-mark.json?v=17">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=18">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=18">
+    <link rel="manifest" href="manifest-mark.json?v=18">
 
     <style>
         * { box-sizing: border-box; }
@@ -110,11 +118,9 @@
         initCamera();
     });
 
+    // ONE-TAP HARD REFRESH FROM GITHUB
     refreshBtn.addEventListener('click', () => {
-        regoInput.value = "";
-        capturedPhoto = "";
-        thumbGallery.innerHTML = "";
-        statusDiv.innerText = "";
+        window.location.reload(true);
     });
 
     async function loadProperties() {
@@ -162,11 +168,33 @@
         };
 
         statusDiv.innerText = "MARKING VEHICLE...";
-        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
+        } catch(err) {
+            // SAVES LOCALLY IF BASEMENT HAS NO SERVICE
+            let offlineQueue = JSON.parse(localStorage.getItem('offline_marks') || '[]');
+            offlineQueue.push(payload);
+            localStorage.setItem('offline_marks', JSON.stringify(offlineQueue));
+            statusDiv.innerText = "⚠️ OFFLINE: LOGGED LOCALLY";
+        }
+
         setTimeout(() => {
             regoInput.value = ""; capturedPhoto = ""; thumbGallery.innerHTML = ""; statusDiv.innerText = "";
         }, 1500);
+    });
+
+    // AUTO-SYNC WHEN RETURNING TO CELL COVERAGE
+    window.addEventListener('online', async () => {
+        let offlineQueue = JSON.parse(localStorage.getItem('offline_marks') || '[]');
+        if (offlineQueue.length > 0) {
+            statusDiv.innerText = "SYNCING OFFLINE LOGS...";
+            for (let item of offlineQueue) {
+                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
+            }
+            localStorage.removeItem('offline_marks');
+            statusDiv.innerText = "✔ ALL OFFLINE LOGS SYNCED!";
+        }
     });
 </script>
 </body>
