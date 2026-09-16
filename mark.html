@@ -12,9 +12,12 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=20">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=20">
-    <link rel="manifest" href="manifest-mark.json?v=20">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=26">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=26">
+    <link rel="manifest" href="manifest-mark.json?v=26">
+
+    <!-- OCR ENGINE FOR ANPR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
         * { box-sizing: border-box; }
@@ -46,9 +49,13 @@
 
         .camera-box {
             width: 100%; height: 260px; background: #000; border-radius: 14px; border: 2px solid #333;
-            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
+        .anpr-overlay {
+            position: absolute; width: 80%; height: 40%; border: 2px dashed #ffab00;
+            border-radius: 12px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+        }
 
         .thumb-gallery { display: flex; gap: 10px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
         .thumb-img { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 3px solid #ffab00; cursor: pointer; flex-shrink: 0; }
@@ -61,7 +68,7 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #000; }
 
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #ffab00; }
     </style>
 </head>
 <body>
@@ -82,13 +89,17 @@
     <label>PROPERTY</label>
     <select id="propertySelect"><option value="">LOADING...</option></select>
 
-    <label>REGO</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="font-size:28px; color:#ffab00; text-transform:uppercase;">
+    <label>REGO (AUTO-DETECT / MANUAL)</label>
+    <input type="text" id="regoInput" placeholder="SCANNING..." style="font-size:28px; color:#ffab00; text-transform:uppercase;">
 
-    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
+    <div class="camera-box">
+        <video id="videoElem" autoplay playsinline></video>
+        <div class="anpr-overlay"></div>
+    </div>
+    
     <div class="thumb-gallery" id="thumbGallery"></div>
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-    <div id="status"></div>
+    <div id="status">ALIGN PLATE IN BOX FOR ANPR SCAN</div>
 </div>
 
 <script>
@@ -102,10 +113,11 @@
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
     let capturedPhoto = "";
+    let isScanning = true;
 
     window.addEventListener('load', () => {
         loadProperties();
-        initCamera();
+        initCameraAndANPR();
     });
 
     refreshBtn.addEventListener('click', () => {
@@ -125,16 +137,52 @@
         } catch(e) {}
     }
 
-    async function initCamera() {
+    async function initCameraAndANPR() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             videoElem.srcObject = stream;
+            
+            // Start background ANPR recognition loop
+            setInterval(scanPlateFrame, 2500);
+        } catch(e) {
+            statusDiv.innerText = "CAMERA ACCESS DENIED";
+        }
+    }
+
+    // ANPR FRAME PROCESSING LOGIC
+    async function scanPlateFrame() {
+        if (!isScanning || !videoElem.videoWidth) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElem.videoWidth;
+        canvas.height = videoElem.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+
+        try {
+            const { data: { text } } = await Tesseract.recognize(canvas, 'eng', {
+                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            });
+
+            // Extract Australian format registration pattern (3-7 alphanumeric chars)
+            const cleanText = text.replace(/[^A-Z0-9]/gi, '');
+            const matches = cleanText.match(/[A-Z0-9]{3,7}/g);
+
+            if (matches && matches.length > 0 && isScanning) {
+                // Set rego input if not locked by user
+                if (!document.activeElement || document.activeElement !== regoInput) {
+                    regoInput.value = matches[0].toUpperCase();
+                    statusDiv.innerText = "✔ ANPR READ: " + matches[0].toUpperCase();
+                }
+            }
         } catch(e) {}
     }
 
     snapBtn.addEventListener('click', async () => {
         const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
+        if (!rego) { statusDiv.innerText = "ENTER OR SCAN REGO FIRST"; return; }
+
+        isScanning = false; // Pause ANPR scanner on capture
 
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 640;
@@ -166,7 +214,11 @@
         }
 
         setTimeout(() => {
-            regoInput.value = ""; capturedPhoto = ""; thumbGallery.innerHTML = ""; statusDiv.innerText = "";
+            regoInput.value = ""; 
+            capturedPhoto = ""; 
+            thumbGallery.innerHTML = ""; 
+            statusDiv.innerText = "ALIGN PLATE IN BOX FOR ANPR SCAN";
+            isScanning = true;
         }, 1500);
     });
 </script>
