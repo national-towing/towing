@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PASSES</title>
     
-    <link rel="apple-touch-icon" href="icon-passes.png?v=14">
-    <link rel="icon" type="image/png" href="icon-passes.png?v=14">
-    <link rel="manifest" href="manifest-passes.json?v=14">
+    <link rel="apple-touch-icon" href="icon-passes.png?v=15">
+    <link rel="icon" type="image/png" href="icon-passes.png?v=15">
+    <link rel="manifest" href="manifest-passes.json?v=15">
 
     <style>
         * { box-sizing: border-box; }
@@ -36,7 +36,7 @@
         #propsScreen, #detailScreen, #addScreen { width: 100%; max-width: 440px; }
         #detailScreen, #addScreen { display: none; }
 
-        /* PROPERTY TILE BUTTONS */
+        /* PROPERTY TILE BUTTONS WITH PASS COUNT COUNTER */
         .prop-tile-btn { 
             background: #1e1e1e; border: 1px solid #333; border-radius: 14px; padding: 18px; width: 100%; 
             margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; 
@@ -46,7 +46,7 @@
         .prop-name { font-size: 20px; font-weight: 900; color: #fff; text-transform: uppercase; }
         .prop-badge { background: #ab47bc; color: #fff; font-size: 18px; font-weight: 900; border-radius: 20px; padding: 4px 14px; }
 
-        /* PASS ITEM LIST */
+        /* PASS ITEM LIST DETAILS */
         .pass-item { background: #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 6px solid #ab47bc; }
         .pass-rego { font-size: 24px; font-weight: 900; color: #ab47bc; }
         .pass-dates { font-size: 14px; color: #aaa; margin-top: 4px; font-weight: 600; }
@@ -110,7 +110,6 @@
 <div id="detailScreen">
     <div id="detailTitle" style="font-size:22px; font-weight:900; color:#ab47bc; margin-bottom:12px; text-transform:uppercase;"></div>
     <div id="passesContainer"></div>
-    <!-- FLOATING CIRCLE PLUS BUTTON AT BOTTOM -->
     <div class="fab-btn" id="fabAddBtn">＋</div>
 </div>
 
@@ -190,7 +189,6 @@
         loadAllData();
     });
 
-    // BACK BUTTON NAVIGATION LOGIC
     backBtn.addEventListener('click', () => {
         if (addScreen.style.display === 'block') {
             if (currentSelectedProperty) {
@@ -246,7 +244,6 @@
         }
     }
 
-    // DURATION & EXPIRY CALCULATIONS
     startDateInput.addEventListener('change', calcExpiry);
     durationSelect.addEventListener('change', calcExpiry);
 
@@ -283,7 +280,6 @@
             allPasses = await passRes.json();
             loadingDiv.style.display = 'none';
 
-            // Populate Property Dropdown for Add Form
             propertySelect.innerHTML = "";
             properties.forEach(p => {
                 const opt = document.createElement('option');
@@ -291,14 +287,12 @@
                 propertySelect.appendChild(opt);
             });
 
-            // Count passes by property
             const counts = {};
             allPasses.forEach(p => {
                 const name = p.property || "GENERAL";
                 counts[name] = (counts[name] || 0) + 1;
             });
 
-            // Render Property Tile Buttons
             properties.forEach(p => {
                 const propName = p.name;
                 const count = counts[propName] || 0;
