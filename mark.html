@@ -12,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=32">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=32">
-    <link rel="manifest" href="manifest-mark.json?v=32">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=33">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=33">
+    <link rel="manifest" href="manifest-mark.json?v=33">
 
     <style>
         * { box-sizing: border-box; }
@@ -36,7 +36,7 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; position: relative; }
         
         label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
         input, select {
@@ -61,7 +61,12 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #000; }
 
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
+        /* FULL SCREEN TICK / CROSS FEEDBACK OVERLAY */
+        #feedbackOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center;
+        }
+        .feedback-symbol { font-size: 160px; line-height: 1; user-select: none; }
     </style>
 </head>
 <body>
@@ -88,7 +93,11 @@
     <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
     <div class="thumb-gallery" id="thumbGallery"></div>
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-    <div id="status"></div>
+</div>
+
+<!-- FULL OVERLAY FOR HUGE TICK / CROSS -->
+<div id="feedbackOverlay">
+    <div id="feedbackIcon" class="feedback-symbol"></div>
 </div>
 
 <script>
@@ -104,7 +113,8 @@
     const snapBtn = document.getElementById('snapBtn');
     const thumbGallery = document.getElementById('thumbGallery');
     const refreshBtn = document.getElementById('refreshBtn');
-    const statusDiv = document.getElementById('status');
+    const feedbackOverlay = document.getElementById('feedbackOverlay');
+    const feedbackIcon = document.getElementById('feedbackIcon');
     let capturedPhoto = "";
 
     window.addEventListener('load', () => {
@@ -136,11 +146,19 @@
         } catch(e) {}
     }
 
-    // ULTRA-FAST ANPR LOOKUP
-    async function scanPhotoForPlate(fastBase64Image) {
-        statusDiv.innerText = "🔍 READING PLATE...";
+    function showFeedback(success) {
+        feedbackIcon.innerHTML = success ? "✔️" : "❌";
+        feedbackIcon.style.color = success ? "#00e676" : "#ff1744";
+        feedbackOverlay.style.display = "flex";
+        setTimeout(() => {
+            feedbackOverlay.style.display = "none";
+        }, 1200);
+    }
+
+    // HIGH-SPEED CROPPED ANPR LOOKUP
+    async function scanPhotoForPlate(base64Image) {
         try {
-            const byteString = atob(fastBase64Image.split(',')[1]);
+            const byteString = atob(base64Image.split(',')[1]);
             const ab = new ArrayBuffer(byteString.length);
             const ia = new Uint8Array(ab);
             for (let i = 0; i < byteString.length; i++) {
@@ -154,9 +172,7 @@
 
             const response = await fetch(ANPR_API_URL, {
                 method: 'POST',
-                headers: {
-                    'Authorization': 'Token ' + ANPR_API_KEY
-                },
+                headers: { 'Authorization': 'Token ' + ANPR_API_KEY },
                 body: formData
             });
 
@@ -164,34 +180,37 @@
             if (result.results && result.results.length > 0) {
                 const plateFound = result.results[0].plate.toUpperCase();
                 regoInput.value = plateFound;
-                statusDiv.innerText = "✔ ANPR READ: " + plateFound;
                 return plateFound;
-            } else {
-                statusDiv.innerText = "⚠️ NO PLATE DETECTED";
-                return "";
             }
+            return "";
         } catch (err) {
-            statusDiv.innerText = "⚠️ ANPR API ERROR";
             return "";
         }
     }
 
     snapBtn.addEventListener('click', async () => {
-        // 1. COMPRESSED CANVAS FOR DRIVE SAVING
+        const vw = videoElem.videoWidth || 1280;
+        const vh = videoElem.videoHeight || 720;
+
+        // 1. FULL QUALITY PHOTO (SAVED TO GOOGLE DRIVE)
         const fullCanvas = document.createElement('canvas');
         fullCanvas.width = 1024;
         fullCanvas.height = 576;
         fullCanvas.getContext('2d').drawImage(videoElem, 0, 0, 1024, 576);
-        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.65);
+        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.6);
 
-        // 2. ULTRA-COMPRESSED CANVAS FOR ANPR API (TINY PAYLOAD)
-        const fastCanvas = document.createElement('canvas');
-        fastCanvas.width = 480;
-        fastCanvas.height = 270;
-        fastCanvas.getContext('2d').drawImage(videoElem, 0, 0, 480, 270);
-        const fastPhoto = fastCanvas.toDataURL('image/jpeg', 0.5);
+        // 2. CENTER-CROPPED CANVAS (TINY FAST PAYLOAD FOR ANPR)
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = 400;
+        cropCanvas.height = 200;
+        cropCanvas.getContext('2d').drawImage(
+            videoElem, 
+            vw * 0.2, vh * 0.3, vw * 0.6, vh * 0.4, // Source crop rectangle
+            0, 0, 400, 200                         // Target size
+        );
+        const cropPhoto = cropCanvas.toDataURL('image/jpeg', 0.5);
 
-        // Render thumbnail instantly
+        // Display Thumbnail
         thumbGallery.innerHTML = "";
         const img = document.createElement('img');
         img.src = capturedPhoto; img.className = 'thumb-img';
@@ -199,13 +218,17 @@
 
         let currentRego = regoInput.value.trim().toUpperCase();
         if (!currentRego) {
-            currentRego = await scanPhotoForPlate(fastPhoto);
+            currentRego = await scanPhotoForPlate(cropPhoto);
         }
 
+        // FAIL: SHOW RED CROSS
         if (!currentRego) {
-            statusDiv.innerText = "ENTER REGO OR RETAKE CLEAR PHOTO";
+            showFeedback(false);
             return;
         }
+
+        // SUCCESS: SHOW GREEN TICK IMMEDIATELY
+        showFeedback(true);
 
         const payload = {
             action: 'log_mark',
@@ -214,9 +237,7 @@
             photoBytes: capturedPhoto
         };
 
-        // INSTANT UI RESPONSE (NON-BLOCKING BACKGROUND SAVE)
-        statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
-
+        // BACKGROUND DRIVE & MASTER LOG UPLOAD
         fetch(GOOGLE_SCRIPT_URL, { 
             method: 'POST', 
             body: JSON.stringify(payload) 
@@ -229,8 +250,7 @@
         setTimeout(() => {
             regoInput.value = ""; 
             capturedPhoto = ""; 
-            thumbGallery.innerHTML = ""; 
-            statusDiv.innerText = "";
+            thumbGallery.innerHTML = "";
         }, 1200);
     });
 </script>
