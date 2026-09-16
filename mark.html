@@ -12,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=30">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=30">
-    <link rel="manifest" href="manifest-mark.json?v=30">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=32">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=32">
+    <link rel="manifest" href="manifest-mark.json?v=32">
 
     <style>
         * { box-sizing: border-box; }
@@ -136,7 +136,7 @@
         } catch(e) {}
     }
 
-    // HIGH-SPEED ANPR RECOGNITION (DOWNSCALED PAYLOAD)
+    // ULTRA-FAST ANPR LOOKUP
     async function scanPhotoForPlate(fastBase64Image) {
         statusDiv.innerText = "🔍 READING PLATE...";
         try {
@@ -177,27 +177,26 @@
     }
 
     snapBtn.addEventListener('click', async () => {
-        // 1. FULL QUALITY CANVAS (FOR SAVING TO MASTER LOG)
+        // 1. COMPRESSED CANVAS FOR DRIVE SAVING
         const fullCanvas = document.createElement('canvas');
-        fullCanvas.width = videoElem.videoWidth || 1280;
-        fullCanvas.height = videoElem.videoHeight || 720;
-        fullCanvas.getContext('2d').drawImage(videoElem, 0, 0);
-        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.8);
+        fullCanvas.width = 1024;
+        fullCanvas.height = 576;
+        fullCanvas.getContext('2d').drawImage(videoElem, 0, 0, 1024, 576);
+        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.65);
 
-        // 2. FAST SMALL CANVAS (LOW LATENCY PAYLOAD FOR ANPR)
+        // 2. ULTRA-COMPRESSED CANVAS FOR ANPR API (TINY PAYLOAD)
         const fastCanvas = document.createElement('canvas');
-        fastCanvas.width = 640;
-        fastCanvas.height = 360;
-        fastCanvas.getContext('2d').drawImage(videoElem, 0, 0, 640, 360);
-        const fastPhoto = fastCanvas.toDataURL('image/jpeg', 0.6);
+        fastCanvas.width = 480;
+        fastCanvas.height = 270;
+        fastCanvas.getContext('2d').drawImage(videoElem, 0, 0, 480, 270);
+        const fastPhoto = fastCanvas.toDataURL('image/jpeg', 0.5);
 
-        // Display Thumbnail
+        // Render thumbnail instantly
         thumbGallery.innerHTML = "";
         const img = document.createElement('img');
         img.src = capturedPhoto; img.className = 'thumb-img';
         thumbGallery.appendChild(img);
 
-        // Run ANPR scan using the fast, lightweight payload
         let currentRego = regoInput.value.trim().toUpperCase();
         if (!currentRego) {
             currentRego = await scanPhotoForPlate(fastPhoto);
@@ -208,7 +207,6 @@
             return;
         }
 
-        // Log vehicle entry to Master Sheet using the full quality image
         const payload = {
             action: 'log_mark',
             property: propertySelect.value,
@@ -216,23 +214,24 @@
             photoBytes: capturedPhoto
         };
 
-        statusDiv.innerText = "MARKING VEHICLE...";
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
-        } catch(err) {
+        // INSTANT UI RESPONSE (NON-BLOCKING BACKGROUND SAVE)
+        statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
+
+        fetch(GOOGLE_SCRIPT_URL, { 
+            method: 'POST', 
+            body: JSON.stringify(payload) 
+        }).catch(() => {
             let offlineQueue = JSON.parse(localStorage.getItem('offline_marks') || '[]');
             offlineQueue.push(payload);
             localStorage.setItem('offline_marks', JSON.stringify(offlineQueue));
-            statusDiv.innerText = "⚠️ OFFLINE: LOGGED LOCALLY";
-        }
+        });
 
         setTimeout(() => {
             regoInput.value = ""; 
             capturedPhoto = ""; 
             thumbGallery.innerHTML = ""; 
             statusDiv.innerText = "";
-        }, 1500);
+        }, 1200);
     });
 </script>
 </body>
