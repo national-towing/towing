@@ -12,9 +12,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=21">
-    <link rel="icon" type="image/png" href="icon-release.png?v=21">
-    <link rel="manifest" href="manifest-release.json?v=21">
+    <link rel="apple-touch-icon" href="icon-release.png?v=22">
+    <link rel="icon" type="image/png" href="icon-release.png?v=22">
+    <link rel="manifest" href="manifest-release.json?v=22">
 
     <style>
         * { box-sizing: border-box; }
@@ -50,14 +50,32 @@
             margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .scan-overlay { position: absolute; width: 80%; height: 60%; border: 2px dashed #00e676; border-radius: 12px; pointer-events: none; }
+
+        .thumb-gallery { display: flex; gap: 10px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
+        .thumb-img { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 3px solid #00e676; cursor: pointer; flex-shrink: 0; }
+
+        .circle-cam-btn {
+            width: 100px; height: 100px; background: #00e676; border: 5px solid #fff; border-radius: 50%;
+            margin: 14px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5); cursor: pointer; user-select: none;
+        }
+        .circle-cam-btn:active { transform: scale(0.90); }
+        .circle-cam-inner { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #000; }
 
         .submit-btn {
             background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
             height: 60px; font-size: 28px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
         }
         .submit-btn:active { transform: scale(0.97); }
+
+        .row-2 { display: flex; gap: 10px; }
+        .row-2 > div { flex: 1; }
         #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
+
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; 
+        }
     </style>
 </head>
 <body>
@@ -78,32 +96,119 @@
     <label>SELECT VEHICLE IN YARD</label>
     <select id="vehicleSelect"><option value="">LOADING YARD VEHICLES...</option></select>
 
-    <label>OFFICER / DRIVER</label>
-    <select id="officerSelect">
-        <option value="Brian" selected>Brian</option>
-        <option value="Brett">Brett</option>
-        <option value="Other">Other</option>
-    </select>
+    <div class="row-2">
+        <div>
+            <label>REGO</label>
+            <input type="text" id="regoInput" placeholder="REGO" style="font-size:24px; color:#00e676; text-transform:uppercase;">
+        </div>
+        <div>
+            <label>MAKE</label>
+            <input type="text" id="makeInput" placeholder="MAKE">
+        </div>
+    </div>
 
+    <div class="row-2">
+        <div>
+            <label>MODEL</label>
+            <input type="text" id="modelInput" placeholder="MODEL">
+        </div>
+        <div>
+            <label>COLOUR</label>
+            <input type="text" id="colourInput" placeholder="COLOUR">
+        </div>
+    </div>
+
+    <label>PROPERTY TOWED FROM</label>
+    <input type="text" id="propertyInput" placeholder="PROPERTY">
+
+    <div class="row-2">
+        <div>
+            <label>RELEASE FEE ($)</label>
+            <input type="number" id="feeInput" value="380">
+        </div>
+        <div>
+            <label>PAYMENT TYPE</label>
+            <select id="paymentSelect">
+                <option value="EFTPOS" selected>EFTPOS</option>
+                <option value="CASH">CASH</option>
+                <option value="DIRECT DEPOSIT">DIRECT DEPOSIT</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row-2">
+        <div>
+            <label>ID TYPE</label>
+            <select id="idTypeSelect">
+                <option value="Driver Licence" selected>Driver Licence</option>
+                <option value="Passport">Passport</option>
+                <option value="Proof of Age">Proof of Age</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div>
+            <label>ID / LICENCE NO.</label>
+            <input type="text" id="idNumInput" placeholder="ID NUMBER">
+        </div>
+    </div>
+
+    <div class="row-2">
+        <div>
+            <label>RELEASED BY</label>
+            <select id="officerSelect">
+                <option value="Brian" selected>Brian</option>
+                <option value="Brett">Brett</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <label>SNAP DRIVER ID / LICENCE</label>
     <div class="camera-box">
         <video id="videoElem" autoplay playsinline></video>
-        <div class="scan-overlay"></div>
     </div>
+    
+    <div class="thumb-gallery" id="thumbGallery"></div>
+    <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
     <button class="submit-btn" id="submitBtn">RELEASE VEHICLE</button>
     <div id="status"></div>
+</div>
+
+<div class="modal" id="imgModal">
+    <div style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; justify-content:center;">
+        <img id="modalImg" src="" style="max-width:90%; max-height:75%; border-radius:12px; border:2px solid #fff;">
+        <button onclick="document.getElementById('imgModal').style.display='none'" 
+                style="margin-top:20px; background:#ff1744; color:#fff; font-weight:900; border:none; border-radius:12px; height:50px; width:200px; font-size:18px; cursor:pointer;">
+            ⬅ BACK
+        </button>
+    </div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     const vehicleSelect = document.getElementById('vehicleSelect');
+    const regoInput = document.getElementById('regoInput');
+    const makeInput = document.getElementById('makeInput');
+    const modelInput = document.getElementById('modelInput');
+    const colourInput = document.getElementById('colourInput');
+    const propertyInput = document.getElementById('propertyInput');
+    const feeInput = document.getElementById('feeInput');
+    const paymentSelect = document.getElementById('paymentSelect');
+    const idTypeSelect = document.getElementById('idTypeSelect');
+    const idNumInput = document.getElementById('idNumInput');
     const officerSelect = document.getElementById('officerSelect');
+    
     const videoElem = document.getElementById('videoElem');
+    const snapBtn = document.getElementById('snapBtn');
+    const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
+    
     let yardVehicles = [];
+    let idPhotoBytes = "";
 
     window.addEventListener('load', () => {
         loadYardVehicles();
@@ -114,11 +219,23 @@
         window.location.reload(true);
     });
 
+    vehicleSelect.addEventListener('change', () => {
+        const selectedRego = vehicleSelect.value;
+        const veh = yardVehicles.find(v => v.rego === selectedRego);
+        if (veh) {
+            regoInput.value = veh.rego || '';
+            makeInput.value = veh.make || '';
+            modelInput.value = veh.model || '';
+            colourInput.value = veh.colour || '';
+            propertyInput.value = veh.property || '';
+        }
+    });
+
     async function loadYardVehicles() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
             yardVehicles = await res.json();
-            vehicleSelect.innerHTML = "";
+            vehicleSelect.innerHTML = "<option value=''>-- SELECT FROM YARD --</option>";
 
             if (!yardVehicles || yardVehicles.length === 0) {
                 vehicleSelect.innerHTML = "<option value=''>NO VEHICLES IN YARD</option>";
@@ -143,20 +260,43 @@
         } catch(e) {}
     }
 
-    submitBtn.addEventListener('click', async () => {
-        const rego = vehicleSelect.value;
-        if (!rego) { statusDiv.innerText = "SELECT A VEHICLE"; return; }
+    // WORKING ID PHOTO SNAP FUNCTION
+    snapBtn.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElem.videoWidth || 640;
+        canvas.height = videoElem.videoHeight || 480;
+        canvas.getContext('2d').drawImage(videoElem, 0, 0);
+        idPhotoBytes = canvas.toDataURL('image/jpeg', 0.8);
 
-        const selectedVeh = yardVehicles.find(v => v.rego === rego) || {};
+        thumbGallery.innerHTML = "";
+        const img = document.createElement('img');
+        img.src = idPhotoBytes; 
+        img.className = 'thumb-img';
+        img.onclick = () => {
+            document.getElementById('modalImg').src = idPhotoBytes;
+            document.getElementById('imgModal').style.display = 'flex';
+        };
+        thumbGallery.appendChild(img);
+        statusDiv.innerText = "✔ ID PHOTO CAPTURED";
+    });
+
+    submitBtn.addEventListener('click', async () => {
+        const rego = regoInput.value.trim().toUpperCase();
+        if (!rego) { statusDiv.innerText = "ENTER OR SELECT REGO"; return; }
 
         const payload = {
             action: 'process_release',
             rego: rego,
-            make: selectedVeh.make || '',
-            model: selectedVeh.model || '',
-            colour: selectedVeh.colour || '',
-            property: selectedVeh.property || '',
-            officer: officerSelect.value
+            make: makeInput.value.trim(),
+            model: modelInput.value.trim(),
+            colour: colourInput.value.trim(),
+            property: propertyInput.value.trim(),
+            fee: feeInput.value,
+            paymentType: paymentSelect.value,
+            idType: idTypeSelect.value,
+            idNumber: idNumInput.value.trim(),
+            officer: officerSelect.value,
+            idPhotoBytes: idPhotoBytes
         };
 
         statusDiv.innerText = "PROCESSING RELEASE...";
@@ -168,8 +308,7 @@
         }
 
         setTimeout(() => {
-            loadYardVehicles();
-            statusDiv.innerText = "";
+            window.location.reload(true);
         }, 1500);
     });
 </script>
