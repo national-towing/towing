@@ -12,12 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=26">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=26">
-    <link rel="manifest" href="manifest-mark.json?v=26">
-
-    <!-- OCR ENGINE FOR ANPR -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="apple-touch-icon" href="icon-mark.png?v=28">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=28">
+    <link rel="manifest" href="manifest-mark.json?v=28">
 
     <style>
         * { box-sizing: border-box; }
@@ -52,10 +49,6 @@
             margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .anpr-overlay {
-            position: absolute; width: 80%; height: 40%; border: 2px dashed #ffab00;
-            border-radius: 12px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
-        }
 
         .thumb-gallery { display: flex; gap: 10px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
         .thumb-img { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 3px solid #ffab00; cursor: pointer; flex-shrink: 0; }
@@ -68,7 +61,7 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #000; }
 
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #ffab00; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
     </style>
 </head>
 <body>
@@ -89,21 +82,21 @@
     <label>PROPERTY</label>
     <select id="propertySelect"><option value="">LOADING...</option></select>
 
-    <label>REGO (AUTO-DETECT / MANUAL)</label>
-    <input type="text" id="regoInput" placeholder="SCANNING..." style="font-size:28px; color:#ffab00; text-transform:uppercase;">
+    <label>REGO</label>
+    <input type="text" id="regoInput" placeholder="REGO" style="font-size:28px; color:#ffab00; text-transform:uppercase;">
 
-    <div class="camera-box">
-        <video id="videoElem" autoplay playsinline></video>
-        <div class="anpr-overlay"></div>
-    </div>
-    
+    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
     <div class="thumb-gallery" id="thumbGallery"></div>
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-    <div id="status">ALIGN PLATE IN BOX FOR ANPR SCAN</div>
+    <div id="status"></div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    
+    // RESTORED PLATE RECOGNIZER ANPR CREDENTIALS
+    const ANPR_API_KEY = "74a8bb83a49461eef0266274ce63e1e198b4c888";
+    const ANPR_API_URL = "https://api.platerecognizer.com/v1/plate-reader/";
 
     const propertySelect = document.getElementById('propertySelect');
     const regoInput = document.getElementById('regoInput');
@@ -113,11 +106,10 @@
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
     let capturedPhoto = "";
-    let isScanning = true;
 
     window.addEventListener('load', () => {
         loadProperties();
-        initCameraAndANPR();
+        initCamera();
     });
 
     refreshBtn.addEventListener('click', () => {
@@ -137,53 +129,54 @@
         } catch(e) {}
     }
 
-    async function initCameraAndANPR() {
+    async function initCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             videoElem.srcObject = stream;
-            
-            // Start background ANPR recognition loop
-            setInterval(scanPlateFrame, 2500);
-        } catch(e) {
-            statusDiv.innerText = "CAMERA ACCESS DENIED";
-        }
-    }
-
-    // ANPR FRAME PROCESSING LOGIC
-    async function scanPlateFrame() {
-        if (!isScanning || !videoElem.videoWidth) return;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth;
-        canvas.height = videoElem.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-
-        try {
-            const { data: { text } } = await Tesseract.recognize(canvas, 'eng', {
-                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-            });
-
-            // Extract Australian format registration pattern (3-7 alphanumeric chars)
-            const cleanText = text.replace(/[^A-Z0-9]/gi, '');
-            const matches = cleanText.match(/[A-Z0-9]{3,7}/g);
-
-            if (matches && matches.length > 0 && isScanning) {
-                // Set rego input if not locked by user
-                if (!document.activeElement || document.activeElement !== regoInput) {
-                    regoInput.value = matches[0].toUpperCase();
-                    statusDiv.innerText = "✔ ANPR READ: " + matches[0].toUpperCase();
-                }
-            }
         } catch(e) {}
     }
 
+    // FAST ANPR PLATE RECOGNITION
+    async function recognizePlate(base64Image) {
+        statusDiv.innerText = "🔍 SCANNING PLATE (ANPR)...";
+        try {
+            const byteString = atob(base64Image.split(',')[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: 'image/jpeg' });
+
+            const formData = new FormData();
+            formData.append('upload', blob);
+            formData.append('regions', 'au');
+
+            const response = await fetch(ANPR_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Token ' + ANPR_API_KEY
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.results && result.results.length > 0) {
+                const detectedPlate = result.results[0].plate.toUpperCase();
+                regoInput.value = detectedPlate;
+                statusDiv.innerText = "✔ ANPR RECOGNIZED: " + detectedPlate;
+                return detectedPlate;
+            } else {
+                statusDiv.innerText = "⚠️ ANPR: NO PLATE READ, ENTER MANUAL";
+                return regoInput.value.trim().toUpperCase();
+            }
+        } catch (err) {
+            statusDiv.innerText = "⚠️ ANPR API ERROR";
+            return regoInput.value.trim().toUpperCase();
+        }
+    }
+
     snapBtn.addEventListener('click', async () => {
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER OR SCAN REGO FIRST"; return; }
-
-        isScanning = false; // Pause ANPR scanner on capture
-
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 640;
         canvas.height = videoElem.videoHeight || 480;
@@ -194,6 +187,16 @@
         const img = document.createElement('img');
         img.src = capturedPhoto; img.className = 'thumb-img';
         thumbGallery.appendChild(img);
+
+        let rego = regoInput.value.trim().toUpperCase();
+        if (!rego) {
+            rego = await recognizePlate(capturedPhoto);
+        }
+
+        if (!rego) { 
+            statusDiv.innerText = "ENTER OR SCAN REGO FIRST"; 
+            return; 
+        }
 
         const payload = {
             action: 'log_mark',
@@ -214,11 +217,7 @@
         }
 
         setTimeout(() => {
-            regoInput.value = ""; 
-            capturedPhoto = ""; 
-            thumbGallery.innerHTML = ""; 
-            statusDiv.innerText = "ALIGN PLATE IN BOX FOR ANPR SCAN";
-            isScanning = true;
+            regoInput.value = ""; capturedPhoto = ""; thumbGallery.innerHTML = ""; statusDiv.innerText = "";
         }, 1500);
     });
 </script>
