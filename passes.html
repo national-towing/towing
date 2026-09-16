@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>PASSES</title>
     
-    <link rel="apple-touch-icon" href="icon-passes.png?v=16">
-    <link rel="icon" type="image/png" href="icon-passes.png?v=16">
-    <link rel="manifest" href="manifest-passes.json?v=16">
+    <link rel="apple-touch-icon" href="icon-passes.png?v=24">
+    <link rel="icon" type="image/png" href="icon-passes.png?v=24">
+    <link rel="manifest" href="manifest-passes.json?v=24">
 
     <style>
         * { box-sizing: border-box; }
@@ -15,10 +22,9 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             margin: 0; padding: 14px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-bottom: 110px; /* Buffer for large bottom floating button */
+            padding-bottom: 110px;
         }
         
-        /* HEADER BAR WITH CENTERED TITLE AND ICON REFRESH */
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ab47bc; letter-spacing: 2px; text-align: center; }
         .icon-btn { position: absolute; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
@@ -33,11 +39,9 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        /* SCREENS */
         #propsScreen, #detailScreen, #addScreen { width: 100%; max-width: 440px; }
         #detailScreen, #addScreen { display: none; }
 
-        /* PROPERTY TILE BUTTONS WITH PASS COUNTER */
         .prop-tile-btn { 
             background: #1e1e1e; border: 1px solid #333; border-radius: 14px; padding: 18px; width: 100%; 
             margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; 
@@ -47,7 +51,6 @@
         .prop-name { font-size: 20px; font-weight: 900; color: #fff; text-transform: uppercase; }
         .prop-badge { background: #ab47bc; color: #fff; font-size: 18px; font-weight: 900; border-radius: 20px; padding: 4px 14px; }
 
-        /* PASS ITEM LIST TILES */
         .pass-item { background: #2a2a2a; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; border-left: 6px solid #ab47bc; }
         .pass-header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #3a3a3a; padding-bottom: 6px; margin-bottom: 6px; }
         .pass-rego { font-size: 24px; font-weight: 900; color: #ab47bc; letter-spacing: 1px; }
@@ -55,7 +58,6 @@
         .pass-meta { font-size: 13px; color: #aaa; margin-top: 2px; font-weight: 600; }
         .pass-notes { font-size: 13px; color: #ffd54f; margin-top: 4px; font-style: italic; }
 
-        /* 150% EXTRA LARGE CENTERED FLOATING PLUS BUTTON */
         .fab-btn {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
             width: 84px; height: 84px; background: #ab47bc; color: #fff; border-radius: 50%;
@@ -64,7 +66,6 @@
         }
         .fab-btn:active { transform: translateX(-50%) scale(0.9); }
 
-        /* FORM STYLES */
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; border: 1px solid #333; }
         label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
         input, select, textarea {
@@ -102,19 +103,16 @@
     <a href="passes.html" class="nav-tile nav-pass">PASS</a>
 </div>
 
-<!-- SCREEN 1: PROPERTY LIST (ONLY ACTIVE PASSES) -->
 <div id="propsScreen">
     <div id="loading">LOADING PROPERTIES...</div>
     <div id="propsContainer"></div>
 </div>
 
-<!-- SCREEN 2: VEHICLE PASSES FOR SELECTED PROPERTY -->
 <div id="detailScreen">
     <div id="detailTitle" style="font-size:22px; font-weight:900; color:#ab47bc; margin-bottom:12px; text-transform:uppercase;"></div>
     <div id="passesContainer"></div>
 </div>
 
-<!-- SCREEN 3: ADD PASS FORM -->
 <div id="addScreen">
     <div class="card">
         <label>PROPERTY</label>
@@ -154,7 +152,6 @@
     </div>
 </div>
 
-<!-- UNIVERSAL CENTERED 150% FLOATING PLUS BUTTON -->
 <div class="fab-btn" id="fabAddBtn">＋</div>
 
 <script>
@@ -205,7 +202,21 @@
         }
     });
 
-    refreshBtn.addEventListener('click', loadAllData);
+    // REFRESH BUTTON ACTION (CLEARS FORM IF ON ADD SCREEN, OTHERWISE REFRESHES DATA)
+    refreshBtn.addEventListener('click', () => {
+        if (addScreen.style.display === 'block') {
+            regoInput.value = "";
+            notesInput.value = "";
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.value = today;
+            durationSelect.value = "1";
+            calcExpiry();
+            statusDiv.innerText = "";
+        } else {
+            loadAllData();
+        }
+    });
+
     fabAddBtn.addEventListener('click', () => showAddScreen(currentSelectedProperty));
 
     function showPropsScreen() {
@@ -237,7 +248,7 @@
         detailScreen.style.display = 'none';
         addScreen.style.display = 'block';
         backBtn.style.display = 'flex';
-        refreshBtn.style.display = 'none';
+        refreshBtn.style.display = 'flex'; // REFRESH ICON IS NOW VISIBLE ON ADD PASS SCREEN
         fabAddBtn.style.display = 'none';
         headerTitle.innerText = "ADD PASS";
 
@@ -274,7 +285,6 @@
         }
     }
 
-    // HELPER TO FORMAT EXPIRY DATE AS "Day DD-MMM" (e.g. "Wed 16-Sep")
     function formatDayDDMMM(dateStr) {
         if (!dateStr) return "";
         const d = new Date(dateStr);
@@ -304,7 +314,6 @@
                 propertySelect.appendChild(opt);
             });
 
-            // Count passes by property
             const counts = {};
             allPasses.forEach(p => {
                 const name = p.property || "GENERAL";
@@ -316,7 +325,6 @@
                 const propName = p.name;
                 const count = counts[propName] || 0;
 
-                // HIDE PROPERTIES WITH ZERO PASSES
                 if (count > 0) {
                     activePropertyCount++;
                     const tile = document.createElement('div');
