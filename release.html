@@ -12,9 +12,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=23">
-    <link rel="icon" type="image/png" href="icon-release.png?v=23">
-    <link rel="manifest" href="manifest-release.json?v=23">
+    <link rel="apple-touch-icon" href="icon-release.png?v=24">
+    <link rel="icon" type="image/png" href="icon-release.png?v=24">
+    <link rel="manifest" href="manifest-release.json?v=24">
 
     <style>
         * { box-sizing: border-box; }
@@ -62,7 +62,6 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #000; }
 
-        /* SIGNATURE CANVAS BOXES */
         .sig-container { width: 100%; margin-top: 6px; position: relative; }
         canvas.sig-box {
             width: 100%; height: 140px; background: #2a2a2a; border: 1px solid #444; border-radius: 12px;
@@ -182,14 +181,12 @@
     <div class="thumb-gallery" id="thumbGallery"></div>
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
-    <!-- OWNER / RECEIVER SIGNATURE CANVAS -->
     <label>OWNER / RECEIVER SIGNATURE</label>
     <div class="sig-container">
         <canvas id="ownerSigCanvas" class="sig-box"></canvas>
         <button class="clear-sig-btn" onclick="clearSig('ownerSigCanvas')">CLEAR</button>
     </div>
 
-    <!-- OFFICER SIGNATURE CANVAS -->
     <label>OFFICER SIGNATURE</label>
     <div class="sig-container">
         <canvas id="officerSigCanvas" class="sig-box"></canvas>
@@ -287,11 +284,14 @@
         } catch(e) {}
     }
 
+    // DIRECT HARDWARE CANVAS SNAP
     snapBtn.addEventListener('click', () => {
+        if (!videoElem.videoWidth) { statusDiv.innerText = "CAMERA LOADING..."; return; }
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 640;
-        canvas.height = videoElem.videoHeight || 480;
-        canvas.getContext('2d').drawImage(videoElem, 0, 0);
+        canvas.width = videoElem.videoWidth;
+        canvas.height = videoElem.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
         idPhotoBytes = canvas.toDataURL('image/jpeg', 0.8);
 
         thumbGallery.innerHTML = "";
@@ -303,10 +303,9 @@
             document.getElementById('imgModal').style.display = 'flex';
         };
         thumbGallery.appendChild(img);
-        statusDiv.innerText = "✔ ID PHOTO CAPTURED";
+        statusDiv.innerText = "✔ ID SNAP CAPTURED";
     });
 
-    // SIGNATURE CANVAS LOGIC
     function initSignatureCanvas(canvasId) {
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
