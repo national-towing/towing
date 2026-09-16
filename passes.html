@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PASSES</title>
     
-    <link rel="apple-touch-icon" href="icon-passes.png?v=11">
-    <link rel="icon" type="image/png" href="icon-passes.png?v=11">
-    <link rel="manifest" href="manifest-passes.json?v=11">
+    <link rel="apple-touch-icon" href="icon-passes.png?v=12">
+    <link rel="icon" type="image/png" href="icon-passes.png?v=12">
+    <link rel="manifest" href="manifest-passes.json?v=12">
 
     <style>
         * { box-sizing: border-box; }
@@ -19,8 +19,10 @@
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ab47bc; letter-spacing: 2px; text-align: center; }
-        .icon-refresh-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
-        .icon-refresh-btn:active { transform: scale(0.9); }
+        .icon-btn { position: absolute; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; text-decoration: none; }
+        .icon-btn:active { transform: scale(0.9); }
+        .refresh-pos { right: 54px; }
+        .add-pos { right: 0; background: #ab47bc; color: #fff; font-size: 24px; font-weight: 900; }
 
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
@@ -29,42 +31,23 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
-        
-        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
-        input, select, textarea {
-            width: 100%; height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 6px; outline: none;
-            -webkit-appearance: none;
-        }
+        .property-card { background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 14px; }
+        .property-title { font-size: 20px; font-weight: 900; color: #ab47bc; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 6px; }
 
-        /* DATES INPUT HEIGHT & CALENDAR PADDING FIX */
-        input[type="date"] { height: 56px !important; line-height: 56px !important; font-size: 18px !important; }
-
-        textarea { height: 80px; padding: 12px; font-size: 16px; font-weight: 500; resize: none; }
-
-        .submit-btn {
-            background: #ab47bc; color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 26px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
-        }
-        .submit-btn:active { transform: scale(0.97); }
-
-        .row-2 { display: flex; gap: 10px; }
-        .row-2 > div { flex: 1; }
-
-        .pass-item { background: #2a2a2a; border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 6px solid #ab47bc; }
-        .pass-rego { font-size: 24px; font-weight: 900; color: #ab47bc; }
-        .pass-prop { font-size: 16px; font-weight: 700; color: #fff; margin-top: 2px; }
-        .pass-dates { font-size: 13px; color: #aaa; margin-top: 4px; font-weight: 600; }
+        .pass-item { background: #2a2a2a; border-radius: 10px; padding: 12px; margin-bottom: 8px; border-left: 5px solid #ab47bc; }
+        .pass-rego { font-size: 22px; font-weight: 900; color: #fff; }
+        .pass-dates { font-size: 13px; color: #aaa; margin-top: 2px; font-weight: 600; }
         .pass-notes { font-size: 13px; color: #ffd54f; margin-top: 4px; font-style: italic; }
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 12px; min-height: 24px; color: #00e676; }
+        
+        #loading { text-align: center; color: #aaa; font-weight: 900; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="header-box">
     <h1>PASSES</h1>
-    <div class="icon-refresh-btn" id="refreshBtn">🔄</div>
+    <div class="icon-btn refresh-pos" id="refreshBtn">🔄</div>
+    <a href="add-pass.html" class="icon-btn add-pos">➕</a>
 </div>
 
 <div class="nav-bar">
@@ -74,142 +57,62 @@
     <a href="passes.html" class="nav-tile nav-pass">PASS</a>
 </div>
 
-<div class="card">
-    <label>PROPERTY</label>
-    <select id="propertySelect"><option value="">LOADING...</option></select>
-
-    <label>REGO</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="font-size:26px; color:#ab47bc; text-transform:uppercase;">
-
-    <div class="row-2">
-        <div>
-            <label>START DATE</label>
-            <input type="date" id="startDateInput">
-        </div>
-        <div>
-            <label>DURATION</label>
-            <select id="durationSelect">
-                <option value="1">1 Day</option>
-                <option value="2">2 Days</option>
-                <option value="3">3 Days</option>
-                <option value="7">7 Days</option>
-                <option value="14">14 Days</option>
-                <option value="30">30 Days</option>
-            </select>
-        </div>
-    </div>
-
-    <label>EXPIRY DATE</label>
-    <input type="date" id="expiryDateInput" readonly style="background:#1a1a1a; color:#aaa;">
-
-    <label>NOTES</label>
-    <textarea id="notesInput" placeholder="Optional"></textarea>
-
-    <button class="submit-btn" id="submitBtn">ADD PASS</button>
-    <div id="status"></div>
-</div>
-
-<div style="width:100%; max-width:440px;">
-    <label style="margin-bottom:8px;">ACTIVE PASSES LOG</label>
-    <div id="passesList"></div>
-</div>
+<div id="loading">LOADING ACTIVE PASSES...</div>
+<div id="container" style="width:100%; max-width:440px;"></div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
-    const propertySelect = document.getElementById('propertySelect');
-    const regoInput = document.getElementById('regoInput');
-    const startDateInput = document.getElementById('startDateInput');
-    const durationSelect = document.getElementById('durationSelect');
-    const expiryDateInput = document.getElementById('expiryDateInput');
-    const notesInput = document.getElementById('notesInput');
-    const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
-    const statusDiv = document.getElementById('status');
-    const passesList = document.getElementById('passesList');
+    const loadingDiv = document.getElementById('loading');
+    const container = document.getElementById('container');
 
-    window.addEventListener('load', () => {
-        const today = new Date().toISOString().split('T')[0];
-        startDateInput.value = today;
-        calcExpiry();
-        loadProperties();
-        loadPasses();
-    });
-
-    startDateInput.addEventListener('change', calcExpiry);
-    durationSelect.addEventListener('change', calcExpiry);
-
-    function calcExpiry() {
-        if (!startDateInput.value) return;
-        const start = new Date(startDateInput.value);
-        const days = parseInt(durationSelect.value, 10);
-        start.setDate(start.getDate() + days);
-        expiryDateInput.value = start.toISOString().split('T')[0];
-    }
-
-    async function loadProperties() {
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
-            const data = await res.json();
-            propertySelect.innerHTML = "";
-            data.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.name; opt.innerText = p.name;
-                propertySelect.appendChild(opt);
-            });
-        } catch(e) {}
-    }
+    window.addEventListener('load', loadPasses);
+    refreshBtn.addEventListener('click', loadPasses);
 
     async function loadPasses() {
-        passesList.innerHTML = "<div style='text-align:center; color:#aaa;'>LOADING PASSES...</div>";
+        loadingDiv.style.display = 'block';
+        container.innerHTML = "";
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_passes");
-            const data = await res.json();
-            passesList.innerHTML = "";
-            if (!data || data.length === 0) {
-                passesList.innerHTML = "<div style='text-align:center; color:#666;'>NO ACTIVE PASSES</div>";
+            const passes = await res.json();
+            loadingDiv.style.display = 'none';
+
+            if (!passes || passes.length === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#666; font-weight:900;'>NO ACTIVE PASSES</div>";
                 return;
             }
-            data.forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'pass-item';
-                div.innerHTML = `
-                    <div class="pass-rego">${p.rego}</div>
-                    <div class="pass-prop">${p.property}</div>
-                    <div class="pass-dates">Valid: ${p.startDate} to ${p.expiry} (${p.duration})</div>
-                    ${p.notes ? `<div class="pass-notes">Notes: ${p.notes}</div>` : ''}
-                `;
-                passesList.appendChild(div);
+
+            // Group passes by Property
+            const grouped = {};
+            passes.forEach(p => {
+                const prop = p.property || "GENERAL";
+                if (!grouped[prop]) grouped[prop] = [];
+                grouped[prop].push(p);
             });
+
+            for (let prop in grouped) {
+                const card = document.createElement('div');
+                card.className = 'property-card';
+                card.innerHTML = `<div class="property-title">${prop}</div>`;
+
+                grouped[prop].forEach(p => {
+                    const item = document.createElement('div');
+                    item.className = 'pass-item';
+                    item.innerHTML = `
+                        <div class="pass-rego">${p.rego}</div>
+                        <div class="pass-dates">Valid: ${p.startDate} to ${p.expiry} (${p.duration})</div>
+                        ${p.notes ? `<div class="pass-notes">Notes: ${p.notes}</div>` : ''}
+                    `;
+                    card.appendChild(item);
+                });
+
+                container.appendChild(card);
+            }
         } catch(e) {
-            passesList.innerHTML = "<div style='text-align:center; color:#ff1744;'>ERROR LOADING PASSES</div>";
+            loadingDiv.innerText = "ERROR LOADING PASSES";
         }
     }
-
-    refreshBtn.addEventListener('click', () => {
-        loadPasses();
-    });
-
-    submitBtn.addEventListener('click', async () => {
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER REGO"; return; }
-
-        const payload = {
-            action: 'add_pass',
-            property: propertySelect.value,
-            rego: rego,
-            startDate: startDateInput.value,
-            duration: durationSelect.value,
-            expiryDate: expiryDateInput.value,
-            notes: notesInput.value.trim()
-        };
-
-        statusDiv.innerText = "ADDING PASS...";
-        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        statusDiv.innerText = "✔ PASS ADDED SUCCESS!";
-        regoInput.value = ""; notesInput.value = "";
-        loadPasses();
-    });
 </script>
 </body>
 </html>
