@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOW RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=17">
-    <link rel="icon" type="image/png" href="icon-run.png?v=17">
-    <link rel="manifest" href="manifest-run.json?v=17">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>RUN</title>
+    
+    <link rel="apple-touch-icon" href="icon-run.png?v=20">
+    <link rel="icon" type="image/png" href="icon-run.png?v=20">
+    <link rel="manifest" href="manifest-run.json?v=20">
 
     <style>
         * { box-sizing: border-box; }
@@ -47,7 +54,7 @@
 <body>
 
 <div class="header-box">
-    <h1>TOW RUN</h1>
+    <h1>RUN</h1>
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
@@ -58,7 +65,7 @@
     <a href="passes.html" class="nav-tile nav-pass">PASS</a>
 </div>
 
-<div id="loading">LOADING TOW RUN...</div>
+<div id="loading">LOADING RUN...</div>
 <div id="container" style="width:100%; max-width:440px;"></div>
 
 <script>
@@ -69,7 +76,10 @@
     const container = document.getElementById('container');
 
     window.addEventListener('load', loadRunData);
-    refreshBtn.addEventListener('click', loadRunData);
+    
+    refreshBtn.addEventListener('click', () => {
+        window.location.reload(true);
+    });
 
     async function loadRunData() {
         loadingDiv.style.display = 'block';
@@ -80,7 +90,7 @@
             loadingDiv.style.display = 'none';
 
             if (!data || data.length === 0) {
-                container.innerHTML = "<div style='text-align:center; color:#666; font-weight:900;'>NO VEHICLES ON TOW RUN</div>";
+                container.innerHTML = "<div style='text-align:center; color:#666; font-weight:900;'>NO VEHICLES ON RUN</div>";
                 return;
             }
 
@@ -126,7 +136,7 @@
                 container.appendChild(card);
             }
         } catch(e) {
-            loadingDiv.innerText = "ERROR LOADING TOW RUN";
+            loadingDiv.innerText = "ERROR LOADING RUN";
         }
     }
 </script>
