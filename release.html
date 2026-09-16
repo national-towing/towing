@@ -3,19 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=7">
-    <link rel="icon" type="image/png" href="icon-release.png?v=7">
-    <link rel="manifest" href="manifest-release.json?v=7">
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <link rel="apple-touch-icon" href="icon-release.png?v=21">
+    <link rel="icon" type="image/png" href="icon-release.png?v=21">
+    <link rel="manifest" href="manifest-release.json?v=21">
 
     <style>
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header h1 { margin: 0 0 10px 0; font-size: 38px; font-weight: 900; color: #00e676; letter-spacing: 2px; text-align: center; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+        }
         
-        /* UNIVERSAL TILE HEADER NAVIGATION BAR */
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #00e676; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.9); }
+
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
@@ -24,31 +37,36 @@
         .nav-pass { background: #ab47bc; color: #fff; }
 
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
-
+        
         label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
         input, select {
             width: 100%; height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 22px; font-weight: 900; margin-top: 6px; outline: none;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 6px; outline: none;
+            -webkit-appearance: none;
         }
 
-        .rego-select { height: 60px !important; font-size: 26px !important; color: #00e676 !important; border: 2px solid #00e676 !important; text-align: center; }
+        .camera-box {
+            width: 100%; height: 240px; background: #000; border-radius: 14px; border: 2px solid #333;
+            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .scan-overlay { position: absolute; width: 80%; height: 60%; border: 2px dashed #00e676; border-radius: 12px; pointer-events: none; }
 
-        .ocr-btn { background: #2979ff; color: #fff; border: none; border-radius: 12px; height: 50px; font-size: 18px; font-weight: 900; width: 100%; margin-top: 10px; cursor: pointer; }
-        .sig-container { margin-top: 6px; background: #fff; border-radius: 12px; position: relative; touch-action: none; }
-        canvas.sig-pad { width: 100%; height: 200px; border-radius: 12px; display: block; }
-        .clear-sig { position: absolute; right: 8px; top: 8px; background: #ff1744; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 900; }
-
-        .submit-btn { background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px; height: 60px; font-size: 28px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px; }
-        .row-2 { display: flex; gap: 10px; }
-        .row-2 > div { flex: 1; }
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; color: #00e676; }
+        .submit-btn {
+            background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 28px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
+        }
+        .submit-btn:active { transform: scale(0.97); }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
     </style>
 </head>
 <body>
 
-<div class="header"><h1>RELEASE</h1></div>
+<div class="header-box">
+    <h1>RELEASE</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
+</div>
 
-<!-- STANDARD NAV BAR -->
 <div class="nav-bar">
     <a href="run.html" class="nav-tile nav-run">RUN</a>
     <a href="tow.html" class="nav-tile nav-tow">TOW</a>
@@ -57,161 +75,102 @@
 </div>
 
 <div class="card">
-    <label>REGO</label>
-    <select id="regoSelect" class="rego-select"><option value="" disabled selected>LOADING YARD...</option></select>
+    <label>SELECT VEHICLE IN YARD</label>
+    <select id="vehicleSelect"><option value="">LOADING YARD VEHICLES...</option></select>
 
-    <button class="ocr-btn" id="ocrScanBtn">Scan ID</button>
-    <input type="file" id="ocrFileInput" accept="image/*" style="display:none;">
+    <label>OFFICER / DRIVER</label>
+    <select id="officerSelect">
+        <option value="Brian" selected>Brian</option>
+        <option value="Brett">Brett</option>
+        <option value="Other">Other</option>
+    </select>
 
-    <label>OWNER FULL NAME</label>
-    <input type="text" id="ownerName" placeholder="JOHN CITIZEN">
-
-    <label>ID / LICENSE NUMBER</label>
-    <input type="text" id="idNumber" placeholder="DL-12345678">
-
-    <label>ADDRESS</label>
-    <input type="text" id="ownerAddress" placeholder="ADDRESS">
-
-    <div class="row-2">
-        <div><label>PHONE</label><input type="tel" id="ownerPhone" placeholder="PHONE"></div>
-        <div><label>EMAIL</label><input type="email" id="ownerEmail" placeholder="EMAIL"></div>
+    <div class="camera-box">
+        <video id="videoElem" autoplay playsinline></video>
+        <div class="scan-overlay"></div>
     </div>
 
-    <label style="color:#00e676;">1. Owner Signature</label>
-    <div class="sig-container">
-        <button class="clear-sig" id="clearOwnerSig">CLEAR</button>
-        <canvas id="ownerSigCanvas" class="sig-pad"></canvas>
-    </div>
-
-    <div class="row-2">
-        <div><label>TOW FEE ($)</label><input type="number" id="towFee" value="310.05" step="0.01"></div>
-        <div><label>STORAGE ($)</label><input type="number" id="storageFee" value="140.95" step="0.01"></div>
-    </div>
-
-    <label>TOTAL PAID ($ incl. GST)</label>
-    <input type="number" id="totalPaid" value="451.00" step="0.01" style="color:#00e676; font-size:26px;">
-
-    <label>RELEASE OFFICER</label>
-    <select id="officerSelect"><option value="Brett" selected>Brett</option><option value="Brian">Brian</option></select>
-
-    <label style="color:#00e676;">2. Officer Signature</label>
-    <div class="sig-container">
-        <button class="clear-sig" id="clearOfficerSig">CLEAR</button>
-        <canvas id="officerSigCanvas" class="sig-pad"></canvas>
-    </div>
-
-    <button class="submit-btn" id="releaseBtn">RELEASE</button>
+    <button class="submit-btn" id="submitBtn">RELEASE VEHICLE</button>
     <div id="status"></div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
-    const regoSelect = document.getElementById('regoSelect');
-    const ownerName = document.getElementById('ownerName');
-    const idNumber = document.getElementById('idNumber');
-    const ownerAddress = document.getElementById('ownerAddress');
-    const ownerPhone = document.getElementById('ownerPhone');
-    const ownerEmail = document.getElementById('ownerEmail');
-    const towFee = document.getElementById('towFee');
-    const storageFee = document.getElementById('storageFee');
-    const totalPaid = document.getElementById('totalPaid');
+    const vehicleSelect = document.getElementById('vehicleSelect');
     const officerSelect = document.getElementById('officerSelect');
-    const releaseBtn = document.getElementById('releaseBtn');
+    const videoElem = document.getElementById('videoElem');
+    const submitBtn = document.getElementById('submitBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
-    const ocrScanBtn = document.getElementById('ocrScanBtn');
-    const ocrFileInput = document.getElementById('ocrFileInput');
-
     let yardVehicles = [];
 
-    function setupCanvas(canvasId, clearBtnId) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
-
-        function resize() {
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width; canvas.height = rect.height;
-            ctx.lineWidth = 3; ctx.strokeStyle = "#000"; ctx.lineCap = "round";
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        }
-
-        canvas.addEventListener('mousedown', (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
-        canvas.addEventListener('mousemove', (e) => { if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
-        window.addEventListener('mouseup', () => drawing = false);
-
-        canvas.addEventListener('touchstart', (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, {passive:false});
-        canvas.addEventListener('touchmove', (e) => { if (drawing) { e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive:false});
-        window.addEventListener('touchend', () => drawing = false);
-
-        document.getElementById(clearBtnId).onclick = (e) => { e.preventDefault(); ctx.clearRect(0,0,canvas.width,canvas.height); };
-        return canvas;
-    }
-
-    setupCanvas('ownerSigCanvas', 'clearOwnerSig');
-    setupCanvas('officerSigCanvas', 'clearOfficerSig');
-
-    function updateTotal() {
-        totalPaid.value = ((parseFloat(towFee.value) || 0) + (parseFloat(storageFee.value) || 0)).toFixed(2);
-    }
-    towFee.addEventListener('input', updateTotal);
-    storageFee.addEventListener('input', updateTotal);
-
-    ocrScanBtn.onclick = () => ocrFileInput.click();
-    ocrFileInput.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        statusDiv.innerText = "READING ID...";
-        try {
-            const result = await Tesseract.recognize(file, 'eng');
-            const lines = result.data.text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if (lines.length > 0) ownerName.value = lines[0].toUpperCase();
-            if (lines.length > 1) ownerAddress.value = lines.slice(1, 3).join(', ').toUpperCase();
-            statusDiv.innerText = "✔ ID SCANNED!";
-        } catch(err) { statusDiv.innerText = "MANUAL ENTRY REQUIRED"; }
-    };
-
-    window.addEventListener('load', async () => {
-        try {
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_yard_vehicles`);
-            yardVehicles = await res.json();
-            regoSelect.innerHTML = '<option value="" disabled selected>SELECT REGO</option>';
-            yardVehicles.forEach(v => {
-                if (v.rego) {
-                    const opt = document.createElement('option');
-                    opt.value = v.rego; 
-                    opt.innerText = `${v.rego} ${v.make ? '(' + v.make + ' ' + v.model + ')' : ''}`;
-                    regoSelect.appendChild(opt);
-                }
-            });
-        } catch(e) {
-            regoSelect.innerHTML = '<option value="" disabled>ERROR LOADING YARD</option>';
-        }
+    window.addEventListener('load', () => {
+        loadYardVehicles();
+        initCamera();
     });
 
-    releaseBtn.addEventListener('click', async () => {
-        const selectedRego = regoSelect.value;
-        if (!selectedRego) { statusDiv.innerText = "SELECT A VEHICLE"; return; }
-        const vehicleObj = yardVehicles.find(v => v.rego === selectedRego) || {};
-        
+    refreshBtn.addEventListener('click', () => {
+        window.location.reload(true);
+    });
+
+    async function loadYardVehicles() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
+            yardVehicles = await res.json();
+            vehicleSelect.innerHTML = "";
+
+            if (!yardVehicles || yardVehicles.length === 0) {
+                vehicleSelect.innerHTML = "<option value=''>NO VEHICLES IN YARD</option>";
+                return;
+            }
+
+            yardVehicles.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.rego;
+                opt.innerText = `${v.rego} (${v.make || ''} ${v.model || ''})`;
+                vehicleSelect.appendChild(opt);
+            });
+        } catch(e) {
+            vehicleSelect.innerHTML = "<option value=''>ERROR LOADING YARD</option>";
+        }
+    }
+
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            videoElem.srcObject = stream;
+        } catch(e) {}
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        const rego = vehicleSelect.value;
+        if (!rego) { statusDiv.innerText = "SELECT A VEHICLE"; return; }
+
+        const selectedVeh = yardVehicles.find(v => v.rego === rego) || {};
+
         const payload = {
-            action: "process_release", rego: selectedRego, make: vehicleObj.make || "",
-            model: vehicleObj.model || "", colour: vehicleObj.colour || "", ownerName: ownerName.value.trim(),
-            idNumber: idNumber.value.trim(), ownerAddress: ownerAddress.value.trim(), ownerPhone: ownerPhone.value.trim(),
-            ownerEmail: ownerEmail.value.trim(), towFee: towFee.value, storageFee: storageFee.value, totalPaid: totalPaid.value, officer: officerSelect.value
+            action: 'process_release',
+            rego: rego,
+            make: selectedVeh.make || '',
+            model: selectedVeh.model || '',
+            colour: selectedVeh.colour || '',
+            property: selectedVeh.property || '',
+            officer: officerSelect.value
         };
 
         statusDiv.innerText = "PROCESSING RELEASE...";
-        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        statusDiv.innerText = "✔ VEHICLE RELEASED & INVOICED!";
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            statusDiv.innerText = "✔ VEHICLE RELEASED SUCCESS!";
+        } catch(err) {
+            statusDiv.innerText = "ERROR PROCESSING RELEASE";
+        }
+
+        setTimeout(() => {
+            loadYardVehicles();
+            statusDiv.innerText = "";
+        }, 1500);
     });
 </script>
 </body>
