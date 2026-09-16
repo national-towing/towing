@@ -12,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=28">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=28">
-    <link rel="manifest" href="manifest-mark.json?v=28">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=29">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=29">
+    <link rel="manifest" href="manifest-mark.json?v=29">
 
     <style>
         * { box-sizing: border-box; }
@@ -41,12 +41,12 @@
         label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
         input, select {
             width: 100%; height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 22px; font-weight: 900; margin-top: 6px; outline: none;
+            background: #2a2a2a; color: #fff; font-size: 28px; font-weight: 900; margin-top: 6px; outline: none;
         }
 
         .camera-box {
             width: 100%; height: 260px; background: #000; border-radius: 14px; border: 2px solid #333;
-            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
@@ -83,7 +83,7 @@
     <select id="propertySelect"><option value="">LOADING...</option></select>
 
     <label>REGO</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="font-size:28px; color:#ffab00; text-transform:uppercase;">
+    <input type="text" id="regoInput" placeholder="REGO" style="color:#ffab00; text-transform:uppercase;">
 
     <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
     <div class="thumb-gallery" id="thumbGallery"></div>
@@ -94,7 +94,7 @@
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
     
-    // RESTORED PLATE RECOGNIZER ANPR CREDENTIALS
+    // PLATE RECOGNIZER API CREDENTIALS
     const ANPR_API_KEY = "74a8bb83a49461eef0266274ce63e1e198b4c888";
     const ANPR_API_URL = "https://api.platerecognizer.com/v1/plate-reader/";
 
@@ -136,9 +136,9 @@
         } catch(e) {}
     }
 
-    // FAST ANPR PLATE RECOGNITION
-    async function recognizePlate(base64Image) {
-        statusDiv.innerText = "🔍 SCANNING PLATE (ANPR)...";
+    // RUNS PLATE RECOGNIZER ANPR DIRECTLY ON SNAPSHOT
+    async function scanPhotoForPlate(base64Image) {
+        statusDiv.innerText = "🔍 READING PLATE...";
         try {
             const byteString = atob(base64Image.split(',')[1]);
             const ab = new ArrayBuffer(byteString.length);
@@ -162,46 +162,50 @@
 
             const result = await response.json();
             if (result.results && result.results.length > 0) {
-                const detectedPlate = result.results[0].plate.toUpperCase();
-                regoInput.value = detectedPlate;
-                statusDiv.innerText = "✔ ANPR RECOGNIZED: " + detectedPlate;
-                return detectedPlate;
+                const plateFound = result.results[0].plate.toUpperCase();
+                regoInput.value = plateFound;
+                statusDiv.innerText = "✔ ANPR READ: " + plateFound;
+                return plateFound;
             } else {
-                statusDiv.innerText = "⚠️ ANPR: NO PLATE READ, ENTER MANUAL";
-                return regoInput.value.trim().toUpperCase();
+                statusDiv.innerText = "⚠️ NO PLATE DETECTED";
+                return "";
             }
         } catch (err) {
             statusDiv.innerText = "⚠️ ANPR API ERROR";
-            return regoInput.value.trim().toUpperCase();
+            return "";
         }
     }
 
     snapBtn.addEventListener('click', async () => {
+        // Take Photo Snapshot
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 640;
         canvas.height = videoElem.videoHeight || 480;
         canvas.getContext('2d').drawImage(videoElem, 0, 0);
         capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
 
+        // Display Thumbnail
         thumbGallery.innerHTML = "";
         const img = document.createElement('img');
         img.src = capturedPhoto; img.className = 'thumb-img';
         thumbGallery.appendChild(img);
 
-        let rego = regoInput.value.trim().toUpperCase();
-        if (!rego) {
-            rego = await recognizePlate(capturedPhoto);
+        // Check Rego Field: If empty, execute ANPR API scanning on the photo
+        let currentRego = regoInput.value.trim().toUpperCase();
+        if (!currentRego) {
+            currentRego = await scanPhotoForPlate(capturedPhoto);
         }
 
-        if (!rego) { 
-            statusDiv.innerText = "ENTER OR SCAN REGO FIRST"; 
-            return; 
+        if (!currentRego) {
+            statusDiv.innerText = "ENTER REGO OR RETAKE CLEAR PHOTO";
+            return;
         }
 
+        // Log vehicle entry to Master Sheet
         const payload = {
             action: 'log_mark',
             property: propertySelect.value,
-            rego: rego,
+            rego: currentRego,
             photoBytes: capturedPhoto
         };
 
@@ -217,7 +221,10 @@
         }
 
         setTimeout(() => {
-            regoInput.value = ""; capturedPhoto = ""; thumbGallery.innerHTML = ""; statusDiv.innerText = "";
+            regoInput.value = ""; 
+            capturedPhoto = ""; 
+            thumbGallery.innerHTML = ""; 
+            statusDiv.innerText = "";
         }, 1500);
     });
 </script>
