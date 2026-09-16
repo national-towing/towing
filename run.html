@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RUN</title>
+    <title>TOW RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=13">
-    <link rel="icon" type="image/png" href="icon-run.png?v=13">
-    <link rel="manifest" href="manifest-run.json?v=13">
+    <link rel="apple-touch-icon" href="icon-run.png?v=17">
+    <link rel="icon" type="image/png" href="icon-run.png?v=17">
+    <link rel="manifest" href="manifest-run.json?v=17">
 
     <style>
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 14px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+        }
         
-        .header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 440px; margin-bottom: 10px; }
-        .header h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; }
-        .refresh-btn { background: #2a2a2a; border: 2px solid #ffab00; color: #ffab00; border-radius: 12px; padding: 8px 16px; font-weight: 900; font-size: 16px; cursor: pointer; }
-        .refresh-btn:active { transform: scale(0.95); }
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.9); }
 
-        /* UNIVERSAL TILE HEADER NAVIGATION BAR */
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
@@ -26,35 +29,28 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 10px; }
-        .property-card { background: #1e1e1e; border-radius: 18px; padding: 18px; border: 1px solid #333; }
-        .prop-title { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 14px; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
-        
-        .count-boxes { display: flex; gap: 10px; }
-        .count-box { flex: 1; height: 75px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; cursor: pointer; }
-        .box-red { background: #ff1744; color: #fff; }
-        .box-yellow { background: #ffab00; color: #000; }
-        .box-green { background: #00e676; color: #000; }
-        
-        .back-btn { background: #2a2a2a; color: #ffab00; border: 2px solid #ffab00; border-radius: 12px; height: 48px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 10px; }
-        
-        .vehicle-card-v2 { background: #1e1e1e; border-radius: 14px; padding: 12px 14px; border: 2px solid #333; margin-bottom: 10px; width: 100%; }
-        .action-btn { font-weight: 900; border: none; border-radius: 12px; height: 48px; font-size: 22px; width: 100%; margin-top: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; }
-        .btn-red { background: #ff1744; color: #fff; }
-        .btn-yellow { background: #ffab00; color: #000; }
-        .btn-green { background: #00e676; color: #000; }
+        .property-card { background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 14px; }
+        .property-title { font-size: 20px; font-weight: 900; color: #ffab00; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 6px; }
 
-        #status { text-align: center; font-weight: 900; font-size: 20px; color: #ffab00; margin-top: 24px; }
+        .vehicle-row { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border-left: 6px solid #444; }
+        .vehicle-rego { font-size: 24px; font-weight: 900; color: #fff; }
+        .vehicle-time { font-size: 13px; color: #aaa; margin-top: 2px; font-weight: 600; }
+        
+        .status-badge { font-size: 14px; font-weight: 900; border-radius: 8px; padding: 6px 10px; text-align: center; text-decoration: none; display: inline-block; }
+        .badge-wait { background: #ffab00; color: #000; }
+        .badge-tow { background: #ff1744; color: #fff; }
+        .badge-pass { background: #ab47bc; color: #fff; }
+
+        #loading { text-align: center; color: #aaa; font-weight: 900; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>RUN</h1>
-    <button class="refresh-btn" id="refreshBtn">🔄 REFRESH</button>
+<div class="header-box">
+    <h1>TOW RUN</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
-<!-- STANDARD NAV BAR -->
 <div class="nav-bar">
     <a href="run.html" class="nav-tile nav-run">RUN</a>
     <a href="tow.html" class="nav-tile nav-tow">TOW</a>
@@ -62,125 +58,77 @@
     <a href="passes.html" class="nav-tile nav-pass">PASS</a>
 </div>
 
-<div class="container" id="appContainer"><div id="status">LOADING RUN DATA...</div></div>
+<div id="loading">LOADING TOW RUN...</div>
+<div id="container" style="width:100%; max-width:440px;"></div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-    const appContainer = document.getElementById('appContainer');
+
     const refreshBtn = document.getElementById('refreshBtn');
-    let allRunData = [];
+    const loadingDiv = document.getElementById('loading');
+    const container = document.getElementById('container');
 
-    window.addEventListener('load', fetchRunData);
+    window.addEventListener('load', loadRunData);
+    refreshBtn.addEventListener('click', loadRunData);
 
-    async function fetchRunData() {
+    async function loadRunData() {
+        loadingDiv.style.display = 'block';
+        container.innerHTML = "";
         try {
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_tow_run`);
-            allRunData = await res.json();
-            renderDashboard();
-        } catch(e) { 
-            appContainer.innerHTML = '<div id="status">NO MARKED CARS FOUND</div>'; 
-        }
-    }
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run");
+            const data = await res.json();
+            loadingDiv.style.display = 'none';
 
-    refreshBtn.onclick = async () => {
-        appContainer.innerHTML = '<div id="status">REFRESHING RUN DATA...</div>';
-        await fetchRunData();
-    };
-
-    function getVehicleStatus(item) {
-        const isExempt = item.pass && item.pass.toUpperCase().includes('EXEMPT');
-        if (isExempt) return 'GREEN';
-
-        const nowMs = Date.now();
-        if (item.rawExpiryMs && nowMs >= item.rawExpiryMs) {
-            return 'RED';
-        }
-        return 'YELLOW';
-    }
-
-    function renderDashboard() {
-        appContainer.innerHTML = '';
-        if (!allRunData || allRunData.length === 0) {
-            appContainer.innerHTML = '<div id="status">NO CARS CURRENTLY MARKED</div>';
-            return;
-        }
-
-        const propGroups = {};
-
-        allRunData.forEach(item => {
-            const prop = item.property || 'GENERAL';
-            if (!propGroups[prop]) propGroups[prop] = { red: 0, yellow: 0, green: 0 };
-            
-            const status = getVehicleStatus(item);
-            if (status === 'GREEN') propGroups[prop].green++;
-            else if (status === 'RED') propGroups[prop].red++;
-            else propGroups[prop].yellow++;
-        });
-
-        const sortedProperties = Object.keys(propGroups).sort((a, b) => {
-            if (propGroups[b].red !== propGroups[a].red) {
-                return propGroups[b].red - propGroups[a].red;
-            }
-            return propGroups[b].yellow - propGroups[a].yellow;
-        });
-
-        sortedProperties.forEach(prop => {
-            const counts = propGroups[prop];
-            const card = document.createElement('div');
-            card.className = 'property-card';
-            card.innerHTML = `
-                <div class="prop-title" onclick="showPropertyList('${escapeJs(prop)}')">📍 ${prop}</div>
-                <div class="count-boxes">
-                    <div class="count-box box-red" onclick="showPropertyList('${escapeJs(prop)}')">${counts.red}</div>
-                    <div class="count-box box-yellow" onclick="showPropertyList('${escapeJs(prop)}')">${counts.yellow}</div>
-                    <div class="count-box box-green" onclick="showPropertyList('${escapeJs(prop)}')">${counts.green}</div>
-                </div>
-            `;
-            appContainer.appendChild(card);
-        });
-    }
-
-    function showPropertyList(prop) {
-        appContainer.innerHTML = `<button class="back-btn" onclick="renderDashboard()">⬅ BACK TO PROPERTIES</button>`;
-        const filtered = allRunData.filter(i => i.property === prop);
-
-        const weight = { 'RED': 1, 'YELLOW': 2, 'GREEN': 3 };
-        filtered.sort((a, b) => weight[getVehicleStatus(a)] - weight[getVehicleStatus(b)]);
-
-        filtered.forEach(i => {
-            const status = getVehicleStatus(i);
-            let btnClass = "btn-red";
-            let btnText = "TOW";
-
-            if (status === "YELLOW") {
-                btnClass = "btn-yellow";
-                btnText = "WAIT";
-            } else if (status === "GREEN") {
-                btnClass = "btn-green";
-                btnText = "PASS";
+            if (!data || data.length === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#666; font-weight:900;'>NO VEHICLES ON TOW RUN</div>";
+                return;
             }
 
-            const card = document.createElement('div');
-            card.className = 'vehicle-card-v2';
-            
-            card.innerHTML = `
-                <div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; width: 100% !important;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 28px !important; font-weight: 900 !important; color: #fff !important; line-height: 1.1 !important;">${i.rego}</div>
-                        <div style="color: #aaa !important; font-weight: 900 !important; font-size: 14px !important; margin-top: 4px !important;">📍 ${i.property}</div>
-                    </div>
-                    <div style="text-align: right !important; color: #fff !important; font-weight: 800 !important; font-size: 13px !important; line-height: 1.4 !important; flex-shrink: 0 !important;">
-                        Marked: ${i.markedTime}<br>
-                        Tow Ready: ${i.expiryTime}
-                    </div>
-                </div>
-                <a href="tow.html?rego=${encodeURIComponent(i.rego)}&prop=${encodeURIComponent(i.property)}" class="action-btn ${btnClass}">${btnText}</a>
-            `;
-            appContainer.appendChild(card);
-        });
-    }
+            const grouped = {};
+            data.forEach(item => {
+                const prop = item.property || "GENERAL";
+                if (!grouped[prop]) grouped[prop] = [];
+                grouped[prop].push(item);
+            });
 
-    function escapeJs(str) { return (str || '').replace(/'/g, "\\'"); }
+            const nowMs = Date.now();
+
+            for (let prop in grouped) {
+                const card = document.createElement('div');
+                card.className = 'property-card';
+                card.innerHTML = `<div class="property-title">${prop}</div>`;
+
+                grouped[prop].forEach(v => {
+                    const row = document.createElement('div');
+                    row.className = 'vehicle-row';
+
+                    let badgeHtml = "";
+                    if (v.pass && v.pass.toUpperCase() === "YES") {
+                        badgeHtml = `<span class="status-badge badge-pass">PASS</span>`;
+                    } else if (v.rawExpiryMs && nowMs >= v.rawExpiryMs) {
+                        badgeHtml = `<a href="tow.html?rego=${encodeURIComponent(v.rego)}&prop=${encodeURIComponent(v.property)}" class="status-badge badge-tow">TOW READY</a>`;
+                        row.style.borderLeftColor = "#ff1744";
+                    } else {
+                        badgeHtml = `<span class="status-badge badge-wait">WAIT</span>`;
+                        row.style.borderLeftColor = "#ffab00";
+                    }
+
+                    row.innerHTML = `
+                        <div>
+                            <div class="vehicle-rego">${v.rego}</div>
+                            <div class="vehicle-time">Marked: ${v.markedTime} | Exp: ${v.expiryTime}</div>
+                        </div>
+                        <div>${badgeHtml}</div>
+                    `;
+                    card.appendChild(row);
+                });
+
+                container.appendChild(card);
+            }
+        } catch(e) {
+            loadingDiv.innerText = "ERROR LOADING TOW RUN";
+        }
+    }
 </script>
 </body>
 </html>
