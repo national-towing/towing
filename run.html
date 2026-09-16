@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- OFFLINE PWA & NO-CACHE META TAGS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -12,9 +13,9 @@
 
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=20">
-    <link rel="icon" type="image/png" href="icon-run.png?v=20">
-    <link rel="manifest" href="manifest-run.json?v=20">
+    <link rel="apple-touch-icon" href="icon-run.png?v=31">
+    <link rel="icon" type="image/png" href="icon-run.png?v=31">
+    <link rel="manifest" href="manifest-run.json?v=31">
 
     <style>
         * { box-sizing: border-box; }
@@ -26,8 +27,11 @@
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        
+        .icon-btn { position: absolute; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
         .icon-btn:active { transform: scale(0.9); }
+        .refresh-pos { right: 0; }
+        .back-btn { position: absolute; left: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 15px; font-weight: 900; padding: 0 12px; height: 44px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; display: none; }
 
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
@@ -36,9 +40,25 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .property-card { background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 14px; }
-        .property-title { font-size: 20px; font-weight: 900; color: #ffab00; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 6px; }
+        #landingPage, #detailPage { width: 100%; max-width: 440px; }
+        #detailPage { display: none; }
 
+        /* PROPERTY SUMMARY CARDS (PAGE 1) */
+        .summary-card { background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; border: 1px solid #333; margin-bottom: 14px; }
+        .summary-title { font-size: 20px; font-weight: 900; color: #ffab00; margin-bottom: 12px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 6px; cursor: pointer; }
+
+        .tiles-row { display: flex; gap: 8px; width: 100%; }
+        .count-tile { flex: 1; border-radius: 12px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; user-select: none; }
+        .count-tile:active { transform: scale(0.95); }
+        
+        .tile-red { background: #ff1744; color: #fff; }
+        .tile-yellow { background: #ffab00; color: #000; }
+        .tile-green { background: #ab47bc; color: #fff; }
+
+        .tile-num { font-size: 28px; font-weight: 900; line-height: 1; }
+        .tile-label { font-size: 11px; font-weight: 900; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px; }
+
+        /* VEHICLE LIST ROWS (PAGE 2) */
         .vehicle-row { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border-left: 6px solid #444; }
         .vehicle-rego { font-size: 24px; font-weight: 900; color: #fff; }
         .vehicle-time { font-size: 13px; color: #aaa; margin-top: 2px; font-weight: 600; }
@@ -49,13 +69,15 @@
         .badge-pass { background: #ab47bc; color: #fff; }
 
         #loading { text-align: center; color: #aaa; font-weight: 900; margin-top: 20px; }
+        #detailFilterHeader { font-size: 18px; font-weight: 900; color: #ffab00; margin-bottom: 12px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 6px; }
     </style>
 </head>
 <body>
 
 <div class="header-box">
-    <h1>RUN</h1>
-    <div class="icon-btn" id="refreshBtn">🔄</div>
+    <div class="back-btn" id="backBtn">⬅ BACK</div>
+    <h1 id="pageTitle">RUN</h1>
+    <div class="icon-btn refresh-pos" id="refreshBtn">🔄</div>
 </div>
 
 <div class="nav-bar">
@@ -65,79 +87,173 @@
     <a href="passes.html" class="nav-tile nav-pass">PASS</a>
 </div>
 
-<div id="loading">LOADING RUN...</div>
-<div id="container" style="width:100%; max-width:440px;"></div>
+<div id="loading">LOADING RUN DATA...</div>
+
+<!-- PAGE 1: TILES LANDING PAGE -->
+<div id="landingPage"></div>
+
+<!-- PAGE 2: FILTERED VEHICLE LIST -->
+<div id="detailPage">
+    <div id="detailFilterHeader"></div>
+    <div id="detailVehicleContainer"></div>
+</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
+    const landingPage = document.getElementById('landingPage');
+    const detailPage = document.getElementById('detailPage');
+    const backBtn = document.getElementById('backBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const loadingDiv = document.getElementById('loading');
-    const container = document.getElementById('container');
+    const detailFilterHeader = document.getElementById('detailFilterHeader');
+    const detailVehicleContainer = document.getElementById('detailVehicleContainer');
+
+    let rawRunData = [];
 
     window.addEventListener('load', loadRunData);
-    
+
     refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
     });
 
+    backBtn.addEventListener('click', showLandingPage);
+
+    function showLandingPage() {
+        landingPage.style.display = 'block';
+        detailPage.style.display = 'none';
+        backBtn.style.display = 'none';
+    }
+
     async function loadRunData() {
         loadingDiv.style.display = 'block';
-        container.innerHTML = "";
+        landingPage.innerHTML = "";
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run");
-            const data = await res.json();
+            rawRunData = await res.json();
             loadingDiv.style.display = 'none';
 
-            if (!data || data.length === 0) {
-                container.innerHTML = "<div style='text-align:center; color:#666; font-weight:900;'>NO VEHICLES ON RUN</div>";
+            if (!rawRunData || rawRunData.length === 0) {
+                landingPage.innerHTML = "<div style='text-align:center; color:#666; font-weight:900;'>NO VEHICLES ON RUN</div>";
                 return;
             }
 
-            const grouped = {};
-            data.forEach(item => {
-                const prop = item.property || "GENERAL";
-                if (!grouped[prop]) grouped[prop] = [];
-                grouped[prop].push(item);
-            });
-
-            const nowMs = Date.now();
-
-            for (let prop in grouped) {
-                const card = document.createElement('div');
-                card.className = 'property-card';
-                card.innerHTML = `<div class="property-title">${prop}</div>`;
-
-                grouped[prop].forEach(v => {
-                    const row = document.createElement('div');
-                    row.className = 'vehicle-row';
-
-                    let badgeHtml = "";
-                    if (v.pass && v.pass.toUpperCase() === "YES") {
-                        badgeHtml = `<span class="status-badge badge-pass">PASS</span>`;
-                    } else if (v.rawExpiryMs && nowMs >= v.rawExpiryMs) {
-                        badgeHtml = `<a href="tow.html?rego=${encodeURIComponent(v.rego)}&prop=${encodeURIComponent(v.property)}" class="status-badge badge-tow">TOW READY</a>`;
-                        row.style.borderLeftColor = "#ff1744";
-                    } else {
-                        badgeHtml = `<span class="status-badge badge-wait">WAIT</span>`;
-                        row.style.borderLeftColor = "#ffab00";
-                    }
-
-                    row.innerHTML = `
-                        <div>
-                            <div class="vehicle-rego">${v.rego}</div>
-                            <div class="vehicle-time">Marked: ${v.markedTime} | Exp: ${v.expiryTime}</div>
-                        </div>
-                        <div>${badgeHtml}</div>
-                    `;
-                    card.appendChild(row);
-                });
-
-                container.appendChild(card);
-            }
+            renderLandingPage();
         } catch(e) {
-            loadingDiv.innerText = "ERROR LOADING RUN";
+            loadingDiv.innerText = "ERROR LOADING RUN DATA";
         }
+    }
+
+    function renderLandingPage() {
+        showLandingPage();
+        landingPage.innerHTML = "";
+        const nowMs = Date.now();
+
+        // Group data by Property Name and calculate tile counts
+        const grouped = {};
+        rawRunData.forEach(item => {
+            const prop = item.property || "GENERAL";
+            if (!grouped[prop]) {
+                grouped[prop] = { red: 0, yellow: 0, green: 0, items: [] };
+            }
+
+            // Categorize Vehicle Status
+            if (item.pass && item.pass.toUpperCase() === "YES") {
+                item.statusCategory = "GREEN";
+                grouped[prop].green++;
+            } else if (item.rawExpiryMs && nowMs >= item.rawExpiryMs) {
+                item.statusCategory = "RED";
+                grouped[prop].red++;
+            } else {
+                item.statusCategory = "YELLOW";
+                grouped[prop].yellow++;
+            }
+
+            grouped[prop].items.push(item);
+        });
+
+        // Generate Summary Cards with Red, Yellow, Green Tiles
+        for (let prop in grouped) {
+            const card = document.createElement('div');
+            card.className = 'summary-card';
+
+            card.innerHTML = `
+                <div class="summary-title" onclick="openDetailPage('${prop}', 'ALL')">${prop}</div>
+                <div class="tiles-row">
+                    <div class="count-tile tile-red" onclick="openDetailPage('${prop}', 'RED')">
+                        <div class="tile-num">${grouped[prop].red}</div>
+                        <div class="tile-label">TOW READY</div>
+                    </div>
+                    <div class="count-tile tile-yellow" onclick="openDetailPage('${prop}', 'YELLOW')">
+                        <div class="tile-num">${grouped[prop].yellow}</div>
+                        <div class="tile-label">WAIT</div>
+                    </div>
+                    <div class="count-tile tile-green" onclick="openDetailPage('${prop}', 'GREEN')">
+                        <div class="tile-num">${grouped[prop].green}</div>
+                        <div class="tile-label">PASS</div>
+                    </div>
+                </div>
+            `;
+
+            landingPage.appendChild(card);
+        }
+    }
+
+    // OPEN PAGE 2 WITH SELECTED FILTER (RED, YELLOW, GREEN, OR ALL)
+    function openDetailPage(propertyName, filterCategory) {
+        landingPage.style.display = 'none';
+        detailPage.style.display = 'block';
+        backBtn.style.display = 'flex';
+
+        detailVehicleContainer.innerHTML = "";
+        
+        let labelText = `${propertyName} - `;
+        if (filterCategory === 'RED') labelText += "🔴 TOW READY";
+        else if (filterCategory === 'YELLOW') labelText += "🟡 WAIT LIST";
+        else if (filterCategory === 'GREEN') labelText += "🟢 PASSES";
+        else labelText += "ALL VEHICLES";
+
+        detailFilterHeader.innerText = labelText;
+
+        // Filter items matching Property and Category
+        const filteredList = rawRunData.filter(v => {
+            const matchProp = (v.property || "GENERAL").toUpperCase() === propertyName.toUpperCase();
+            if (!matchProp) return false;
+            if (filterCategory === 'ALL') return true;
+            return v.statusCategory === filterCategory;
+        });
+
+        if (filteredList.length === 0) {
+            detailVehicleContainer.innerHTML = "<div style='text-align:center; color:#666; font-weight:900; margin-top:20px;'>NO VEHICLES FOUND</div>";
+            return;
+        }
+
+        // Render Filtered Vehicle Rows
+        filteredList.forEach(v => {
+            const row = document.createElement('div');
+            row.className = 'vehicle-row';
+
+            let badgeHtml = "";
+            if (v.statusCategory === "GREEN") {
+                badgeHtml = `<span class="status-badge badge-pass">PASS</span>`;
+                row.style.borderLeftColor = "#ab47bc";
+            } else if (v.statusCategory === "RED") {
+                badgeHtml = `<a href="tow.html?rego=${encodeURIComponent(v.rego)}&prop=${encodeURIComponent(v.property)}" class="status-badge badge-tow">TOW READY</a>`;
+                row.style.borderLeftColor = "#ff1744";
+            } else {
+                badgeHtml = `<span class="status-badge badge-wait">WAIT</span>`;
+                row.style.borderLeftColor = "#ffab00";
+            }
+
+            row.innerHTML = `
+                <div>
+                    <div class="vehicle-rego">${v.rego}</div>
+                    <div class="vehicle-time">Marked: ${v.markedTime} | Exp: ${v.expiryTime}</div>
+                </div>
+                <div>${badgeHtml}</div>
+            `;
+            detailVehicleContainer.appendChild(row);
+        });
     }
 </script>
 </body>
