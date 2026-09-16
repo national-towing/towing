@@ -12,9 +12,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=24">
-    <link rel="icon" type="image/png" href="icon-release.png?v=24">
-    <link rel="manifest" href="manifest-release.json?v=24">
+    <link rel="apple-touch-icon" href="icon-release.png?v=25">
+    <link rel="icon" type="image/png" href="icon-release.png?v=25">
+    <link rel="manifest" href="manifest-release.json?v=25">
 
     <style>
         * { box-sizing: border-box; }
@@ -284,12 +284,10 @@
         } catch(e) {}
     }
 
-    // DIRECT HARDWARE CANVAS SNAP
     snapBtn.addEventListener('click', () => {
-        if (!videoElem.videoWidth) { statusDiv.innerText = "CAMERA LOADING..."; return; }
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth;
-        canvas.height = videoElem.videoHeight;
+        canvas.width = videoElem.videoWidth || 640;
+        canvas.height = videoElem.videoHeight || 480;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
         idPhotoBytes = canvas.toDataURL('image/jpeg', 0.8);
