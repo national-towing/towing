@@ -12,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=29">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=29">
-    <link rel="manifest" href="manifest-mark.json?v=29">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=30">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=30">
+    <link rel="manifest" href="manifest-mark.json?v=30">
 
     <style>
         * { box-sizing: border-box; }
@@ -136,11 +136,11 @@
         } catch(e) {}
     }
 
-    // RUNS PLATE RECOGNIZER ANPR DIRECTLY ON SNAPSHOT
-    async function scanPhotoForPlate(base64Image) {
+    // HIGH-SPEED ANPR RECOGNITION (DOWNSCALED PAYLOAD)
+    async function scanPhotoForPlate(fastBase64Image) {
         statusDiv.innerText = "🔍 READING PLATE...";
         try {
-            const byteString = atob(base64Image.split(',')[1]);
+            const byteString = atob(fastBase64Image.split(',')[1]);
             const ab = new ArrayBuffer(byteString.length);
             const ia = new Uint8Array(ab);
             for (let i = 0; i < byteString.length; i++) {
@@ -177,12 +177,19 @@
     }
 
     snapBtn.addEventListener('click', async () => {
-        // Take Photo Snapshot
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 640;
-        canvas.height = videoElem.videoHeight || 480;
-        canvas.getContext('2d').drawImage(videoElem, 0, 0);
-        capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
+        // 1. FULL QUALITY CANVAS (FOR SAVING TO MASTER LOG)
+        const fullCanvas = document.createElement('canvas');
+        fullCanvas.width = videoElem.videoWidth || 1280;
+        fullCanvas.height = videoElem.videoHeight || 720;
+        fullCanvas.getContext('2d').drawImage(videoElem, 0, 0);
+        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.8);
+
+        // 2. FAST SMALL CANVAS (LOW LATENCY PAYLOAD FOR ANPR)
+        const fastCanvas = document.createElement('canvas');
+        fastCanvas.width = 640;
+        fastCanvas.height = 360;
+        fastCanvas.getContext('2d').drawImage(videoElem, 0, 0, 640, 360);
+        const fastPhoto = fastCanvas.toDataURL('image/jpeg', 0.6);
 
         // Display Thumbnail
         thumbGallery.innerHTML = "";
@@ -190,10 +197,10 @@
         img.src = capturedPhoto; img.className = 'thumb-img';
         thumbGallery.appendChild(img);
 
-        // Check Rego Field: If empty, execute ANPR API scanning on the photo
+        // Run ANPR scan using the fast, lightweight payload
         let currentRego = regoInput.value.trim().toUpperCase();
         if (!currentRego) {
-            currentRego = await scanPhotoForPlate(capturedPhoto);
+            currentRego = await scanPhotoForPlate(fastPhoto);
         }
 
         if (!currentRego) {
@@ -201,7 +208,7 @@
             return;
         }
 
-        // Log vehicle entry to Master Sheet
+        // Log vehicle entry to Master Sheet using the full quality image
         const payload = {
             action: 'log_mark',
             property: propertySelect.value,
