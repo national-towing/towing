@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- OFFLINE PWA & NO-CACHE META TAGS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -13,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=18">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=18">
-    <link rel="manifest" href="manifest-mark.json?v=18">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=19">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=19">
+    <link rel="manifest" href="manifest-mark.json?v=19">
 
     <style>
         * { box-sizing: border-box; }
@@ -62,12 +61,6 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #000; }
 
-        .submit-btn {
-            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 28px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
-        }
-        .submit-btn:active { transform: scale(0.97); }
-        
         #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
     </style>
 </head>
@@ -95,8 +88,6 @@
     <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
     <div class="thumb-gallery" id="thumbGallery"></div>
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-
-    <button class="submit-btn" id="submitBtn">MARK VEHICLE</button>
     <div id="status"></div>
 </div>
 
@@ -108,7 +99,6 @@
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
     const thumbGallery = document.getElementById('thumbGallery');
-    const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
     let capturedPhoto = "";
@@ -118,7 +108,6 @@
         initCamera();
     });
 
-    // ONE-TAP HARD REFRESH FROM GITHUB
     refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
     });
@@ -143,7 +132,10 @@
         } catch(e) {}
     }
 
-    snapBtn.addEventListener('click', () => {
+    snapBtn.addEventListener('click', async () => {
+        const rego = regoInput.value.trim().toUpperCase();
+        if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
+
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 640;
         canvas.height = videoElem.videoHeight || 480;
@@ -154,11 +146,6 @@
         const img = document.createElement('img');
         img.src = capturedPhoto; img.className = 'thumb-img';
         thumbGallery.appendChild(img);
-    });
-
-    submitBtn.addEventListener('click', async () => {
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER REGO"; return; }
 
         const payload = {
             action: 'log_mark',
@@ -172,7 +159,6 @@
             await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
             statusDiv.innerText = "✔ VEHICLE MARKED SUCCESS!";
         } catch(err) {
-            // SAVES LOCALLY IF BASEMENT HAS NO SERVICE
             let offlineQueue = JSON.parse(localStorage.getItem('offline_marks') || '[]');
             offlineQueue.push(payload);
             localStorage.setItem('offline_marks', JSON.stringify(offlineQueue));
@@ -184,7 +170,6 @@
         }, 1500);
     });
 
-    // AUTO-SYNC WHEN RETURNING TO CELL COVERAGE
     window.addEventListener('online', async () => {
         let offlineQueue = JSON.parse(localStorage.getItem('offline_marks') || '[]');
         if (offlineQueue.length > 0) {
