@@ -12,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=19">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=19">
-    <link rel="manifest" href="manifest-mark.json?v=19">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=20">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=20">
+    <link rel="manifest" href="manifest-mark.json?v=20">
 
     <style>
         * { box-sizing: border-box; }
@@ -168,18 +168,6 @@
         setTimeout(() => {
             regoInput.value = ""; capturedPhoto = ""; thumbGallery.innerHTML = ""; statusDiv.innerText = "";
         }, 1500);
-    });
-
-    window.addEventListener('online', async () => {
-        let offlineQueue = JSON.parse(localStorage.getItem('offline_marks') || '[]');
-        if (offlineQueue.length > 0) {
-            statusDiv.innerText = "SYNCING OFFLINE LOGS...";
-            for (let item of offlineQueue) {
-                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
-            }
-            localStorage.removeItem('offline_marks');
-            statusDiv.innerText = "✔ ALL OFFLINE LOGS SYNCED!";
-        }
     });
 </script>
 </body>
