@@ -12,9 +12,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=25">
-    <link rel="icon" type="image/png" href="icon-release.png?v=25">
-    <link rel="manifest" href="manifest-release.json?v=25">
+    <link rel="apple-touch-icon" href="icon-release.png?v=35">
+    <link rel="icon" type="image/png" href="icon-release.png?v=35">
+    <link rel="manifest" href="manifest-release.json?v=35">
 
     <style>
         * { box-sizing: border-box; }
@@ -36,56 +36,59 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         
-        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
+        .section-title { font-size: 16px; font-weight: 900; color: #00e676; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 6px; margin-top: 10px; margin-bottom: 6px; }
+
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 6px; outline: none;
-            -webkit-appearance: none;
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
         }
 
+        /* VALIDATION HIGHLIGHTING */
+        .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
+        .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
+
+        .legal-stmt { font-size: 11px; color: #aaa; margin-top: 12px; line-height: 1.35; font-style: italic; background: #141414; padding: 8px; border-radius: 8px; border: 1px solid #333; }
+
         .camera-box {
-            width: 100%; height: 240px; background: #000; border-radius: 14px; border: 2px solid #333;
-            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+            width: 100%; height: 180px; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        .thumb-gallery { display: flex; gap: 10px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
-        .thumb-img { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 3px solid #00e676; cursor: pointer; flex-shrink: 0; }
+        .thumb-gallery { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; }
+        .thumb-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #00e676; cursor: pointer; flex-shrink: 0; }
 
         .circle-cam-btn {
-            width: 100px; height: 100px; background: #00e676; border: 5px solid #fff; border-radius: 50%;
-            margin: 14px auto 0 auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.5); cursor: pointer; user-select: none;
+            width: 80px; height: 80px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
+            margin: 10px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 16px rgba(0, 230, 118, 0.4); cursor: pointer; user-select: none;
         }
         .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #000; }
+        .circle-cam-inner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000; }
 
         .sig-container { width: 100%; margin-top: 6px; position: relative; }
         canvas.sig-box {
-            width: 100%; height: 140px; background: #2a2a2a; border: 1px solid #444; border-radius: 12px;
+            width: 100%; height: 140px; background: #fff; border: 2px solid #444; border-radius: 12px;
             touch-action: none; cursor: crosshair;
         }
-        .clear-sig-btn {
-            position: absolute; right: 10px; top: 10px; background: #ff1744; color: #fff; border: none;
-            border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 900; cursor: pointer;
-        }
+        .sig-btn-row { display: flex; gap: 8px; margin-top: 6px; }
+        .sig-btn { flex: 1; height: 38px; border-radius: 8px; border: none; font-weight: 900; font-size: 13px; cursor: pointer; letter-spacing: 1px; }
+        .btn-clear { background: #ff1744; color: #fff; }
+        .btn-confirm { background: #00e676; color: #000; }
 
         .submit-btn {
             background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 28px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
+            height: 60px; font-size: 26px; width: 100%; margin-top: 16px; cursor: pointer; letter-spacing: 2px;
         }
         .submit-btn:active { transform: scale(0.97); }
 
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 16px; min-height: 24px; color: #00e676; }
-
-        .modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; 
-        }
+        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
     </style>
 </head>
 <body>
@@ -103,24 +106,27 @@
 </div>
 
 <div class="card">
-    <label>SELECT VEHICLE IN YARD</label>
+    <label>SELECT FROM YARD</label>
     <select id="vehicleSelect"><option value="">LOADING YARD VEHICLES...</option></select>
 
+    <!-- SECTION 1: OFFENDING VEHICLE DETAILS -->
+    <div class="section-title">OFFENDING VEHICLE DETAILS</div>
+    
     <div class="row-2">
         <div>
-            <label>REGO</label>
-            <input type="text" id="regoInput" placeholder="REGO" style="font-size:24px; color:#00e676; text-transform:uppercase;">
+            <label>PROPERTY</label>
+            <input type="text" id="propertyInput" placeholder="PROPERTY" readonly style="background:#1a1a1a; color:#aaa;">
         </div>
         <div>
-            <label>MAKE</label>
-            <input type="text" id="makeInput" placeholder="MAKE">
+            <label>SVN # (POLICELINK)</label>
+            <input type="text" id="svnInput" placeholder="SVN NUMBER">
         </div>
     </div>
 
     <div class="row-2">
         <div>
-            <label>MODEL</label>
-            <input type="text" id="modelInput" placeholder="MODEL">
+            <label>REGO</label>
+            <input type="text" id="regoInput" placeholder="REGO" style="color:#00e676; text-transform:uppercase;">
         </div>
         <div>
             <label>COLOUR</label>
@@ -128,131 +134,159 @@
         </div>
     </div>
 
-    <label>PROPERTY TOWED FROM</label>
-    <input type="text" id="propertyInput" placeholder="PROPERTY">
-
     <div class="row-2">
         <div>
-            <label>RELEASE FEE ($)</label>
-            <input type="number" id="feeInput" placeholder="FEE">
+            <label>MAKE</label>
+            <input type="text" id="makeInput" placeholder="MAKE">
         </div>
         <div>
-            <label>PAYMENT TYPE</label>
-            <select id="paymentSelect">
-                <option value="EFTPOS" selected>EFTPOS</option>
-                <option value="CASH">CASH</option>
-                <option value="DIRECT DEPOSIT">DIRECT DEPOSIT</option>
-            </select>
+            <label>MODEL</label>
+            <input type="text" id="modelInput" placeholder="MODEL">
         </div>
     </div>
 
-    <div class="row-2">
-        <div>
-            <label>ID TYPE</label>
-            <select id="idTypeSelect">
-                <option value="Driver Licence" selected>Driver Licence</option>
-                <option value="Passport">Passport</option>
-                <option value="Proof of Age">Proof of Age</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-        <div>
-            <label>ID / LICENCE NO.</label>
-            <input type="text" id="idNumInput" placeholder="ID NUMBER">
-        </div>
-    </div>
-
-    <div class="row-2">
-        <div>
-            <label>RELEASED BY</label>
-            <select id="officerSelect">
-                <option value="Brian" selected>Brian</option>
-                <option value="Brett">Brett</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-    </div>
-
-    <label>SNAP DRIVER ID / LICENCE</label>
-    <div class="camera-box">
-        <video id="videoElem" autoplay playsinline></video>
-    </div>
+    <!-- SECTION 2: OWNER DETAILS -->
+    <div class="section-title">OWNER DETAILS</div>
     
+    <label>SNAP DRIVER ID / LICENCE (FRONT & BACK)</label>
+    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
     <div class="thumb-gallery" id="thumbGallery"></div>
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
-    <label>OWNER / RECEIVER SIGNATURE</label>
+    <label>NAME</label>
+    <input type="text" id="ownerNameInput" placeholder="FULL NAME">
+
+    <label>ADDRESS</label>
+    <input type="text" id="ownerAddressInput" placeholder="STREET ADDRESS, SUBURB, STATE">
+
+    <div class="row-2">
+        <div>
+            <label>PHONE</label>
+            <input type="tel" id="ownerPhoneInput" placeholder="PHONE NUMBER">
+        </div>
+        <div>
+            <label>EMAIL</label>
+            <input type="email" id="ownerEmailInput" placeholder="EMAIL ADDRESS">
+        </div>
+    </div>
+
+    <div class="legal-stmt">
+        "I am the owner, owners agent, driver or authorised person in charge of the above vehicle. I take full responsibility for payment, release and acceptance of the vehicle as inspected."
+    </div>
+
+    <label>OWNER SIGNATURE</label>
     <div class="sig-container">
         <canvas id="ownerSigCanvas" class="sig-box"></canvas>
-        <button class="clear-sig-btn" onclick="clearSig('ownerSigCanvas')">CLEAR</button>
+        <div class="sig-btn-row">
+            <button class="sig-btn btn-clear" onclick="clearSig('ownerSigCanvas')">CLEAR</button>
+            <button class="sig-btn btn-confirm" onclick="confirmSig('ownerSigCanvas')">CONFIRM</button>
+        </div>
     </div>
+
+    <!-- SECTION 3: PAYMENT DETAILS -->
+    <div class="section-title">PAYMENT DETAILS</div>
+    <div class="row-2">
+        <div>
+            <label>RELEASE FEE ($)</label>
+            <input type="number" step="0.01" id="releaseFeeInput" value="310.05">
+        </div>
+        <div>
+            <label>STORAGE / AH FEE ($)</label>
+            <input type="number" step="0.01" id="storageFeeInput" value="140.95">
+        </div>
+    </div>
+
+    <!-- SECTION 4: OFFICE USE -->
+    <div class="section-title">OFFICE USE</div>
+    
+    <label>RELEASED BY</label>
+    <select id="officerSelect" onchange="checkOfficerOther(this)">
+        <option value="Brian" selected>Brian</option>
+        <option value="Brett">Brett</option>
+        <option value="OTHER">Other...</option>
+    </select>
+    <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;">
 
     <label>OFFICER SIGNATURE</label>
     <div class="sig-container">
         <canvas id="officerSigCanvas" class="sig-box"></canvas>
-        <button class="clear-sig-btn" onclick="clearSig('officerSigCanvas')">CLEAR</button>
+        <div class="sig-btn-row">
+            <button class="sig-btn btn-clear" onclick="clearSig('officerSigCanvas')">CLEAR</button>
+            <button class="sig-btn btn-confirm" onclick="confirmSig('officerSigCanvas')">CONFIRM</button>
+        </div>
     </div>
 
-    <button class="submit-btn" id="submitBtn">RELEASE VEHICLE</button>
+    <button class="submit-btn" id="submitBtn">PAID - RELEASE</button>
     <div id="status"></div>
-</div>
-
-<div class="modal" id="imgModal">
-    <div style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; justify-content:center;">
-        <img id="modalImg" src="" style="max-width:90%; max-height:75%; border-radius:12px; border:2px solid #fff;">
-        <button onclick="document.getElementById('imgModal').style.display='none'" 
-                style="margin-top:20px; background:#ff1744; color:#fff; font-weight:900; border:none; border-radius:12px; height:50px; width:200px; font-size:18px; cursor:pointer;">
-            ⬅ BACK
-        </button>
-    </div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     const vehicleSelect = document.getElementById('vehicleSelect');
+    const propertyInput = document.getElementById('propertyInput');
+    const svnInput = document.getElementById('svnInput');
     const regoInput = document.getElementById('regoInput');
+    const colourInput = document.getElementById('colourInput');
     const makeInput = document.getElementById('makeInput');
     const modelInput = document.getElementById('modelInput');
-    const colourInput = document.getElementById('colourInput');
-    const propertyInput = document.getElementById('propertyInput');
-    const feeInput = document.getElementById('feeInput');
-    const paymentSelect = document.getElementById('paymentSelect');
-    const idTypeSelect = document.getElementById('idTypeSelect');
-    const idNumInput = document.getElementById('idNumInput');
+
+    const ownerNameInput = document.getElementById('ownerNameInput');
+    const ownerAddressInput = document.getElementById('ownerAddressInput');
+    const ownerPhoneInput = document.getElementById('ownerPhoneInput');
+    const ownerEmailInput = document.getElementById('ownerEmailInput');
+
+    const releaseFeeInput = document.getElementById('releaseFeeInput');
+    const storageFeeInput = document.getElementById('storageFeeInput');
+
     const officerSelect = document.getElementById('officerSelect');
-    
+    const officerOtherInput = document.getElementById('officerOtherInput');
+
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
     const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
-    
+
     let yardVehicles = [];
-    let idPhotoBytes = "";
+    let idPhotos = [];
+    let ownerSigConfirmed = false;
+    let officerSigConfirmed = false;
 
     window.addEventListener('load', () => {
         loadYardVehicles();
         initCamera();
         initSignatureCanvas('ownerSigCanvas');
         initSignatureCanvas('officerSigCanvas');
+        setupLiveValidation();
     });
 
     refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
     });
 
+    function checkOfficerOther(selectElem) {
+        if (selectElem.value === "OTHER") {
+            officerOtherInput.style.display = 'block';
+            officerOtherInput.focus();
+        } else {
+            officerOtherInput.style.display = 'none';
+        }
+        validateForm();
+    }
+
     vehicleSelect.addEventListener('change', () => {
         const selectedRego = vehicleSelect.value;
         const veh = yardVehicles.find(v => v.rego === selectedRego);
         if (veh) {
+            propertyInput.value = veh.property || '';
             regoInput.value = veh.rego || '';
             makeInput.value = veh.make || '';
             modelInput.value = veh.model || '';
             colourInput.value = veh.colour || '';
-            propertyInput.value = veh.property || '';
         }
+        validateForm();
     });
 
     async function loadYardVehicles() {
@@ -288,22 +322,19 @@
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 640;
         canvas.height = videoElem.videoHeight || 480;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-        idPhotoBytes = canvas.toDataURL('image/jpeg', 0.8);
+        canvas.getContext('2d').drawImage(videoElem, 0, 0);
+        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+        idPhotos.push(b64);
 
-        thumbGallery.innerHTML = "";
         const img = document.createElement('img');
-        img.src = idPhotoBytes; 
+        img.src = b64; 
         img.className = 'thumb-img';
-        img.onclick = () => {
-            document.getElementById('modalImg').src = idPhotoBytes;
-            document.getElementById('imgModal').style.display = 'flex';
-        };
         thumbGallery.appendChild(img);
-        statusDiv.innerText = "✔ ID SNAP CAPTURED";
+        statusDiv.innerText = `✔ ID SNAP ${idPhotos.length} CAPTURED`;
+        validateForm();
     });
 
+    // SIGNATURE CANVAS LOGIC
     function initSignatureCanvas(canvasId) {
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
@@ -312,7 +343,7 @@
         function resizeCanvas() {
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
-            ctx.strokeStyle = "#00e676";
+            ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3;
             ctx.lineCap = "round";
         }
@@ -342,36 +373,110 @@
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
+        validateForm();
+    }
+
+    function confirmSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
+        statusDiv.innerText = "✔ SIGNATURE CONFIRMED";
+        validateForm();
+    }
+
+    // MANDATORY FIELD HIGHLIGHT VALIDATION
+    function setupLiveValidation() {
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        inputs.forEach(elem => {
+            elem.addEventListener('input', validateForm);
+            elem.addEventListener('change', validateForm);
+        });
+        validateForm();
+    }
+
+    function validateForm() {
+        let isValid = true;
+
+        function mark(elem, condition) {
+            if (condition) {
+                elem.classList.remove('field-missing');
+                elem.classList.add('field-valid');
+            } else {
+                elem.classList.remove('field-valid');
+                elem.classList.add('field-missing');
+                isValid = false;
+            }
+        }
+
+        mark(vehicleSelect, vehicleSelect.value !== "");
+        mark(svnInput, svnInput.value.trim() !== "");
+        mark(regoInput, regoInput.value.trim() !== "");
+        mark(colourInput, colourInput.value.trim() !== "");
+        mark(makeInput, makeInput.value.trim() !== "");
+        mark(modelInput, modelInput.value.trim() !== "");
+
+        mark(ownerNameInput, ownerNameInput.value.trim() !== "");
+        mark(ownerAddressInput, ownerAddressInput.value.trim() !== "");
+
+        const hasPhone = ownerPhoneInput.value.trim() !== "";
+        const hasEmail = ownerEmailInput.value.trim() !== "";
+        if (hasPhone || hasEmail) {
+            ownerPhoneInput.classList.remove('field-missing'); ownerPhoneInput.classList.add('field-valid');
+            ownerEmailInput.classList.remove('field-missing'); ownerEmailInput.classList.add('field-valid');
+        } else {
+            ownerPhoneInput.classList.add('field-missing');
+            ownerEmailInput.classList.add('field-missing');
+            isValid = false;
+        }
+
+        mark(releaseFeeInput, releaseFeeInput.value !== "");
+        mark(storageFeeInput, storageFeeInput.value !== "");
+
+        if (officerSelect.value === "OTHER") {
+            mark(officerOtherInput, officerOtherInput.value.trim() !== "");
+        }
+
+        if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
+
+        return isValid;
     }
 
     submitBtn.addEventListener('click', async () => {
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER OR SELECT REGO"; return; }
+        if (!validateForm()) {
+            statusDiv.innerText = "⚠️ FILL ALL HIGHLIGHTED FIELDS & CONFIRM SIGNATURES";
+            return;
+        }
 
         const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
         const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
+        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
 
         const payload = {
             action: 'process_release',
-            rego: rego,
+            rego: regoInput.value.trim().toUpperCase(),
+            svnNumber: svnInput.value.trim(),
             make: makeInput.value.trim(),
             model: modelInput.value.trim(),
             colour: colourInput.value.trim(),
             property: propertyInput.value.trim(),
-            fee: feeInput.value.trim(),
-            paymentType: paymentSelect.value,
-            idType: idTypeSelect.value,
-            idNumber: idNumInput.value.trim(),
-            officer: officerSelect.value,
-            idPhotoBytes: idPhotoBytes,
+            ownerName: ownerNameInput.value.trim(),
+            ownerAddress: ownerAddressInput.value.trim(),
+            ownerPhone: ownerPhoneInput.value.trim(),
+            ownerEmail: ownerEmailInput.value.trim(),
+            releaseFee: releaseFeeInput.value,
+            storageFee: storageFeeInput.value,
+            officer: finalOfficer,
+            idPhotos: idPhotos,
             ownerSigBytes: ownerSig,
             officerSigBytes: officerSig
         };
 
-        statusDiv.innerText = "PROCESSING RELEASE...";
+        statusDiv.innerText = "GENERATING INVOICE & RELEASING...";
         try {
             await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            statusDiv.innerText = "✔ VEHICLE RELEASED SUCCESS!";
+            statusDiv.innerText = "✔ PAID - VEHICLE RELEASED SUCCESS!";
         } catch(err) {
             statusDiv.innerText = "ERROR PROCESSING RELEASE";
         }
