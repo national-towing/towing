@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=11">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=11">
-    <link rel="manifest" href="manifest-tow.json?v=11">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=17">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=17">
+    <link rel="manifest" href="manifest-tow.json?v=17">
 
     <style>
         * { box-sizing: border-box; }
@@ -16,8 +16,12 @@
             margin: 0; padding: 14px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
         }
-        .header h1 { margin: 0 0 10px 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
         
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.9); }
+
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
@@ -34,7 +38,7 @@
         }
 
         .camera-box {
-            width: 100%; height: 280px; background: #000; border-radius: 14px; border: 2px solid #333;
+            width: 100%; height: 260px; background: #000; border-radius: 14px; border: 2px solid #333;
             margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
@@ -43,12 +47,12 @@
         .thumb-img { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 3px solid #ff1744; cursor: pointer; flex-shrink: 0; }
 
         .circle-cam-btn {
-            width: 120px; height: 120px; background: #00e676; border: 6px solid #fff; border-radius: 50%;
+            width: 110px; height: 110px; background: #00e676; border: 6px solid #fff; border-radius: 50%;
             margin: 16px auto 0 auto; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 8px 26px rgba(0, 230, 118, 0.6); cursor: pointer; user-select: none;
         }
         .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 92px; height: 92px; border-radius: 50%; border: 3px solid #000; }
+        .circle-cam-inner { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #000; }
 
         .submit-btn {
             background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
@@ -74,7 +78,10 @@
 </head>
 <body>
 
-<div class="header"><h1>TOW</h1></div>
+<div class="header-box">
+    <h1>TOW</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
+</div>
 
 <div class="nav-bar">
     <a href="run.html" class="nav-tile nav-run">RUN</a>
@@ -183,6 +190,7 @@
     const snapBtn = document.getElementById('snapBtn');
     const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
     const policelinkBtn = document.getElementById('policelinkBtn');
     const statusDiv = document.getElementById('status');
     const photos = [];
@@ -192,6 +200,12 @@
         if (urlParams.get('rego')) regoInput.value = urlParams.get('rego');
         loadProperties(urlParams.get('prop'));
         initCamera();
+    });
+
+    refreshBtn.addEventListener('click', () => {
+        regoInput.value = ""; makeInput.value = ""; modelInput.value = ""; colourInput.value = "";
+        photos.length = 0; thumbGallery.innerHTML = ""; statusDiv.innerText = "";
+        policelinkBtn.style.display = 'none';
     });
 
     async function loadProperties(selectedProp) {
