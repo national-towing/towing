@@ -12,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=33">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=33">
-    <link rel="manifest" href="manifest-mark.json?v=33">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=34">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=34">
+    <link rel="manifest" href="manifest-mark.json?v=34">
 
     <style>
         * { box-sizing: border-box; }
@@ -61,7 +61,6 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #000; }
 
-        /* FULL SCREEN TICK / CROSS FEEDBACK OVERLAY */
         #feedbackOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center;
@@ -95,7 +94,6 @@
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 </div>
 
-<!-- FULL OVERLAY FOR HUGE TICK / CROSS -->
 <div id="feedbackOverlay">
     <div id="feedbackIcon" class="feedback-symbol"></div>
 </div>
@@ -103,7 +101,6 @@
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
     
-    // PLATE RECOGNIZER API CREDENTIALS
     const ANPR_API_KEY = "74a8bb83a49461eef0266274ce63e1e198b4c888";
     const ANPR_API_URL = "https://api.platerecognizer.com/v1/plate-reader/";
 
@@ -155,7 +152,6 @@
         }, 1200);
     }
 
-    // HIGH-SPEED CROPPED ANPR LOOKUP
     async function scanPhotoForPlate(base64Image) {
         try {
             const byteString = atob(base64Image.split(',')[1]);
@@ -192,21 +188,21 @@
         const vw = videoElem.videoWidth || 1280;
         const vh = videoElem.videoHeight || 720;
 
-        // 1. FULL QUALITY PHOTO (SAVED TO GOOGLE DRIVE)
+        // 1. FULL QUALITY NATIVE ASPECT RATIO CANVAS (PRESERVES NATURAL SHAPE)
         const fullCanvas = document.createElement('canvas');
-        fullCanvas.width = 1024;
-        fullCanvas.height = 576;
-        fullCanvas.getContext('2d').drawImage(videoElem, 0, 0, 1024, 576);
-        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.6);
+        fullCanvas.width = vw;
+        fullCanvas.height = vh;
+        fullCanvas.getContext('2d').drawImage(videoElem, 0, 0, vw, vh);
+        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.65);
 
-        // 2. CENTER-CROPPED CANVAS (TINY FAST PAYLOAD FOR ANPR)
+        // 2. CENTER-CROPPED CANVAS FOR FAST ANPR SCANNING
         const cropCanvas = document.createElement('canvas');
         cropCanvas.width = 400;
         cropCanvas.height = 200;
         cropCanvas.getContext('2d').drawImage(
             videoElem, 
-            vw * 0.2, vh * 0.3, vw * 0.6, vh * 0.4, // Source crop rectangle
-            0, 0, 400, 200                         // Target size
+            vw * 0.2, vh * 0.3, vw * 0.6, vh * 0.4,
+            0, 0, 400, 200
         );
         const cropPhoto = cropCanvas.toDataURL('image/jpeg', 0.5);
 
@@ -221,13 +217,11 @@
             currentRego = await scanPhotoForPlate(cropPhoto);
         }
 
-        // FAIL: SHOW RED CROSS
         if (!currentRego) {
             showFeedback(false);
             return;
         }
 
-        // SUCCESS: SHOW GREEN TICK IMMEDIATELY
         showFeedback(true);
 
         const payload = {
@@ -237,7 +231,6 @@
             photoBytes: capturedPhoto
         };
 
-        // BACKGROUND DRIVE & MASTER LOG UPLOAD
         fetch(GOOGLE_SCRIPT_URL, { 
             method: 'POST', 
             body: JSON.stringify(payload) 
