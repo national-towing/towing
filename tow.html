@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=8">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=8">
-    <link rel="manifest" href="manifest-tow.json?v=8">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=9">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=9">
+    <link rel="manifest" href="manifest-tow.json?v=9">
 
     <style>
         * { box-sizing: border-box; }
@@ -57,11 +57,12 @@
         }
         .submit-btn:active { transform: scale(0.97); }
         
-        .copy-policelink-btn {
-            display: none; width: 100%; height: 54px; background: #2979ff; color: #fff; font-weight: 900;
+        .policelink-btn {
+            display: none; width: 100%; height: 56px; background: #2979ff; color: #fff; font-weight: 900;
             border: none; border-radius: 14px; margin-top: 14px; font-size: 20px; cursor: pointer; letter-spacing: 1px;
+            text-align: center; line-height: 56px; text-decoration: none;
         }
-        .copy-policelink-btn:active { transform: scale(0.97); }
+        .policelink-btn:active { transform: scale(0.97); }
 
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
@@ -119,7 +120,7 @@
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
     <button class="submit-btn" id="submitBtn">TOW</button>
-    <button class="copy-policelink-btn" id="copyPolicelinkBtn">📋 COPY POLICELINK DATA</button>
+    <a href="#" target="_blank" class="policelink-btn" id="policelinkBtn">🚨 OPEN POLICELINK FORM</a>
     <div id="status"></div>
 </div>
 
@@ -146,7 +147,7 @@
     const snapBtn = document.getElementById('snapBtn');
     const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
-    const copyPolicelinkBtn = document.getElementById('copyPolicelinkBtn');
+    const policelinkBtn = document.getElementById('policelinkBtn');
     const statusDiv = document.getElementById('status');
     const photos = [];
 
@@ -186,32 +187,25 @@
         if (!rego) { statusDiv.innerText = "ENTER REGO"; return; }
 
         const payload = {
-            action: 'log_tow', rego: rego, make: makeInput.value.trim(), model: modelInput.value.trim(),
-            colour: colourInput.value.trim(), bodyType: bodySelect.value, property: propertyInput.value.trim(), officer: "Driver"
+            action: 'log_tow', 
+            rego: rego, 
+            make: makeInput.value.trim(), 
+            model: modelInput.value.trim(),
+            colour: colourInput.value.trim(), 
+            bodyType: bodySelect.value, 
+            property: propertyInput.value.trim(), 
+            officer: "Driver"
         };
 
         statusDiv.innerText = "LOGGING TOW...";
         await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         statusDiv.innerText = "✔ VEHICLE TOWED SUCCESS!";
 
-        // SHOW AND CONFIGURE POLICELINK COPY BUTTON
-        copyPolicelinkBtn.style.display = 'block';
-        copyPolicelinkBtn.onclick = () => {
-            const policelinkData = {
-                rego: rego,
-                make: makeInput.value.trim(),
-                model: modelInput.value.trim(),
-                colour: colourInput.value.trim(),
-                body: bodySelect.value,
-                location: propertyInput.value.trim(),
-                holdingYard: "4 Lau Place, Ashmore QLD 4124",
-                company: "National Towing and Carparking Solutions",
-                phone: "0450605370"
-            };
-            navigator.clipboard.writeText(JSON.stringify(policelinkData));
-            copyPolicelinkBtn.innerText = "✔ COPIED TO CLIPBOARD!";
-            setTimeout(() => { copyPolicelinkBtn.innerText = "📋 COPY POLICELINK DATA"; }, 3000);
-        };
+        // CONFIGURE POLICELINK LAUNCH BUTTON WITH PRE-FILLED URL PARAMETERS
+        const qpsLaunchUrl = `https://www.police.qld.gov.au/policelink-reporting/tow-notification-launch?rego=${encodeURIComponent(rego)}&make=${encodeURIComponent(makeInput.value.trim())}&model=${encodeURIComponent(modelInput.value.trim())}&colour=${encodeURIComponent(colourInput.value.trim())}&location=${encodeURIComponent(propertyInput.value.trim())}`;
+        
+        policelinkBtn.href = qpsLaunchUrl;
+        policelinkBtn.style.display = 'block';
     });
 </script>
 </body>
