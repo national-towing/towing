@@ -12,9 +12,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=42">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=42">
-    <link rel="manifest" href="manifest-tow.json?v=42">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=43">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=43">
+    <link rel="manifest" href="manifest-tow.json?v=43">
 
     <style>
         * { box-sizing: border-box; }
@@ -119,8 +119,8 @@
     <div class="row-2">
         <div>
             <label>MAKE</label>
-            <select id="makeSelect">
-                <option value="">SELECT MAKE</option>
+            <select id="makeSelect" onchange="checkMakeOther(this)">
+                <option value="">MAKE</option>
                 <option value="Toyota">Toyota</option>
                 <option value="Holden">Holden</option>
                 <option value="Ford">Ford</option>
@@ -138,6 +138,7 @@
                 <option value="Jeep">Jeep</option>
                 <option value="Other">Other</option>
             </select>
+            <input type="text" id="makeOtherInput" placeholder="ENTER MAKE" style="display:none; margin-top:4px; font-size:18px;">
         </div>
         <div>
             <label>MODEL</label>
@@ -148,8 +149,8 @@
     <div class="row-2">
         <div>
             <label>COLOUR</label>
-            <select id="colourSelect">
-                <option value="">SELECT COLOUR</option>
+            <select id="colourSelect" onchange="checkColourOther(this)">
+                <option value="">COLOUR</option>
                 <option value="White">White</option>
                 <option value="Black">Black</option>
                 <option value="Silver">Silver</option>
@@ -165,6 +166,7 @@
                 <option value="Brown">Brown</option>
                 <option value="Other">Other</option>
             </select>
+            <input type="text" id="colourOtherInput" placeholder="ENTER COLOUR" style="display:none; margin-top:4px; font-size:18px;">
         </div>
         <div>
             <label>BODY TYPE</label>
@@ -203,8 +205,10 @@
     const regoInput = document.getElementById('regoInput');
     const stateSelect = document.getElementById('stateSelect');
     const makeSelect = document.getElementById('makeSelect');
+    const makeOtherInput = document.getElementById('makeOtherInput');
     const modelInput = document.getElementById('modelInput');
     const colourSelect = document.getElementById('colourSelect');
+    const colourOtherInput = document.getElementById('colourOtherInput');
     const bodyTypeSelect = document.getElementById('bodyTypeSelect');
     const officerSelect = document.getElementById('officerSelect');
     const officerOtherInput = document.getElementById('officerOtherInput');
@@ -242,6 +246,24 @@
                     break;
                 }
             }
+        }
+    }
+
+    function checkMakeOther(selectElem) {
+        if (selectElem.value === "Other") {
+            makeOtherInput.style.display = 'block';
+            makeOtherInput.focus();
+        } else {
+            makeOtherInput.style.display = 'none';
+        }
+    }
+
+    function checkColourOther(selectElem) {
+        if (selectElem.value === "Other") {
+            colourOtherInput.style.display = 'block';
+            colourOtherInput.focus();
+        } else {
+            colourOtherInput.style.display = 'none';
         }
     }
 
@@ -293,6 +315,8 @@
         const rego = regoInput.value.trim().toUpperCase();
         if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
 
+        const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
+        const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
         const driver = officerSelect.value === "Other" ? officerOtherInput.value.trim() : officerSelect.value;
 
         const payload = {
@@ -300,9 +324,9 @@
             property: propertySelect.value,
             rego: rego,
             state: stateSelect.value,
-            make: makeSelect.value,
+            make: finalMake,
             model: modelInput.value.trim(),
-            colour: colourSelect.value,
+            colour: finalColour,
             bodyType: bodyTypeSelect.value,
             officer: driver,
             photos: conditionPhotos
