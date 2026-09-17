@@ -10,9 +10,9 @@
 
     <title>PASSES</title>
     
-    <link rel="apple-touch-icon" href="icon-pass.png?v=702">
-    <link rel="icon" type="image/png" href="icon-pass.png?v=702">
-    <link rel="manifest" href="manifest-pass.json?v=702">
+    <link rel="apple-touch-icon" href="icon-pass.png?v=703">
+    <link rel="icon" type="image/png" href="icon-pass.png?v=703">
+    <link rel="manifest" href="manifest-pass.json?v=703">
 
     <style>
         * { box-sizing: border-box; }
@@ -309,22 +309,24 @@
             <div class="row-2">
                 <div>
                     <label>START DATE</label>
-                    <input type="date" id="startDateInput" value="${todayStr}" style="font-size:16px;">
+                    <input type="date" id="startDateInput" value="${todayStr}" style="font-size:16px;" onchange="onStartDateChange()">
                 </div>
                 <div>
                     <label>EXPIRY DATE</label>
-                    <input type="date" id="expiryDateInput" style="font-size:16px;">
+                    <input type="date" id="expiryDateInput" style="font-size:16px;" onchange="onExpiryDateChange()">
                 </div>
             </div>
 
             <label>DURATION (DAYS)</label>
-            <select id="durationSelect" onchange="updateExpiryFromDuration(this.value)">
+            <select id="durationSelect" onchange="onDurationSelectChange(this.value)">
                 <option value="1" selected>1 DAY</option>
                 <option value="2">2 DAYS</option>
                 <option value="3">3 DAYS</option>
+                <option value="4">4 DAYS</option>
+                <option value="5">5 DAYS</option>
+                <option value="6">6 DAYS</option>
                 <option value="7">7 DAYS</option>
-                <option value="14">14 DAYS</option>
-                <option value="30">30 DAYS</option>
+                <option value="custom" id="customOpt" style="display:none;">CUSTOM</option>
             </select>
 
             <label>NOTES / APARTMENT</label>
@@ -336,8 +338,8 @@
 
         passContainer.appendChild(formCard);
 
-        // INITIALIZE EXPIRY DATE TO TODAY + 1 DAY
-        updateExpiryFromDuration(1);
+        // INITIALIZE DEFAULT EXPIRY TO TODAY + 1 DAY
+        onDurationSelectChange("1");
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
             const propertySelect = document.getElementById('propertySelect');
@@ -367,7 +369,7 @@
                                 action: 'parse_pass_screenshot',
                                 property: selectedProp,
                                 photoBytes: reader.result,
-                                duration: durationSelect.value,
+                                duration: durationSelect.value === "custom" ? "1" : durationSelect.value,
                                 notes: notesInput.value.trim()
                             })
                         });
@@ -391,14 +393,18 @@
             if (!rego) { statusDiv.innerText = "ENTER REGO OR CHOOSE SCREENSHOT!"; return; }
 
             const startDate = startDateInput.value ? new Date(startDateInput.value) : new Date();
-            const expiryDate = expiryDateInput.value ? new Date(expiryDateInput.value) : new Date(startDate.getTime() + (parseInt(durationSelect.value, 10) * 24 * 60 * 60 * 1000));
+            const expiryDate = expiryDateInput.value ? new Date(expiryDateInput.value) : new Date(startDate.getTime() + (24 * 60 * 60 * 1000));
+
+            // CALCULATE DURATION IN DAYS
+            const diffTime = Math.abs(expiryDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
             const payload = {
                 action: 'add_pass',
                 property: selectedProp,
                 rego: rego,
                 startDate: startDate,
-                duration: durationSelect.value,
+                duration: String(diffDays),
                 expiryDate: expiryDate,
                 notes: notesInput.value.trim()
             };
@@ -419,14 +425,46 @@
         });
     }
 
-    function updateExpiryFromDuration(days) {
+    // BI-DIRECTIONAL DATE & DURATION CALCULATIONS
+    function onDurationSelectChange(val) {
+        if (val === "custom") return;
         const startDateInput = document.getElementById('startDateInput');
         const expiryDateInput = document.getElementById('expiryDateInput');
         if (!startDateInput || !expiryDateInput) return;
 
         const start = startDateInput.value ? new Date(startDateInput.value) : new Date();
-        const exp = new Date(start.getTime() + (parseInt(days, 10) * 24 * 60 * 60 * 1000));
+        const days = parseInt(val, 10);
+        const exp = new Date(start.getTime() + (days * 24 * 60 * 60 * 1000));
         expiryDateInput.value = exp.toISOString().split('T')[0];
+    }
+
+    function onStartDateChange() {
+        const durationSelect = document.getElementById('durationSelect');
+        onDurationSelectChange(durationSelect.value);
+    }
+
+    function onExpiryDateChange() {
+        const startDateInput = document.getElementById('startDateInput');
+        const expiryDateInput = document.getElementById('expiryDateInput');
+        const durationSelect = document.getElementById('durationSelect');
+        const customOpt = document.getElementById('customOpt');
+
+        if (!startDateInput.value || !expiryDateInput.value) return;
+
+        const start = new Date(startDateInput.value);
+        const exp = new Date(expiryDateInput.value);
+        
+        const diffTime = exp - start;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays >= 1 && diffDays <= 7) {
+            durationSelect.value = String(diffDays);
+            customOpt.style.display = "none";
+        } else {
+            customOpt.innerText = `CUSTOM (${diffDays} DAYS)`;
+            customOpt.style.display = "block";
+            durationSelect.value = "custom";
+        }
     }
 </script>
 </body>
