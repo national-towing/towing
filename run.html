@@ -12,9 +12,9 @@
 
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=999">
-    <link rel="icon" type="image/png" href="icon-run.png?v=999">
-    <link rel="manifest" href="manifest-run.json?v=999">
+    <link rel="apple-touch-icon" href="icon-run.png?v=100">
+    <link rel="icon" type="image/png" href="icon-run.png?v=100">
+    <link rel="manifest" href="manifest-run.json?v=100">
 
     <style>
         * { box-sizing: border-box; }
@@ -77,10 +77,10 @@
 </div>
 
 <div class="nav-bar">
-    <a href="run.html?v=999" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=999" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=999" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=999" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="container" id="runContainer">
@@ -102,7 +102,7 @@
 
     async function loadTowRun() {
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run&nocache=" + Date.now());
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run");
             const data = await res.json();
 
             if (!data || data.length === 0) {
@@ -133,33 +133,9 @@
                 });
             });
 
-            // PROPERTY SORTING: HIGHEST RED COUNT -> HIGHEST ORANGE COUNT -> HIGHEST GREEN COUNT
-            const sortedProperties = Object.keys(groups).sort((a, b) => {
-                let redA = 0, waitA = 0, passA = 0;
-                let redB = 0, waitB = 0, passB = 0;
-
-                groups[a].forEach(c => {
-                    if (c.status === "READY") redA++;
-                    else if (c.status === "WAIT") waitA++;
-                    else if (c.status === "PASS") passA++;
-                });
-
-                groups[b].forEach(c => {
-                    if (c.status === "READY") redB++;
-                    else if (c.status === "WAIT") waitB++;
-                    else if (c.status === "PASS") passB++;
-                });
-
-                if (redB !== redA) return redB - redA;
-                if (waitB !== waitA) return waitB - waitA;
-                if (passB !== passA) return passB - passA;
-
-                return a.localeCompare(b);
-            });
-
             runContainer.innerHTML = "";
 
-            sortedProperties.forEach(prop => {
+            Object.keys(groups).forEach(prop => {
                 const propBox = document.createElement('div');
                 propBox.className = 'prop-group';
 
@@ -167,9 +143,6 @@
                 title.className = 'prop-title';
                 title.innerText = prop;
                 propBox.appendChild(title);
-
-                const statusOrder = { "READY": 1, "WAIT": 2, "PASS": 3 };
-                groups[prop].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
                 groups[prop].forEach(car => {
                     const tile = document.createElement('a');
