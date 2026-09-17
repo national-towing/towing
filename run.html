@@ -10,11 +10,11 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <title>TOW RUN</title>
+    <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=48">
-    <link rel="icon" type="image/png" href="icon-run.png?v=48">
-    <link rel="manifest" href="manifest-run.json?v=48">
+    <link rel="apple-touch-icon" href="icon-run.png?v=50">
+    <link rel="icon" type="image/png" href="icon-run.png?v=50">
+    <link rel="manifest" href="manifest-run.json?v=50">
 
     <style>
         * { box-sizing: border-box; }
@@ -72,7 +72,7 @@
 <body>
 
 <div class="header-box">
-    <h1>TOW RUN</h1>
+    <h1>RUN</h1>
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
@@ -84,7 +84,7 @@
 </div>
 
 <div class="container" id="runContainer">
-    <div class="empty-msg">LOADING TOW RUN...</div>
+    <div class="empty-msg">LOADING RUN...</div>
 </div>
 
 <script>
@@ -106,7 +106,7 @@
             const data = await res.json();
 
             if (!data || data.length === 0) {
-                runContainer.innerHTML = "<div class='empty-msg'>NO CARS ON TOW RUN</div>";
+                runContainer.innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
                 return;
             }
 
@@ -133,7 +133,7 @@
                 });
             });
 
-            // PROPERTY SORTING ONLY: HIGHEST RED COUNT -> HIGHEST ORANGE COUNT -> HIGHEST GREEN COUNT
+            // PROPERTY SORTING: HIGHEST RED COUNT -> HIGHEST ORANGE COUNT -> HIGHEST GREEN COUNT
             const sortedProperties = Object.keys(groups).sort((a, b) => {
                 let redA = 0, waitA = 0, passA = 0;
                 let redB = 0, waitB = 0, passB = 0;
@@ -190,7 +190,7 @@
                             <div class="car-rego">${car.rego}</div>
                             <div class="car-times">MKD: ${car.markedTime} | EXP: ${car.expiryTime}</div>
                         </div>
-                        <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW READY" : car.status}</div>
+                        <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
                     `;
 
                     propBox.appendChild(tile);
@@ -200,7 +200,7 @@
             });
 
         } catch(e) {
-            runContainer.innerHTML = "<div class='empty-msg'>ERROR LOADING TOW RUN</div>";
+            runContainer.innerHTML = "<div class='empty-msg'>ERROR LOADING RUN</div>";
         }
     }
 </script>
