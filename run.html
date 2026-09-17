@@ -12,9 +12,9 @@
 
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=100">
-    <link rel="icon" type="image/png" href="icon-run.png?v=100">
-    <link rel="manifest" href="manifest-run.json?v=100">
+    <link rel="apple-touch-icon" href="icon-run.png?v=500">
+    <link rel="icon" type="image/png" href="icon-run.png?v=500">
+    <link rel="manifest" href="manifest-run.json?v=500">
 
     <style>
         * { box-sizing: border-box; }
@@ -38,8 +38,33 @@
 
         .container { width: 100%; max-width: 440px; }
 
-        .prop-group { margin-bottom: 18px; }
-        .prop-title { font-size: 20px; font-weight: 900; color: #ffab00; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; padding-left: 4px; border-left: 4px solid #ffab00; }
+        /* PROPERTY SUMMARY TILE */
+        .prop-summary-card {
+            background: #1e1e1e; border-radius: 16px; padding: 14px; margin-bottom: 12px;
+            border: 1px solid #333; display: flex; align-items: center; justify-content: space-between;
+        }
+        .prop-name {
+            font-size: 19px; font-weight: 900; color: #ffab00; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; flex: 1; padding-right: 8px;
+        }
+
+        .count-btns { display: flex; gap: 6px; }
+        .cnt-btn {
+            padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 900;
+            display: flex; align-items: center; gap: 4px; cursor: pointer; border: none; text-decoration: none;
+        }
+        .cnt-btn:active { transform: scale(0.92); }
+
+        .btn-red { background: #ff1744; color: #fff; }
+        .btn-orange { background: #ffab00; color: #000; }
+        .btn-blue { background: #29b6f6; color: #000; }
+
+        /* DETAIL VIEW STYLES */
+        .back-btn {
+            background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px;
+            border-radius: 10px; font-weight: 900; margin-bottom: 14px; cursor: pointer; display: inline-block;
+        }
+        .detail-title { font-size: 24px; font-weight: 900; color: #ffab00; margin-bottom: 12px; text-transform: uppercase; }
 
         .car-tile {
             background: #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 10px;
@@ -50,12 +75,12 @@
 
         .tile-ready { border-color: #ff1744; background: #2a1215; }
         .tile-wait { border-color: #ffab00; background: #2a2212; }
-        .tile-pass { border-color: #00e676; background: #122a18; }
+        .tile-pass { border-color: #29b6f6; background: #0d212d; }
 
         .car-rego { font-size: 28px; font-weight: 900; letter-spacing: 1px; }
         .tile-ready .car-rego { color: #ff1744; }
         .tile-wait .car-rego { color: #ffab00; }
-        .tile-pass .car-rego { color: #00e676; }
+        .tile-pass .car-rego { color: #29b6f6; }
 
         .car-times { font-size: 12px; color: #aaa; margin-top: 4px; font-weight: 700; }
 
@@ -64,7 +89,7 @@
         }
         .badge-ready { background: #ff1744; color: #fff; }
         .badge-wait { background: #ffab00; color: #000; }
-        .badge-pass { background: #00e676; color: #000; }
+        .badge-pass { background: #29b6f6; color: #000; }
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
     </style>
@@ -93,6 +118,9 @@
     const runContainer = document.getElementById('runContainer');
     const refreshBtn = document.getElementById('refreshBtn');
 
+    let rawData = [];
+    let propertyGroups = {};
+
     window.addEventListener('load', loadTowRun);
 
     refreshBtn.addEventListener('click', () => {
@@ -103,19 +131,19 @@
     async function loadTowRun() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run");
-            const data = await res.json();
+            rawData = await res.json();
 
-            if (!data || data.length === 0) {
+            if (!rawData || rawData.length === 0) {
                 runContainer.innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
                 return;
             }
 
             const nowMs = Date.now();
-            const groups = {};
+            propertyGroups = {};
 
-            data.forEach(item => {
+            rawData.forEach(item => {
                 const prop = item.property || "GENERAL";
-                if (!groups[prop]) groups[prop] = [];
+                if (!propertyGroups[prop]) propertyGroups[prop] = [];
 
                 let status = "WAIT";
                 if (item.pass === "YES") {
@@ -124,7 +152,7 @@
                     status = "READY";
                 }
 
-                groups[prop].push({
+                propertyGroups[prop].push({
                     rego: item.rego,
                     markedTime: item.markedTime,
                     expiryTime: item.expiryTime,
@@ -133,48 +161,106 @@
                 });
             });
 
-            runContainer.innerHTML = "";
-
-            Object.keys(groups).forEach(prop => {
-                const propBox = document.createElement('div');
-                propBox.className = 'prop-group';
-
-                const title = document.createElement('div');
-                title.className = 'prop-title';
-                title.innerText = prop;
-                propBox.appendChild(title);
-
-                groups[prop].forEach(car => {
-                    const tile = document.createElement('a');
-                    
-                    if (car.status === "READY") {
-                        tile.className = 'car-tile tile-ready';
-                        tile.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`;
-                    } else if (car.status === "WAIT") {
-                        tile.className = 'car-tile tile-wait';
-                        tile.href = '#';
-                    } else {
-                        tile.className = 'car-tile tile-pass';
-                        tile.href = '#';
-                    }
-
-                    tile.innerHTML = `
-                        <div>
-                            <div class="car-rego">${car.rego}</div>
-                            <div class="car-times">MKD: ${car.markedTime} | EXP: ${car.expiryTime}</div>
-                        </div>
-                        <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
-                    `;
-
-                    propBox.appendChild(tile);
-                });
-
-                runContainer.appendChild(propBox);
-            });
+            renderSummaryView();
 
         } catch(e) {
             runContainer.innerHTML = "<div class='empty-msg'>ERROR LOADING RUN</div>";
         }
+    }
+
+    // MAIN LANDING PAGE: ONE SINGLE SUMMARY TILE PER PROPERTY
+    function renderSummaryView() {
+        const sortedProps = Object.keys(propertyGroups).sort((a, b) => {
+            let redA = propertyGroups[a].filter(c => c.status === "READY").length;
+            let redB = propertyGroups[b].filter(c => c.status === "READY").length;
+            if (redB !== redA) return redB - redA;
+
+            let orangeA = propertyGroups[a].filter(c => c.status === "WAIT").length;
+            let orangeB = propertyGroups[b].filter(c => c.status === "WAIT").length;
+            if (orangeB !== orangeA) return orangeB - orangeA;
+
+            let blueA = propertyGroups[a].filter(c => c.status === "PASS").length;
+            let blueB = propertyGroups[b].filter(c => c.status === "PASS").length;
+            if (blueB !== blueA) return blueB - blueA;
+
+            return a.localeCompare(b);
+        });
+
+        runContainer.innerHTML = "";
+
+        sortedProps.forEach(prop => {
+            const redCount = propertyGroups[prop].filter(c => c.status === "READY").length;
+            const orangeCount = propertyGroups[prop].filter(c => c.status === "WAIT").length;
+            const blueCount = propertyGroups[prop].filter(c => c.status === "PASS").length;
+
+            const card = document.createElement('div');
+            card.className = 'prop-summary-card';
+
+            card.innerHTML = `
+                <div class="prop-name" onclick="renderDetailView('${prop}', 'ALL')">${prop}</div>
+                <div class="count-btns">
+                    <button class="cnt-btn btn-red" onclick="renderDetailView('${prop}', 'READY')">TOW ${redCount}</button>
+                    <button class="cnt-btn btn-orange" onclick="renderDetailView('${prop}', 'WAIT')">WAIT ${orangeCount}</button>
+                    <button class="cnt-btn btn-blue" onclick="renderDetailView('${prop}', 'PASS')">PASS ${blueCount}</button>
+                </div>
+            `;
+
+            runContainer.appendChild(card);
+        });
+    }
+
+    // DETAIL VIEW: LIST CARS FOR SELECTED PROPERTY (OPTIONALLY FILTERED BY READY/WAIT/PASS)
+    function renderDetailView(prop, filterStatus) {
+        runContainer.innerHTML = "";
+
+        const backBtn = document.createElement('div');
+        backBtn.className = 'back-btn';
+        backBtn.innerText = "← BACK TO ALL PROPERTIES";
+        backBtn.onclick = renderSummaryView;
+        runContainer.appendChild(backBtn);
+
+        const title = document.createElement('div');
+        title.className = 'detail-title';
+        title.innerText = `${prop} ${filterStatus !== 'ALL' ? '(' + filterStatus + ')' : ''}`;
+        runContainer.appendChild(title);
+
+        let cars = propertyGroups[prop] || [];
+        if (filterStatus !== 'ALL') {
+            cars = cars.filter(c => c.status === filterStatus);
+        }
+
+        const statusOrder = { "READY": 1, "WAIT": 2, "PASS": 3 };
+        cars.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+
+        if (cars.length === 0) {
+            runContainer.innerHTML += `<div class="empty-msg">NO ${filterStatus} VEHICLES</div>`;
+            return;
+        }
+
+        cars.forEach(car => {
+            const tile = document.createElement('a');
+            
+            if (car.status === "READY") {
+                tile.className = 'car-tile tile-ready';
+                tile.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`;
+            } else if (car.status === "WAIT") {
+                tile.className = 'car-tile tile-wait';
+                tile.href = '#';
+            } else {
+                tile.className = 'car-tile tile-pass';
+                tile.href = '#';
+            }
+
+            tile.innerHTML = `
+                <div>
+                    <div class="car-rego">${car.rego}</div>
+                    <div class="car-times">MKD: ${car.markedTime} | EXP: ${car.expiryTime}</div>
+                </div>
+                <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
+            `;
+
+            runContainer.appendChild(tile);
+        });
     }
 </script>
 </body>
