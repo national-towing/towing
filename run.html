@@ -12,9 +12,9 @@
 
     <title>TOW RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=46">
-    <link rel="icon" type="image/png" href="icon-run.png?v=46">
-    <link rel="manifest" href="manifest-run.json?v=46">
+    <link rel="apple-touch-icon" href="icon-run.png?v=47">
+    <link rel="icon" type="image/png" href="icon-run.png?v=47">
+    <link rel="manifest" href="manifest-run.json?v=47">
 
     <style>
         * { box-sizing: border-box; }
@@ -133,19 +133,19 @@
                 });
             });
 
-            // SORT PROPERTIES STRICTLY BY MOST TOW READY (RED) CARS FIRST
+            // STRICT PROPERTY SORTING: HIGHEST RED COUNT -> HIGHEST ORANGE COUNT -> HIGHEST GREEN COUNT
             const sortedProperties = Object.keys(groups).sort((a, b) => {
-                const countRedA = groups[a].filter(c => c.status === "READY").length;
-                const countRedB = groups[b].filter(c => c.status === "READY").length;
-                if (countRedB !== countRedA) return countRedB - countRedA;
+                const redA = groups[a].reduce((acc, c) => acc + (c.status === "READY" ? 1 : 0), 0);
+                const redB = groups[b].reduce((acc, c) => acc + (c.status === "READY" ? 1 : 0), 0);
+                if (redB !== redA) return redB - redA;
 
-                const countWaitA = groups[a].filter(c => c.status === "WAIT").length;
-                const countWaitB = groups[b].filter(c => c.status === "WAIT").length;
-                if (countWaitB !== countWaitA) return countWaitB - countWaitA;
+                const waitA = groups[a].reduce((acc, c) => acc + (c.status === "WAIT" ? 1 : 0), 0);
+                const waitB = groups[b].reduce((acc, c) => acc + (c.status === "WAIT" ? 1 : 0), 0);
+                if (waitB !== waitA) return waitB - waitA;
 
-                const countPassA = groups[a].filter(c => c.status === "PASS").length;
-                const countPassB = groups[b].filter(c => c.status === "PASS").length;
-                if (countPassB !== countPassA) return countPassB - countPassA;
+                const passA = groups[a].reduce((acc, c) => acc + (c.status === "PASS" ? 1 : 0), 0);
+                const passB = groups[b].reduce((acc, c) => acc + (c.status === "PASS" ? 1 : 0), 0);
+                if (passB !== passA) return passB - passA;
 
                 return a.localeCompare(b);
             });
@@ -161,7 +161,7 @@
                 title.innerText = prop;
                 propBox.appendChild(title);
 
-                // SORT CARS WITHIN PROPERTY GROUP: READY -> WAIT -> PASS
+                // CAR TILES INSIDE EACH PROPERTY SORTED: READY -> WAIT -> PASS
                 const statusOrder = { "READY": 1, "WAIT": 2, "PASS": 3 };
                 groups[prop].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
