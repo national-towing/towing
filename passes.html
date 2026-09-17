@@ -10,9 +10,9 @@
 
     <title>PASSES</title>
     
-    <link rel="apple-touch-icon" href="icon-pass.png?v=701">
-    <link rel="icon" type="image/png" href="icon-pass.png?v=701">
-    <link rel="manifest" href="manifest-pass.json?v=701">
+    <link rel="apple-touch-icon" href="icon-pass.png?v=702">
+    <link rel="icon" type="image/png" href="icon-pass.png?v=702">
+    <link rel="manifest" href="manifest-pass.json?v=702">
 
     <style>
         * { box-sizing: border-box; }
@@ -80,6 +80,10 @@
             background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
             -webkit-appearance: none;
         }
+
+        .row-2 { display: flex; gap: 10px; }
+        .row-2 > div { flex: 1; }
+
         .submit-btn {
             background: #ab47bc; color: #fff; font-weight: 900; border: none; border-radius: 14px;
             height: 60px; font-size: 24px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
@@ -280,25 +284,41 @@
         backBtn.onclick = renderSummaryView;
         passContainer.appendChild(backBtn);
 
-        let propOptionsHtml = "";
+        let propOptionsHtml = "<option value=''>SELECT PROPERTY (REQUIRED)</option>";
         cachedProperties.forEach(p => {
             propOptionsHtml += `<option value="${p.name}">${p.name}</option>`;
         });
 
+        const todayStr = new Date().toISOString().split('T')[0];
+
         const formCard = document.createElement('div');
         formCard.className = 'card';
         formCard.innerHTML = `
-            <label>AUTO-FILL FROM SCREENSHOT</label>
-            <input type="file" id="ocrInput" accept="image/*" style="font-size:14px; padding:10px; height:auto;">
-
-            <label>PROPERTY</label>
+            <label style="color:#ffab00;">PROPERTY (REQUIRED)</label>
             <select id="propertySelect">${propOptionsHtml}</select>
 
+            <label>OPTION 1: UPLOAD SCREENSHOT (MULTI-VEHICLE)</label>
+            <input type="file" id="ocrInput" accept="image/*" style="font-size:14px; padding:10px; height:auto;">
+
+            <hr style="border:0; border-top:1px solid #333; margin:16px 0;">
+
+            <label>OPTION 2: MANUAL ENTRY</label>
             <label>VEHICLE REGO</label>
             <input type="text" id="regoInput" placeholder="REGO" style="text-transform:uppercase; color:#ab47bc;">
 
+            <div class="row-2">
+                <div>
+                    <label>START DATE</label>
+                    <input type="date" id="startDateInput" value="${todayStr}" style="font-size:16px;">
+                </div>
+                <div>
+                    <label>EXPIRY DATE</label>
+                    <input type="date" id="expiryDateInput" style="font-size:16px;">
+                </div>
+            </div>
+
             <label>DURATION (DAYS)</label>
-            <select id="durationSelect">
+            <select id="durationSelect" onchange="updateExpiryFromDuration(this.value)">
                 <option value="1" selected>1 DAY</option>
                 <option value="2">2 DAYS</option>
                 <option value="3">3 DAYS</option>
@@ -316,71 +336,97 @@
 
         passContainer.appendChild(formCard);
 
-        document.getElementById('ocrInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerText = "READING SCREENSHOT...";
-
-            const reader = new FileReader();
-            reader.onload = async () => {
-                const b64 = reader.result;
-                try {
-                    const res = await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'parse_pass_screenshot', photoBytes: b64 })
-                    });
-                    const data = await res.json();
-
-                    if (data.status === "SUCCESS") {
-                        if (data.rego) {
-                            document.getElementById('regoInput').value = data.rego;
-                        }
-                        statusDiv.innerText = `✔ AUTO-FILLED REGO: ${data.rego || 'Check image'}`;
-                    } else {
-                        statusDiv.innerText = "COULD NOT READ TEXT - ENTER MANUALLY";
-                    }
-                } catch(err) {
-                    statusDiv.innerText = "OCR FAILED - ENTER MANUALLY";
-                }
-            };
-            reader.readAsDataURL(file);
-        });
+        // INITIALIZE EXPIRY DATE TO TODAY + 1 DAY
+        updateExpiryFromDuration(1);
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
-            const regoInput = document.getElementById('regoInput');
             const propertySelect = document.getElementById('propertySelect');
+            const ocrInput = document.getElementById('ocrInput');
+            const regoInput = document.getElementById('regoInput');
+            const startDateInput = document.getElementById('startDateInput');
+            const expiryDateInput = document.getElementById('expiryDateInput');
             const durationSelect = document.getElementById('durationSelect');
             const notesInput = document.getElementById('notesInput');
             const statusDiv = document.getElementById('status');
 
-            const rego = regoInput.value.trim().toUpperCase();
-            if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
+            const selectedProp = propertySelect.value;
+            if (!selectedProp) {
+                statusDiv.innerText = "SELECT A PROPERTY FIRST!";
+                return;
+            }
 
-            const now = new Date();
-            const durationDays = parseInt(durationSelect.value, 10);
-            const expiryDate = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+            // BRANCH A: SCREENSHOT OCR PROCESSING
+            if (ocrInput.files && ocrInput.files[0]) {
+                statusDiv.innerText = "READING SCREENSHOT & ADDING PASSES...";
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        const res = await fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action: 'parse_pass_screenshot',
+                                property: selectedProp,
+                                photoBytes: reader.result,
+                                duration: durationSelect.value,
+                                notes: notesInput.value.trim()
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.status === "SUCCESS") {
+                            statusDiv.innerText = `✔ ADDED ${data.addedCount} PASSES (${data.skippedCount} DUPLICATES SKIPPED)`;
+                            setTimeout(loadData, 1500);
+                        } else {
+                            statusDiv.innerText = "ERROR: " + data.message;
+                        }
+                    } catch(err) {
+                        statusDiv.innerText = "OCR FAILED - CHECK NETWORK";
+                    }
+                };
+                reader.readAsDataURL(ocrInput.files[0]);
+                return;
+            }
+
+            // BRANCH B: MANUAL SINGLE PASS ENTRY
+            const rego = regoInput.value.trim().toUpperCase();
+            if (!rego) { statusDiv.innerText = "ENTER REGO OR CHOOSE SCREENSHOT!"; return; }
+
+            const startDate = startDateInput.value ? new Date(startDateInput.value) : new Date();
+            const expiryDate = expiryDateInput.value ? new Date(expiryDateInput.value) : new Date(startDate.getTime() + (parseInt(durationSelect.value, 10) * 24 * 60 * 60 * 1000));
 
             const payload = {
                 action: 'add_pass',
-                property: propertySelect.value,
+                property: selectedProp,
                 rego: rego,
-                startDate: now,
+                startDate: startDate,
                 duration: durationSelect.value,
                 expiryDate: expiryDate,
                 notes: notesInput.value.trim()
             };
 
-            statusDiv.innerText = "ADDING PASS...";
+            statusDiv.innerText = "ADDING MANUAL PASS...";
             try {
-                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                statusDiv.innerText = "✔ PASS ADDED SUCCESS!";
-                setTimeout(loadData, 1000);
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.status === "SUCCESS") {
+                    statusDiv.innerText = "✔ PASS ADDED SUCCESS!";
+                    setTimeout(loadData, 1000);
+                } else {
+                    statusDiv.innerText = "ERROR: " + data.message;
+                }
             } catch(err) {
                 statusDiv.innerText = "ERROR ADDING PASS (OFFLINE)";
             }
         });
+    }
+
+    function updateExpiryFromDuration(days) {
+        const startDateInput = document.getElementById('startDateInput');
+        const expiryDateInput = document.getElementById('expiryDateInput');
+        if (!startDateInput || !expiryDateInput) return;
+
+        const start = startDateInput.value ? new Date(startDateInput.value) : new Date();
+        const exp = new Date(start.getTime() + (parseInt(days, 10) * 24 * 60 * 60 * 1000));
+        expiryDateInput.value = exp.toISOString().split('T')[0];
     }
 </script>
 </body>
