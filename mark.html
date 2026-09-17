@@ -7,14 +7,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=34">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=34">
-    <link rel="manifest" href="manifest-mark.json?v=34">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=600">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=600">
+    <link rel="manifest" href="manifest-mark.json?v=600">
 
     <style>
         * { box-sizing: border-box; }
@@ -27,7 +25,12 @@
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
-        .icon-btn:active { transform: scale(0.9); }
+
+        .sync-badge {
+            background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
+            padding: 6px 12px; border-radius: 20px; margin-bottom: 10px; display: none;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
 
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
@@ -36,36 +39,38 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; position: relative; }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         
-        label { font-size: 13px; text-transform: uppercase; color: #aaa; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 28px; font-weight: 900; margin-top: 6px; outline: none;
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none;
         }
 
         .camera-box {
-            width: 100%; height: 260px; background: #000; border-radius: 14px; border: 2px solid #333;
-            margin-top: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 220px; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        .thumb-gallery { display: flex; gap: 10px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
-        .thumb-img { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 3px solid #ffab00; cursor: pointer; flex-shrink: 0; }
+        .thumb-preview { width: 100%; height: 220px; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin-top: 10px; }
 
         .circle-cam-btn {
-            width: 110px; height: 110px; background: #00e676; border: 6px solid #fff; border-radius: 50%;
-            margin: 16px auto 0 auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 26px rgba(0, 230, 118, 0.6); cursor: pointer; user-select: none;
+            width: 90px; height: 90px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
+            margin: 14px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 18px rgba(255, 171, 0, 0.4); cursor: pointer; user-select: none;
         }
         .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #000; }
+        .circle-cam-inner { width: 66px; height: 66px; border-radius: 50%; border: 2px solid #000; }
 
-        #feedbackOverlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center;
+        .submit-btn {
+            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
         }
-        .feedback-symbol { font-size: 160px; line-height: 1; user-select: none; }
+        .submit-btn:active { transform: scale(0.97); }
+
+        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
     </style>
 </head>
 <body>
@@ -74,6 +79,8 @@
     <h1>MARK</h1>
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
+
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-bar">
     <a href="run.html" class="nav-tile nav-run">RUN</a>
@@ -84,56 +91,71 @@
 
 <div class="card">
     <label>PROPERTY</label>
-    <select id="propertySelect"><option value="">LOADING...</option></select>
+    <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
 
     <label>REGO</label>
     <input type="text" id="regoInput" placeholder="REGO" style="color:#ffab00; text-transform:uppercase;">
 
-    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
-    <div class="thumb-gallery" id="thumbGallery"></div>
+    <label>MARKING PHOTO</label>
+    <div class="camera-box" id="camBox"><video id="videoElem" autoplay playsinline></video></div>
+    <img class="thumb-preview" id="thumbPreview">
+    
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-</div>
 
-<div id="feedbackOverlay">
-    <div id="feedbackIcon" class="feedback-symbol"></div>
+    <button class="submit-btn" id="submitBtn">LOG MARK</button>
+    <div id="status"></div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-    
-    const ANPR_API_KEY = "74a8bb83a49461eef0266274ce63e1e198b4c888";
-    const ANPR_API_URL = "https://api.platerecognizer.com/v1/plate-reader/";
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    }
 
     const propertySelect = document.getElementById('propertySelect');
     const regoInput = document.getElementById('regoInput');
     const videoElem = document.getElementById('videoElem');
+    const camBox = document.getElementById('camBox');
+    const thumbPreview = document.getElementById('thumbPreview');
     const snapBtn = document.getElementById('snapBtn');
-    const thumbGallery = document.getElementById('thumbGallery');
+    const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
-    const feedbackOverlay = document.getElementById('feedbackOverlay');
-    const feedbackIcon = document.getElementById('feedbackIcon');
+    const statusDiv = document.getElementById('status');
+    const syncBadge = document.getElementById('syncBadge');
+    const queueCount = document.getElementById('queueCount');
+
     let capturedPhoto = "";
+    let isSubmitting = false;
 
-    window.addEventListener('load', () => {
-        loadProperties();
+    window.addEventListener('load', async () => {
+        await loadProperties();
         initCamera();
+        updateQueueUI();
+        window.addEventListener('online', processOfflineQueue);
     });
 
-    refreshBtn.addEventListener('click', () => {
-        window.location.reload(true);
-    });
+    refreshBtn.addEventListener('click', () => { window.location.reload(true); });
 
     async function loadProperties() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
             const data = await res.json();
-            propertySelect.innerHTML = "";
-            data.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.name; opt.innerText = p.name;
-                propertySelect.appendChild(opt);
-            });
-        } catch(e) {}
+            localStorage.setItem('cached_properties', JSON.stringify(data));
+            populatePropertiesUI(data);
+        } catch(e) {
+            const cached = localStorage.getItem('cached_properties');
+            if (cached) populatePropertiesUI(JSON.parse(cached));
+        }
+    }
+
+    function populatePropertiesUI(data) {
+        propertySelect.innerHTML = "";
+        data.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.name; opt.innerText = p.name;
+            propertySelect.appendChild(opt);
+        });
     }
 
     async function initCamera() {
@@ -143,109 +165,95 @@
         } catch(e) {}
     }
 
-    function showFeedback(success) {
-        feedbackIcon.innerHTML = success ? "✔️" : "❌";
-        feedbackIcon.style.color = success ? "#00e676" : "#ff1744";
-        feedbackOverlay.style.display = "flex";
-        setTimeout(() => {
-            feedbackOverlay.style.display = "none";
-        }, 1200);
-    }
+    snapBtn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
 
-    async function scanPhotoForPlate(base64Image) {
-        try {
-            const byteString = atob(base64Image.split(',')[1]);
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-            const blob = new Blob([ab], { type: 'image/jpeg' });
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElem.videoWidth || 1024;
+        canvas.height = videoElem.videoHeight || 576;
+        canvas.getContext('2d').drawImage(videoElem, 0, 0);
+        capturedPhoto = canvas.toDataURL('image/jpeg', 0.65);
 
-            const formData = new FormData();
-            formData.append('upload', blob);
-            formData.append('regions', 'au');
+        thumbPreview.src = capturedPhoto;
+        thumbPreview.style.display = 'block';
+        camBox.style.display = 'none';
 
-            const response = await fetch(ANPR_API_URL, {
-                method: 'POST',
-                headers: { 'Authorization': 'Token ' + ANPR_API_KEY },
-                body: formData
-            });
+        statusDiv.innerText = "✔ PHOTO CAPTURED";
+    });
 
-            const result = await response.json();
-            if (result.results && result.results.length > 0) {
-                const plateFound = result.results[0].plate.toUpperCase();
-                regoInput.value = plateFound;
-                return plateFound;
-            }
-            return "";
-        } catch (err) {
-            return "";
-        }
-    }
+    submitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
 
-    snapBtn.addEventListener('click', async () => {
-        const vw = videoElem.videoWidth || 1280;
-        const vh = videoElem.videoHeight || 720;
+        const rego = regoInput.value.trim().toUpperCase();
+        if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
 
-        // 1. FULL QUALITY NATIVE ASPECT RATIO CANVAS (PRESERVES NATURAL SHAPE)
-        const fullCanvas = document.createElement('canvas');
-        fullCanvas.width = vw;
-        fullCanvas.height = vh;
-        fullCanvas.getContext('2d').drawImage(videoElem, 0, 0, vw, vh);
-        capturedPhoto = fullCanvas.toDataURL('image/jpeg', 0.65);
-
-        // 2. CENTER-CROPPED CANVAS FOR FAST ANPR SCANNING
-        const cropCanvas = document.createElement('canvas');
-        cropCanvas.width = 400;
-        cropCanvas.height = 200;
-        cropCanvas.getContext('2d').drawImage(
-            videoElem, 
-            vw * 0.2, vh * 0.3, vw * 0.6, vh * 0.4,
-            0, 0, 400, 200
-        );
-        const cropPhoto = cropCanvas.toDataURL('image/jpeg', 0.5);
-
-        // Display Thumbnail
-        thumbGallery.innerHTML = "";
-        const img = document.createElement('img');
-        img.src = capturedPhoto; img.className = 'thumb-img';
-        thumbGallery.appendChild(img);
-
-        let currentRego = regoInput.value.trim().toUpperCase();
-        if (!currentRego) {
-            currentRego = await scanPhotoForPlate(cropPhoto);
-        }
-
-        if (!currentRego) {
-            showFeedback(false);
-            return;
-        }
-
-        showFeedback(true);
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
 
         const payload = {
             action: 'log_mark',
             property: propertySelect.value,
-            rego: currentRego,
+            rego: rego,
             photoBytes: capturedPhoto
         };
 
-        fetch(GOOGLE_SCRIPT_URL, { 
-            method: 'POST', 
-            body: JSON.stringify(payload) 
-        }).catch(() => {
-            let offlineQueue = JSON.parse(localStorage.getItem('offline_marks') || '[]');
-            offlineQueue.push(payload);
-            localStorage.setItem('offline_marks', JSON.stringify(offlineQueue));
-        });
+        if (!navigator.onLine) {
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            setTimeout(() => { window.location.href = "run.html"; }, 1200);
+            return;
+        }
 
-        setTimeout(() => {
-            regoInput.value = ""; 
-            capturedPhoto = ""; 
-            thumbGallery.innerHTML = "";
-        }, 1200);
+        statusDiv.innerText = "LOGGING MARK...";
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            statusDiv.innerText = "✔ MARK LOGGED SUCCESS!";
+            setTimeout(() => { window.location.href = "run.html"; }, 1200);
+        } catch(err) {
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            setTimeout(() => { window.location.href = "run.html"; }, 1200);
+        }
     });
+
+    function saveToOfflineQueue(payload) {
+        let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+        queue.push(payload);
+        localStorage.setItem('mark_offline_queue', JSON.stringify(queue));
+        updateQueueUI();
+    }
+
+    function updateQueueUI() {
+        let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+        if (queue.length > 0) {
+            queueCount.innerText = queue.length;
+            syncBadge.style.display = 'block';
+        } else {
+            syncBadge.style.display = 'none';
+        }
+    }
+
+    async function processOfflineQueue() {
+        let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+        if (queue.length === 0 || !navigator.onLine) return;
+
+        statusDiv.innerText = "SYNCING OFFLINE MARKS...";
+        let remaining = [];
+
+        for (let item of queue) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
+            } catch(e) {
+                remaining.push(item);
+            }
+        }
+
+        localStorage.setItem('mark_offline_queue', JSON.stringify(remaining));
+        updateQueueUI();
+        if (remaining.length === 0) statusDiv.innerText = "✔ ALL OFFLINE MARKS SYNCED!";
+    }
 </script>
 </body>
 </html>
