@@ -12,9 +12,9 @@
 
     <title>TOW RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=47">
-    <link rel="icon" type="image/png" href="icon-run.png?v=47">
-    <link rel="manifest" href="manifest-run.json?v=47">
+    <link rel="apple-touch-icon" href="icon-run.png?v=48">
+    <link rel="icon" type="image/png" href="icon-run.png?v=48">
+    <link rel="manifest" href="manifest-run.json?v=48">
 
     <style>
         * { box-sizing: border-box; }
@@ -133,18 +133,25 @@
                 });
             });
 
-            // STRICT PROPERTY SORTING: HIGHEST RED COUNT -> HIGHEST ORANGE COUNT -> HIGHEST GREEN COUNT
+            // PROPERTY SORTING ONLY: HIGHEST RED COUNT -> HIGHEST ORANGE COUNT -> HIGHEST GREEN COUNT
             const sortedProperties = Object.keys(groups).sort((a, b) => {
-                const redA = groups[a].reduce((acc, c) => acc + (c.status === "READY" ? 1 : 0), 0);
-                const redB = groups[b].reduce((acc, c) => acc + (c.status === "READY" ? 1 : 0), 0);
+                let redA = 0, waitA = 0, passA = 0;
+                let redB = 0, waitB = 0, passB = 0;
+
+                groups[a].forEach(c => {
+                    if (c.status === "READY") redA++;
+                    else if (c.status === "WAIT") waitA++;
+                    else if (c.status === "PASS") passA++;
+                });
+
+                groups[b].forEach(c => {
+                    if (c.status === "READY") redB++;
+                    else if (c.status === "WAIT") waitB++;
+                    else if (c.status === "PASS") passB++;
+                });
+
                 if (redB !== redA) return redB - redA;
-
-                const waitA = groups[a].reduce((acc, c) => acc + (c.status === "WAIT" ? 1 : 0), 0);
-                const waitB = groups[b].reduce((acc, c) => acc + (c.status === "WAIT" ? 1 : 0), 0);
                 if (waitB !== waitA) return waitB - waitA;
-
-                const passA = groups[a].reduce((acc, c) => acc + (c.status === "PASS" ? 1 : 0), 0);
-                const passB = groups[b].reduce((acc, c) => acc + (c.status === "PASS" ? 1 : 0), 0);
                 if (passB !== passA) return passB - passA;
 
                 return a.localeCompare(b);
@@ -161,7 +168,6 @@
                 title.innerText = prop;
                 propBox.appendChild(title);
 
-                // CAR TILES INSIDE EACH PROPERTY SORTED: READY -> WAIT -> PASS
                 const statusOrder = { "READY": 1, "WAIT": 2, "PASS": 3 };
                 groups[prop].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
