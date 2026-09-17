@@ -338,7 +338,6 @@
 
         passContainer.appendChild(formCard);
 
-        // INITIALIZE DEFAULT EXPIRY TO TODAY + 1 DAY
         onDurationSelectChange("1");
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
@@ -357,7 +356,6 @@
                 return;
             }
 
-            // BRANCH A: SCREENSHOT OCR PROCESSING
             if (ocrInput.files && ocrInput.files[0]) {
                 statusDiv.innerText = "READING SCREENSHOT & ADDING PASSES...";
                 const reader = new FileReader();
@@ -388,14 +386,12 @@
                 return;
             }
 
-            // BRANCH B: MANUAL SINGLE PASS ENTRY
             const rego = regoInput.value.trim().toUpperCase();
             if (!rego) { statusDiv.innerText = "ENTER REGO OR CHOOSE SCREENSHOT!"; return; }
 
             const startDate = startDateInput.value ? new Date(startDateInput.value) : new Date();
             const expiryDate = expiryDateInput.value ? new Date(expiryDateInput.value) : new Date(startDate.getTime() + (24 * 60 * 60 * 1000));
 
-            // CALCULATE DURATION IN DAYS
             const diffTime = Math.abs(expiryDate - startDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
@@ -425,7 +421,6 @@
         });
     }
 
-    // BI-DIRECTIONAL DATE & DURATION CALCULATIONS
     function onDurationSelectChange(val) {
         if (val === "custom") return;
         const startDateInput = document.getElementById('startDateInput');
