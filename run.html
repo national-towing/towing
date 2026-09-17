@@ -12,9 +12,9 @@
 
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=50">
-    <link rel="icon" type="image/png" href="icon-run.png?v=50">
-    <link rel="manifest" href="manifest-run.json?v=50">
+    <link rel="apple-touch-icon" href="icon-run.png?v=999">
+    <link rel="icon" type="image/png" href="icon-run.png?v=999">
+    <link rel="manifest" href="manifest-run.json?v=999">
 
     <style>
         * { box-sizing: border-box; }
@@ -77,10 +77,10 @@
 </div>
 
 <div class="nav-bar">
-    <a href="run.html" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=999" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=999" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=999" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=999" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="container" id="runContainer">
@@ -102,7 +102,7 @@
 
     async function loadTowRun() {
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run");
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run&nocache=" + Date.now());
             const data = await res.json();
 
             if (!data || data.length === 0) {
