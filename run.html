@@ -12,9 +12,9 @@
 
     <title>TOW RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=45">
-    <link rel="icon" type="image/png" href="icon-run.png?v=45">
-    <link rel="manifest" href="manifest-run.json?v=45">
+    <link rel="apple-touch-icon" href="icon-run.png?v=46">
+    <link rel="icon" type="image/png" href="icon-run.png?v=46">
+    <link rel="manifest" href="manifest-run.json?v=46">
 
     <style>
         * { box-sizing: border-box; }
@@ -133,7 +133,7 @@
                 });
             });
 
-            // SORT PROPERTIES BY: TOW READY (RED) COUNT DESC -> WAIT (ORANGE) COUNT DESC -> PASS (GREEN) COUNT DESC
+            // SORT PROPERTIES STRICTLY BY MOST TOW READY (RED) CARS FIRST
             const sortedProperties = Object.keys(groups).sort((a, b) => {
                 const countRedA = groups[a].filter(c => c.status === "READY").length;
                 const countRedB = groups[b].filter(c => c.status === "READY").length;
