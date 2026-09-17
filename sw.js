@@ -1,12 +1,15 @@
-const CACHE_NAME = 'tow-app-v1';
+const CACHE_NAME = 'tow-app-v2';
 const ASSETS = [
   './',
   './run.html',
+  './mark.html',
   './tow.html',
   './passes.html',
   './release.html',
   './manifest-run.json',
-  './manifest-tow.json'
+  './manifest-mark.json',
+  './manifest-tow.json',
+  './manifest-pass.json'
 ];
 
 self.addEventListener('install', (e) => {
@@ -30,7 +33,6 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Network first, fall back to cache for HTML/Assets
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))
   );
