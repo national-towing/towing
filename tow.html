@@ -12,9 +12,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=43">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=43">
-    <link rel="manifest" href="manifest-tow.json?v=43">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=44">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=44">
+    <link rel="manifest" href="manifest-tow.json?v=44">
 
     <style>
         * { box-sizing: border-box; }
@@ -221,6 +221,7 @@
     const statusDiv = document.getElementById('status');
 
     let conditionPhotos = [];
+    let isSubmitting = false;
 
     window.addEventListener('load', async () => {
         await loadProperties();
@@ -296,7 +297,10 @@
         } catch(e) {}
     }
 
-    snapBtn.addEventListener('click', () => {
+    snapBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1024;
         canvas.height = videoElem.videoHeight || 576;
@@ -311,9 +315,16 @@
         statusDiv.innerText = `✔ PHOTO ${conditionPhotos.length} CAPTURED`;
     });
 
-    submitBtn.addEventListener('click', async () => {
+    submitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+
         const rego = regoInput.value.trim().toUpperCase();
         if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
 
         const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
         const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
