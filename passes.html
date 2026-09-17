@@ -9,18 +9,24 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 
     <title>PASSES</title>
+    
+    <link rel="apple-touch-icon" href="icon-pass.png?v=700">
+    <link rel="icon" type="image/png" href="icon-pass.png?v=700">
+    <link rel="manifest" href="manifest-pass.json?v=700">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            padding-bottom: 90px;
         }
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ab47bc; letter-spacing: 2px; text-align: center; }
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.9); }
 
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
@@ -29,6 +35,47 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
+        .container { width: 100%; max-width: 440px; }
+
+        /* PROPERTY SUMMARY TILE */
+        .prop-summary-card {
+            background: #1e1e1e; border-radius: 16px; padding: 14px; margin-bottom: 12px;
+            border: 1px solid #333; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer;
+        }
+        .prop-summary-card:active { transform: scale(0.98); }
+        .prop-name {
+            font-size: 19px; font-weight: 900; color: #ffab00; text-transform: uppercase;
+            letter-spacing: 1px; flex: 1; padding-right: 8px;
+        }
+
+        .cnt-btn-blue {
+            width: 58px; height: 58px; border-radius: 10px; border: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #29b6f6; color: #000; padding: 0; flex-shrink: 0;
+        }
+        .cnt-num { font-size: 22px; font-weight: 900; line-height: 1; margin-bottom: 2px; }
+        .cnt-lbl { font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
+
+        /* DETAIL VIEW STYLES */
+        .back-btn {
+            background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px;
+            border-radius: 10px; font-weight: 900; margin-bottom: 14px; cursor: pointer; display: inline-block;
+        }
+        .detail-title { font-size: 24px; font-weight: 900; color: #ffab00; margin-bottom: 12px; text-transform: uppercase; }
+
+        .pass-tile {
+            background: #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 10px;
+            border: 2px solid #29b6f6; color: #fff;
+        }
+        .pass-header { display: flex; justify-content: space-between; align-items: baseline; }
+        .pass-rego { font-size: 28px; font-weight: 900; color: #29b6f6; letter-spacing: 1px; }
+        .pass-expiry { font-size: 22px; font-weight: 900; color: #29b6f6; text-align: right; }
+
+        .pass-footer { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #aaa; font-weight: 700; }
+        .pass-notes { color: #fff; font-weight: 800; max-width: 50%; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ADD PASS FORM */
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
         input, select {
@@ -36,17 +83,22 @@
             background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
             -webkit-appearance: none;
         }
-
         .submit-btn {
             background: #ab47bc; color: #fff; font-weight: 900; border: none; border-radius: 14px;
             height: 60px; font-size: 24px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
         }
 
-        .pass-list { width: 100%; max-width: 440px; }
-        .pass-tile { background: #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 10px; border: 2px solid #ab47bc; }
-        .pass-rego { font-size: 26px; font-weight: 900; color: #ab47bc; }
-        .pass-info { font-size: 13px; color: #aaa; margin-top: 4px; font-weight: 700; }
+        /* CENTERED FLOATING PLUS BUTTON */
+        .fab-add {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 64px; height: 64px; background: #29b6f6; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; font-weight: 900; color: #000; box-shadow: 0 4px 18px rgba(41, 182, 246, 0.4);
+            cursor: pointer; z-index: 999; border: none; user-select: none;
+        }
+        .fab-add:active { transform: translateX(-50%) scale(0.90); }
 
+        .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
         #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ab47bc; }
     </style>
 </head>
@@ -64,31 +116,12 @@
     <a href="passes.html" class="nav-tile nav-pass">PASS</a>
 </div>
 
-<div class="card">
-    <label>PROPERTY</label>
-    <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
-
-    <label>VEHICLE REGO</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="text-transform:uppercase; color:#ab47bc;">
-
-    <label>DURATION (DAYS)</label>
-    <select id="durationSelect">
-        <option value="1" selected>1 DAY</option>
-        <option value="2">2 DAYS</option>
-        <option value="3">3 DAYS</option>
-        <option value="7">7 DAYS</option>
-        <option value="14">14 DAYS</option>
-        <option value="30">30 DAYS</option>
-    </select>
-
-    <label>NOTES / APARTMENT</label>
-    <input type="text" id="notesInput" placeholder="NOTES (OPTIONAL)">
-
-    <button class="submit-btn" id="submitBtn">ADD PASS</button>
-    <div id="status"></div>
+<div class="container" id="passContainer">
+    <div class="empty-msg">LOADING PASSES...</div>
 </div>
 
-<div class="pass-list" id="passList"></div>
+<!-- FLOATING PLUS BUTTON -->
+<button class="fab-add" id="fabAddBtn">+</button>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
@@ -97,102 +130,228 @@
         navigator.serviceWorker.register('./sw.js').catch(()=>{});
     }
 
-    const propertySelect = document.getElementById('propertySelect');
-    const regoInput = document.getElementById('regoInput');
-    const durationSelect = document.getElementById('durationSelect');
-    const notesInput = document.getElementById('notesInput');
-    const submitBtn = document.getElementById('submitBtn');
+    const passContainer = document.getElementById('passContainer');
     const refreshBtn = document.getElementById('refreshBtn');
-    const statusDiv = document.getElementById('status');
-    const passList = document.getElementById('passList');
+    const fabAddBtn = document.getElementById('fabAddBtn');
+
+    let allPasses = [];
+    let propertyPassGroups = {};
+    let cachedProperties = [];
 
     window.addEventListener('load', () => {
-        loadProperties();
-        loadActivePasses();
+        loadData();
     });
 
-    refreshBtn.addEventListener('click', () => { window.location.reload(true); });
+    refreshBtn.addEventListener('click', () => {
+        passContainer.innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
+        loadData();
+    });
+
+    fabAddBtn.addEventListener('click', renderAddPassForm);
+
+    async function loadData() {
+        await loadProperties();
+        await loadActivePasses();
+    }
 
     async function loadProperties() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
-            const data = await res.json();
-            localStorage.setItem('cached_properties', JSON.stringify(data));
-            populateProperties(data);
+            cachedProperties = await res.json();
+            localStorage.setItem('cached_properties', JSON.stringify(cachedProperties));
         } catch(e) {
             const cached = localStorage.getItem('cached_properties');
-            if (cached) populateProperties(JSON.parse(cached));
+            if (cached) cachedProperties = JSON.parse(cached);
         }
-    }
-
-    function populateProperties(data) {
-        propertySelect.innerHTML = "";
-        data.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.name; opt.innerText = p.name;
-            propertySelect.appendChild(opt);
-        });
     }
 
     async function loadActivePasses() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_passes");
-            const passes = await res.json();
-            localStorage.setItem('cached_passes', JSON.stringify(passes));
-            renderPasses(passes);
+            allPasses = await res.json();
+            localStorage.setItem('cached_passes', JSON.stringify(allPasses));
+            parseAndRenderPassSummary();
         } catch(e) {
             const cached = localStorage.getItem('cached_passes');
-            if (cached) renderPasses(JSON.parse(cached));
+            if (cached) {
+                allPasses = JSON.parse(cached);
+                parseAndRenderPassSummary();
+            } else {
+                passContainer.innerHTML = "<div class='empty-msg'>NO OFFLINE DATA STORED</div>";
+            }
         }
     }
 
-    function renderPasses(passes) {
-        passList.innerHTML = "";
-        if (!passes || passes.length === 0) {
-            passList.innerHTML = "<div style='text-align:center; color:#666; font-weight:800;'>NO ACTIVE PASSES</div>";
+    function parseAndRenderPassSummary() {
+        propertyPassGroups = {};
+
+        // INITIATE GROUPS FOR ALL PROPERTIES
+        cachedProperties.forEach(p => {
+            propertyPassGroups[p.name] = [];
+        });
+
+        allPasses.forEach(p => {
+            const prop = p.property || "GENERAL";
+            if (!propertyPassGroups[prop]) propertyPassGroups[prop] = [];
+            propertyPassGroups[prop].push(p);
+        });
+
+        renderSummaryView();
+    }
+
+    // LANDING PAGE: SINGLE PROPERTY TILES WITH BLUE PASS COUNT BOX
+    function renderSummaryView() {
+        passContainer.innerHTML = "";
+
+        const sortedProps = Object.keys(propertyPassGroups).sort((a, b) => {
+            const countA = propertyPassGroups[a].length;
+            const countB = propertyPassGroups[b].length;
+            if (countB !== countA) return countB - countA;
+            return a.localeCompare(b);
+        });
+
+        if (sortedProps.length === 0) {
+            passContainer.innerHTML = "<div class='empty-msg'>NO ACTIVE PASSES</div>";
+            return;
+        }
+
+        sortedProps.forEach(prop => {
+            const count = propertyPassGroups[prop].length;
+
+            const card = document.createElement('div');
+            card.className = 'prop-summary-card';
+            card.onclick = () => renderDetailView(prop);
+
+            card.innerHTML = `
+                <div class="prop-name">${prop}</div>
+                <div class="cnt-btn-blue">
+                    <span class="cnt-num">${count}</span>
+                    <span class="cnt-lbl">PASS</span>
+                </div>
+            `;
+
+            passContainer.appendChild(card);
+        });
+    }
+
+    // DETAIL VIEW: LIST VEHICLES FOR SELECTED PROPERTY
+    function renderDetailView(prop) {
+        passContainer.innerHTML = "";
+
+        const backBtn = document.createElement('div');
+        backBtn.className = 'back-btn';
+        backBtn.innerText = "← BACK TO ALL PROPERTIES";
+        backBtn.onclick = renderSummaryView;
+        passContainer.appendChild(backBtn);
+
+        const title = document.createElement('div');
+        title.className = 'detail-title';
+        title.innerText = prop;
+        passContainer.appendChild(title);
+
+        const passes = propertyPassGroups[prop] || [];
+
+        if (passes.length === 0) {
+            passContainer.innerHTML += `<div class="empty-msg">NO PASSES FOR THIS PROPERTY</div>`;
             return;
         }
 
         passes.forEach(p => {
             const tile = document.createElement('div');
             tile.className = 'pass-tile';
+
             tile.innerHTML = `
-                <div class="pass-rego">${p.rego}</div>
-                <div class="pass-info">${p.property} | EXP: ${p.expiry}</div>
-                ${p.notes ? `<div class="pass-info" style="color:#fff;">NOTES: ${p.notes}</div>` : ''}
+                <div class="pass-header">
+                    <div class="pass-rego">${p.rego}</div>
+                    <div class="pass-expiry">${p.expiry}</div>
+                </div>
+                <div class="pass-footer">
+                    <div>START: ${p.startDate} (${p.duration})</div>
+                    ${p.notes ? `<div class="pass-notes">${p.notes}</div>` : ''}
+                </div>
             `;
-            passList.appendChild(tile);
+
+            passContainer.appendChild(tile);
         });
     }
 
-    submitBtn.addEventListener('click', async () => {
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
+    // SEPARATE ADD PASS PAGE
+    function renderAddPassForm() {
+        passContainer.innerHTML = "";
 
-        const now = new Date();
-        const durationDays = parseInt(durationSelect.value, 10);
-        const expiryDate = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+        const backBtn = document.createElement('div');
+        backBtn.className = 'back-btn';
+        backBtn.innerText = "← BACK TO PASSES";
+        backBtn.onclick = renderSummaryView;
+        passContainer.appendChild(backBtn);
 
-        const payload = {
-            action: 'add_pass',
-            property: propertySelect.value,
-            rego: rego,
-            startDate: now,
-            duration: durationSelect.value,
-            expiryDate: expiryDate,
-            notes: notesInput.value.trim()
-        };
+        let propOptionsHtml = "";
+        cachedProperties.forEach(p => {
+            propOptionsHtml += `<option value="${p.name}">${p.name}</option>`;
+        });
 
-        statusDiv.innerText = "ADDING PASS...";
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            statusDiv.innerText = "✔ PASS ADDED SUCCESS!";
-            regoInput.value = ""; notesInput.value = "";
-            loadActivePasses();
-        } catch(err) {
-            statusDiv.innerText = "ERROR ADDING PASS (OFFLINE)";
-        }
-    });
+        const formCard = document.createElement('div');
+        formCard.className = 'card';
+        formCard.innerHTML = `
+            <label>PROPERTY</label>
+            <select id="propertySelect">${propOptionsHtml}</select>
+
+            <label>VEHICLE REGO</label>
+            <input type="text" id="regoInput" placeholder="REGO" style="text-transform:uppercase; color:#ab47bc;">
+
+            <label>DURATION (DAYS)</label>
+            <select id="durationSelect">
+                <option value="1" selected>1 DAY</option>
+                <option value="2">2 DAYS</option>
+                <option value="3">3 DAYS</option>
+                <option value="7">7 DAYS</option>
+                <option value="14">14 DAYS</option>
+                <option value="30">30 DAYS</option>
+            </select>
+
+            <label>NOTES / APARTMENT</label>
+            <input type="text" id="notesInput" placeholder="NOTES (OPTIONAL)">
+
+            <button class="submit-btn" id="submitBtn">ADD PASS</button>
+            <div id="status"></div>
+        `;
+
+        passContainer.appendChild(formCard);
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const regoInput = document.getElementById('regoInput');
+            const propertySelect = document.getElementById('propertySelect');
+            const durationSelect = document.getElementById('durationSelect');
+            const notesInput = document.getElementById('notesInput');
+            const statusDiv = document.getElementById('status');
+
+            const rego = regoInput.value.trim().toUpperCase();
+            if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
+
+            const now = new Date();
+            const durationDays = parseInt(durationSelect.value, 10);
+            const expiryDate = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+
+            const payload = {
+                action: 'add_pass',
+                property: propertySelect.value,
+                rego: rego,
+                startDate: now,
+                duration: durationSelect.value,
+                expiryDate: expiryDate,
+                notes: notesInput.value.trim()
+            };
+
+            statusDiv.innerText = "ADDING PASS...";
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                statusDiv.innerText = "✔ PASS ADDED SUCCESS!";
+                setTimeout(loadData, 1000);
+            } catch(err) {
+                statusDiv.innerText = "ERROR ADDING PASS (OFFLINE)";
+            }
+        });
+    }
 </script>
 </body>
 </html>
