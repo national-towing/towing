@@ -12,9 +12,9 @@
 
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=500">
-    <link rel="icon" type="image/png" href="icon-run.png?v=500">
-    <link rel="manifest" href="manifest-run.json?v=500">
+    <link rel="apple-touch-icon" href="icon-run.png?v=501">
+    <link rel="icon" type="image/png" href="icon-run.png?v=501">
+    <link rel="manifest" href="manifest-run.json?v=501">
 
     <style>
         * { box-sizing: border-box; }
@@ -48,12 +48,18 @@
             letter-spacing: 1px; cursor: pointer; flex: 1; padding-right: 8px;
         }
 
-        .count-btns { display: flex; gap: 6px; }
+        .count-btns { display: flex; gap: 8px; }
+        
+        /* SQUARE / STACKED COUNT BUTTONS */
         .cnt-btn {
-            padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 900;
-            display: flex; align-items: center; gap: 4px; cursor: pointer; border: none; text-decoration: none;
+            width: 58px; height: 58px; border-radius: 10px; border: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; text-decoration: none; padding: 0;
         }
         .cnt-btn:active { transform: scale(0.92); }
+
+        .cnt-num { font-size: 22px; font-weight: 900; line-height: 1; margin-bottom: 2px; }
+        .cnt-lbl { font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
 
         .btn-red { background: #ff1744; color: #fff; }
         .btn-orange { background: #ffab00; color: #000; }
@@ -199,9 +205,18 @@
             card.innerHTML = `
                 <div class="prop-name" onclick="renderDetailView('${prop}', 'ALL')">${prop}</div>
                 <div class="count-btns">
-                    <button class="cnt-btn btn-red" onclick="renderDetailView('${prop}', 'READY')">TOW ${redCount}</button>
-                    <button class="cnt-btn btn-orange" onclick="renderDetailView('${prop}', 'WAIT')">WAIT ${orangeCount}</button>
-                    <button class="cnt-btn btn-blue" onclick="renderDetailView('${prop}', 'PASS')">PASS ${blueCount}</button>
+                    <button class="cnt-btn btn-red" onclick="renderDetailView('${prop}', 'READY')">
+                        <span class="cnt-num">${redCount}</span>
+                        <span class="cnt-lbl">TOW</span>
+                    </button>
+                    <button class="cnt-btn btn-orange" onclick="renderDetailView('${prop}', 'WAIT')">
+                        <span class="cnt-num">${orangeCount}</span>
+                        <span class="cnt-lbl">WAIT</span>
+                    </button>
+                    <button class="cnt-btn btn-blue" onclick="renderDetailView('${prop}', 'PASS')">
+                        <span class="cnt-num">${blueCount}</span>
+                        <span class="cnt-lbl">PASS</span>
+                    </button>
                 </div>
             `;
 
