@@ -49,28 +49,22 @@
         }
 
         .camera-box {
-            width: 100%; height: 220px; background: #000; border-radius: 12px; border: 2px solid #333;
+            width: 100%; height: 260px; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        .thumb-preview { width: 100%; height: 220px; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin-top: 10px; }
+        .thumb-preview { width: 100%; height: 260px; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin-top: 10px; }
 
         .circle-cam-btn {
-            width: 90px; height: 90px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
-            margin: 14px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            width: 100px; height: 100px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
+            margin: 18px auto 0 auto; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 18px rgba(255, 171, 0, 0.4); cursor: pointer; user-select: none;
         }
         .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 66px; height: 66px; border-radius: 50%; border: 2px solid #000; }
+        .circle-cam-inner { width: 74px; height: 74px; border-radius: 50%; border: 2px solid #000; }
 
-        .submit-btn {
-            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
-        }
-        .submit-btn:active { transform: scale(0.97); }
-
-        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 14px; min-height: 24px; color: #ffab00; }
     </style>
 </head>
 <body>
@@ -91,19 +85,20 @@
 
 <div class="card">
     <label>PROPERTY</label>
-    <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
+    <select id="propertySelect" onchange="saveSelectedProperty(this.value)">
+        <option value="">LOADING PROPERTIES...</option>
+    </select>
 
-    <label>REGO</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="color:#ffab00; text-transform:uppercase;">
+    <label>REGO (OPTIONAL OVERRIDE)</label>
+    <input type="text" id="regoInput" placeholder="AUTO-DETECT VIA ANPR" style="color:#ffab00; text-transform:uppercase;">
 
-    <label>MARKING PHOTO</label>
+    <label>MARKING CAMERA</label>
     <div class="camera-box" id="camBox"><video id="videoElem" autoplay playsinline></video></div>
     <img class="thumb-preview" id="thumbPreview">
     
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
-    <button class="submit-btn" id="submitBtn">LOG MARK</button>
-    <div id="status"></div>
+    <div id="status">READY TO SNAP</div>
 </div>
 
 <script>
@@ -119,14 +114,12 @@
     const camBox = document.getElementById('camBox');
     const thumbPreview = document.getElementById('thumbPreview');
     const snapBtn = document.getElementById('snapBtn');
-    const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
     const syncBadge = document.getElementById('syncBadge');
     const queueCount = document.getElementById('queueCount');
 
-    let capturedPhoto = "";
-    let isSubmitting = false;
+    let isProcessing = false;
 
     window.addEventListener('load', async () => {
         await loadProperties();
@@ -136,6 +129,10 @@
     });
 
     refreshBtn.addEventListener('click', () => { window.location.reload(true); });
+
+    function saveSelectedProperty(val) {
+        if (val) localStorage.setItem('sticky_selected_property', val);
+    }
 
     async function loadProperties() {
         try {
@@ -156,6 +153,12 @@
             opt.value = p.name; opt.innerText = p.name;
             propertySelect.appendChild(opt);
         });
+
+        // STICKY PROPERTY RETRIEVAL
+        const savedProp = localStorage.getItem('sticky_selected_property');
+        if (savedProp) {
+            propertySelect.value = savedProp;
+        }
     }
 
     async function initCamera() {
@@ -165,58 +168,76 @@
         } catch(e) {}
     }
 
-    snapBtn.addEventListener('click', (e) => {
+    // SNAP AND LOG AUTOMATICALLY
+    snapBtn.addEventListener('click', async (e) => {
         e.preventDefault(); e.stopPropagation();
+        if (isProcessing) return;
 
+        const selectedProp = propertySelect.value;
+        if (!selectedProp) {
+            statusDiv.innerText = "SELECT A PROPERTY FIRST!";
+            return;
+        }
+
+        isProcessing = true;
+        snapBtn.style.opacity = "0.5";
+        statusDiv.innerText = "SCANNING & LOGGING MARK...";
+
+        // CAPTURE FRAME
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1024;
         canvas.height = videoElem.videoHeight || 576;
         canvas.getContext('2d').drawImage(videoElem, 0, 0);
-        capturedPhoto = canvas.toDataURL('image/jpeg', 0.65);
+        const photoBytes = canvas.toDataURL('image/jpeg', 0.65);
 
-        thumbPreview.src = capturedPhoto;
+        // SHOW FLASH PREVIEW
+        thumbPreview.src = photoBytes;
         thumbPreview.style.display = 'block';
         camBox.style.display = 'none';
 
-        statusDiv.innerText = "✔ PHOTO CAPTURED";
-    });
-
-    submitBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (isSubmitting) return;
-
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) { statusDiv.innerText = "ENTER REGO FIRST"; return; }
-
-        isSubmitting = true;
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = "0.5";
+        const manualRego = regoInput.value.trim().toUpperCase();
 
         const payload = {
             action: 'log_mark',
-            property: propertySelect.value,
-            rego: rego,
-            photoBytes: capturedPhoto
+            property: selectedProp,
+            rego: manualRego,
+            photoBytes: photoBytes
         };
 
         if (!navigator.onLine) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html"; }, 1200);
+            resetCameraAfterDelay();
             return;
         }
 
-        statusDiv.innerText = "LOGGING MARK...";
         try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            statusDiv.innerText = "✔ MARK LOGGED SUCCESS!";
-            setTimeout(() => { window.location.href = "run.html"; }, 1200);
+            const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            
+            if (data.status === "SUCCESS") {
+                statusDiv.innerText = `✔ MARKED: ${data.rego}`;
+                regoInput.value = "";
+            } else {
+                statusDiv.innerText = "ERROR LOGGING MARK";
+            }
         } catch(err) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html"; }, 1200);
         }
+
+        resetCameraAfterDelay();
     });
+
+    function resetCameraAfterDelay() {
+        setTimeout(() => {
+            thumbPreview.style.display = 'none';
+            camBox.style.display = 'flex';
+            snapBtn.style.opacity = "1.0";
+            statusDiv.innerText = "READY TO SNAP NEXT CAR";
+            isProcessing = false;
+        }, 1800);
+    }
 
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
