@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1200">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1200">
-    <link rel="manifest" href="manifest-mark.json?v=1200">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1300">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1300">
+    <link rel="manifest" href="manifest-mark.json?v=1300">
 
     <style>
         * { box-sizing: border-box; }
@@ -48,8 +48,9 @@
             -webkit-appearance: none;
         }
 
+        /* ASPECT RATIO ENFORCEMENT (16:9 PREVELANCE) */
         .camera-box {
-            width: 100%; height: 260px; background: #000; border-radius: 12px; border: 2px solid #333;
+            width: 100%; height: 220px; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
@@ -60,15 +61,25 @@
             font-size: 12px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
-        .thumb-preview { width: 100%; height: 260px; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin-top: 10px; }
+        .thumb-preview { width: 100%; height: 220px; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin-top: 10px; }
+
+        /* VISUAL FEEDBACK OVERLAY (GREEN TICK / RED CROSS) */
+        .feedback-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; align-items: center; justify-content: center;
+            font-size: 90px; font-weight: 900; border-radius: 12px; z-index: 20;
+            background: rgba(0,0,0,0.7);
+        }
+        .overlay-success { color: #00e676; border: 4px solid #00e676; }
+        .overlay-error { color: #ff1744; border: 4px solid #ff1744; }
 
         .circle-cam-btn {
-            width: 100px; height: 100px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
-            margin: 18px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            width: 90px; height: 90px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
+            margin: 16px auto 0 auto; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 18px rgba(255, 171, 0, 0.4); cursor: pointer; user-select: none;
         }
         .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 74px; height: 74px; border-radius: 50%; border: 2px solid #000; }
+        .circle-cam-inner { width: 66px; height: 66px; border-radius: 50%; border: 2px solid #000; }
 
         .manual-btn {
             background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 12px;
@@ -89,10 +100,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=1200" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=1200" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=1200" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=1200" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=1300" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=1300" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=1300" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=1300" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -108,6 +119,7 @@
     <div class="camera-box" id="camBox">
         <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <video id="videoElem" autoplay playsinline></video>
+        <div class="feedback-overlay" id="feedbackOverlay"></div>
     </div>
     <img class="thumb-preview" id="thumbPreview">
     
@@ -123,7 +135,7 @@
     const PLATE_RECOGNIZER_TOKEN = "Token 74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1200').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=1300').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -131,6 +143,7 @@
     const videoElem = document.getElementById('videoElem');
     const camBox = document.getElementById('camBox');
     const thumbPreview = document.getElementById('thumbPreview');
+    const feedbackOverlay = document.getElementById('feedbackOverlay');
     const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
     const manualLogBtn = document.getElementById('manualLogBtn');
@@ -192,7 +205,13 @@
 
     async function initCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
             videoElem.srcObject = stream;
             videoTrack = stream.getVideoTracks()[0];
         } catch(e) {}
@@ -212,10 +231,9 @@
         }
     });
 
-    // HIGH-SPEED CLIENT-SIDE PLATE RECOGNIZER ANPR CALL
+    // PLATE RECOGNIZER ANPR CALL
     async function recognizePlate(base64Image) {
         try {
-            // CONVERT BASE64 DATA URL TO BLOB FOR MULTIPART FORMDATA
             const fetchRes = await fetch(base64Image);
             const blob = await fetchRes.blob();
 
@@ -237,7 +255,7 @@
         return null;
     }
 
-    // 1. SNAP, INSTANT ANPR & LOG
+    // 1. AUTO SNAP & ANPR
     snapBtn.addEventListener('click', async (e) => {
         e.preventDefault(); e.stopPropagation();
 
@@ -248,25 +266,20 @@
             return;
         }
 
-        // CAPTURE FRAME
+        // CAPTURE CANVAS WITH PROPER 16:9 PROPORTIONS (PREVENTS DISTORTION)
         const canvas = document.createElement('canvas');
-        canvas.width = 1024;
-        canvas.height = 576;
+        canvas.width = 1280;
+        canvas.height = 720;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, 1024, 576);
+        ctx.drawImage(videoElem, 0, 0, 1280, 720);
         
-        lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.65);
-
-        thumbPreview.src = lastCapturedPhotoBytes;
-        thumbPreview.style.display = 'block';
-        camBox.style.display = 'none';
+        lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.70);
 
         let detectedRego = regoInput.value.trim().toUpperCase();
 
-        statusDiv.innerText = "SCANNING PLATE...";
+        statusDiv.innerText = "SCANNING...";
         statusDiv.style.color = "#ffab00";
 
-        // RUN PLATE RECOGNIZER IF NO MANUAL OVERRIDE ENTERED
         if (!detectedRego && navigator.onLine) {
             detectedRego = await recognizePlate(lastCapturedPhotoBytes);
         }
@@ -282,6 +295,8 @@
                 photoBytes: lastCapturedPhotoBytes
             };
 
+            // SHOW GREEN TICK OVERLAY
+            showVisualFeedback("✔", true);
             statusDiv.innerText = `LOGGED: ${detectedRego}`;
             statusDiv.style.color = "#00e676";
 
@@ -299,9 +314,10 @@
                 saveToOfflineQueue(payload);
             }
 
-            resetCameraAfterDelay();
+            resetCameraAfterDelay(1000);
         } else {
-            // ANPR UNREADABLE -> SHOW ERROR & REVEAL MANUAL LOG BUTTON
+            // SHOW RED CROSS OVERLAY & REVEAL MANUAL BUTTON
+            showVisualFeedback("✖", false);
             statusDiv.innerText = "ERROR";
             statusDiv.style.color = "#ff1744";
             manualLogBtn.style.display = "block";
@@ -309,7 +325,7 @@
         }
     });
 
-    // 2. MANUAL REGO OVERRIDE BUTTON SUBMISSION
+    // 2. MANUAL REGO OVERRIDE SUBMISSION
     manualLogBtn.addEventListener('click', async () => {
         const manualRego = regoInput.value.trim().toUpperCase();
         if (!manualRego) {
@@ -326,6 +342,7 @@
             photoBytes: lastCapturedPhotoBytes
         };
 
+        showVisualFeedback("✔", true);
         statusDiv.innerText = `LOGGED: ${manualRego}`;
         statusDiv.style.color = "#00e676";
 
@@ -345,17 +362,22 @@
 
         manualLogBtn.style.display = "none";
         regoInput.value = "";
-        resetCameraAfterDelay();
+        resetCameraAfterDelay(1000);
     });
 
-    function resetCameraAfterDelay() {
+    function showVisualFeedback(symbol, isSuccess) {
+        feedbackOverlay.innerText = symbol;
+        feedbackOverlay.className = `feedback-overlay ${isSuccess ? 'overlay-success' : 'overlay-error'}`;
+        feedbackOverlay.style.display = 'flex';
+    }
+
+    function resetCameraAfterDelay(ms) {
         setTimeout(() => {
-            thumbPreview.style.display = 'none';
-            camBox.style.display = 'flex';
+            feedbackOverlay.style.display = 'none';
             statusDiv.innerText = "READY";
             statusDiv.style.color = "#ffab00";
             manualLogBtn.style.display = "none";
-        }, 1600);
+        }, ms);
     }
 
     function saveToOfflineQueue(payload) {
