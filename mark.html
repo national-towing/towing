@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1050">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1050">
-    <link rel="manifest" href="manifest-mark.json?v=1050">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1200">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1200">
+    <link rel="manifest" href="manifest-mark.json?v=1200">
 
     <style>
         * { box-sizing: border-box; }
@@ -89,10 +89,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=1050" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=1050" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=1050" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=1050" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=1200" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=1200" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=1200" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=1200" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -120,9 +120,10 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    const PLATE_RECOGNIZER_TOKEN = "Token 74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1050').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=1200').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -211,7 +212,32 @@
         }
     });
 
-    // 1. AUTO SNAP & ANPR PROCESS
+    // HIGH-SPEED CLIENT-SIDE PLATE RECOGNIZER ANPR CALL
+    async function recognizePlate(base64Image) {
+        try {
+            // CONVERT BASE64 DATA URL TO BLOB FOR MULTIPART FORMDATA
+            const fetchRes = await fetch(base64Image);
+            const blob = await fetchRes.blob();
+
+            const formData = new FormData();
+            formData.append('upload', blob, 'plate.jpg');
+            formData.append('regions', 'au');
+
+            const response = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
+                method: 'POST',
+                headers: { 'Authorization': PLATE_RECOGNIZER_TOKEN },
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.results && result.results.length > 0) {
+                return result.results[0].plate.toUpperCase();
+            }
+        } catch(err) {}
+        return null;
+    }
+
+    // 1. SNAP, INSTANT ANPR & LOG
     snapBtn.addEventListener('click', async (e) => {
         e.preventDefault(); e.stopPropagation();
 
@@ -222,64 +248,64 @@
             return;
         }
 
-        // CAPTURE COMPRESSED STILL
+        // CAPTURE FRAME
         const canvas = document.createElement('canvas');
         canvas.width = 1024;
         canvas.height = 576;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, 1024, 576);
         
-        lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.60);
+        lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.65);
 
         thumbPreview.src = lastCapturedPhotoBytes;
         thumbPreview.style.display = 'block';
         camBox.style.display = 'none';
 
-        const manualRego = regoInput.value.trim().toUpperCase();
+        let detectedRego = regoInput.value.trim().toUpperCase();
 
-        const payload = {
-            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-            action: 'log_mark',
-            property: selectedProp,
-            rego: manualRego,
-            photoBytes: lastCapturedPhotoBytes
-        };
-
-        statusDiv.innerText = "PROCESSING...";
+        statusDiv.innerText = "SCANNING PLATE...";
         statusDiv.style.color = "#ffab00";
 
-        if (navigator.onLine) {
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                
-                if (data.status === "SUCCESS" && data.anprSuccess && data.rego && data.rego !== "UNREADABLE") {
-                    statusDiv.innerText = `LOGGED: ${data.rego}`;
-                    statusDiv.style.color = "#00e676";
-                    regoInput.value = data.rego;
-                    resetCameraAfterDelay();
-                } else {
-                    // ANPR UNREADABLE -> HALT & DISPLAY MANUAL BUTTON
-                    statusDiv.innerText = "ERROR";
-                    statusDiv.style.color = "#ff1744";
-                    manualLogBtn.style.display = "block";
-                    regoInput.focus();
+        // RUN PLATE RECOGNIZER IF NO MANUAL OVERRIDE ENTERED
+        if (!detectedRego && navigator.onLine) {
+            detectedRego = await recognizePlate(lastCapturedPhotoBytes);
+        }
+
+        if (detectedRego) {
+            regoInput.value = detectedRego;
+            
+            const payload = {
+                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                action: 'log_mark',
+                property: selectedProp,
+                rego: detectedRego,
+                photoBytes: lastCapturedPhotoBytes
+            };
+
+            statusDiv.innerText = `LOGGED: ${detectedRego}`;
+            statusDiv.style.color = "#00e676";
+
+            if (navigator.onLine) {
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch(err) {
+                    saveToOfflineQueue(payload);
                 }
-            } catch(err) {
+            } else {
                 saveToOfflineQueue(payload);
-                statusDiv.innerText = "LOGGED (OFFLINE)";
-                statusDiv.style.color = "#ffab00";
-                resetCameraAfterDelay();
             }
-        } else {
-            saveToOfflineQueue(payload);
-            statusDiv.innerText = "LOGGED (OFFLINE)";
-            statusDiv.style.color = "#ffab00";
+
             resetCameraAfterDelay();
+        } else {
+            // ANPR UNREADABLE -> SHOW ERROR & REVEAL MANUAL LOG BUTTON
+            statusDiv.innerText = "ERROR";
+            statusDiv.style.color = "#ff1744";
+            manualLogBtn.style.display = "block";
+            regoInput.focus();
         }
     });
 
@@ -300,21 +326,21 @@
             photoBytes: lastCapturedPhotoBytes
         };
 
-        statusDiv.innerText = "LOGGING MANUAL...";
-        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = `LOGGED: ${manualRego}`;
+        statusDiv.style.color = "#00e676";
 
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-            statusDiv.innerText = `LOGGED: ${manualRego}`;
-            statusDiv.style.color = "#00e676";
-        } catch(e) {
+        if (navigator.onLine) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+            } catch(e) {
+                saveToOfflineQueue(payload);
+            }
+        } else {
             saveToOfflineQueue(payload);
-            statusDiv.innerText = "LOGGED (OFFLINE)";
-            statusDiv.style.color = "#ffab00";
         }
 
         manualLogBtn.style.display = "none";
@@ -334,7 +360,6 @@
 
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
-        // DEDUPLICATE BY UNIQUE ID BEFORE ADDING TO QUEUE
         if (!queue.some(item => item.id === payload.id)) {
             queue.push(payload);
             localStorage.setItem('mark_offline_queue', JSON.stringify(queue));
