@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=900">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=900">
-    <link rel="manifest" href="manifest-mark.json?v=900">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=950">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=950">
+    <link rel="manifest" href="manifest-mark.json?v=950">
 
     <style>
         * { box-sizing: border-box; }
@@ -70,7 +70,7 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 74px; height: 74px; border-radius: 50%; border: 2px solid #000; }
 
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 14px; min-height: 24px; color: #ffab00; }
+        #status { text-align: center; font-weight: 900; font-size: 18px; margin-top: 14px; min-height: 24px; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -83,10 +83,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=900" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=900" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=900" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=900" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=950" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=950" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=950" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=950" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -107,14 +107,14 @@
     
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
-    <div id="status">READY TO SNAP</div>
+    <div id="status">READY</div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=900').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=950').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -196,28 +196,27 @@
             torchBtn.innerText = torchOn ? "⚡ FLASH ON" : "⚡ FLASH OFF";
             torchBtn.style.color = torchOn ? "#00e676" : "#ffab00";
         } catch(e) {
-            statusDiv.innerText = "FLASH NOT SUPPORTED ON THIS DEVICE";
+            statusDiv.innerText = "ERROR";
         }
     });
 
-    // INSTANT SNAP & BACKGROUND LOG
-    snapBtn.addEventListener('click', (e) => {
+    snapBtn.addEventListener('click', async (e) => {
         e.preventDefault(); e.stopPropagation();
 
         const selectedProp = propertySelect.value;
         if (!selectedProp) {
-            statusDiv.innerText = "SELECT A PROPERTY FIRST!";
+            statusDiv.innerText = "SELECT PROPERTY";
             return;
         }
 
-        // FAST CAMERA CAPTURE (< 0.5 SECONDS)
+        // 1. FAST CAMERA FRAME CAPTURE
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 800;
         canvas.height = videoElem.videoHeight || 450;
         canvas.getContext('2d').drawImage(videoElem, 0, 0);
         const photoBytes = canvas.toDataURL('image/jpeg', 0.55);
 
-        // BRIEF FLASH ANIMATION
+        // 2. FLASH PREVIEW
         thumbPreview.src = photoBytes;
         thumbPreview.style.display = 'block';
         camBox.style.display = 'none';
@@ -231,22 +230,35 @@
             photoBytes: photoBytes
         };
 
-        // SAVE TO QUEUE FOR ASYNCHRONOUS PUSH
-        saveToOfflineQueue(payload);
-        statusDiv.innerText = "✔ MARKED! SAVED TO QUEUE";
-        regoInput.value = "";
+        statusDiv.innerText = "PROCESSING...";
 
-        // INSTANTLY RESET UI FOR NEXT SNAP
+        // 3. EXECUTE BACKEND ANPR & LOG
+        if (navigator.onLine) {
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const data = await res.json();
+                
+                if (data.status === "SUCCESS") {
+                    statusDiv.innerText = `LOGGED: ${data.rego}`;
+                    regoInput.value = "";
+                } else {
+                    statusDiv.innerText = "ERROR";
+                }
+            } catch(err) {
+                saveToOfflineQueue(payload);
+                statusDiv.innerText = "LOGGED (OFFLINE)";
+            }
+        } else {
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "LOGGED (OFFLINE)";
+        }
+
+        // 4. RESET CAMERA FOR NEXT SNAP AFTER 1.5 SECONDS
         setTimeout(() => {
             thumbPreview.style.display = 'none';
             camBox.style.display = 'flex';
-            statusDiv.innerText = "READY TO SNAP NEXT CAR";
-        }, 600);
-
-        // TRIGGER BACKGROUND SYNC IF ONLINE
-        if (navigator.onLine) {
-            processOfflineQueue();
-        }
+            statusDiv.innerText = "READY";
+        }, 1500);
     });
 
     function saveToOfflineQueue(payload) {
