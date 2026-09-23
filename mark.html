@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=800">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=800">
-    <link rel="manifest" href="manifest-mark.json?v=800">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=900">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=900">
+    <link rel="manifest" href="manifest-mark.json?v=900">
 
     <style>
         * { box-sizing: border-box; }
@@ -83,10 +83,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=800" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=800" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=800" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=800" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=900" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=900" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=900" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=900" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -95,8 +95,8 @@
         <option value="">LOADING PROPERTIES...</option>
     </select>
 
-    <label>REGO (OPTIONAL OVERRIDE)</label>
-    <input type="text" id="regoInput" placeholder="AUTO-DETECT VIA ANPR" style="color:#ffab00; text-transform:uppercase;">
+    <label>REGO</label>
+    <input type="text" id="regoInput" placeholder="REGO" style="color:#ffab00; text-transform:uppercase;">
 
     <label>MARKING CAMERA</label>
     <div class="camera-box" id="camBox">
@@ -114,7 +114,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=800').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=900').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -129,7 +129,6 @@
     const syncBadge = document.getElementById('syncBadge');
     const queueCount = document.getElementById('queueCount');
 
-    let isProcessing = false;
     let videoTrack = null;
     let torchOn = false;
 
@@ -140,7 +139,6 @@
         window.addEventListener('online', processOfflineQueue);
     });
 
-    // INSTANT HARD CACHE CLEAR & REFRESH
     refreshBtn.addEventListener('click', async () => {
         if ('serviceWorker' in navigator) {
             const registrations = await navigator.serviceWorker.getRegistrations();
@@ -189,7 +187,6 @@
         } catch(e) {}
     }
 
-    // TOGGLE HARDWARE FLASH / TORCH
     torchBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (!videoTrack) return;
@@ -203,9 +200,9 @@
         }
     });
 
-    snapBtn.addEventListener('click', async (e) => {
+    // INSTANT SNAP & BACKGROUND LOG
+    snapBtn.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
-        if (isProcessing) return;
 
         const selectedProp = propertySelect.value;
         if (!selectedProp) {
@@ -213,16 +210,14 @@
             return;
         }
 
-        isProcessing = true;
-        snapBtn.style.opacity = "0.5";
-        statusDiv.innerText = "SCANNING & LOGGING MARK...";
-
+        // FAST CAMERA CAPTURE (< 0.5 SECONDS)
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 1024;
-        canvas.height = videoElem.videoHeight || 576;
+        canvas.width = videoElem.videoWidth || 800;
+        canvas.height = videoElem.videoHeight || 450;
         canvas.getContext('2d').drawImage(videoElem, 0, 0);
-        const photoBytes = canvas.toDataURL('image/jpeg', 0.65);
+        const photoBytes = canvas.toDataURL('image/jpeg', 0.55);
 
+        // BRIEF FLASH ANIMATION
         thumbPreview.src = photoBytes;
         thumbPreview.style.display = 'block';
         camBox.style.display = 'none';
@@ -236,40 +231,23 @@
             photoBytes: photoBytes
         };
 
-        if (!navigator.onLine) {
-            saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            resetCameraAfterDelay();
-            return;
-        }
+        // SAVE TO QUEUE FOR ASYNCHRONOUS PUSH
+        saveToOfflineQueue(payload);
+        statusDiv.innerText = "✔ MARKED! SAVED TO QUEUE";
+        regoInput.value = "";
 
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const data = await res.json();
-            
-            if (data.status === "SUCCESS") {
-                statusDiv.innerText = `✔ MARKED: ${data.rego}`;
-                regoInput.value = "";
-            } else {
-                statusDiv.innerText = "ERROR LOGGING MARK";
-            }
-        } catch(err) {
-            saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-        }
-
-        resetCameraAfterDelay();
-    });
-
-    function resetCameraAfterDelay() {
+        // INSTANTLY RESET UI FOR NEXT SNAP
         setTimeout(() => {
             thumbPreview.style.display = 'none';
             camBox.style.display = 'flex';
-            snapBtn.style.opacity = "1.0";
             statusDiv.innerText = "READY TO SNAP NEXT CAR";
-            isProcessing = false;
-        }, 1800);
-    }
+        }, 600);
+
+        // TRIGGER BACKGROUND SYNC IF ONLINE
+        if (navigator.onLine) {
+            processOfflineQueue();
+        }
+    });
 
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
@@ -292,7 +270,6 @@
         let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
         if (queue.length === 0 || !navigator.onLine) return;
 
-        statusDiv.innerText = "SYNCING OFFLINE MARKS...";
         let remaining = [];
 
         for (let item of queue) {
@@ -305,7 +282,6 @@
 
         localStorage.setItem('mark_offline_queue', JSON.stringify(remaining));
         updateQueueUI();
-        if (remaining.length === 0) statusDiv.innerText = "✔ ALL OFFLINE MARKS SYNCED!";
     }
 </script>
 </body>
