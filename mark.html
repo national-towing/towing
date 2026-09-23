@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=980">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=980">
-    <link rel="manifest" href="manifest-mark.json?v=980">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=990">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=990">
+    <link rel="manifest" href="manifest-mark.json?v=990">
 
     <style>
         * { box-sizing: border-box; }
@@ -83,10 +83,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=980" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=980" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=980" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=980" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=990" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=990" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=990" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=990" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -114,7 +114,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=980').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=990').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -211,7 +211,7 @@
             return;
         }
 
-        // 1. CAPTURE HIGH-RESOLUTION STILL FOR ANPR OCR ACCURACY
+        // 1. CAPTURE STILL
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1280;
         canvas.height = videoElem.videoHeight || 720;
@@ -241,10 +241,15 @@
                 const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const data = await res.json();
                 
-                if (data.status === "SUCCESS" && data.rego && data.rego !== "UNREADABLE") {
-                    statusDiv.innerText = `LOGGED: ${data.rego}`;
-                    statusDiv.style.color = "#00e676";
-                    regoInput.value = data.rego;
+                if (data.status === "SUCCESS") {
+                    if (data.anprSuccess && data.rego && data.rego !== "UNREADABLE") {
+                        statusDiv.innerText = `LOGGED: ${data.rego}`;
+                        statusDiv.style.color = "#00e676";
+                        regoInput.value = data.rego;
+                    } else {
+                        statusDiv.innerText = "ERROR";
+                        statusDiv.style.color = "#ff1744";
+                    }
                 } else {
                     statusDiv.innerText = "ERROR";
                     statusDiv.style.color = "#ff1744";
@@ -260,7 +265,7 @@
             statusDiv.style.color = "#ffab00";
         }
 
-        // 4. RESET CAMERA STATUS AFTER 1.8 SECONDS
+        // 4. RESET CAMERA FOR NEXT SNAP AFTER 1.8 SECONDS
         setTimeout(() => {
             thumbPreview.style.display = 'none';
             camBox.style.display = 'flex';
