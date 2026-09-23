@@ -1,15 +1,15 @@
-const CACHE_NAME = 'tow-app-v2';
+const CACHE_NAME = 'tow-app-v800';
 const ASSETS = [
   './',
-  './run.html',
-  './mark.html',
-  './tow.html',
-  './passes.html',
-  './release.html',
-  './manifest-run.json',
-  './manifest-mark.json',
-  './manifest-tow.json',
-  './manifest-pass.json'
+  './run.html?v=800',
+  './mark.html?v=800',
+  './tow.html?v=800',
+  './passes.html?v=800',
+  './release.html?v=800',
+  './manifest-run.json?v=800',
+  './manifest-mark.json?v=800',
+  './manifest-tow.json?v=800',
+  './manifest-pass.json?v=800'
 ];
 
 self.addEventListener('install', (e) => {
