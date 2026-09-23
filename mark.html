@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1300">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1300">
-    <link rel="manifest" href="manifest-mark.json?v=1300">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1400">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1400">
+    <link rel="manifest" href="manifest-mark.json?v=1400">
 
     <style>
         * { box-sizing: border-box; }
@@ -48,7 +48,6 @@
             -webkit-appearance: none;
         }
 
-        /* ASPECT RATIO ENFORCEMENT (16:9 PREVELANCE) */
         .camera-box {
             width: 100%; height: 220px; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
@@ -63,7 +62,6 @@
 
         .thumb-preview { width: 100%; height: 220px; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin-top: 10px; }
 
-        /* VISUAL FEEDBACK OVERLAY (GREEN TICK / RED CROSS) */
         .feedback-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: none; align-items: center; justify-content: center;
@@ -100,10 +98,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=1300" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=1300" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=1300" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=1300" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=1400" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=1400" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=1400" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=1400" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -135,7 +133,7 @@
     const PLATE_RECOGNIZER_TOKEN = "Token 74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1300').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=1400').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -266,7 +264,10 @@
             return;
         }
 
-        // CAPTURE CANVAS WITH PROPER 16:9 PROPORTIONS (PREVENTS DISTORTION)
+        // CLEAR OLD REGO INPUT VALUE SO IT DOES NOT OVERRIDE THE NEW SNAP
+        let manualRego = regoInput.value.trim().toUpperCase();
+
+        // CAPTURE NEW CANVAS FRAME
         const canvas = document.createElement('canvas');
         canvas.width = 1280;
         canvas.height = 720;
@@ -275,10 +276,10 @@
         
         lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.70);
 
-        let detectedRego = regoInput.value.trim().toUpperCase();
-
         statusDiv.innerText = "SCANNING...";
         statusDiv.style.color = "#ffab00";
+
+        let detectedRego = manualRego;
 
         if (!detectedRego && navigator.onLine) {
             detectedRego = await recognizePlate(lastCapturedPhotoBytes);
@@ -295,7 +296,6 @@
                 photoBytes: lastCapturedPhotoBytes
             };
 
-            // SHOW GREEN TICK OVERLAY
             showVisualFeedback("✔", true);
             statusDiv.innerText = `LOGGED: ${detectedRego}`;
             statusDiv.style.color = "#00e676";
@@ -316,7 +316,6 @@
 
             resetCameraAfterDelay(1000);
         } else {
-            // SHOW RED CROSS OVERLAY & REVEAL MANUAL BUTTON
             showVisualFeedback("✖", false);
             statusDiv.innerText = "ERROR";
             statusDiv.style.color = "#ff1744";
@@ -361,7 +360,6 @@
         }
 
         manualLogBtn.style.display = "none";
-        regoInput.value = "";
         resetCameraAfterDelay(1000);
     });
 
@@ -377,6 +375,7 @@
             statusDiv.innerText = "READY";
             statusDiv.style.color = "#ffab00";
             manualLogBtn.style.display = "none";
+            regoInput.value = ""; // RESET REGO FIELD FOR NEXT VEHICLE SNAP
         }, ms);
     }
 
