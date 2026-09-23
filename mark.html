@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=990">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=990">
-    <link rel="manifest" href="manifest-mark.json?v=990">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1000">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1000">
+    <link rel="manifest" href="manifest-mark.json?v=1000">
 
     <style>
         * { box-sizing: border-box; }
@@ -70,6 +70,12 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 74px; height: 74px; border-radius: 50%; border: 2px solid #000; }
 
+        .manual-btn {
+            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 12px;
+            height: 54px; font-size: 20px; width: 100%; margin-top: 14px; cursor: pointer; letter-spacing: 1px;
+            display: none;
+        }
+
         #status { text-align: center; font-weight: 900; font-size: 20px; margin-top: 14px; min-height: 24px; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
@@ -83,10 +89,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=990" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=990" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=990" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=990" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=1000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=1000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=1000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=1000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -107,6 +113,8 @@
     
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
+    <button class="manual-btn" id="manualLogBtn">LOG MANUAL MARK</button>
+
     <div id="status">READY</div>
 </div>
 
@@ -114,7 +122,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=990').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=1000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -124,6 +132,7 @@
     const thumbPreview = document.getElementById('thumbPreview');
     const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
+    const manualLogBtn = document.getElementById('manualLogBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
     const syncBadge = document.getElementById('syncBadge');
@@ -131,6 +140,7 @@
 
     let videoTrack = null;
     let torchOn = false;
+    let lastCapturedPhotoBytes = "";
 
     window.addEventListener('load', async () => {
         await loadProperties();
@@ -201,25 +211,30 @@
         }
     });
 
+    // 1. AUTO SNAP & ANPR PROCESS
     snapBtn.addEventListener('click', async (e) => {
         e.preventDefault(); e.stopPropagation();
 
         const selectedProp = propertySelect.value;
         if (!selectedProp) {
-            statusDiv.innerText = "ERROR";
+            statusDiv.innerText = "SELECT PROPERTY";
             statusDiv.style.color = "#ff1744";
             return;
         }
 
-        // 1. CAPTURE STILL
+        // CAPTURE STILL & APPLY CONTRAST BOOST FOR ANPR
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1280;
         canvas.height = videoElem.videoHeight || 720;
-        canvas.getContext('2d').drawImage(videoElem, 0, 0);
-        const photoBytes = canvas.toDataURL('image/jpeg', 0.75);
+        const ctx = canvas.getContext('2d');
+        
+        // BOOST CONTRAST ON CANVAS
+        ctx.filter = "contrast(140%) brightness(105%)";
+        ctx.drawImage(videoElem, 0, 0);
+        
+        lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.80);
 
-        // 2. FLASH PREVIEW
-        thumbPreview.src = photoBytes;
+        thumbPreview.src = lastCapturedPhotoBytes;
         thumbPreview.style.display = 'block';
         camBox.style.display = 'none';
 
@@ -229,50 +244,86 @@
             action: 'log_mark',
             property: selectedProp,
             rego: manualRego,
-            photoBytes: photoBytes
+            photoBytes: lastCapturedPhotoBytes
         };
 
         statusDiv.innerText = "PROCESSING...";
         statusDiv.style.color = "#ffab00";
 
-        // 3. EXECUTE BACKEND LOG & ANPR
         if (navigator.onLine) {
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const data = await res.json();
                 
-                if (data.status === "SUCCESS") {
-                    if (data.anprSuccess && data.rego && data.rego !== "UNREADABLE") {
-                        statusDiv.innerText = `LOGGED: ${data.rego}`;
-                        statusDiv.style.color = "#00e676";
-                        regoInput.value = data.rego;
-                    } else {
-                        statusDiv.innerText = "ERROR";
-                        statusDiv.style.color = "#ff1744";
-                    }
+                if (data.status === "SUCCESS" && data.rego && data.rego !== "UNREADABLE") {
+                    statusDiv.innerText = `LOGGED: ${data.rego}`;
+                    statusDiv.style.color = "#00e676";
+                    regoInput.value = data.rego;
+                    resetCameraAfterDelay();
                 } else {
+                    // ANPR FAILED -> SHOW ERROR & REVEAL MANUAL LOG BUTTON
                     statusDiv.innerText = "ERROR";
                     statusDiv.style.color = "#ff1744";
+                    manualLogBtn.style.display = "block";
+                    regoInput.focus();
                 }
             } catch(err) {
                 saveToOfflineQueue(payload);
                 statusDiv.innerText = "LOGGED (OFFLINE)";
                 statusDiv.style.color = "#ffab00";
+                resetCameraAfterDelay();
             }
         } else {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "LOGGED (OFFLINE)";
             statusDiv.style.color = "#ffab00";
+            resetCameraAfterDelay();
+        }
+    });
+
+    // 2. MANUAL REGO OVERRIDE BUTTON SUBMISSION
+    manualLogBtn.addEventListener('click', async () => {
+        const manualRego = regoInput.value.trim().toUpperCase();
+        if (!manualRego) {
+            statusDiv.innerText = "ENTER REGO FIRST";
+            statusDiv.style.color = "#ff1744";
+            return;
         }
 
-        // 4. RESET CAMERA FOR NEXT SNAP AFTER 1.8 SECONDS
+        const payload = {
+            action: 'log_mark',
+            property: propertySelect.value,
+            rego: manualRego,
+            photoBytes: lastCapturedPhotoBytes
+        };
+
+        statusDiv.innerText = "LOGGING MANUAL...";
+        statusDiv.style.color = "#ffab00";
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            statusDiv.innerText = `LOGGED: ${manualRego}`;
+            statusDiv.style.color = "#00e676";
+        } catch(e) {
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "LOGGED (OFFLINE)";
+            statusDiv.style.color = "#ffab00";
+        }
+
+        manualLogBtn.style.display = "none";
+        regoInput.value = "";
+        resetCameraAfterDelay();
+    });
+
+    function resetCameraAfterDelay() {
         setTimeout(() => {
             thumbPreview.style.display = 'none';
             camBox.style.display = 'flex';
             statusDiv.innerText = "READY";
             statusDiv.style.color = "#ffab00";
-        }, 1800);
-    });
+            manualLogBtn.style.display = "none";
+        }, 1600);
+    }
 
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
