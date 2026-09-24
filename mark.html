@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1600">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1600">
-    <link rel="manifest" href="manifest-mark.json?v=1600">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1700">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1700">
+    <link rel="manifest" href="manifest-mark.json?v=1700">
 
     <style>
         * { box-sizing: border-box; }
@@ -49,12 +49,14 @@
             -webkit-appearance: none;
         }
 
-        /* ACCURATE 16:9 VIEWFINDER PROPORTIONS FOR SINGLE-SCREEN PORTRAIT DISPLAY */
+        /* UNDISTORTED CONTAINER */
         .camera-box {
-            width: 100%; height: 248px; background: #000; border-radius: 12px; border: 2px solid #333;
+            width: 100%; height: 260px; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* PREVENT VIDEO STRETCHING/DISTORTION */
+        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
 
         .torch-btn {
             position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6);
@@ -62,7 +64,7 @@
             font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
-        .thumb-preview { width: 100%; height: 248px; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin-top: 6px; }
+        .thumb-preview { width: 100%; height: 260px; border-radius: 12px; object-fit: contain; background: #000; border: 2px solid #ffab00; display: none; margin-top: 6px; }
 
         .feedback-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -100,10 +102,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=1600" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=1600" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=1600" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=1600" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=1700" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=1700" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=1700" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=1700" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -135,7 +137,7 @@
     const PLATE_RECOGNIZER_TOKEN = "Token 74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1600').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=1700').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -268,12 +270,15 @@
 
         let manualRego = regoInput.value.trim().toUpperCase();
 
-        // CAPTURE CANVAS ENFORCING NATIVE 16:9 PROPORTIONS (PREVENTS DISTORTION)
+        // DYNAMIC SENSOR RATIO CANVAS MATCHING (ELIMINATES DISTORTION/STRETCHING)
+        const sensorWidth = videoElem.videoWidth || 1280;
+        const sensorHeight = videoElem.videoHeight || 720;
+
         const canvas = document.createElement('canvas');
-        canvas.width = 1280;
-        canvas.height = 720;
+        canvas.width = sensorWidth;
+        canvas.height = sensorHeight;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, 1280, 720);
+        ctx.drawImage(videoElem, 0, 0, sensorWidth, sensorHeight);
         
         lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.60);
 
