@@ -7,17 +7,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=39">
-    <link rel="icon" type="image/png" href="icon-release.png?v=39">
-    <link rel="manifest" href="manifest-release.json?v=39">
-
-    <!-- OCR ENGINE FOR ID CARD EXTRACTION -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="apple-touch-icon" href="icon-rel.png?v=2200">
+    <link rel="icon" type="image/png" href="icon-rel.png?v=2200">
+    <link rel="manifest" href="manifest-rel.json?v=2200">
 
     <style>
         * { box-sizing: border-box; }
@@ -30,7 +25,12 @@
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #00e676; letter-spacing: 2px; text-align: center; }
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
-        .icon-btn:active { transform: scale(0.9); }
+
+        .sync-badge {
+            background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
+            padding: 6px 12px; border-radius: 20px; margin-bottom: 10px; display: none;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
 
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
@@ -41,58 +41,42 @@
 
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         
-        .section-title { font-size: 16px; font-weight: 900; color: #00e676; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 6px; margin-top: 14px; margin-bottom: 6px; }
-
         label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
         input, select {
             width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
-            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none;
         }
-
-        /* VALIDATION HIGHLIGHTING */
-        .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
-        .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
-
-        .legal-stmt { font-size: 13.5px; color: #ddd; margin-top: 14px; line-height: 1.4; font-style: italic; background: #141414; padding: 10px; border-radius: 8px; border: 1px solid #333; font-weight: 600; }
-
-        .camera-box {
-            width: 100%; height: 180px; background: #000; border-radius: 12px; border: 2px solid #333;
-            margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
-        }
-        video { width: 100%; height: 100%; object-fit: cover; }
-
-        .thumb-gallery { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; }
-        .thumb-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #00e676; cursor: pointer; flex-shrink: 0; }
-
-        .circle-cam-btn {
-            width: 80px; height: 80px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
-            margin: 10px auto 0 auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 16px rgba(0, 230, 118, 0.4); cursor: pointer; user-select: none;
-        }
-        .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000; }
-
-        .sig-container { width: 100%; margin-top: 6px; position: relative; }
-        canvas.sig-box {
-            width: 100%; height: 190px; background: #fff; border: 2px solid #444; border-radius: 12px;
-            touch-action: none; cursor: crosshair; transition: opacity 0.3s ease;
-        }
-        .sig-locked { opacity: 0.45; pointer-events: none; border-color: #00e676 !important; }
-
-        .sig-btn-row { display: flex; gap: 8px; margin-top: 6px; }
-        .sig-btn { flex: 1; height: 42px; border-radius: 8px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; letter-spacing: 1px; }
-        .btn-clear { background: #ff1744; color: #fff; }
-        .btn-confirm { background: #00e676; color: #000; }
-
-        .submit-btn {
-            background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
-        }
-        .submit-btn:active { transform: scale(0.97); }
 
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
+
+        .sig-box { width: 100%; height: 130px; background: #fff; border-radius: 10px; margin-top: 6px; touch-action: none; }
+        .sig-btn { background: #333; color: #aaa; border: 1px solid #555; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 900; margin-top: 4px; cursor: pointer; float: right; }
+
+        .camera-box {
+            width: 100%; height: 200px; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .circle-cam-btn {
+            width: 70px; height: 70px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
+            margin: 10px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 18px rgba(0, 230, 118, 0.4); cursor: pointer; user-select: none;
+        }
+        .circle-cam-btn:active { transform: scale(0.90); }
+        .circle-cam-inner { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #000; }
+
+        .thumb-gallery { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; }
+        .thumb-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px solid #00e676; flex-shrink: 0; }
+
+        .submit-btn {
+            background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 24px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+        }
+        .submit-btn:active { transform: scale(0.97); }
+
         #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
     </style>
 </head>
@@ -103,225 +87,187 @@
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
+
 <div class="nav-bar">
-    <a href="run.html" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=2200" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=2200" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=2200" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=2200" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
-    <label>SELECT FROM YARD</label>
-    <select id="vehicleSelect"><option value="">LOADING YARD VEHICLES...</option></select>
+    <label>SELECT VEHICLE IN YARD</label>
+    <select id="yardVehicleSelect" onchange="autoFillYardVehicle(this.value)">
+        <option value="">LOADING YARD VEHICLES...</option>
+    </select>
 
-    <!-- SECTION 1: OFFENDING VEHICLE DETAILS -->
-    <div class="section-title">OFFENDING VEHICLE DETAILS</div>
-    
-    <div class="row-2">
-        <div>
-            <label>PROPERTY</label>
-            <input type="text" id="propertyInput" placeholder="PROPERTY" readonly style="background:#1a1a1a; color:#aaa;">
-        </div>
-        <div>
-            <label>SVN # (POLICELINK)</label>
-            <input type="text" id="svnInput" placeholder="SVN NUMBER">
-        </div>
-    </div>
-
-    <div class="row-2">
-        <div>
-            <label>REGO</label>
-            <input type="text" id="regoInput" placeholder="REGO" style="color:#00e676; text-transform:uppercase;">
-        </div>
-        <div>
-            <label>COLOUR</label>
-            <input type="text" id="colourInput" placeholder="COLOUR">
-        </div>
-    </div>
-
-    <div class="row-2">
-        <div>
-            <label>MAKE</label>
-            <input type="text" id="makeInput" placeholder="MAKE">
-        </div>
-        <div>
-            <label>MODEL</label>
-            <input type="text" id="modelInput" placeholder="MODEL">
-        </div>
-    </div>
-
-    <!-- SECTION 2: OWNER DETAILS -->
-    <div class="section-title">OWNER DETAILS</div>
-    
-    <label>SNAP DRIVER ID / LICENCE (FRONT & BACK)</label>
-    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
-    <div class="thumb-gallery" id="thumbGallery"></div>
-    <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-
-    <div class="row-2">
-        <div>
-            <label>NAME</label>
-            <input type="text" id="ownerNameInput" placeholder="FULL NAME">
-        </div>
-        <div>
-            <label>ID / LICENCE #</label>
-            <input type="text" id="idNumInput" placeholder="ID NUMBER">
-        </div>
-    </div>
-
-    <label>ADDRESS</label>
-    <input type="text" id="ownerAddressInput" placeholder="STREET ADDRESS, SUBURB, STATE">
+    <label>OWNER / COLLECTOR NAME</label>
+    <input type="text" id="ownerNameInput" placeholder="FULL NAME" style="color:#00e676;">
 
     <div class="row-2">
         <div>
             <label>PHONE</label>
-            <input type="tel" id="ownerPhoneInput" placeholder="PHONE NUMBER">
+            <input type="tel" id="ownerPhoneInput" placeholder="PHONE">
         </div>
         <div>
-            <label>EMAIL</label>
-            <input type="email" id="ownerEmailInput" placeholder="EMAIL ADDRESS">
+            <label>ID / LICENCE #</label>
+            <input type="text" id="idNumberInput" placeholder="ID #">
         </div>
     </div>
 
-    <div class="legal-stmt">
-        "I am the owner, owners agent, driver or authorised person in charge of the above vehicle. I take full responsibility for payment, release and acceptance of the vehicle as inspected."
-    </div>
+    <label>EMAIL (FOR TAX INVOICE)</label>
+    <input type="email" id="ownerEmailInput" placeholder="EMAIL ADDRESS">
 
-    <label>OWNER SIGNATURE</label>
-    <div class="sig-container">
-        <canvas id="ownerSigCanvas" class="sig-box"></canvas>
-        <div class="sig-btn-row">
-            <button class="sig-btn btn-clear" onclick="clearSig('ownerSigCanvas')">CLEAR</button>
-            <button class="sig-btn btn-confirm" onclick="confirmSig('ownerSigCanvas')">CONFIRM</button>
-        </div>
-    </div>
+    <label>RESIDENTIAL ADDRESS</label>
+    <input type="text" id="ownerAddressInput" placeholder="ADDRESS">
 
-    <!-- SECTION 3: PAYMENT DETAILS -->
-    <div class="section-title">PAYMENT DETAILS</div>
     <div class="row-2">
         <div>
             <label>RELEASE FEE ($)</label>
-            <input type="number" step="0.01" id="releaseFeeInput" value="310.05">
+            <input type="number" id="relFeeInput" value="310.05" step="0.01">
         </div>
         <div>
-            <label>STORAGE / AH FEE ($)</label>
-            <input type="number" step="0.01" id="storageFeeInput" value="140.95">
+            <label>STORAGE FEE ($)</label>
+            <input type="number" id="storFeeInput" value="140.95" step="0.01">
         </div>
     </div>
 
-    <!-- SECTION 4: OFFICE USE -->
-    <div class="section-title">OFFICE USE</div>
-    
-    <label>RELEASED BY</label>
-    <select id="officerSelect" onchange="checkOfficerOther(this)">
+    <label>RELEASE OFFICER</label>
+    <select id="officerSelect">
         <option value="Brian" selected>Brian</option>
         <option value="Brett">Brett</option>
-        <option value="OTHER">Other...</option>
+        <option value="Other">Other</option>
     </select>
-    <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;">
 
-    <label>OFFICER SIGNATURE</label>
-    <div class="sig-container">
-        <canvas id="officerSigCanvas" class="sig-box"></canvas>
-        <div class="sig-btn-row">
-            <button class="sig-btn btn-clear" onclick="clearSig('officerSigCanvas')">CLEAR</button>
-            <button class="sig-btn btn-confirm" onclick="confirmSig('officerSigCanvas')">CONFIRM</button>
-        </div>
+    <label>CAPTURE COLLECTOR ID / DRIVERS LICENCE</label>
+    <div class="camera-box">
+        <video id="videoElem" autoplay playsinline></video>
+    </div>
+    <div class="thumb-gallery" id="idThumbGallery"></div>
+    <div class="circle-cam-btn" id="snapIdBtn"><div class="circle-cam-inner"></div></div>
+
+    <div style="margin-top:10px;">
+        <button class="sig-btn" onclick="clearOwnerSig()">CLEAR</button>
+        <label>OWNER SIGNATURE</label>
+        <canvas class="sig-box" id="ownerSigCanvas"></canvas>
     </div>
 
-    <button class="submit-btn" id="submitBtn">PAID - RELEASE</button>
+    <button class="submit-btn" id="submitBtn">PROCESS RELEASE</button>
     <div id="status"></div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
-    const vehicleSelect = document.getElementById('vehicleSelect');
-    const propertyInput = document.getElementById('propertyInput');
-    const svnInput = document.getElementById('svnInput');
-    const regoInput = document.getElementById('regoInput');
-    const colourInput = document.getElementById('colourInput');
-    const makeInput = document.getElementById('makeInput');
-    const modelInput = document.getElementById('modelInput');
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js?v=2200').catch(()=>{});
+    }
 
+    const yardVehicleSelect = document.getElementById('yardVehicleSelect');
     const ownerNameInput = document.getElementById('ownerNameInput');
-    const idNumInput = document.getElementById('idNumInput');
-    const ownerAddressInput = document.getElementById('ownerAddressInput');
     const ownerPhoneInput = document.getElementById('ownerPhoneInput');
+    const idNumberInput = document.getElementById('idNumberInput');
     const ownerEmailInput = document.getElementById('ownerEmailInput');
-
-    const releaseFeeInput = document.getElementById('releaseFeeInput');
-    const storageFeeInput = document.getElementById('storageFeeInput');
-
+    const ownerAddressInput = document.getElementById('ownerAddressInput');
+    const relFeeInput = document.getElementById('relFeeInput');
+    const storFeeInput = document.getElementById('storFeeInput');
     const officerSelect = document.getElementById('officerSelect');
-    const officerOtherInput = document.getElementById('officerOtherInput');
-
+    
     const videoElem = document.getElementById('videoElem');
-    const snapBtn = document.getElementById('snapBtn');
-    const thumbGallery = document.getElementById('thumbGallery');
+    const snapIdBtn = document.getElementById('snapIdBtn');
+    const idThumbGallery = document.getElementById('idThumbGallery');
+    const ownerSigCanvas = document.getElementById('ownerSigCanvas');
     const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
+    const syncBadge = document.getElementById('syncBadge');
+    const queueCount = document.getElementById('queueCount');
 
     let yardVehicles = [];
     let idPhotos = [];
-    let ownerSigConfirmed = false;
-    let officerSigConfirmed = false;
+    let isSubmitting = false;
+    let sigCtx = null;
+    let isDrawing = false;
 
-    window.addEventListener('load', () => {
-        loadYardVehicles();
+    window.addEventListener('load', async () => {
+        initSigCanvas();
+        await loadYardVehicles();
         initCamera();
-        initSignatureCanvas('ownerSigCanvas');
-        initSignatureCanvas('officerSigCanvas');
-        setupLiveValidation();
+        updateQueueUI();
+        window.addEventListener('online', processOfflineQueue);
     });
 
-    refreshBtn.addEventListener('click', () => {
+    refreshBtn.addEventListener('click', async () => {
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+                await registration.unregister();
+            }
+        }
         window.location.reload(true);
     });
 
-    function checkOfficerOther(selectElem) {
-        if (selectElem.value === "OTHER") {
-            officerOtherInput.style.display = 'block';
-            officerOtherInput.focus();
-        } else {
-            officerOtherInput.style.display = 'none';
-        }
-        validateForm();
+    function initSigCanvas() {
+        ownerSigCanvas.width = ownerSigCanvas.offsetWidth || 380;
+        ownerSigCanvas.height = 130;
+        sigCtx = ownerSigCanvas.getContext('2d');
+        sigCtx.strokeStyle = "#000";
+        sigCtx.lineWidth = 3;
+
+        const getPos = (e) => {
+            const rect = ownerSigCanvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        };
+
+        const startDraw = (e) => { isDrawing = true; const p = getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); };
+        const draw = (e) => { if (!isDrawing) return; const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); };
+        const stopDraw = () => { isDrawing = false; };
+
+        ownerSigCanvas.addEventListener('mousedown', startDraw);
+        ownerSigCanvas.addEventListener('mousemove', draw);
+        ownerSigCanvas.addEventListener('mouseup', stopDraw);
+
+        ownerSigCanvas.addEventListener('touchstart', startDraw, {passive: true});
+        ownerSigCanvas.addEventListener('touchmove', draw, {passive: true});
+        ownerSigCanvas.addEventListener('touchend', stopDraw);
     }
 
-    vehicleSelect.addEventListener('change', () => {
-        const selectedRego = vehicleSelect.value;
-        const veh = yardVehicles.find(v => v.rego === selectedRego);
-        if (veh) {
-            propertyInput.value = veh.property || '';
-            regoInput.value = veh.rego || '';
-            makeInput.value = veh.make || '';
-            modelInput.value = veh.model || '';
-            colourInput.value = veh.colour || '';
-        }
-        validateForm();
-    });
+    function clearOwnerSig() {
+        sigCtx.clearRect(0, 0, ownerSigCanvas.width, ownerSigCanvas.height);
+    }
 
     async function loadYardVehicles() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
             yardVehicles = await res.json();
-            vehicleSelect.innerHTML = "<option value=''>-- SELECT FROM YARD --</option>";
-
-            if (!yardVehicles || yardVehicles.length === 0) {
-                vehicleSelect.innerHTML = "<option value=''>NO VEHICLES IN YARD</option>";
-                return;
-            }
-
-            yardVehicles.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v.rego;
-                opt.innerText = `${v.rego} (${v.make || ''} ${v.model || ''})`;
-                vehicleSelect.appendChild(opt);
-            });
+            localStorage.setItem('cached_yard_vehicles', JSON.stringify(yardVehicles));
+            populateYardUI(yardVehicles);
         } catch(e) {
-            vehicleSelect.innerHTML = "<option value=''>ERROR LOADING YARD</option>";
+            const cached = localStorage.getItem('cached_yard_vehicles');
+            if (cached) {
+                yardVehicles = JSON.parse(cached);
+                populateYardUI(yardVehicles);
+            }
+        }
+    }
+
+    function populateYardUI(vehicles) {
+        yardVehicleSelect.innerHTML = '<option value="">-- SELECT VEHICLE --</option>';
+        vehicles.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.rego;
+            opt.innerText = `${v.rego} (${v.make} ${v.model} - ${v.property})`;
+            yardVehicleSelect.appendChild(opt);
+        });
+    }
+
+    function autoFillYardVehicle(rego) {
+        const v = yardVehicles.find(x => x.rego === rego);
+        if (v) {
+            statusDiv.innerText = `SELECTED: ${v.rego} (${v.property})`;
         }
     }
 
@@ -332,210 +278,123 @@
         } catch(e) {}
     }
 
-    snapBtn.addEventListener('click', async () => {
+    snapIdBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 640;
-        canvas.height = videoElem.videoHeight || 480;
+        canvas.width = 800;
+        canvas.height = 450;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0);
-        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+        ctx.drawImage(videoElem, 0, 0, 800, 450);
+        
+        const b64 = canvas.toDataURL('image/jpeg', 0.60);
         idPhotos.push(b64);
 
         const img = document.createElement('img');
-        img.src = b64; 
-        img.className = 'thumb-img';
-        thumbGallery.appendChild(img);
-        
-        statusDiv.innerText = "🔍 EXTRACTING ID DETAILS...";
+        img.src = b64; img.className = 'thumb-img';
+        idThumbGallery.appendChild(img);
 
-        try {
-            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
-            
-            const idMatch = text.match(/(?:LIC|NO|ID|CARD)[\s#:]*([A-Z0-9]{7,10})/i) || text.match(/\b[0-9]{7,9}\b/);
-            if (idMatch && !idNumInput.value) {
-                idNumInput.value = idMatch[1] || idMatch[0];
-            }
-
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
-            for (let line of lines) {
-                if (/^[A-Z\s]{4,30}$/.test(line) && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA/i.test(line)) {
-                    if (!ownerNameInput.value) ownerNameInput.value = line;
-                    break;
-                }
-            }
-
-            const addressMatch = lines.find(l => /\d+\s+[A-Z\s]+(?:ST|RD|AVE|DR|WAY|QLD|NSW|VIC)/i.test(l));
-            if (addressMatch && !ownerAddressInput.value) {
-                ownerAddressInput.value = addressMatch;
-            }
-
-            statusDiv.innerText = `✔ ID SNAP ${idPhotos.length} CAPTURED & PARSED`;
-        } catch(e) {
-            statusDiv.innerText = `✔ ID SNAP ${idPhotos.length} CAPTURED`;
-        }
-
-        validateForm();
+        statusDiv.innerText = `✔ ID PHOTO ${idPhotos.length} CAPTURED`;
     });
 
-    function initSignatureCanvas(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
+    submitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
 
-        function resizeCanvas() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 3;
-            ctx.lineCap = "round";
-        }
-        resizeCanvas();
+        const selectedRego = yardVehicleSelect.value;
+        if (!selectedRego) { statusDiv.innerText = "SELECT A VEHICLE FROM YARD"; return; }
 
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        }
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
 
-        function startDrawing(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
-        function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
-        function stopDrawing() { drawing = false; }
+        const matchedVehicle = yardVehicles.find(v => v.rego === selectedRego) || {};
+        const sigBytes = ownerSigCanvas.toDataURL('image/png');
 
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
+        const payload = {
+            id: 'REL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            action: 'process_release',
+            rego: selectedRego,
+            property: matchedVehicle.property || "",
+            make: matchedVehicle.make || "",
+            model: matchedVehicle.model || "",
+            colour: matchedVehicle.colour || "",
+            ownerName: ownerNameInput.value.trim(),
+            ownerPhone: ownerPhoneInput.value.trim(),
+            idNumber: idNumberInput.value.trim(),
+            ownerEmail: ownerEmailInput.value.trim(),
+            ownerAddress: ownerAddressInput.value.trim(),
+            releaseFee: relFeeInput.value || "310.05",
+            storageFee: storFeeInput.value || "140.95",
+            officer: officerSelect.value,
+            ownerSigBytes: sigBytes,
+            idPhotos: idPhotos
+        };
 
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
-        canvas.addEventListener('touchend', stopDrawing);
-    }
-
-    function clearSig(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        canvas.classList.remove('sig-locked');
-        
-        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
-        if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
-        
-        statusDiv.innerText = "";
-        validateForm();
-    }
-
-    function confirmSig(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        canvas.classList.add('sig-locked');
-        
-        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
-        if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
-        
-        statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
-        validateForm();
-    }
-
-    function setupLiveValidation() {
-        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
-        inputs.forEach(elem => {
-            elem.addEventListener('input', validateForm);
-            elem.addEventListener('change', validateForm);
-        });
-        validateForm();
-    }
-
-    function validateForm() {
-        let isValid = true;
-
-        function mark(elem, condition) {
-            if (condition) {
-                elem.classList.remove('field-missing');
-                elem.classList.add('field-valid');
-            } else {
-                elem.classList.remove('field-valid');
-                elem.classList.add('field-missing');
-                isValid = false;
-            }
-        }
-
-        mark(vehicleSelect, vehicleSelect.value !== "");
-        mark(svnInput, svnInput.value.trim() !== "");
-        mark(regoInput, regoInput.value.trim() !== "");
-        mark(colourInput, colourInput.value.trim() !== "");
-        mark(makeInput, makeInput.value.trim() !== "");
-        mark(modelInput, modelInput.value.trim() !== "");
-
-        mark(ownerNameInput, ownerNameInput.value.trim() !== "");
-        mark(idNumInput, idNumInput.value.trim() !== "");
-        mark(ownerAddressInput, ownerAddressInput.value.trim() !== "");
-
-        const hasPhone = ownerPhoneInput.value.trim() !== "";
-        const hasEmail = ownerEmailInput.value.trim() !== "";
-        if (hasPhone || hasEmail) {
-            ownerPhoneInput.classList.remove('field-missing'); ownerPhoneInput.classList.add('field-valid');
-            ownerEmailInput.classList.remove('field-missing'); ownerEmailInput.classList.add('field-valid');
-        } else {
-            ownerPhoneInput.classList.add('field-missing');
-            ownerEmailInput.classList.add('field-missing');
-            isValid = false;
-        }
-
-        mark(releaseFeeInput, releaseFeeInput.value !== "");
-        mark(storageFeeInput, storageFeeInput.value !== "");
-
-        if (officerSelect.value === "OTHER") {
-            mark(officerOtherInput, officerOtherInput.value.trim() !== "");
-        }
-
-        if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
-
-        return isValid;
-    }
-
-    submitBtn.addEventListener('click', async () => {
-        if (!validateForm()) {
-            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM BOTH SIGS";
+        if (!navigator.onLine) {
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            setTimeout(() => { window.location.href = "run.html?v=2200"; }, 1000);
             return;
         }
 
-        const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
-        const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
-        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
-
-        const payload = {
-            action: 'process_release',
-            rego: regoInput.value.trim().toUpperCase(),
-            svnNumber: svnInput.value.trim(),
-            make: makeInput.value.trim(),
-            model: modelInput.value.trim(),
-            colour: colourInput.value.trim(),
-            property: propertyInput.value.trim(),
-            ownerName: ownerNameInput.value.trim(),
-            idNumber: idNumInput.value.trim(),
-            ownerAddress: ownerAddressInput.value.trim(),
-            ownerPhone: ownerPhoneInput.value.trim(),
-            ownerEmail: ownerEmailInput.value.trim(),
-            releaseFee: releaseFeeInput.value,
-            storageFee: storageFeeInput.value,
-            officer: finalOfficer,
-            idPhotos: idPhotos,
-            ownerSigBytes: ownerSig,
-            officerSigBytes: officerSig
-        };
-
         statusDiv.innerText = "GENERATING INVOICE & RELEASING...";
+        
         try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            statusDiv.innerText = "✔ PAID - VEHICLE RELEASED SUCCESS!";
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            statusDiv.innerText = "✔ VEHICLE RELEASED & INVOICE SENT!";
+            setTimeout(() => { window.location.href = "run.html?v=2200"; }, 1000);
         } catch(err) {
-            statusDiv.innerText = "ERROR PROCESSING RELEASE";
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            setTimeout(() => { window.location.href = "run.html?v=2200"; }, 1000);
+        }
+    });
+
+    function saveToOfflineQueue(payload) {
+        let queue = JSON.parse(localStorage.getItem('rel_offline_queue') || "[]");
+        if (!queue.some(item => item.id === payload.id)) {
+            queue.push(payload);
+            localStorage.setItem('rel_offline_queue', JSON.stringify(queue));
+        }
+        updateQueueUI();
+    }
+
+    function updateQueueUI() {
+        let queue = JSON.parse(localStorage.getItem('rel_offline_queue') || "[]");
+        if (queue.length > 0) {
+            queueCount.innerText = queue.length;
+            syncBadge.style.display = 'block';
+        } else {
+            syncBadge.style.display = 'none';
+        }
+    }
+
+    async function processOfflineQueue() {
+        let queue = JSON.parse(localStorage.getItem('rel_offline_queue') || "[]");
+        if (queue.length === 0 || !navigator.onLine) return;
+
+        let remaining = [];
+
+        for (let item of queue) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
+            } catch(e) {
+                remaining.push(item);
+            }
         }
 
-        setTimeout(() => {
-            window.location.reload(true);
-        }, 1500);
-    });
+        localStorage.setItem('rel_offline_queue', JSON.stringify(remaining));
+        updateQueueUI();
+    }
 </script>
 </body>
 </html>
