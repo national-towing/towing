@@ -10,89 +10,83 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=9999999">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=9999999">
-    <link rel="manifest" href="manifest-tow.json?v=9999999">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10000">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10000">
+    <link rel="manifest" href="manifest-tow.json?v=10000">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 6px 10px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; max-height: 100vh; overflow: hidden;
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
         
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 2px; flex-shrink: 0; }
-        .header-box h1 { margin: 0; font-size: 26px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; font-size: 15px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
 
         .sync-badge {
-            background: #ffab00; color: #000; font-weight: 900; font-size: 10px;
-            padding: 3px 8px; border-radius: 20px; margin-bottom: 2px; display: none;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;
+            background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
+            padding: 6px 12px; border-radius: 20px; margin-bottom: 10px; display: none;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
         }
 
-        .nav-bar { display: flex; gap: 6px; width: 100%; max-width: 440px; margin-bottom: 4px; flex-shrink: 0; }
-        .nav-tile { flex: 1; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; }
+        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
+        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
         .nav-tow { background: #ff1744; color: #fff; }
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .card { 
-            background: #1e1e1e; border-radius: 14px; padding: 8px 10px; width: 100%; max-width: 440px; 
-            border: 1px solid #333; display: flex; flex-direction: column; flex: 1; overflow: hidden;
-        }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         
-        label { font-size: 9px; text-transform: uppercase; color: #aaa; display: block; margin-top: 1px; font-weight: 900; letter-spacing: 1px; flex-shrink: 0; }
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 32px; padding: 0 8px; border-radius: 6px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 14px; font-weight: 900; margin-top: 1px; outline: none;
-            -webkit-appearance: none; flex-shrink: 0;
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none;
         }
 
-        .row-rego-state { display: flex; gap: 6px; flex-shrink: 0; }
+        .row-rego-state { display: flex; gap: 10px; }
         .row-rego-state > div:first-child { flex: 2; }
         .row-rego-state > div:last-child { flex: 1; }
 
-        .row-2 { display: flex; gap: 6px; flex-shrink: 0; }
+        .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
 
-        /* TALL PORTRAIT VIEWFINDER (MATCHING MARK APP EXACTLY) */
+        /* TALL PORTRAIT VIEWFINDER MATCHED TO MARK APP */
         .camera-box {
-            width: 100%; flex: 1; background: #000; border-radius: 10px; border: 2px solid #333;
-            margin-top: 2px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
-            min-height: 320px;
+            width: 100%; height: 380px; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .torch-btn {
-            position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.65);
-            border: 1px solid #ff1744; color: #ff1744; padding: 4px 8px; border-radius: 16px;
-            font-size: 10px; font-weight: 900; cursor: pointer; z-index: 10;
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
+            border: 1px solid #ff1744; color: #ff1744; padding: 6px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
-        .thumb-gallery { display: flex; gap: 4px; margin-top: 2px; overflow-x: auto; padding-bottom: 2px; flex-shrink: 0; }
-        .thumb-img { width: 42px; height: 42px; border-radius: 6px; object-fit: cover; border: 2px solid #ff1744; flex-shrink: 0; }
+        .thumb-gallery { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
+        .thumb-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #ff1744; cursor: pointer; flex-shrink: 0; }
 
-        /* FLOATING SNAP BUTTON OVER TALL VIEWFINDER */
+        /* FLOATING SNAP BUTTON OVER VIEWFINDER */
         .circle-cam-btn {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            width: 88px; height: 88px; background: #ff1744; border: 4px solid #fff; border-radius: 50%;
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            width: 94px; height: 94px; background: #ff1744; border: 5px solid #fff; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 22px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
         }
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
-        .circle-cam-inner { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #000; }
+        .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
 
         .submit-btn {
-            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 8px;
-            height: 38px; font-size: 16px; width: 100%; margin-top: 4px; cursor: pointer; letter-spacing: 1px; flex-shrink: 0;
+            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
         }
 
-        #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 1px; min-height: 16px; color: #ffab00; text-transform: uppercase; flex-shrink: 0; }
+        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
     </style>
 </head>
 <body>
@@ -105,10 +99,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=9999999" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=9999999" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=9999999" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=9999999" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=10000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=10000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=10000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=10000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -157,7 +151,7 @@
                 <option value="Jeep">Jeep</option>
                 <option value="Other">Other</option>
             </select>
-            <input type="text" id="makeOtherInput" placeholder="ENTER MAKE" style="display:none; margin-top:1px; font-size:14px;">
+            <input type="text" id="makeOtherInput" placeholder="ENTER MAKE" style="display:none; margin-top:4px; font-size:18px;">
         </div>
         <div>
             <label>MODEL</label>
@@ -185,7 +179,7 @@
                 <option value="Brown">Brown</option>
                 <option value="Other">Other</option>
             </select>
-            <input type="text" id="colourOtherInput" placeholder="ENTER COLOUR" style="display:none; margin-top:1px; font-size:14px;">
+            <input type="text" id="colourOtherInput" placeholder="ENTER COLOUR" style="display:none; margin-top:4px; font-size:18px;">
         </div>
         <div>
             <label>BODY TYPE</label>
@@ -206,9 +200,9 @@
         <option value="Brett">Brett</option>
         <option value="Other">Other...</option>
     </select>
-    <input type="text" id="officerOtherInput" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:1px; font-size:14px;">
+    <input type="text" id="officerOtherInput" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px; font-size:18px;">
 
-    <label>CONDITION PHOTOS</label>
+    <label>CONDITION PHOTOS (SNAP 4 SIDES & DAMAGE)</label>
     <div class="camera-box">
         <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <video id="videoElem" autoplay playsinline></video>
@@ -224,7 +218,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=9999999').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=10000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -406,7 +400,7 @@
         if (!navigator.onLine) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html?v=9999999"; }, 800);
+            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 800);
             return;
         }
 
@@ -419,11 +413,11 @@
             }).catch(() => saveToOfflineQueue(payload));
 
             statusDiv.innerText = "✔ TOW LOGGED SUCCESS!";
-            setTimeout(() => { window.location.href = "run.html?v=9999999"; }, 800);
+            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 800);
         } catch(err) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html?v=9999999"; }, 800);
+            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 800);
         }
     });
 
