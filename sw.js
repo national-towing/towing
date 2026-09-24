@@ -1,22 +1,21 @@
-const CACHE_NAME = 'tow-app-v800';
-const ASSETS = [
+const CACHE_NAME = 'mark-app-v9999';
+const ASSETS_TO_CACHE = [
   './',
-  './run.html?v=800',
-  './mark.html?v=800',
-  './tow.html?v=800',
-  './passes.html?v=800',
-  './release.html?v=800',
-  './manifest-run.json?v=800',
-  './manifest-mark.json?v=800',
-  './manifest-tow.json?v=800',
-  './manifest-pass.json?v=800'
+  './mark.html?v=9999',
+  './run.html?v=9999',
+  './tow.html?v=9999',
+  './release.html?v=9999',
+  './passes.html?v=9999',
+  './manifest-mark.json?v=9999',
+  './manifest-tow.json?v=9999',
+  './manifest-rel.json?v=9999'
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
   self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -27,9 +26,8 @@ self.addEventListener('activate', (e) => {
           if (key !== CACHE_NAME) return caches.delete(key);
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {
