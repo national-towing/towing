@@ -10,9 +10,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=800">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=800">
-    <link rel="manifest" href="manifest-tow.json?v=800">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=2100">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=2100">
+    <link rel="manifest" href="manifest-tow.json?v=2100">
 
     <style>
         * { box-sizing: border-box; }
@@ -56,16 +56,17 @@
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
 
+        /* MATCHED TO MARK APP CAMERA VIEWFINDER SPECIFICATIONS */
         .camera-box {
-            width: 100%; height: 200px; background: #000; border-radius: 12px; border: 2px solid #333;
+            width: 100%; height: 260px; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .torch-btn {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6);
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
             border: 1px solid #ff1744; color: #ff1744; padding: 6px 12px; border-radius: 20px;
-            font-size: 12px; font-weight: 900; cursor: pointer; z-index: 10;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
         .thumb-gallery { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
@@ -95,13 +96,13 @@
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
-<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=800" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=800" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=800" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=800" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=2100" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=2100" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=2100" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=2100" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -217,7 +218,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=800').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=2100').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -255,7 +256,6 @@
         window.addEventListener('online', processOfflineQueue);
     });
 
-    // INSTANT HARD CACHE CLEAR & REFRESH
     refreshBtn.addEventListener('click', async () => {
         if ('serviceWorker' in navigator) {
             const registrations = await navigator.serviceWorker.getRegistrations();
@@ -324,13 +324,18 @@
 
     async function initCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
             videoElem.srcObject = stream;
             videoTrack = stream.getVideoTracks()[0];
         } catch(e) {}
     }
 
-    // TOGGLE HARDWARE FLASH / TORCH
     torchBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (!videoTrack) return;
@@ -347,11 +352,16 @@
     snapBtn.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
 
+        const realW = videoElem.videoWidth || 1024;
+        const realH = videoElem.videoHeight || 576;
+
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 1024;
-        canvas.height = videoElem.videoHeight || 576;
-        canvas.getContext('2d').drawImage(videoElem, 0, 0);
-        const b64 = canvas.toDataURL('image/jpeg', 0.65);
+        canvas.width = 1024;
+        canvas.height = 576;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, 1024, 576);
+        
+        const b64 = canvas.toDataURL('image/jpeg', 0.60);
         conditionPhotos.push(b64);
 
         const img = document.createElement('img');
@@ -377,6 +387,7 @@
         const driver = officerSelect.value === "Other" ? officerOtherInput.value.trim() : officerSelect.value;
 
         const payload = {
+            id: 'TOW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_tow',
             property: propertySelect.value,
             rego: rego,
@@ -392,26 +403,33 @@
         if (!navigator.onLine) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html?v=800"; }, 1200);
+            setTimeout(() => { window.location.href = "run.html?v=2100"; }, 800);
             return;
         }
 
         statusDiv.innerText = "LOGGING TOW TO YARD...";
         try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).catch(() => saveToOfflineQueue(payload));
+
             statusDiv.innerText = "✔ TOW LOGGED SUCCESS!";
-            setTimeout(() => { window.location.href = "run.html?v=800"; }, 1200);
+            setTimeout(() => { window.location.href = "run.html?v=2100"; }, 800);
         } catch(err) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html?v=800"; }, 1200);
+            setTimeout(() => { window.location.href = "run.html?v=2100"; }, 800);
         }
     });
 
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        queue.push(payload);
-        localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+        if (!queue.some(item => item.id === payload.id)) {
+            queue.push(payload);
+            localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+        }
         updateQueueUI();
     }
 
@@ -429,12 +447,15 @@
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
         if (queue.length === 0 || !navigator.onLine) return;
 
-        statusDiv.innerText = "SYNCING OFFLINE TOWS...";
         let remaining = [];
 
         for (let item of queue) {
             try {
-                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
             } catch(e) {
                 remaining.push(item);
             }
@@ -442,7 +463,6 @@
 
         localStorage.setItem('tow_offline_queue', JSON.stringify(remaining));
         updateQueueUI();
-        if (remaining.length === 0) statusDiv.innerText = "✔ ALL OFFLINE TOWS SYNCED!";
     }
 </script>
 </body>
