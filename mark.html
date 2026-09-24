@@ -10,74 +10,62 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=2000">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=2000">
-    <link rel="manifest" href="manifest-mark.json?v=2000">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=20000">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=20000">
+    <link rel="manifest" href="manifest-mark.json?v=20000">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 8px 12px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; max-height: 100vh; overflow: hidden;
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            touch-action: manipulation; user-select: none; -webkit-user-select: none;
         }
         
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 4px; flex-shrink: 0; }
-        .header-box h1 { margin: 0; font-size: 28px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        /* CONSISTENT HEADER MATCHING TOW & RELEASE APPS */
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
 
         .sync-badge {
-            background: #ffab00; color: #000; font-weight: 900; font-size: 11px;
-            padding: 4px 10px; border-radius: 20px; margin-bottom: 4px; display: none;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;
+            background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
+            padding: 6px 12px; border-radius: 20px; margin-bottom: 10px; display: none;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
         }
 
-        .nav-bar { display: flex; gap: 6px; width: 100%; max-width: 440px; margin-bottom: 6px; flex-shrink: 0; }
-        .nav-tile { flex: 1; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; text-decoration: none; color: #000; }
+        /* CONSISTENT NAV BAR MATCHING TOW & RELEASE APPS */
+        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
+        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
         .nav-tow { background: #ff1744; color: #fff; }
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .card { 
-            background: #1e1e1e; border-radius: 16px; padding: 10px; width: 100%; max-width: 440px; 
-            border: 1px solid #333; display: flex; flex-direction: column; flex: 1; overflow: hidden;
-        }
+        /* CONSISTENT CARD & INPUTS MATCHING TOW & RELEASE APPS */
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         
-        label { font-size: 10px; text-transform: uppercase; color: #aaa; display: block; margin-top: 2px; font-weight: 900; letter-spacing: 1px; flex-shrink: 0; }
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
         input, select {
-            width: 100%; height: 38px; padding: 0 10px; border-radius: 8px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 900; margin-top: 2px; outline: none;
-            -webkit-appearance: none; flex-shrink: 0;
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none;
         }
 
+        /* SINGLE-SCREEN FITTING CAMERA VIEWFINDER WITH PRESERVED ASPECT RATIO */
         .camera-box {
-            width: 100%; flex: 1; background: #000; border-radius: 12px; border: 2px solid #333;
-            margin-top: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
-            min-height: 220px;
+            width: 100%; height: 340px; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .torch-btn {
             position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
-            border: 1px solid #ffab00; color: #ffab00; padding: 5px 10px; border-radius: 20px;
-            font-size: 10px; font-weight: 900; cursor: pointer; z-index: 10;
+            border: 1px solid #ffab00; color: #ffab00; padding: 6px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
-        .thumb-preview { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; background: #000; border: 2px solid #ffab00; display: none; }
-
-        .feedback-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; align-items: center; justify-content: center;
-            font-size: 85px; font-weight: 900; border-radius: 12px; z-index: 20;
-            background: rgba(0,0,0,0.75);
-        }
-        .overlay-success { color: #00e676; border: 4px solid #00e676; }
-        .overlay-error { color: #ff1744; border: 4px solid #ff1744; }
-
-        /* FLOATING SNAP BUTTON (INCREASED BY 30%) */
+        /* FLOATING CAPTURE BUTTON OVER LIVE CAMERA STREAM */
         .circle-cam-btn {
             position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
             width: 94px; height: 94px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
@@ -87,13 +75,16 @@
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
         .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
 
-        .manual-btn {
-            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 10px;
-            height: 40px; font-size: 16px; width: 100%; margin-top: 6px; cursor: pointer; letter-spacing: 1px;
-            display: none; flex-shrink: 0;
+        /* GREEN TICK SUCCESS OVERLAY */
+        .success-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 230, 118, 0.85); display: flex; align-items: center; justify-content: center;
+            font-size: 110px; color: #fff; z-index: 20; opacity: 0; pointer-events: none;
+            transition: opacity 0.15s ease-in-out;
         }
+        .success-overlay.show { opacity: 1; }
 
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 4px; min-height: 20px; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 12px; min-height: 24px; color: #ffab00; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -106,60 +97,52 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=2000" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=2000" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=2000" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=2000" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=20000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=20000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=20000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=20000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
     <label>PROPERTY</label>
-    <select id="propertySelect" onchange="saveSelectedProperty(this.value)">
-        <option value="">LOADING PROPERTIES...</option>
-    </select>
+    <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
 
     <label>REGO</label>
-    <input type="text" id="regoInput" placeholder="REGO" style="color:#ffab00; text-transform:uppercase;">
+    <input type="text" id="regoInput" placeholder="SCANNING PLATE..." style="color:#ffab00; text-transform:uppercase;">
 
     <label>MARKING CAMERA</label>
-    <div class="camera-box" id="camBox">
+    <div class="camera-box">
         <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <video id="videoElem" autoplay playsinline></video>
-        <img class="thumb-preview" id="thumbPreview">
-        <div class="feedback-overlay" id="feedbackOverlay"></div>
         <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
+        <div class="success-overlay" id="successOverlay">✔</div>
     </div>
-
-    <button class="manual-btn" id="manualLogBtn">LOG MANUAL MARK</button>
 
     <div id="status">READY</div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-    const PLATE_RECOGNIZER_TOKEN = "Token 74a8bb83a49461eef0266274ce63e1e198b4c888";
+    const PLATE_RECOGNIZER_TOKEN = "e463d12224bd2d0aed2f0d912440ea2999cbfa75";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=2000').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=20000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
     const regoInput = document.getElementById('regoInput');
     const videoElem = document.getElementById('videoElem');
-    const camBox = document.getElementById('camBox');
-    const thumbPreview = document.getElementById('thumbPreview');
-    const feedbackOverlay = document.getElementById('feedbackOverlay');
     const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
-    const manualLogBtn = document.getElementById('manualLogBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
+    const successOverlay = document.getElementById('successOverlay');
     const syncBadge = document.getElementById('syncBadge');
     const queueCount = document.getElementById('queueCount');
 
+    let isProcessing = false;
     let videoTrack = null;
     let torchOn = false;
-    let lastCapturedPhotoBytes = "";
 
     window.addEventListener('load', async () => {
         await loadProperties();
@@ -177,10 +160,6 @@
         }
         window.location.reload(true);
     });
-
-    function saveSelectedProperty(val) {
-        if (val) localStorage.setItem('sticky_selected_property', val);
-    }
 
     async function loadProperties() {
         try {
@@ -201,11 +180,6 @@
             opt.value = p.name; opt.innerText = p.name;
             propertySelect.appendChild(opt);
         });
-
-        const savedProp = localStorage.getItem('sticky_selected_property');
-        if (savedProp) {
-            propertySelect.value = savedProp;
-        }
     }
 
     async function initCamera() {
@@ -230,150 +204,107 @@
             await videoTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
             torchBtn.innerText = torchOn ? "⚡ FLASH ON" : "⚡ FLASH OFF";
             torchBtn.style.color = torchOn ? "#00e676" : "#ffab00";
-        } catch(e) {
-            statusDiv.innerText = "ERROR";
-            statusDiv.style.color = "#ff1744";
-        }
+        } catch(e) {}
     });
-
-    async function recognizePlate(base64Image) {
-        try {
-            const fetchRes = await fetch(base64Image);
-            const blob = await fetchRes.blob();
-
-            const formData = new FormData();
-            formData.append('upload', blob, 'plate.jpg');
-            formData.append('regions', 'au');
-
-            const response = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
-                method: 'POST',
-                headers: { 'Authorization': PLATE_RECOGNIZER_TOKEN },
-                body: formData
-            });
-
-            const result = await response.json();
-            if (result.results && result.results.length > 0) {
-                return result.results[0].plate.toUpperCase();
-            }
-        } catch(err) {}
-        return null;
-    }
 
     snapBtn.addEventListener('click', async (e) => {
         e.preventDefault(); e.stopPropagation();
+        if (isProcessing) return;
 
-        const selectedProp = propertySelect.value;
-        if (!selectedProp) {
-            statusDiv.innerText = "SELECT PROPERTY";
-            statusDiv.style.color = "#ff1744";
-            return;
-        }
-
-        let manualRego = regoInput.value.trim().toUpperCase();
+        isProcessing = true;
+        statusDiv.innerText = "CAPTURING...";
 
         const realW = videoElem.videoWidth || 1080;
         const realH = videoElem.videoHeight || 1920;
 
         const canvas = document.createElement('canvas');
-        canvas.width = realW;
-        canvas.height = realH;
+        canvas.width = realW; canvas.height = realH;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, realW, realH);
-        
-        lastCapturedPhotoBytes = canvas.toDataURL('image/jpeg', 0.65);
 
-        statusDiv.innerText = "SCANNING...";
-        statusDiv.style.color = "#ffab00";
+        const photoBytes = canvas.toDataURL('image/jpeg', 0.65);
 
-        let detectedRego = manualRego;
-
-        if (!detectedRego && navigator.onLine) {
-            detectedRego = await recognizePlate(lastCapturedPhotoBytes);
-        }
-
-        if (detectedRego) {
-            regoInput.value = detectedRego;
-            
+        // INSTANT OFFLINE CAPTURE & QUEUE
+        if (!navigator.onLine) {
+            flashSuccessOverlay();
             const payload = {
                 id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                 action: 'log_mark',
-                property: selectedProp,
-                rego: detectedRego,
-                photoBytes: lastCapturedPhotoBytes
+                property: propertySelect.value,
+                rego: "UNREADABLE",
+                photoBytes: photoBytes
             };
-
-            showVisualFeedback("✔", true);
-            statusDiv.innerText = `LOGGED: ${detectedRego}`;
-            statusDiv.style.color = "#00e676";
-
-            if (navigator.onLine) {
-                fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                }).catch(() => saveToOfflineQueue(payload));
-            } else {
-                saveToOfflineQueue(payload);
-            }
-
-            resetCameraAfterDelay(500);
-        } else {
-            showVisualFeedback("✖", false);
-            statusDiv.innerText = "ERROR";
-            statusDiv.style.color = "#ff1744";
-            manualLogBtn.style.display = "block";
-            regoInput.focus();
-        }
-    });
-
-    manualLogBtn.addEventListener('click', async () => {
-        const manualRego = regoInput.value.trim().toUpperCase();
-        if (!manualRego) {
-            statusDiv.innerText = "ENTER REGO FIRST";
-            statusDiv.style.color = "#ff1744";
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "✔ LOGGED (OFFLINE)";
+            setTimeout(() => { resetForm(); }, 600);
             return;
         }
 
-        const payload = {
-            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-            action: 'log_mark',
-            property: propertySelect.value,
-            rego: manualRego,
-            photoBytes: lastCapturedPhotoBytes
-        };
+        // ONLINE ANPR RECOGNITION
+        statusDiv.innerText = "READING PLATE...";
+        try {
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.65));
+            const formData = new FormData();
+            formData.append('upload', blob);
+            formData.append('regions', 'au');
 
-        showVisualFeedback("✔", true);
-        statusDiv.innerText = `LOGGED: ${manualRego}`;
-        statusDiv.style.color = "#00e676";
+            const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
+                method: 'POST',
+                headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
+                body: formData
+            });
 
-        if (navigator.onLine) {
+            const anprData = await anprRes.json();
+            let detectedRego = "UNREADABLE";
+
+            if (anprData.results && anprData.results.length > 0) {
+                detectedRego = anprData.results[0].plate.toUpperCase();
+                regoInput.value = detectedRego;
+            }
+
+            flashSuccessOverlay();
+
+            const payload = {
+                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                action: 'log_mark',
+                property: propertySelect.value,
+                rego: detectedRego,
+                photoBytes: photoBytes
+            };
+
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             }).catch(() => saveToOfflineQueue(payload));
-        } else {
-            saveToOfflineQueue(payload);
-        }
 
-        manualLogBtn.style.display = "none";
-        resetCameraAfterDelay(500);
+            statusDiv.innerText = `✔ LOGGED: ${detectedRego}`;
+            setTimeout(() => { resetForm(); }, 600);
+
+        } catch(err) {
+            flashSuccessOverlay();
+            const payload = {
+                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                action: 'log_mark',
+                property: propertySelect.value,
+                rego: "UNREADABLE",
+                photoBytes: photoBytes
+            };
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "✔ LOGGED (OFFLINE)";
+            setTimeout(() => { resetForm(); }, 600);
+        }
     });
 
-    function showVisualFeedback(symbol, isSuccess) {
-        feedbackOverlay.innerText = symbol;
-        feedbackOverlay.className = `feedback-overlay ${isSuccess ? 'overlay-success' : 'overlay-error'}`;
-        feedbackOverlay.style.display = 'flex';
+    function flashSuccessOverlay() {
+        successOverlay.classList.add('show');
+        setTimeout(() => { successOverlay.classList.remove('show'); }, 400);
     }
 
-    function resetCameraAfterDelay(ms) {
-        setTimeout(() => {
-            feedbackOverlay.style.display = 'none';
-            statusDiv.innerText = "READY";
-            statusDiv.style.color = "#ffab00";
-            manualLogBtn.style.display = "none";
-            regoInput.value = "";
-        }, ms);
+    function resetForm() {
+        regoInput.value = "";
+        statusDiv.innerText = "READY";
+        isProcessing = false;
     }
 
     function saveToOfflineQueue(payload) {
