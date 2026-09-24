@@ -10,86 +10,91 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1800">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1800">
-    <link rel="manifest" href="manifest-mark.json?v=1800">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1900">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1900">
+    <link rel="manifest" href="manifest-mark.json?v=1900">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 10px 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            overflow-x: hidden;
+            margin: 0; padding: 8px 12px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100vh; max-height: 100vh; overflow: hidden;
         }
         
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 6px; }
-        .header-box h1 { margin: 0; font-size: 32px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 4px; flex-shrink: 0; }
+        .header-box h1 { margin: 0; font-size: 28px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
 
         .sync-badge {
             background: #ffab00; color: #000; font-weight: 900; font-size: 11px;
-            padding: 5px 10px; border-radius: 20px; margin-bottom: 6px; display: none;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            padding: 4px 10px; border-radius: 20px; margin-bottom: 4px; display: none;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;
         }
 
-        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 8px; }
-        .nav-tile { flex: 1; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; text-decoration: none; color: #000; }
+        .nav-bar { display: flex; gap: 6px; width: 100%; max-width: 440px; margin-bottom: 6px; flex-shrink: 0; }
+        .nav-tile { flex: 1; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
         .nav-tow { background: #ff1744; color: #fff; }
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        .card { background: #1e1e1e; border-radius: 16px; padding: 12px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 8px; }
+        .card { 
+            background: #1e1e1e; border-radius: 16px; padding: 10px; width: 100%; max-width: 440px; 
+            border: 1px solid #333; display: flex; flex-direction: column; flex: 1; overflow: hidden;
+        }
         
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 4px; font-weight: 900; letter-spacing: 1px; }
+        label { font-size: 10px; text-transform: uppercase; color: #aaa; display: block; margin-top: 2px; font-weight: 900; letter-spacing: 1px; flex-shrink: 0; }
         input, select {
-            width: 100%; height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 2px; outline: none;
-            -webkit-appearance: none;
+            width: 100%; height: 38px; padding: 0 10px; border-radius: 8px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 900; margin-top: 2px; outline: none;
+            -webkit-appearance: none; flex-shrink: 0;
         }
 
-        /* DYNAMIC NATIVE PORTRAIT VIEWFINDER CONTAINER */
+        /* MAXIMIZED VIEWFINDER FRAME TO FILL SCREEN WITHOUT SCROLLING */
         .camera-box {
-            width: 100%; max-height: 280px; aspect-ratio: 9 / 16; background: #000; border-radius: 12px; border: 2px solid #333;
-            margin: 6px auto 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+            width: 100%; flex: 1; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+            min-height: 220px;
         }
         
-        /* 100% NO-DISTORTION PREVIEW */
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .torch-btn {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6);
-            border: 1px solid #ffab00; color: #ffab00; padding: 6px 12px; border-radius: 20px;
-            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
+            border: 1px solid #ffab00; color: #ffab00; padding: 5px 10px; border-radius: 20px;
+            font-size: 10px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
-        .thumb-preview { width: 100%; max-height: 280px; aspect-ratio: 9 / 16; border-radius: 12px; object-fit: cover; border: 2px solid #ffab00; display: none; margin: 6px auto 0 auto; }
+        .thumb-preview { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; background: #000; border: 2px solid #ffab00; display: none; }
 
         .feedback-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: none; align-items: center; justify-content: center;
-            font-size: 80px; font-weight: 900; border-radius: 12px; z-index: 20;
+            font-size: 85px; font-weight: 900; border-radius: 12px; z-index: 20;
             background: rgba(0,0,0,0.75);
         }
         .overlay-success { color: #00e676; border: 4px solid #00e676; }
         .overlay-error { color: #ff1744; border: 4px solid #ff1744; }
 
+        /* FLOATING SNAP BUTTON ON CAMERA VIEW */
         .circle-cam-btn {
-            width: 76px; height: 76px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
-            margin: 8px auto 0 auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 18px rgba(255, 171, 0, 0.4); cursor: pointer; user-select: none;
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            width: 72px; height: 72px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6); cursor: pointer; user-select: none; z-index: 15;
         }
-        .circle-cam-btn:active { transform: scale(0.90); }
-        .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #000; }
+        .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
+        .circle-cam-inner { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #000; }
 
         .manual-btn {
-            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 12px;
-            height: 44px; font-size: 18px; width: 100%; margin-top: 8px; cursor: pointer; letter-spacing: 1px;
-            display: none;
+            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 10px;
+            height: 40px; font-size: 16px; width: 100%; margin-top: 6px; cursor: pointer; letter-spacing: 1px;
+            display: none; flex-shrink: 0;
         }
 
-        #status { text-align: center; font-weight: 900; font-size: 18px; margin-top: 6px; min-height: 22px; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 4px; min-height: 20px; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -102,10 +107,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=1800" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=1800" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=1800" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=1800" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=1900" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=1900" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=1900" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=1900" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -121,11 +126,10 @@
     <div class="camera-box" id="camBox">
         <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <video id="videoElem" autoplay playsinline></video>
+        <img class="thumb-preview" id="thumbPreview">
         <div class="feedback-overlay" id="feedbackOverlay"></div>
+        <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
     </div>
-    <img class="thumb-preview" id="thumbPreview">
-    
-    <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
     <button class="manual-btn" id="manualLogBtn">LOG MANUAL MARK</button>
 
@@ -137,7 +141,7 @@
     const PLATE_RECOGNIZER_TOKEN = "Token 74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1800').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=1900').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -270,7 +274,6 @@
 
         let manualRego = regoInput.value.trim().toUpperCase();
 
-        // READ DYNAMIC SENSOR GEOMETRY TO PREVENT ANY ASPECT STRETCHING
         const realW = videoElem.videoWidth || 1080;
         const realH = videoElem.videoHeight || 1920;
 
