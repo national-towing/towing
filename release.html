@@ -10,9 +10,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-rel.png?v=3000">
-    <link rel="icon" type="image/png" href="icon-rel.png?v=3000">
-    <link rel="manifest" href="manifest-rel.json?v=3000">
+    <link rel="apple-touch-icon" href="icon-rel.png?v=9999">
+    <link rel="icon" type="image/png" href="icon-rel.png?v=9999">
+    <link rel="manifest" href="manifest-rel.json?v=9999">
 
     <style>
         * { box-sizing: border-box; }
@@ -84,10 +84,10 @@
 </div>
 
 <div class="nav-bar">
-    <a href="run.html?v=3000" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=3000" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=3000" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=3000" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=9999" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=9999" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=9999" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=9999" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -157,7 +157,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=3000').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=9999').catch(()=>{});
     }
 
     const yardVehicleSelect = document.getElementById('yardVehicleSelect');
@@ -324,7 +324,7 @@
             });
 
             statusDiv.innerText = "✔ VEHICLE RELEASED & INVOICE SENT!";
-            setTimeout(() => { window.location.href = "run.html?v=3000"; }, 1000);
+            setTimeout(() => { window.location.href = "run.html?v=9999"; }, 1000);
         } catch(err) {
             statusDiv.innerText = "ERROR PROCESSING RELEASE";
             isSubmitting = false;
