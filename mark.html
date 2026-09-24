@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=20000">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=20000">
-    <link rel="manifest" href="manifest-mark.json?v=20000">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=30000">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=30000">
+    <link rel="manifest" href="manifest-mark.json?v=30000">
 
     <style>
         * { box-sizing: border-box; }
@@ -23,7 +23,6 @@
             touch-action: manipulation; user-select: none; -webkit-user-select: none;
         }
         
-        /* CONSISTENT HEADER MATCHING TOW & RELEASE APPS */
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
@@ -34,7 +33,6 @@
             cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
         }
 
-        /* CONSISTENT NAV BAR MATCHING TOW & RELEASE APPS */
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
         .nav-run { background: #ffab00; }
@@ -42,7 +40,6 @@
         .nav-rel { background: #00e676; }
         .nav-pass { background: #ab47bc; color: #fff; }
 
-        /* CONSISTENT CARD & INPUTS MATCHING TOW & RELEASE APPS */
         .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         
         label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
@@ -52,22 +49,22 @@
             -webkit-appearance: none;
         }
 
-        /* SINGLE-SCREEN FITTING CAMERA VIEWFINDER WITH PRESERVED ASPECT RATIO */
+        /* EXPANDED 3:4 TALL PORTRAIT VIEWFINDER FILLING THE SCREEN */
         .camera-box {
-            width: 100%; height: 340px; background: #000; border-radius: 12px; border: 2px solid #333;
+            width: 100%; height: 460px; aspect-ratio: 3/4; background: #000; border-radius: 14px; border: 2px solid #333;
             margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .torch-btn {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
-            border: 1px solid #ffab00; color: #ffab00; padding: 6px 12px; border-radius: 20px;
+            position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.65);
+            border: 1px solid #ffab00; color: #ffab00; padding: 6px 14px; border-radius: 20px;
             font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
-        /* FLOATING CAPTURE BUTTON OVER LIVE CAMERA STREAM */
+        /* FLOATING CAPTURE BUTTON OVER THE TALL VIEWFINDER */
         .circle-cam-btn {
-            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
             width: 94px; height: 94px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 22px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
@@ -75,11 +72,10 @@
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
         .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
 
-        /* GREEN TICK SUCCESS OVERLAY */
         .success-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 230, 118, 0.85); display: flex; align-items: center; justify-content: center;
-            font-size: 110px; color: #fff; z-index: 20; opacity: 0; pointer-events: none;
+            font-size: 120px; color: #fff; z-index: 20; opacity: 0; pointer-events: none;
             transition: opacity 0.15s ease-in-out;
         }
         .success-overlay.show { opacity: 1; }
@@ -97,10 +93,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=20000" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=20000" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=20000" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=20000" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=30000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=30000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=30000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=30000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -126,7 +122,7 @@
     const PLATE_RECOGNIZER_TOKEN = "e463d12224bd2d0aed2f0d912440ea2999cbfa75";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=20000').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=30000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
