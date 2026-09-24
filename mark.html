@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1900">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1900">
-    <link rel="manifest" href="manifest-mark.json?v=1900">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=2000">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=2000">
+    <link rel="manifest" href="manifest-mark.json?v=2000">
 
     <style>
         * { box-sizing: border-box; }
@@ -52,7 +52,6 @@
             -webkit-appearance: none; flex-shrink: 0;
         }
 
-        /* MAXIMIZED VIEWFINDER FRAME TO FILL SCREEN WITHOUT SCROLLING */
         .camera-box {
             width: 100%; flex: 1; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
@@ -78,15 +77,15 @@
         .overlay-success { color: #00e676; border: 4px solid #00e676; }
         .overlay-error { color: #ff1744; border: 4px solid #ff1744; }
 
-        /* FLOATING SNAP BUTTON ON CAMERA VIEW */
+        /* FLOATING SNAP BUTTON (INCREASED BY 30%) */
         .circle-cam-btn {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            width: 72px; height: 72px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            width: 94px; height: 94px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6); cursor: pointer; user-select: none; z-index: 15;
+            box-shadow: 0 4px 22px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
         }
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
-        .circle-cam-inner { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #000; }
+        .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
 
         .manual-btn {
             background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 10px;
@@ -107,10 +106,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=1900" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=1900" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=1900" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=1900" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=2000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=2000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=2000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=2000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -141,7 +140,7 @@
     const PLATE_RECOGNIZER_TOKEN = "Token 74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1900').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=2000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -237,7 +236,6 @@
         }
     });
 
-    // HIGH-SPEED PLATE RECOGNIZER ANPR CALL
     async function recognizePlate(base64Image) {
         try {
             const fetchRes = await fetch(base64Image);
@@ -261,7 +259,6 @@
         return null;
     }
 
-    // 1. AUTO SNAP & ANPR
     snapBtn.addEventListener('click', async (e) => {
         e.preventDefault(); e.stopPropagation();
 
@@ -329,7 +326,6 @@
         }
     });
 
-    // 2. MANUAL REGO OVERRIDE SUBMISSION
     manualLogBtn.addEventListener('click', async () => {
         const manualRego = regoInput.value.trim().toUpperCase();
         if (!manualRego) {
