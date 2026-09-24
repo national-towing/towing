@@ -10,9 +10,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-rel.png?v=9999">
-    <link rel="icon" type="image/png" href="icon-rel.png?v=9999">
-    <link rel="manifest" href="manifest-rel.json?v=9999">
+    <link rel="apple-touch-icon" href="icon-rel.png?v=5000">
+    <link rel="icon" type="image/png" href="icon-rel.png?v=5000">
+    <link rel="manifest" href="manifest-rel.json?v=5000">
 
     <style>
         * { box-sizing: border-box; }
@@ -25,6 +25,12 @@
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #00e676; letter-spacing: 2px; text-align: center; }
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+
+        .sync-badge {
+            background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
+            padding: 6px 12px; border-radius: 20px; margin-bottom: 10px; display: none;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
 
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
         .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
@@ -83,11 +89,13 @@
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
+
 <div class="nav-bar">
-    <a href="run.html?v=9999" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=9999" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=9999" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=9999" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=5000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=5000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=5000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=5000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -157,7 +165,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=9999').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=5000').catch(()=>{});
     }
 
     const yardVehicleSelect = document.getElementById('yardVehicleSelect');
@@ -177,6 +185,8 @@
     const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
+    const syncBadge = document.getElementById('syncBadge');
+    const queueCount = document.getElementById('queueCount');
 
     let yardVehicles = [];
     let idPhotos = [];
@@ -188,6 +198,8 @@
         initSigCanvas();
         await loadYardVehicles();
         initCamera();
+        updateQueueUI();
+        window.addEventListener('online', processOfflineQueue);
     });
 
     refreshBtn.addEventListener('click', async () => {
@@ -235,8 +247,15 @@
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
             yardVehicles = await res.json();
+            localStorage.setItem('cached_yard_vehicles', JSON.stringify(yardVehicles));
             populateYardUI(yardVehicles);
-        } catch(e) {}
+        } catch(e) {
+            const cached = localStorage.getItem('cached_yard_vehicles');
+            if (cached) {
+                yardVehicles = JSON.parse(cached);
+                populateYardUI(yardVehicles);
+            }
+        }
     }
 
     function populateYardUI(vehicles) {
@@ -296,6 +315,7 @@
         const sigBytes = ownerSigCanvas.toDataURL('image/png');
 
         const payload = {
+            id: 'REL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'process_release',
             rego: selectedRego,
             property: matchedVehicle.property || "",
@@ -314,6 +334,13 @@
             idPhotos: idPhotos
         };
 
+        if (!navigator.onLine) {
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            setTimeout(() => { window.location.href = "run.html?v=5000"; }, 1000);
+            return;
+        }
+
         statusDiv.innerText = "GENERATING INVOICE & RELEASING...";
         
         try {
@@ -324,14 +351,54 @@
             });
 
             statusDiv.innerText = "✔ VEHICLE RELEASED & INVOICE SENT!";
-            setTimeout(() => { window.location.href = "run.html?v=9999"; }, 1000);
+            setTimeout(() => { window.location.href = "run.html?v=5000"; }, 1000);
         } catch(err) {
-            statusDiv.innerText = "ERROR PROCESSING RELEASE";
-            isSubmitting = false;
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = "1";
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            setTimeout(() => { window.location.href = "run.html?v=5000"; }, 1000);
         }
     });
+
+    function saveToOfflineQueue(payload) {
+        let queue = JSON.parse(localStorage.getItem('rel_offline_queue') || "[]");
+        if (!queue.some(item => item.id === payload.id)) {
+            queue.push(payload);
+            localStorage.setItem('rel_offline_queue', JSON.stringify(queue));
+        }
+        updateQueueUI();
+    }
+
+    function updateQueueUI() {
+        let queue = JSON.parse(localStorage.getItem('rel_offline_queue') || "[]");
+        if (queue.length > 0) {
+            queueCount.innerText = queue.length;
+            syncBadge.style.display = 'block';
+        } else {
+            syncBadge.style.display = 'none';
+        }
+    }
+
+    async function processOfflineQueue() {
+        let queue = JSON.parse(localStorage.getItem('rel_offline_queue') || "[]");
+        if (queue.length === 0 || !navigator.onLine) return;
+
+        let remaining = [];
+
+        for (let item of queue) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
+            } catch(e) {
+                remaining.push(item);
+            }
+        }
+
+        localStorage.setItem('rel_offline_queue', JSON.stringify(remaining));
+        updateQueueUI();
+    }
 </script>
 </body>
 </html>
