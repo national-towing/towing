@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=40000">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=40000">
-    <link rel="manifest" href="manifest-mark.json?v=40000">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=50000">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=50000">
+    <link rel="manifest" href="manifest-mark.json?v=50000">
 
     <style>
         * { box-sizing: border-box; }
@@ -70,7 +70,6 @@
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
         .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
 
-        /* GREEN TICK OVERLAY */
         .overlay-tick {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 230, 118, 0.85); display: flex; align-items: center; justify-content: center;
@@ -79,7 +78,6 @@
         }
         .overlay-tick.show { opacity: 1; }
 
-        /* RED CROSS OVERLAY */
         .overlay-cross {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 23, 68, 0.85); display: flex; align-items: center; justify-content: center;
@@ -107,10 +105,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=40000" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=40000" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=40000" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=40000" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=50000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=50000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=50000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=50000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -138,7 +136,7 @@
     const PLATE_RECOGNIZER_TOKEN = "e463d12224bd2d0aed2f0d912440ea2999cbfa75";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=40000').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=50000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -240,12 +238,19 @@
 
         lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.85);
 
-        // ONLINE ANPR RECOGNITION
         statusDiv.innerText = "READING PLATE...";
         try {
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+            const b64Data = lastCapturedB64.split(',')[1];
+            const byteCharacters = atob(b64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
             const formData = new FormData();
-            formData.append('upload', blob, 'plate.jpg');
+            formData.append('upload', blob, 'scan.jpg');
             formData.append('regions', 'au');
 
             const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
@@ -283,12 +288,10 @@
 
                 setTimeout(() => { resetForm(); }, 800);
             } else {
-                // OCR FAILED TO DETECT A PLATE
                 handleUnreadableState();
             }
 
         } catch(err) {
-            // NETWORK / API ERROR
             handleUnreadableState();
         }
     });
