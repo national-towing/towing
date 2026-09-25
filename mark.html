@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=30000">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=30000">
-    <link rel="manifest" href="manifest-mark.json?v=30000">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=40000">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=40000">
+    <link rel="manifest" href="manifest-mark.json?v=40000">
 
     <style>
         * { box-sizing: border-box; }
@@ -49,7 +49,6 @@
             -webkit-appearance: none;
         }
 
-        /* EXPANDED 3:4 TALL PORTRAIT VIEWFINDER FILLING THE SCREEN */
         .camera-box {
             width: 100%; height: 460px; aspect-ratio: 3/4; background: #000; border-radius: 14px; border: 2px solid #333;
             margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
@@ -62,7 +61,6 @@
             font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
-        /* FLOATING CAPTURE BUTTON OVER THE TALL VIEWFINDER */
         .circle-cam-btn {
             position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
             width: 94px; height: 94px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
@@ -72,13 +70,29 @@
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
         .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
 
-        .success-overlay {
+        /* GREEN TICK OVERLAY */
+        .overlay-tick {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 230, 118, 0.85); display: flex; align-items: center; justify-content: center;
             font-size: 120px; color: #fff; z-index: 20; opacity: 0; pointer-events: none;
             transition: opacity 0.15s ease-in-out;
         }
-        .success-overlay.show { opacity: 1; }
+        .overlay-tick.show { opacity: 1; }
+
+        /* RED CROSS OVERLAY */
+        .overlay-cross {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 23, 68, 0.85); display: flex; align-items: center; justify-content: center;
+            font-size: 120px; color: #fff; z-index: 20; opacity: 0; pointer-events: none;
+            transition: opacity 0.15s ease-in-out;
+        }
+        .overlay-cross.show { opacity: 1; }
+
+        .manual-btn {
+            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 10px;
+            height: 46px; font-size: 18px; width: 100%; margin-top: 10px; cursor: pointer; letter-spacing: 1px;
+            display: none;
+        }
 
         #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 12px; min-height: 24px; color: #ffab00; letter-spacing: 1px; }
     </style>
@@ -93,10 +107,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=30000" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=30000" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=30000" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=30000" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=40000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=40000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=40000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=40000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -104,16 +118,18 @@
     <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
 
     <label>REGO</label>
-    <input type="text" id="regoInput" placeholder="SCANNING PLATE..." style="color:#ffab00; text-transform:uppercase;">
+    <input type="text" id="regoInput" placeholder="SCAN OR TYPE REGO..." style="color:#ffab00; text-transform:uppercase;">
 
     <label>MARKING CAMERA</label>
     <div class="camera-box">
         <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <video id="videoElem" autoplay playsinline></video>
         <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-        <div class="success-overlay" id="successOverlay">✔</div>
+        <div class="overlay-tick" id="overlayTick">✔</div>
+        <div class="overlay-cross" id="overlayCross">✖</div>
     </div>
 
+    <button class="manual-btn" id="manualLogBtn">LOG REGO MANUALLY</button>
     <div id="status">READY</div>
 </div>
 
@@ -122,7 +138,7 @@
     const PLATE_RECOGNIZER_TOKEN = "e463d12224bd2d0aed2f0d912440ea2999cbfa75";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=30000').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=40000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -131,14 +147,17 @@
     const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
     const refreshBtn = document.getElementById('refreshBtn');
+    const manualLogBtn = document.getElementById('manualLogBtn');
     const statusDiv = document.getElementById('status');
-    const successOverlay = document.getElementById('successOverlay');
+    const overlayTick = document.getElementById('overlayTick');
+    const overlayCross = document.getElementById('overlayCross');
     const syncBadge = document.getElementById('syncBadge');
     const queueCount = document.getElementById('queueCount');
 
     let isProcessing = false;
     let videoTrack = null;
     let torchOn = false;
+    let lastCapturedB64 = "";
 
     window.addEventListener('load', async () => {
         await loadProperties();
@@ -208,6 +227,7 @@
         if (isProcessing) return;
 
         isProcessing = true;
+        manualLogBtn.style.display = 'none';
         statusDiv.innerText = "CAPTURING...";
 
         const realW = videoElem.videoWidth || 1080;
@@ -218,30 +238,14 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, realW, realH);
 
-        const photoBytes = canvas.toDataURL('image/jpeg', 0.65);
-
-        // INSTANT OFFLINE CAPTURE & QUEUE
-        if (!navigator.onLine) {
-            flashSuccessOverlay();
-            const payload = {
-                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                action: 'log_mark',
-                property: propertySelect.value,
-                rego: "UNREADABLE",
-                photoBytes: photoBytes
-            };
-            saveToOfflineQueue(payload);
-            statusDiv.innerText = "✔ LOGGED (OFFLINE)";
-            setTimeout(() => { resetForm(); }, 600);
-            return;
-        }
+        lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.85);
 
         // ONLINE ANPR RECOGNITION
         statusDiv.innerText = "READING PLATE...";
         try {
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.65));
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
             const formData = new FormData();
-            formData.append('upload', blob);
+            formData.append('upload', blob, 'plate.jpg');
             formData.append('regions', 'au');
 
             const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
@@ -251,55 +255,100 @@
             });
 
             const anprData = await anprRes.json();
-            let detectedRego = "UNREADABLE";
-
-            if (anprData.results && anprData.results.length > 0) {
-                detectedRego = anprData.results[0].plate.toUpperCase();
+            
+            if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
+                const detectedRego = anprData.results[0].plate.toUpperCase();
                 regoInput.value = detectedRego;
+                
+                flashTickOverlay();
+                statusDiv.innerText = `✔ LOGGED: ${detectedRego}`;
+
+                const payload = {
+                    id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    action: 'log_mark',
+                    property: propertySelect.value,
+                    rego: detectedRego,
+                    photoBytes: lastCapturedB64
+                };
+
+                if (navigator.onLine) {
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    }).catch(() => saveToOfflineQueue(payload));
+                } else {
+                    saveToOfflineQueue(payload);
+                }
+
+                setTimeout(() => { resetForm(); }, 800);
+            } else {
+                // OCR FAILED TO DETECT A PLATE
+                handleUnreadableState();
             }
 
-            flashSuccessOverlay();
+        } catch(err) {
+            // NETWORK / API ERROR
+            handleUnreadableState();
+        }
+    });
 
-            const payload = {
-                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                action: 'log_mark',
-                property: propertySelect.value,
-                rego: detectedRego,
-                photoBytes: photoBytes
-            };
+    function handleUnreadableState() {
+        flashCrossOverlay();
+        statusDiv.innerText = "❌ UNREADABLE - TYPE REGO BELOW";
+        regoInput.value = "";
+        regoInput.focus();
+        manualLogBtn.style.display = 'block';
+        isProcessing = false;
+    }
 
+    manualLogBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const typedRego = regoInput.value.trim().toUpperCase();
+        if (!typedRego) {
+            statusDiv.innerText = "ENTER A REGO FIRST";
+            regoInput.focus();
+            return;
+        }
+
+        flashTickOverlay();
+        statusDiv.innerText = `✔ MANUALLY LOGGED: ${typedRego}`;
+
+        const payload = {
+            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            action: 'log_mark',
+            property: propertySelect.value,
+            rego: typedRego,
+            photoBytes: lastCapturedB64
+        };
+
+        if (navigator.onLine) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             }).catch(() => saveToOfflineQueue(payload));
-
-            statusDiv.innerText = `✔ LOGGED: ${detectedRego}`;
-            setTimeout(() => { resetForm(); }, 600);
-
-        } catch(err) {
-            flashSuccessOverlay();
-            const payload = {
-                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                action: 'log_mark',
-                property: propertySelect.value,
-                rego: "UNREADABLE",
-                photoBytes: photoBytes
-            };
+        } else {
             saveToOfflineQueue(payload);
-            statusDiv.innerText = "✔ LOGGED (OFFLINE)";
-            setTimeout(() => { resetForm(); }, 600);
         }
+
+        setTimeout(() => { resetForm(); }, 800);
     });
 
-    function flashSuccessOverlay() {
-        successOverlay.classList.add('show');
-        setTimeout(() => { successOverlay.classList.remove('show'); }, 400);
+    function flashTickOverlay() {
+        overlayTick.classList.add('show');
+        setTimeout(() => { overlayTick.classList.remove('show'); }, 400);
+    }
+
+    function flashCrossOverlay() {
+        overlayCross.classList.add('show');
+        setTimeout(() => { overlayCross.classList.remove('show'); }, 400);
     }
 
     function resetForm() {
         regoInput.value = "";
         statusDiv.innerText = "READY";
+        manualLogBtn.style.display = 'none';
         isProcessing = false;
     }
 
