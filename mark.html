@@ -10,9 +10,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=50000">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=50000">
-    <link rel="manifest" href="manifest-mark.json?v=50000">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=60000">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=60000">
+    <link rel="manifest" href="manifest-mark.json?v=60000">
 
     <style>
         * { box-sizing: border-box; }
@@ -105,10 +105,10 @@
 <div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (AUTO-SYNCING)</div>
 
 <div class="nav-bar">
-    <a href="run.html?v=50000" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=50000" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=50000" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=50000" class="nav-tile nav-pass">PASS</a>
+    <a href="run.html?v=60000" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html?v=60000" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html?v=60000" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html?v=60000" class="nav-tile nav-pass">PASS</a>
 </div>
 
 <div class="card">
@@ -136,7 +136,7 @@
     const PLATE_RECOGNIZER_TOKEN = "e463d12224bd2d0aed2f0d912440ea2999cbfa75";
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=50000').catch(()=>{});
+        navigator.serviceWorker.register('./sw.js?v=60000').catch(()=>{});
     }
 
     const propertySelect = document.getElementById('propertySelect');
@@ -200,8 +200,8 @@
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     facingMode: 'environment',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 } 
             });
             videoElem.srcObject = stream;
@@ -228,72 +228,75 @@
         manualLogBtn.style.display = 'none';
         statusDiv.innerText = "CAPTURING...";
 
-        const realW = videoElem.videoWidth || 1080;
-        const realH = videoElem.videoHeight || 1920;
-
+        // OPTIMIZED RESIZING FOR PLATE RECOGNIZER OCR
         const canvas = document.createElement('canvas');
-        canvas.width = realW; canvas.height = realH;
+        canvas.width = 1024;
+        canvas.height = 768;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, realW, realH);
+        ctx.drawImage(videoElem, 0, 0, 1024, 768);
 
-        lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.85);
+        lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.80);
 
         statusDiv.innerText = "READING PLATE...";
-        try {
-            const b64Data = lastCapturedB64.split(',')[1];
-            const byteCharacters = atob(b64Data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
+
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                handleUnreadableState();
+                return;
             }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'image/jpeg' });
 
-            const formData = new FormData();
-            formData.append('upload', blob, 'scan.jpg');
-            formData.append('regions', 'au');
+            try {
+                const formData = new FormData();
+                formData.append('upload', blob, 'scan.jpg');
+                formData.append('regions', 'au');
 
-            const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
-                method: 'POST',
-                headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
-                body: formData
-            });
+                const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
+                    body: formData
+                });
 
-            const anprData = await anprRes.json();
-            
-            if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
-                const detectedRego = anprData.results[0].plate.toUpperCase();
-                regoInput.value = detectedRego;
-                
-                flashTickOverlay();
-                statusDiv.innerText = `✔ LOGGED: ${detectedRego}`;
-
-                const payload = {
-                    id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                    action: 'log_mark',
-                    property: propertySelect.value,
-                    rego: detectedRego,
-                    photoBytes: lastCapturedB64
-                };
-
-                if (navigator.onLine) {
-                    fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(payload)
-                    }).catch(() => saveToOfflineQueue(payload));
-                } else {
-                    saveToOfflineQueue(payload);
+                if (!anprRes.ok) {
+                    handleUnreadableState();
+                    return;
                 }
 
-                setTimeout(() => { resetForm(); }, 800);
-            } else {
+                const anprData = await anprRes.json();
+                
+                if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
+                    const detectedRego = anprData.results[0].plate.toUpperCase();
+                    regoInput.value = detectedRego;
+                    
+                    flashTickOverlay();
+                    statusDiv.innerText = `✔ LOGGED: ${detectedRego}`;
+
+                    const payload = {
+                        id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                        action: 'log_mark',
+                        property: propertySelect.value,
+                        rego: detectedRego,
+                        photoBytes: lastCapturedB64
+                    };
+
+                    if (navigator.onLine) {
+                        fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify(payload)
+                        }).catch(() => saveToOfflineQueue(payload));
+                    } else {
+                        saveToOfflineQueue(payload);
+                    }
+
+                    setTimeout(() => { resetForm(); }, 800);
+                } else {
+                    handleUnreadableState();
+                }
+
+            } catch(err) {
                 handleUnreadableState();
             }
-
-        } catch(err) {
-            handleUnreadableState();
-        }
+        }, 'image/jpeg', 0.80);
     });
 
     function handleUnreadableState() {
