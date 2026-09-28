@@ -1,4 +1,4 @@
-const CACHE_NAME = 'towing-pwa-v200';
+const CACHE_NAME = 'towing-pwa-v300';
 const ASSETS_TO_CACHE = [
   './',
   './mark.html',
@@ -33,14 +33,20 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// CACHE-FIRST STRATEGY: SERVE INSTANTLY FROM LOCAL DEVICE MEMORY IF OFFLINE
+// OFFLINE CACHE-FIRST STRATEGY WITH QUERY PARAMETER IGNORING
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
 
+  // Ignore Google Apps Script or Plate Recognizer API calls from cache interception
+  if (e.request.url.includes('script.google.com') || e.request.url.includes('platerecognizer.com')) {
+    return;
+  }
+
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
+    // ignoreSearch: true matches 'tow.html?v=99999' directly to cached 'tow.html'
+    caches.match(e.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
-        // Serve local file immediately, update in background if online
+        // Refresh cache quietly in background if online
         fetch(e.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
@@ -48,7 +54,13 @@ self.addEventListener('fetch', (e) => {
         }).catch(() => {});
         return cachedResponse;
       }
-      return fetch(e.request);
+
+      // Secondary fallback: strip query string manually if ignoreSearch misses
+      const cleanUrl = e.request.url.split('?')[0];
+      return caches.match(cleanUrl).then((cleanResponse) => {
+        if (cleanResponse) return cleanResponse;
+        return fetch(e.request);
+      });
     })
   );
 });
