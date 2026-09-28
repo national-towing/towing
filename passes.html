@@ -10,9 +10,9 @@
 
     <title>PASSES</title>
     
-    <link rel="apple-touch-icon" href="icon-pass.png?v=703">
-    <link rel="icon" type="image/png" href="icon-pass.png?v=703">
-    <link rel="manifest" href="manifest-pass.json?v=703">
+    <link rel="apple-touch-icon" href="icon-pass.png?v=704">
+    <link rel="icon" type="image/png" href="icon-pass.png?v=704">
+    <link rel="manifest" href="manifest-pass.json?v=704">
 
     <style>
         * { box-sizing: border-box; }
@@ -284,9 +284,12 @@
         backBtn.onclick = renderSummaryView;
         passContainer.appendChild(backBtn);
 
+        const lastProp = localStorage.getItem('last_pass_prop') || "";
+
         let propOptionsHtml = "<option value=''>SELECT PROPERTY (REQUIRED)</option>";
         cachedProperties.forEach(p => {
-            propOptionsHtml += `<option value="${p.name}">${p.name}</option>`;
+            const isSelected = (p.name === lastProp) ? "selected" : "";
+            propOptionsHtml += `<option value="${p.name}" ${isSelected}>${p.name}</option>`;
         });
 
         const todayStr = new Date().toISOString().split('T')[0];
@@ -339,14 +342,8 @@
         passContainer.appendChild(formCard);
 
         const propertySelect = document.getElementById('propertySelect');
-        
-        // AUTO-SELECT LAST USED PROPERTY IF SAVED
-        const lastProp = localStorage.getItem('last_pass_prop');
-        if (lastProp && propertySelect) {
-            propertySelect.value = lastProp;
-        }
 
-        // SAVE PROPERTY WHENEVER SELECTION IS CHANGED
+        // SAVE PROPERTY INSTANTLY ON DROPDOWN CHANGE
         propertySelect.addEventListener('change', () => {
             if (propertySelect.value) {
                 localStorage.setItem('last_pass_prop', propertySelect.value);
@@ -370,7 +367,6 @@
                 return;
             }
 
-            // SAVE LAST USED PROPERTY ON SUBMIT
             localStorage.setItem('last_pass_prop', selectedProp);
 
             if (ocrInput.files && ocrInput.files[0]) {
@@ -391,7 +387,7 @@
                         const data = await res.json();
                         if (data.status === "SUCCESS") {
                             statusDiv.innerText = `✔ ADDED ${data.addedCount} PASSES (${data.skippedCount} DUPLICATES SKIPPED)`;
-                            setTimeout(loadData, 1500);
+                            setTimeout(loadData, 800);
                         } else {
                             statusDiv.innerText = "ERROR: " + data.message;
                         }
@@ -422,19 +418,27 @@
                 notes: notesInput.value.trim()
             };
 
-            statusDiv.innerText = "ADDING MANUAL PASS...";
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const data = await res.json();
-                if (data.status === "SUCCESS") {
-                    statusDiv.innerText = "✔ PASS ADDED SUCCESS!";
-                    setTimeout(loadData, 1000);
-                } else {
-                    statusDiv.innerText = "ERROR: " + data.message;
-                }
-            } catch(err) {
-                statusDiv.innerText = "ERROR ADDING PASS (OFFLINE)";
-            }
+            // OPTIMISTIC LOCAL UPDATE FOR INSTANT RESPONSIVENESS
+            const newPassObj = {
+                property: selectedProp,
+                rego: rego,
+                startDate: startDateInput.value,
+                duration: String(diffDays) + " days",
+                expiry: expiryDateInput.value,
+                notes: notesInput.value.trim()
+            };
+            
+            allPasses.push(newPassObj);
+            localStorage.setItem('cached_passes', JSON.stringify(allPasses));
+
+            statusDiv.innerText = "✔ PASS ADDED!";
+            
+            // BACKGROUND SYNC TO GOOGLE SHEETS
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
+
+            setTimeout(() => {
+                parseAndRenderPassSummary();
+            }, 300);
         });
     }
 
