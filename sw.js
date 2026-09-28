@@ -1,14 +1,17 @@
-const CACHE_NAME = 'mark-app-v9999';
+const CACHE_NAME = 'towing-pwa-v200';
 const ASSETS_TO_CACHE = [
   './',
-  './mark.html?v=9999',
-  './run.html?v=9999',
-  './tow.html?v=9999',
-  './release.html?v=9999',
-  './passes.html?v=9999',
-  './manifest-mark.json?v=9999',
-  './manifest-tow.json?v=9999',
-  './manifest-rel.json?v=9999'
+  './mark.html',
+  './tow.html',
+  './release.html',
+  './run.html',
+  './passes.html',
+  './manifest-mark.json',
+  './manifest-tow.json',
+  './manifest-rel.json',
+  './icon-mark.png',
+  './icon-tow.png',
+  './icon-release.png'
 ];
 
 self.addEventListener('install', (e) => {
@@ -30,8 +33,22 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// CACHE-FIRST STRATEGY: SERVE INSTANTLY FROM LOCAL DEVICE MEMORY IF OFFLINE
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    caches.match(e.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        // Serve local file immediately, update in background if online
+        fetch(e.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
+          }
+        }).catch(() => {});
+        return cachedResponse;
+      }
+      return fetch(e.request);
+    })
   );
 });
