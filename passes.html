@@ -338,10 +338,24 @@
 
         passContainer.appendChild(formCard);
 
+        const propertySelect = document.getElementById('propertySelect');
+        
+        // AUTO-SELECT LAST USED PROPERTY IF SAVED
+        const lastProp = localStorage.getItem('last_pass_prop');
+        if (lastProp && propertySelect) {
+            propertySelect.value = lastProp;
+        }
+
+        // SAVE PROPERTY WHENEVER SELECTION IS CHANGED
+        propertySelect.addEventListener('change', () => {
+            if (propertySelect.value) {
+                localStorage.setItem('last_pass_prop', propertySelect.value);
+            }
+        });
+
         onDurationSelectChange("1");
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
-            const propertySelect = document.getElementById('propertySelect');
             const ocrInput = document.getElementById('ocrInput');
             const regoInput = document.getElementById('regoInput');
             const startDateInput = document.getElementById('startDateInput');
@@ -355,6 +369,9 @@
                 statusDiv.innerText = "SELECT A PROPERTY FIRST!";
                 return;
             }
+
+            // SAVE LAST USED PROPERTY ON SUBMIT
+            localStorage.setItem('last_pass_prop', selectedProp);
 
             if (ocrInput.files && ocrInput.files[0]) {
                 statusDiv.innerText = "READING SCREENSHOT & ADDING PASSES...";
