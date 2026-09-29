@@ -228,40 +228,43 @@
         isProcessing = true;
         statusDiv.innerText = "CAPTURING...";
 
-        // Native camera frame canvas
+        // Capture photo in full native aspect ratio
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1280;
         canvas.height = videoElem.videoHeight || 720;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
-        // Standard size for online processing
-        lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.85);
+        // Compress image slightly for smooth offline storage (~90KB)
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = 720;
+        offCanvas.height = Math.round(720 * (canvas.height / canvas.width));
+        const offCtx = offCanvas.getContext('2d');
+        offCtx.drawImage(canvas, 0, 0, offCanvas.width, offCanvas.height);
+        
+        lastCapturedB64 = offCanvas.toDataURL('image/jpeg', 0.70);
 
-        // AIRPLANE / OFFLINE MODE
+        // OFFLINE AUTOMATIC PATH
         if (!navigator.onLine) {
-            // Create a compressed lightweight image (~80KB) specifically for localStorage
-            const offCanvas = document.createElement('canvas');
-            offCanvas.width = 600;
-            offCanvas.height = Math.round(600 * (canvas.height / canvas.width));
-            const offCtx = offCanvas.getContext('2d');
-            offCtx.drawImage(canvas, 0, 0, offCanvas.width, offCanvas.height);
-            const lightB64 = offCanvas.toDataURL('image/jpeg', 0.60);
+            flashTickOverlay();
+            statusDiv.innerText = "⚡ QUEUED FOR AUTO-OCR";
 
-            const typedRego = regoInput.value.trim().toUpperCase();
-            if (typedRego) {
-                saveAndLogOffline(typedRego, lightB64);
-            } else {
-                lastCapturedB64 = lightB64; // store compressed image
-                statusDiv.innerText = "⚡ PHOTO SAVED. TYPE REGO BELOW";
-                regoInput.focus();
-                manualLogBtn.style.display = 'block';
-                isProcessing = false;
-            }
+            const payload = {
+                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                action: 'log_mark',
+                property: propertySelect.value,
+                rego: regoInput.value.trim().toUpperCase() || "PENDING_OCR",
+                photoBytes: lastCapturedB64,
+                timestamp: new Date().toISOString(),
+                needsOcr: !regoInput.value.trim()
+            };
+
+            saveToOfflineQueue(payload);
+            setTimeout(() => { resetForm(); }, 800);
             return;
         }
 
-        // ONLINE MODE
+        // ONLINE PATH: Perform live OCR
         statusDiv.innerText = "READING PLATE...";
 
         canvas.toBlob(async (blob) => {
@@ -316,23 +319,6 @@
         }, 'image/jpeg', 0.85);
     });
 
-    function saveAndLogOffline(regoStr, photoB64) {
-        flashTickOverlay();
-        statusDiv.innerText = `⚡ OFFLINE QUEUED: ${regoStr}`;
-
-        const payload = {
-            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-            action: 'log_mark',
-            property: propertySelect.value,
-            rego: regoStr,
-            photoBytes: photoB64 || lastCapturedB64,
-            timestamp: new Date().toISOString()
-        };
-
-        saveToOfflineQueue(payload);
-        setTimeout(() => { resetForm(); }, 800);
-    }
-
     function handleUnreadableState() {
         flashCrossOverlay();
         statusDiv.innerText = "❌ UNREADABLE - TYPE REGO BELOW";
@@ -350,11 +336,6 @@
             return;
         }
 
-        if (!navigator.onLine) {
-            saveAndLogOffline(typedRego, lastCapturedB64);
-            return;
-        }
-
         flashTickOverlay();
         statusDiv.innerText = `✔ MANUALLY LOGGED: ${typedRego}`;
 
@@ -364,7 +345,8 @@
             property: propertySelect.value,
             rego: typedRego,
             photoBytes: lastCapturedB64,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            needsOcr: false
         };
 
         sendOrQueuePayload(payload);
@@ -412,7 +394,7 @@
             }
             updateQueueUI();
         } catch(e) {
-            alert("Offline storage full! Please reconnect to sync existing logs.");
+            alert("Storage full! Reconnect to network to sync.");
         }
     }
 
@@ -426,21 +408,45 @@
         }
     }
 
+    // AUTO-OCR BACKGROUND SYNC WHEN NETWORK RETURNS
     async function processOfflineQueue() {
         let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
         if (queue.length === 0 || !navigator.onLine) return;
 
-        statusDiv.innerText = "SYNCING OFFLINE QUEUE...";
+        statusDiv.innerText = "RUNNING BACKLOG OCR & SYNC...";
         let remaining = [];
 
         for (let item of queue) {
             try {
+                // Perform pending OCR on stored image if rego wasn't typed
+                if (item.needsOcr && item.photoBytes) {
+                    const blob = b64ToBlob(item.photoBytes);
+                    const formData = new FormData();
+                    formData.append('upload', blob, 'scan.jpg');
+                    formData.append('regions', 'au');
+
+                    const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
+                        body: formData
+                    });
+
+                    if (anprRes.ok) {
+                        const anprData = await anprRes.json();
+                        if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
+                            item.rego = anprData.results[0].plate.toUpperCase();
+                        }
+                    }
+                }
+
+                // Push processed log item to Google Sheet
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(item)
                 });
+
             } catch(e) {
                 remaining.push(item);
             }
@@ -450,11 +456,22 @@
         updateQueueUI();
         
         if (remaining.length === 0) {
-            statusDiv.innerText = "✔ OFFLINE QUEUE SYNCED!";
+            statusDiv.innerText = "✔ ALL OFFLINE MARKS PROCESSED!";
             setTimeout(() => { statusDiv.innerText = "READY"; }, 1500);
         } else {
             statusDiv.innerText = "PARTIAL SYNC. TAP BADGE TO RETRY.";
         }
+    }
+
+    function b64ToBlob(b64Data) {
+        const clean = b64Data.replace(/^data:image\/\w+;base64,/, "");
+        const byteCharacters = atob(clean);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: 'image/jpeg' });
     }
 </script>
 </body>
