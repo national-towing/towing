@@ -201,8 +201,8 @@
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     facingMode: 'environment',
-                    width: { ideal: 1024 },
-                    height: { ideal: 1366 }
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
                 } 
             });
             videoElem.srcObject = stream;
@@ -229,18 +229,34 @@
         manualLogBtn.style.display = 'none';
         statusDiv.innerText = "CAPTURING...";
 
+        // Native Camera Aspect Ratio Capture (Fixes squished/narrow image aspect ratio)
         const canvas = document.createElement('canvas');
-        canvas.width = 768;
-        canvas.height = 1024;
+        canvas.width = videoElem.videoWidth || 1280;
+        canvas.height = videoElem.videoHeight || 720;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
         lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.85);
 
+        // OFFLINE MODE: Save directly to queue if Airplane Mode is active
+        if (!navigator.onLine) {
+            const typedRego = regoInput.value.trim().toUpperCase();
+            if (typedRego) {
+                saveAndLogOffline(typedRego);
+            } else {
+                statusDiv.innerText = "AIRPLANE MODE: TYPE REGO BELOW";
+                regoInput.focus();
+                manualLogBtn.style.display = 'block';
+                isProcessing = false;
+            }
+            return;
+        }
+
+        // ONLINE MODE: Call Plate Recognizer OCR
         statusDiv.innerText = "READING PLATE...";
 
         canvas.toBlob(async (blob) => {
-            if (!blob || !navigator.onLine) {
+            if (!blob) {
                 handleUnreadableState();
                 return;
             }
@@ -291,10 +307,26 @@
         }, 'image/jpeg', 0.85);
     });
 
+    function saveAndLogOffline(regoStr) {
+        flashTickOverlay();
+        statusDiv.innerText = `⚡ OFFLINE QUEUED: ${regoStr}`;
+
+        const payload = {
+            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            action: 'log_mark',
+            property: propertySelect.value,
+            rego: regoStr,
+            photoBytes: lastCapturedB64,
+            timestamp: new Date().toISOString()
+        };
+
+        saveToOfflineQueue(payload);
+        setTimeout(() => { resetForm(); }, 800);
+    }
+
     function handleUnreadableState() {
         flashCrossOverlay();
         statusDiv.innerText = "❌ UNREADABLE - TYPE REGO BELOW";
-        regoInput.value = "";
         regoInput.focus();
         manualLogBtn.style.display = 'block';
         isProcessing = false;
@@ -306,6 +338,11 @@
         if (!typedRego) {
             statusDiv.innerText = "ENTER A REGO FIRST";
             regoInput.focus();
+            return;
+        }
+
+        if (!navigator.onLine) {
+            saveAndLogOffline(typedRego);
             return;
         }
 
