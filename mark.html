@@ -226,10 +226,9 @@
         if (isProcessing) return;
 
         isProcessing = true;
-        manualLogBtn.style.display = 'none';
         statusDiv.innerText = "CAPTURING...";
 
-        // Native Camera Aspect Ratio Capture (Fixes squished/narrow image aspect ratio)
+        // Capture full native aspect ratio image frame
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1280;
         canvas.height = videoElem.videoHeight || 720;
@@ -238,13 +237,13 @@
 
         lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.85);
 
-        // OFFLINE MODE: Save directly to queue if Airplane Mode is active
+        // AIRPLANE MODE PATH: Save photo frame and prompt for rego typing
         if (!navigator.onLine) {
             const typedRego = regoInput.value.trim().toUpperCase();
             if (typedRego) {
                 saveAndLogOffline(typedRego);
             } else {
-                statusDiv.innerText = "AIRPLANE MODE: TYPE REGO BELOW";
+                statusDiv.innerText = "⚡ PHOTO SAVED. TYPE REGO BELOW";
                 regoInput.focus();
                 manualLogBtn.style.display = 'block';
                 isProcessing = false;
@@ -252,7 +251,7 @@
             return;
         }
 
-        // ONLINE MODE: Call Plate Recognizer OCR
+        // ONLINE MODE PATH: Read plate via API
         statusDiv.innerText = "READING PLATE...";
 
         canvas.toBlob(async (blob) => {
