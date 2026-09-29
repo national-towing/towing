@@ -158,31 +158,32 @@
     let lastCapturedB64 = "";
 
     window.addEventListener('load', async () => {
-        await loadProperties();
+        loadProperties();
         initCamera();
         updateQueueUI();
         window.addEventListener('online', processOfflineQueue);
     });
 
-    refreshBtn.addEventListener('click', async () => {
-        if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (let registration of registrations) {
-                await registration.unregister();
-            }
-        }
+    refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
     });
 
-    async function loadProperties() {
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
-            const data = await res.json();
-            localStorage.setItem('cached_properties', JSON.stringify(data));
-            populatePropertiesUI(data);
-        } catch(e) {
-            const cached = localStorage.getItem('cached_properties');
-            if (cached) populatePropertiesUI(JSON.parse(cached));
+    function loadProperties() {
+        const cached = localStorage.getItem('cached_properties');
+        if (cached) {
+            populatePropertiesUI(JSON.parse(cached));
+        }
+
+        if (navigator.onLine) {
+            fetch(GOOGLE_SCRIPT_URL + "?action=get_properties")
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data) && data.length > 0) {
+                        localStorage.setItem('cached_properties', JSON.stringify(data));
+                        populatePropertiesUI(data);
+                    }
+                })
+                .catch(() => {});
         }
     }
 
@@ -200,8 +201,8 @@
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     facingMode: 'environment',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
+                    width: { ideal: 1024 },
+                    height: { ideal: 1366 }
                 } 
             });
             videoElem.srcObject = stream;
@@ -229,17 +230,17 @@
         statusDiv.innerText = "CAPTURING...";
 
         const canvas = document.createElement('canvas');
-        canvas.width = 1024;
-        canvas.height = 768;
+        canvas.width = 768;
+        canvas.height = 1024;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, 1024, 768);
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
-        lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.80);
+        lastCapturedB64 = canvas.toDataURL('image/jpeg', 0.85);
 
         statusDiv.innerText = "READING PLATE...";
 
         canvas.toBlob(async (blob) => {
-            if (!blob) {
+            if (!blob || !navigator.onLine) {
                 handleUnreadableState();
                 return;
             }
@@ -274,19 +275,11 @@
                         action: 'log_mark',
                         property: propertySelect.value,
                         rego: detectedRego,
-                        photoBytes: lastCapturedB64
+                        photoBytes: lastCapturedB64,
+                        timestamp: new Date().toISOString()
                     };
 
-                    if (navigator.onLine) {
-                        fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify(payload)
-                        }).catch(() => saveToOfflineQueue(payload));
-                    } else {
-                        saveToOfflineQueue(payload);
-                    }
-
+                    sendOrQueuePayload(payload);
                     setTimeout(() => { resetForm(); }, 800);
                 } else {
                     handleUnreadableState();
@@ -295,7 +288,7 @@
             } catch(err) {
                 handleUnreadableState();
             }
-        }, 'image/jpeg', 0.80);
+        }, 'image/jpeg', 0.85);
     });
 
     function handleUnreadableState() {
@@ -324,21 +317,28 @@
             action: 'log_mark',
             property: propertySelect.value,
             rego: typedRego,
-            photoBytes: lastCapturedB64
+            photoBytes: lastCapturedB64,
+            timestamp: new Date().toISOString()
         };
 
-        if (navigator.onLine) {
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            }).catch(() => saveToOfflineQueue(payload));
-        } else {
-            saveToOfflineQueue(payload);
-        }
-
+        sendOrQueuePayload(payload);
         setTimeout(() => { resetForm(); }, 800);
     });
+
+    function sendOrQueuePayload(payload) {
+        if (!navigator.onLine) {
+            saveToOfflineQueue(payload);
+            return;
+        }
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        })
+        .catch(() => saveToOfflineQueue(payload));
+    }
 
     function flashTickOverlay() {
         overlayTick.classList.add('show');
@@ -386,6 +386,7 @@
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(item)
                 });
