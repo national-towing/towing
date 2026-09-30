@@ -10,17 +10,16 @@
 
     <title>PASSES</title>
     
-    <link rel="apple-touch-icon" href="icon-pass.png?v=704">
-    <link rel="icon" type="image/png" href="icon-pass.png?v=704">
-    <link rel="manifest" href="manifest-pass.json?v=704">
+    <link rel="apple-touch-icon" href="icon-pass.png?v=700">
+    <link rel="icon" type="image/png" href="icon-pass.png?v=700">
+    <link rel="manifest" href="manifest-pass.json?v=700">
 
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-bottom: 110px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
         }
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
@@ -37,69 +36,62 @@
 
         .container { width: 100%; max-width: 440px; }
 
-        .prop-summary-card {
-            background: #1e1e1e; border-radius: 16px; padding: 14px; margin-bottom: 12px;
-            border: 1px solid #333; display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer;
+        .property-title {
+            font-size: 24px; font-weight: 900; color: #ffab00; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;
         }
-        .prop-summary-card:active { transform: scale(0.98); }
-        .prop-name {
-            font-size: 19px; font-weight: 900; color: #ffab00; text-transform: uppercase;
-            letter-spacing: 1px; flex: 1; padding-right: 8px;
-        }
-
-        .cnt-btn-blue {
-            width: 58px; height: 58px; border-radius: 10px; border: none;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #29b6f6; color: #000; padding: 0; flex-shrink: 0;
-        }
-        .cnt-num { font-size: 22px; font-weight: 900; line-height: 1; margin-bottom: 2px; }
-        .cnt-lbl { font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
-
-        .back-btn {
-            background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px;
-            border-radius: 10px; font-weight: 900; margin-bottom: 14px; cursor: pointer; display: inline-block;
-        }
-        .detail-title { font-size: 24px; font-weight: 900; color: #ffab00; margin-bottom: 12px; text-transform: uppercase; }
 
         .pass-tile {
-            background: #1e1e1e; border-radius: 14px; padding: 14px; margin-bottom: 10px;
-            border: 2px solid #29b6f6; color: #fff;
+            background: #1e1e1e; border-radius: 16px; padding: 16px; margin-bottom: 12px;
+            border: 2px solid #29b6f6; cursor: pointer; transition: transform 0.1s ease;
         }
-        .pass-header { display: flex; justify-content: space-between; align-items: baseline; }
-        .pass-rego { font-size: 28px; font-weight: 900; color: #29b6f6; letter-spacing: 1px; }
-        .pass-expiry { font-size: 18px; font-weight: 900; color: #29b6f6; text-align: right; }
+        .pass-tile:active { transform: scale(0.98); }
 
-        .pass-footer { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #aaa; font-weight: 700; }
-        .pass-notes { color: #fff; font-weight: 800; max-width: 50%; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tile-top-row { display: flex; justify-content: space-between; align-items: baseline; }
+        .pass-rego { font-size: 32px; font-weight: 900; color: #29b6f6; letter-spacing: 1px; }
+        .pass-exp { font-size: 16px; font-weight: 900; color: #29b6f6; }
 
-        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
-        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
-        input, select {
-            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
-            -webkit-appearance: none;
-        }
-
-        .row-2 { display: flex; gap: 10px; }
-        .row-2 > div { flex: 1; }
-
-        .submit-btn {
-            background: #ab47bc; color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 24px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+        .tile-bottom-row {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; color: #aaa; margin-top: 8px; font-weight: 700;
         }
 
         .fab-add {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 76px; height: 76px; background: #29b6f6; border-radius: 50%;
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            width: 72px; height: 72px; background: #29b6f6; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 48px; font-weight: 900; color: #000; box-shadow: 0 6px 22px rgba(41, 182, 246, 0.5);
-            cursor: pointer; z-index: 999; border: none; user-select: none;
+            font-size: 40px; color: #000; font-weight: 900; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6); z-index: 100;
         }
-        .fab-add:active { transform: translateX(-50%) scale(0.90); }
+        .fab-add:active { transform: translateX(-50%) scale(0.92); }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center;
+            z-index: 200; padding: 20px;
+        }
+        .modal-card {
+            background: #1e1e1e; border-radius: 18px; padding: 20px; width: 100%; max-width: 400px;
+            border: 2px solid #ab47bc; box-shadow: 0 6px 30px rgba(0,0,0,0.8);
+        }
+        .modal-card h2 { margin: 0 0 14px 0; color: #ab47bc; font-size: 24px; font-weight: 900; text-transform: uppercase; text-align: center; }
+
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
+        input, select {
+            width: 100%; height: 48px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none;
+        }
+
+        .modal-btn-row { display: flex; gap: 10px; margin-top: 18px; }
+        .modal-btn {
+            flex: 1; height: 48px; border-radius: 10px; border: none; font-size: 16px; font-weight: 900;
+            cursor: pointer; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .btn-cancel { background: #444; color: #fff; }
+        .btn-save { background: #ab47bc; color: #fff; }
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
-        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ab47bc; }
     </style>
 </head>
 <body>
@@ -120,7 +112,31 @@
     <div class="empty-msg">LOADING PASSES...</div>
 </div>
 
-<button class="fab-add" id="fabAddBtn">+</button>
+<div class="fab-add" id="fabAdd">+</div>
+
+<!-- EDIT / ADD MODAL -->
+<div class="modal-overlay" id="passModal">
+    <div class="modal-card">
+        <h2 id="modalTitle">EDIT PASS</h2>
+        
+        <label>PROPERTY</label>
+        <select id="modalProp"></select>
+
+        <label>REGISTRATION</label>
+        <input type="text" id="modalRego" placeholder="REGO..." style="color:#29b6f6; text-transform:uppercase;">
+
+        <label>DURATION (DAYS)</label>
+        <input type="number" id="modalDuration" value="1" min="1">
+
+        <label>NOTES</label>
+        <input type="text" id="modalNotes" placeholder="NOTES / REASON...">
+
+        <div class="modal-btn-row">
+            <button class="modal-btn btn-cancel" id="btnCancel">CANCEL</button>
+            <button class="modal-btn btn-save" id="btnSave">SAVE PASS</button>
+        </div>
+    </div>
+</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
@@ -131,357 +147,174 @@
 
     const passContainer = document.getElementById('passContainer');
     const refreshBtn = document.getElementById('refreshBtn');
-    const fabAddBtn = document.getElementById('fabAddBtn');
+    const fabAdd = document.getElementById('fabAdd');
 
-    let allPasses = [];
-    let propertyPassGroups = {};
-    let cachedProperties = [];
+    const passModal = document.getElementById('passModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalProp = document.getElementById('modalProp');
+    const modalRego = document.getElementById('modalRego');
+    const modalDuration = document.getElementById('modalDuration');
+    const modalNotes = document.getElementById('modalNotes');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnSave = document.getElementById('btnSave');
 
-    window.addEventListener('load', () => {
-        loadData();
+    let passesData = [];
+    let propertiesList = [];
+    let activeEditPass = null;
+
+    window.addEventListener('load', async () => {
+        await loadProperties();
+        loadPasses();
     });
 
     refreshBtn.addEventListener('click', () => {
         passContainer.innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
-        loadData();
+        loadPasses();
     });
-
-    fabAddBtn.addEventListener('click', renderAddPassForm);
-
-    async function loadData() {
-        await loadProperties();
-        await loadActivePasses();
-    }
 
     async function loadProperties() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
-            cachedProperties = await res.json();
-            localStorage.setItem('cached_properties', JSON.stringify(cachedProperties));
-        } catch(e) {
-            const cached = localStorage.getItem('cached_properties');
-            if (cached) cachedProperties = JSON.parse(cached);
-        }
+            propertiesList = await res.json();
+            populatePropertiesSelect();
+        } catch(e) {}
     }
 
-    async function loadActivePasses() {
+    function populatePropertiesSelect() {
+        modalProp.innerHTML = "";
+        propertiesList.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.name;
+            opt.innerText = p.name;
+            modalProp.appendChild(opt);
+        });
+    }
+
+    async function loadPasses() {
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_passes");
-            allPasses = await res.json();
-            localStorage.setItem('cached_passes', JSON.stringify(allPasses));
-            parseAndRenderPassSummary();
+            passesData = await res.json();
+            localStorage.setItem('cached_passes', JSON.stringify(passesData));
+            renderPasses(passesData);
         } catch(e) {
             const cached = localStorage.getItem('cached_passes');
             if (cached) {
-                allPasses = JSON.parse(cached);
-                parseAndRenderPassSummary();
+                passesData = JSON.parse(cached);
+                renderPasses(passesData);
             } else {
-                passContainer.innerHTML = "<div class='empty-msg'>NO OFFLINE DATA STORED</div>";
+                passContainer.innerHTML = "<div class='empty-msg'>NO PASSES FOUND</div>";
             }
         }
     }
 
-    function parseAndRenderPassSummary() {
-        propertyPassGroups = {};
-
-        allPasses.forEach(p => {
-            const prop = p.property || "GENERAL";
-            if (!propertyPassGroups[prop]) propertyPassGroups[prop] = [];
-            propertyPassGroups[prop].push(p);
-        });
-
-        renderSummaryView();
-    }
-
-    function formatExpiryNoYear(expiryStr) {
-        if (!expiryStr) return "EXP: N/A";
-        let cleanStr = expiryStr.replace(/-\d{2,4}$/, '').trim();
-        return `EXP: ${cleanStr}`;
-    }
-
-    function renderSummaryView() {
-        passContainer.innerHTML = "";
-
-        const activeProps = Object.keys(propertyPassGroups).filter(prop => propertyPassGroups[prop].length > 0);
-
-        activeProps.sort((a, b) => {
-            const countA = propertyPassGroups[a].length;
-            const countB = propertyPassGroups[b].length;
-            if (countB !== countA) return countB - countA;
-            return a.localeCompare(b);
-        });
-
-        if (activeProps.length === 0) {
+    function renderPasses(data) {
+        if (!data || !Array.isArray(data) || data.length === 0) {
             passContainer.innerHTML = "<div class='empty-msg'>NO ACTIVE PASSES</div>";
             return;
         }
 
-        activeProps.forEach(prop => {
-            const count = propertyPassGroups[prop].length;
+        const grouped = {};
+        data.forEach(p => {
+            const prop = p.property || "WATERPOINT";
+            if (!grouped[prop]) grouped[prop] = [];
+            grouped[prop].push(p);
+        });
 
-            const card = document.createElement('div');
-            card.className = 'prop-summary-card';
-            card.onclick = () => renderDetailView(prop);
+        passContainer.innerHTML = "";
 
-            card.innerHTML = `
-                <div class="prop-name">${prop}</div>
-                <div class="cnt-btn-blue">
-                    <span class="cnt-num">${count}</span>
-                    <span class="cnt-lbl">PASS</span>
-                </div>
-            `;
+        Object.keys(grouped).sort().forEach(prop => {
+            const title = document.createElement('div');
+            title.className = 'property-title';
+            title.innerText = prop;
+            passContainer.appendChild(title);
 
-            passContainer.appendChild(card);
+            grouped[prop].forEach(pass => {
+                const tile = document.createElement('div');
+                tile.className = 'pass-tile';
+                tile.onclick = () => openEditModal(pass);
+
+                tile.innerHTML = `
+                    <div class="tile-top-row">
+                        <span class="pass-rego">${pass.rego}</span>
+                        <span class="pass-exp">EXP: ${pass.expiry || 'N/A'}</span>
+                    </div>
+                    <div class="tile-bottom-row">
+                        <span>START: ${pass.startDate || 'N/A'} (${pass.duration})</span>
+                        <span>${pass.notes || ''}</span>
+                    </div>
+                `;
+
+                passContainer.appendChild(tile);
+            });
         });
     }
 
-    function renderDetailView(prop) {
-        passContainer.innerHTML = "";
+    function openEditModal(pass) {
+        activeEditPass = pass;
+        modalTitle.innerText = "EDIT PASS";
+        modalProp.value = pass.property || (propertiesList[0] ? propertiesList[0].name : "");
+        modalRego.value = pass.rego;
+        modalDuration.value = parseInt(pass.duration, 10) || 1;
+        modalNotes.value = pass.notes || "";
+        passModal.style.display = 'flex';
+    }
 
-        const backBtn = document.createElement('div');
-        backBtn.className = 'back-btn';
-        backBtn.innerText = "← BACK TO ALL PROPERTIES";
-        backBtn.onclick = renderSummaryView;
-        passContainer.appendChild(backBtn);
+    fabAdd.addEventListener('click', () => {
+        activeEditPass = null;
+        modalTitle.innerText = "ADD PASS";
+        if (propertiesList.length > 0) modalProp.value = propertiesList[0].name;
+        modalRego.value = "";
+        modalDuration.value = 1;
+        modalNotes.value = "";
+        passModal.style.display = 'flex';
+    });
 
-        const title = document.createElement('div');
-        title.className = 'detail-title';
-        title.innerText = prop;
-        passContainer.appendChild(title);
+    btnCancel.addEventListener('click', () => {
+        passModal.style.display = 'none';
+    });
 
-        const passes = propertyPassGroups[prop] || [];
-
-        if (passes.length === 0) {
-            passContainer.innerHTML += `<div class="empty-msg">NO PASSES FOR THIS PROPERTY</div>`;
+    btnSave.addEventListener('click', async () => {
+        const newRego = modalRego.value.trim().toUpperCase();
+        if (!newRego) {
+            alert("ENTER A REGISTRATION PLATE");
             return;
         }
 
-        passes.forEach(p => {
-            const tile = document.createElement('div');
-            tile.className = 'pass-tile';
+        btnSave.disabled = true;
+        btnSave.innerText = "SAVING...";
 
-            tile.innerHTML = `
-                <div class="pass-header">
-                    <div class="pass-rego">${p.rego}</div>
-                    <div class="pass-expiry">${formatExpiryNoYear(p.expiry)}</div>
-                </div>
-                <div class="pass-footer">
-                    <div>START: ${p.startDate} (${p.duration})</div>
-                    ${p.notes ? `<div class="pass-notes">${p.notes}</div>` : ''}
-                </div>
-            `;
+        const payload = {
+            action: activeEditPass ? 'update_pass' : 'add_pass',
+            oldRego: activeEditPass ? activeEditPass.rego : "",
+            newRego: newRego,
+            rego: newRego,
+            property: modalProp.value,
+            duration: modalDuration.value,
+            notes: modalNotes.value,
+            rowIdx: activeEditPass ? activeEditPass.rowIdx : null
+        };
 
-            passContainer.appendChild(tile);
-        });
-    }
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
 
-    function renderAddPassForm() {
-        passContainer.innerHTML = "";
+            passModal.style.display = 'none';
+            btnSave.disabled = false;
+            btnSave.innerText = "SAVE PASS";
 
-        const backBtn = document.createElement('div');
-        backBtn.className = 'back-btn';
-        backBtn.innerText = "← BACK TO PASSES";
-        backBtn.onclick = renderSummaryView;
-        passContainer.appendChild(backBtn);
+            passContainer.innerHTML = "<div class='empty-msg'>UPDATING PASSES...</div>";
+            setTimeout(loadPasses, 1200);
 
-        const lastProp = localStorage.getItem('last_pass_prop') || "";
-
-        let propOptionsHtml = "<option value=''>SELECT PROPERTY (REQUIRED)</option>";
-        cachedProperties.forEach(p => {
-            const isSelected = (p.name === lastProp) ? "selected" : "";
-            propOptionsHtml += `<option value="${p.name}" ${isSelected}>${p.name}</option>`;
-        });
-
-        const todayStr = new Date().toISOString().split('T')[0];
-
-        const formCard = document.createElement('div');
-        formCard.className = 'card';
-        formCard.innerHTML = `
-            <label style="color:#ffab00;">PROPERTY (REQUIRED)</label>
-            <select id="propertySelect">${propOptionsHtml}</select>
-
-            <label>OPTION 1: UPLOAD SCREENSHOT (MULTI-VEHICLE)</label>
-            <input type="file" id="ocrInput" accept="image/*" style="font-size:14px; padding:10px; height:auto;">
-
-            <hr style="border:0; border-top:1px solid #333; margin:16px 0;">
-
-            <label>OPTION 2: MANUAL ENTRY</label>
-            <label>VEHICLE REGO</label>
-            <input type="text" id="regoInput" placeholder="REGO" style="text-transform:uppercase; color:#ab47bc;">
-
-            <div class="row-2">
-                <div>
-                    <label>START DATE</label>
-                    <input type="date" id="startDateInput" value="${todayStr}" style="font-size:16px;" onchange="onStartDateChange()">
-                </div>
-                <div>
-                    <label>EXPIRY DATE</label>
-                    <input type="date" id="expiryDateInput" style="font-size:16px;" onchange="onExpiryDateChange()">
-                </div>
-            </div>
-
-            <label>DURATION (DAYS)</label>
-            <select id="durationSelect" onchange="onDurationSelectChange(this.value)">
-                <option value="1" selected>1 DAY</option>
-                <option value="2">2 DAYS</option>
-                <option value="3">3 DAYS</option>
-                <option value="4">4 DAYS</option>
-                <option value="5">5 DAYS</option>
-                <option value="6">6 DAYS</option>
-                <option value="7">7 DAYS</option>
-                <option value="custom" id="customOpt" style="display:none;">CUSTOM</option>
-            </select>
-
-            <label>NOTES / APARTMENT</label>
-            <input type="text" id="notesInput" placeholder="NOTES (OPTIONAL)">
-
-            <button class="submit-btn" id="submitBtn">ADD PASS</button>
-            <div id="status"></div>
-        `;
-
-        passContainer.appendChild(formCard);
-
-        const propertySelect = document.getElementById('propertySelect');
-
-        // SAVE PROPERTY INSTANTLY ON DROPDOWN CHANGE
-        propertySelect.addEventListener('change', () => {
-            if (propertySelect.value) {
-                localStorage.setItem('last_pass_prop', propertySelect.value);
-            }
-        });
-
-        onDurationSelectChange("1");
-
-        document.getElementById('submitBtn').addEventListener('click', async () => {
-            const ocrInput = document.getElementById('ocrInput');
-            const regoInput = document.getElementById('regoInput');
-            const startDateInput = document.getElementById('startDateInput');
-            const expiryDateInput = document.getElementById('expiryDateInput');
-            const durationSelect = document.getElementById('durationSelect');
-            const notesInput = document.getElementById('notesInput');
-            const statusDiv = document.getElementById('status');
-
-            const selectedProp = propertySelect.value;
-            if (!selectedProp) {
-                statusDiv.innerText = "SELECT A PROPERTY FIRST!";
-                return;
-            }
-
-            localStorage.setItem('last_pass_prop', selectedProp);
-
-            if (ocrInput.files && ocrInput.files[0]) {
-                statusDiv.innerText = "READING SCREENSHOT & ADDING PASSES...";
-                const reader = new FileReader();
-                reader.onload = async () => {
-                    try {
-                        const res = await fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                action: 'parse_pass_screenshot',
-                                property: selectedProp,
-                                photoBytes: reader.result,
-                                duration: durationSelect.value === "custom" ? "1" : durationSelect.value,
-                                notes: notesInput.value.trim()
-                            })
-                        });
-                        const data = await res.json();
-                        if (data.status === "SUCCESS") {
-                            statusDiv.innerText = `✔ ADDED ${data.addedCount} PASSES (${data.skippedCount} DUPLICATES SKIPPED)`;
-                            setTimeout(loadData, 800);
-                        } else {
-                            statusDiv.innerText = "ERROR: " + data.message;
-                        }
-                    } catch(err) {
-                        statusDiv.innerText = "OCR FAILED - CHECK NETWORK";
-                    }
-                };
-                reader.readAsDataURL(ocrInput.files[0]);
-                return;
-            }
-
-            const rego = regoInput.value.trim().toUpperCase();
-            if (!rego) { statusDiv.innerText = "ENTER REGO OR CHOOSE SCREENSHOT!"; return; }
-
-            const startDate = startDateInput.value ? new Date(startDateInput.value) : new Date();
-            const expiryDate = expiryDateInput.value ? new Date(expiryDateInput.value) : new Date(startDate.getTime() + (24 * 60 * 60 * 1000));
-
-            const diffTime = Math.abs(expiryDate - startDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-
-            const payload = {
-                action: 'add_pass',
-                property: selectedProp,
-                rego: rego,
-                startDate: startDate,
-                duration: String(diffDays),
-                expiryDate: expiryDate,
-                notes: notesInput.value.trim()
-            };
-
-            // OPTIMISTIC LOCAL UPDATE FOR INSTANT RESPONSIVENESS
-            const newPassObj = {
-                property: selectedProp,
-                rego: rego,
-                startDate: startDateInput.value,
-                duration: String(diffDays) + " days",
-                expiry: expiryDateInput.value,
-                notes: notesInput.value.trim()
-            };
-            
-            allPasses.push(newPassObj);
-            localStorage.setItem('cached_passes', JSON.stringify(allPasses));
-
-            statusDiv.innerText = "✔ PASS ADDED!";
-            
-            // BACKGROUND SYNC TO GOOGLE SHEETS
-            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
-
-            setTimeout(() => {
-                parseAndRenderPassSummary();
-            }, 300);
-        });
-    }
-
-    function onDurationSelectChange(val) {
-        if (val === "custom") return;
-        const startDateInput = document.getElementById('startDateInput');
-        const expiryDateInput = document.getElementById('expiryDateInput');
-        if (!startDateInput || !expiryDateInput) return;
-
-        const start = startDateInput.value ? new Date(startDateInput.value) : new Date();
-        const days = parseInt(val, 10);
-        const exp = new Date(start.getTime() + (days * 24 * 60 * 60 * 1000));
-        expiryDateInput.value = exp.toISOString().split('T')[0];
-    }
-
-    function onStartDateChange() {
-        const durationSelect = document.getElementById('durationSelect');
-        onDurationSelectChange(durationSelect.value);
-    }
-
-    function onExpiryDateChange() {
-        const startDateInput = document.getElementById('startDateInput');
-        const expiryDateInput = document.getElementById('expiryDateInput');
-        const durationSelect = document.getElementById('durationSelect');
-        const customOpt = document.getElementById('customOpt');
-
-        if (!startDateInput.value || !expiryDateInput.value) return;
-
-        const start = new Date(startDateInput.value);
-        const exp = new Date(expiryDateInput.value);
-        
-        const diffTime = exp - start;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays >= 1 && diffDays <= 7) {
-            durationSelect.value = String(diffDays);
-            customOpt.style.display = "none";
-        } else {
-            customOpt.innerText = `CUSTOM (${diffDays} DAYS)`;
-            customOpt.style.display = "block";
-            durationSelect.value = "custom";
+        } catch(e) {
+            alert("Network error. Could not update pass.");
+            btnSave.disabled = false;
+            btnSave.innerText = "SAVE PASS";
         }
-    }
+    });
 </script>
 </body>
 </html>
