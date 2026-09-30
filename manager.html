@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PROPERTY MANAGER PORTAL</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            margin: 0; padding: 16px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+        }
+        .card { background: #1e1e1e; border-radius: 18px; padding: 20px; width: 100%; max-width: 420px; border: 1px solid #333; margin-top: 10px; }
+        h1 { margin: 0 0 4px 0; font-size: 24px; color: #fff; text-align: center; font-weight: 900; letter-spacing: 1px; }
+        .prop-title { text-align: center; font-size: 18px; color: #ffab00; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; }
+        
+        /* TAB NAVIGATION */
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab-btn {
+            flex: 1; height: 46px; border-radius: 10px; border: none; font-weight: 900; font-size: 15px;
+            cursor: pointer; background: #2a2a2a; color: #aaa; transition: all 0.2s ease;
+        }
+        .tab-btn.active-pass { background: #ab47bc; color: #fff; }
+        .tab-btn.active-tow { background: #ff1744; color: #fff; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 12px; font-weight: 900; letter-spacing: 1px; }
+        input, select {
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
+            text-transform: uppercase;
+        }
+
+        .duration-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
+        .dur-btn {
+            height: 44px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 8px;
+            font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .dur-btn.active { background: #ab47bc; border-color: #ab47bc; color: #fff; }
+
+        .submit-btn-pass {
+            background: #ab47bc; color: #fff; font-weight: 900; border: none; border-radius: 12px;
+            height: 56px; font-size: 20px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 1px;
+        }
+        .submit-btn-tow {
+            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 12px;
+            height: 56px; font-size: 20px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 1px;
+        }
+        .submit-btn-pass:active, .submit-btn-tow:active { transform: scale(0.98); }
+        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 14px; min-height: 24px; color: #00e676; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>MANAGER PORTAL</h1>
+    <div class="prop-title" id="propDisplay">LOADING PROPERTY...</div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active-pass" id="tabPassBtn" onclick="switchTab('pass')">🎫 ISSUE PASS</button>
+        <button class="tab-btn" id="tabTowBtn" onclick="switchTab('tow')">🚨 REQUEST TOW</button>
+    </div>
+
+    <!-- TAB 1: ISSUE PASS -->
+    <div class="tab-content active" id="passTab">
+        <label>VEHICLE REGISTRATION</label>
+        <input type="text" id="passRegoInput" placeholder="ENTER REGO" maxlength="10">
+
+        <label>PERMIT DURATION</label>
+        <div class="duration-grid">
+            <div class="dur-btn active" data-days="1" onclick="selectDuration(this)">1 DAY</div>
+            <div class="dur-btn" data-days="2" onclick="selectDuration(this)">2 DAYS</div>
+            <div class="dur-btn" data-days="3" onclick="selectDuration(this)">3 DAYS</div>
+            <div class="dur-btn" data-days="7" onclick="selectDuration(this)">7 DAYS</div>
+        </div>
+
+        <label>AUTHORIZED UNIT / NOTES (OPTIONAL)</label>
+        <input type="text" id="passNotesInput" placeholder="E.G. UNIT 402 VISITOR" style="font-size:15px;">
+
+        <button class="submit-btn-pass" id="submitPassBtn">ISSUE PERMIT NOW</button>
+    </div>
+
+    <!-- TAB 2: REQUEST TOW -->
+    <div class="tab-content" id="towTab">
+        <label>VEHICLE REGISTRATION</label>
+        <input type="text" id="towRegoInput" placeholder="ENTER REGO" maxlength="10">
+
+        <label>REASON FOR TOW</label>
+        <select id="towReasonSelect">
+            <option value="UNAUTHORIZED PARKING">UNAUTHORIZED PARKING</option>
+            <option value="PARKED IN RESERVED BAY">PARKED IN RESERVED BAY</option>
+            <option value="BLOCKING DRIVEWAY / ACCESS">BLOCKING DRIVEWAY / ACCESS</option>
+            <option value="EXPIRED TIME LIMIT">EXPIRED TIME LIMIT</option>
+            <option value="NO VISITOR PASS">NO VISITOR PASS</option>
+        </select>
+
+        <label>BAY # / LOCATION DETAILS</label>
+        <input type="text" id="towLocationInput" placeholder="E.G. BAY 12 OR VISITOR SECTION" style="font-size:15px;">
+
+        <label>REQUESTED BY (NAME / UNIT)</label>
+        <input type="text" id="towAuthorizerInput" placeholder="E.G. JANE (BUILDING MGR)" style="font-size:15px;">
+
+        <button class="submit-btn-tow" id="submitTowBtn">REQUEST TOW NOW</button>
+    </div>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+    let selectedProperty = "";
+    let selectedDuration = 1;
+    let currentMode = "pass";
+
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        selectedProperty = urlParams.get('prop') || "GENERAL";
+        document.getElementById('propDisplay').innerText = selectedProperty.toUpperCase();
+    });
+
+    function switchTab(mode) {
+        currentMode = mode;
+        const passBtn = document.getElementById('tabPassBtn');
+        const towBtn = document.getElementById('tabTowBtn');
+        const passTab = document.getElementById('passTab');
+        const towTab = document.getElementById('towTab');
+        const statusDiv = document.getElementById('status');
+
+        statusDiv.innerText = "";
+
+        if (mode === 'pass') {
+            passBtn.className = "tab-btn active-pass";
+            towBtn.className = "tab-btn";
+            passTab.className = "tab-content active";
+            towTab.className = "tab-content";
+        } else {
+            passBtn.className = "tab-btn";
+            towBtn.className = "tab-btn active-tow";
+            passTab.className = "tab-content";
+            towTab.className = "tab-content active";
+        }
+    }
+
+    function selectDuration(elem) {
+        document.querySelectorAll('.dur-btn').forEach(btn => btn.classList.remove('active'));
+        elem.classList.add('active');
+        selectedDuration = parseInt(elem.getAttribute('data-days'), 10) || 1;
+    }
+
+    // SUBMIT PASS
+    document.getElementById('submitPassBtn').addEventListener('click', async () => {
+        const rego = document.getElementById('passRegoInput').value.trim().toUpperCase();
+        const notes = document.getElementById('passNotesInput').value.trim();
+        const statusDiv = document.getElementById('status');
+
+        if (!rego) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "ENTER VEHICLE REGO";
+            return;
+        }
+
+        document.getElementById('submitPassBtn').disabled = true;
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "ISSUING PERMIT...";
+
+        const payload = {
+            action: 'add_pass',
+            property: selectedProperty,
+            rego: rego,
+            duration: selectedDuration,
+            notes: notes || "ISSUED VIA MANAGER PORTAL"
+        };
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = `✔ PERMIT ISSUED FOR ${rego}!`;
+            document.getElementById('passRegoInput').value = "";
+            document.getElementById('passNotesInput').value = "";
+        } catch(e) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "ERROR ISSUING PERMIT";
+        }
+
+        setTimeout(() => {
+            document.getElementById('submitPassBtn').disabled = false;
+            statusDiv.innerText = "";
+        }, 2000);
+    });
+
+    // SUBMIT TOW REQUEST
+    document.getElementById('submitTowBtn').addEventListener('click', async () => {
+        const rego = document.getElementById('towRegoInput').value.trim().toUpperCase();
+        const reason = document.getElementById('towReasonSelect').value;
+        const location = document.getElementById('towLocationInput').value.trim();
+        const authorizer = document.getElementById('towAuthorizerInput').value.trim();
+        const statusDiv = document.getElementById('status');
+
+        if (!rego) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "ENTER VEHICLE REGO";
+            return;
+        }
+
+        document.getElementById('submitTowBtn').disabled = true;
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "SENDING TOW REQUEST...";
+
+        const payload = {
+            action: 'log_mark',
+            property: selectedProperty,
+            rego: rego,
+            makeModel: `${reason} ${location ? '(' + location + ')' : ''}`,
+            confidence: "HIGH",
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = `✔ TOW REQUESTED FOR ${rego}!`;
+            document.getElementById('towRegoInput').value = "";
+            document.getElementById('towLocationInput').value = "";
+            document.getElementById('towAuthorizerInput').value = "";
+        } catch(e) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "ERROR SENDING TOW REQUEST";
+        }
+
+        setTimeout(() => {
+            document.getElementById('submitTowBtn').disabled = false;
+            statusDiv.innerText = "";
+        }, 2000);
+    });
+</script>
+</body>
+</html>
