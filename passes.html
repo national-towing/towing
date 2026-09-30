@@ -48,7 +48,7 @@
 
         .tile-top-row { display: flex; justify-content: space-between; align-items: baseline; }
         .pass-rego { font-size: 32px; font-weight: 900; color: #29b6f6; letter-spacing: 1px; }
-        .pass-exp { font-size: 16px; font-weight: 900; color: #29b6f6; }
+        .pass-exp { font-size: 18px; font-weight: 900; color: #29b6f6; letter-spacing: 0.5px; }
 
         .tile-bottom-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -207,6 +207,32 @@
         }
     }
 
+    function formatExpiryDisplay(rawExpStr) {
+        if (!rawExpStr) return "N/A";
+        
+        // If string is already formatted like "Thu 01-Oct-26" or "Thu 01-Oct"
+        if (String(rawExpStr).includes("-") && !String(rawExpStr).includes("T")) {
+            const parts = String(rawExpStr).trim().split(/[\s-]+/);
+            if (parts.length >= 3) {
+                return `${parts[0]} ${parts[1]} ${parts[2]}`; // "Thu 01 Oct"
+            }
+            return String(rawExpStr);
+        }
+
+        // Standard date fallback
+        const d = new Date(rawExpStr);
+        if (!isNaN(d.getTime())) {
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const dayName = days[d.getDay()];
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mmm = months[d.getMonth()];
+            return `${dayName} ${dd} ${mmm}`;
+        }
+
+        return String(rawExpStr);
+    }
+
     function renderPasses(data) {
         if (!data || !Array.isArray(data) || data.length === 0) {
             passContainer.innerHTML = "<div class='empty-msg'>NO ACTIVE PASSES</div>";
@@ -233,10 +259,12 @@
                 tile.className = 'pass-tile';
                 tile.onclick = () => openEditModal(pass);
 
+                const cleanExpStr = formatExpiryDisplay(pass.expiry || pass.rawExpiry);
+
                 tile.innerHTML = `
                     <div class="tile-top-row">
                         <span class="pass-rego">${pass.rego}</span>
-                        <span class="pass-exp">EXP: ${pass.expiry || 'N/A'}</span>
+                        <span class="pass-exp">EXP: ${cleanExpStr}</span>
                     </div>
                     <div class="tile-bottom-row">
                         <span>START: ${pass.startDate || 'N/A'} (${pass.duration})</span>
