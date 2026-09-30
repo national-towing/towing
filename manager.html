@@ -8,17 +8,16 @@
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 16px; background: #121212; color: #fff; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
         }
         .card { background: #1e1e1e; border-radius: 18px; padding: 20px; width: 100%; max-width: 420px; border: 1px solid #333; margin-top: 10px; }
         h1 { margin: 0 0 4px 0; font-size: 24px; color: #fff; text-align: center; font-weight: 900; letter-spacing: 1px; }
         .prop-title { text-align: center; font-size: 18px; color: #ffab00; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; }
         
-        /* TAB NAVIGATION */
         .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
         .tab-btn {
-            flex: 1; height: 46px; border-radius: 10px; border: none; font-weight: 900; font-size: 15px;
+            flex: 1; height: 46px; border-radius: 10px; border: none; font-weight: 900; font-size: 14px;
             cursor: pointer; background: #2a2a2a; color: #aaa; transition: all 0.2s ease;
         }
         .tab-btn.active-pass { background: #ab47bc; color: #fff; }
@@ -37,7 +36,7 @@
         .duration-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
         .dur-btn {
             height: 44px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 8px;
-            font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
         .dur-btn.active { background: #ab47bc; border-color: #ab47bc; color: #fff; }
 
@@ -98,7 +97,7 @@
         </select>
 
         <label>BAY # / LOCATION DETAILS</label>
-        <input type="text" id="towLocationInput" placeholder="E.G. BAY 12 OR VISITOR SECTION" style="font-size:15px;">
+        <input type="text" id="towLocationInput" placeholder="E.G. BAY 12 OR VISITOR BAY" style="font-size:15px;">
 
         <label>REQUESTED BY (NAME / UNIT)</label>
         <input type="text" id="towAuthorizerInput" placeholder="E.G. JANE (BUILDING MGR)" style="font-size:15px;">
@@ -114,7 +113,6 @@
 
     let selectedProperty = "";
     let selectedDuration = 1;
-    let currentMode = "pass";
 
     window.addEventListener('load', () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -123,7 +121,6 @@
     });
 
     function switchTab(mode) {
-        currentMode = mode;
         const passBtn = document.getElementById('tabPassBtn');
         const towBtn = document.getElementById('tabTowBtn');
         const passTab = document.getElementById('passTab');
@@ -159,7 +156,7 @@
 
         if (!rego) {
             statusDiv.style.color = "#ff1744";
-            statusDiv.innerText = "ENTER VEHICLE REGO";
+            statusDiv.innerText = "PLEASE ENTER VEHICLE REGO";
             return;
         }
 
@@ -195,7 +192,7 @@
         setTimeout(() => {
             document.getElementById('submitPassBtn').disabled = false;
             statusDiv.innerText = "";
-        }, 2000);
+        }, 2500);
     });
 
     // SUBMIT TOW REQUEST
@@ -208,7 +205,7 @@
 
         if (!rego) {
             statusDiv.style.color = "#ff1744";
-            statusDiv.innerText = "ENTER VEHICLE REGO";
+            statusDiv.innerText = "PLEASE ENTER VEHICLE REGO";
             return;
         }
 
@@ -222,6 +219,10 @@
             rego: rego,
             makeModel: `${reason} ${location ? '(' + location + ')' : ''}`,
             confidence: "HIGH",
+            isManagerRequest: true,
+            reason: reason,
+            location: location,
+            authorizer: authorizer,
             timestamp: new Date().toISOString()
         };
 
@@ -246,7 +247,7 @@
         setTimeout(() => {
             document.getElementById('submitTowBtn').disabled = false;
             statusDiv.innerText = "";
-        }, 2000);
+        }, 2500);
     });
 </script>
 </body>
