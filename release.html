@@ -299,6 +299,12 @@
             makeInput.value = veh.make || '';
             modelInput.value = veh.model || '';
             colourInput.value = veh.colour || '';
+        } else {
+            propertyInput.value = '';
+            regoInput.value = '';
+            makeInput.value = '';
+            modelInput.value = '';
+            colourInput.value = '';
         }
         validateForm();
     });
@@ -309,7 +315,7 @@
             yardVehicles = await res.json();
             vehicleSelect.innerHTML = "<option value=''>-- SELECT FROM YARD --</option>";
 
-            if (!yardVehicles || yardVehicles.length === 0) {
+            if (!Array.isArray(yardVehicles) || yardVehicles.length === 0) {
                 vehicleSelect.innerHTML = "<option value=''>NO VEHICLES IN YARD</option>";
                 return;
             }
@@ -317,7 +323,7 @@
             yardVehicles.forEach(v => {
                 const opt = document.createElement('option');
                 opt.value = v.rego;
-                opt.innerText = `${v.rego} (${v.make || ''} ${v.model || ''})`;
+                opt.innerText = `${v.rego} (${v.property || ''} - ${v.make || ''} ${v.model || ''})`;
                 vehicleSelect.appendChild(opt);
             });
         } catch(e) {
@@ -526,7 +532,12 @@
 
         statusDiv.innerText = "GENERATING INVOICE & RELEASING...";
         try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            await fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
+            });
             statusDiv.innerText = "✔ PAID - VEHICLE RELEASED SUCCESS!";
         } catch(err) {
             statusDiv.innerText = "ERROR PROCESSING RELEASE";
