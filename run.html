@@ -135,7 +135,7 @@
 
     async function loadTowRun() {
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_tow_run");
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_run");
             rawData = await res.json();
             localStorage.setItem('cached_run_data', JSON.stringify(rawData));
             parseAndRenderRun(rawData);
@@ -151,7 +151,7 @@
     }
 
     function parseAndRenderRun(data) {
-        if (!data || data.length === 0) {
+        if (!data || !Array.isArray(data) || data.length === 0) {
             runContainer.innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
             return;
         }
@@ -168,12 +168,30 @@
                 status = "PASS";
             } else if (item.rawExpiryMs > 0 && nowMs >= item.rawExpiryMs) {
                 status = "READY";
+            } else {
+                // Fallback date parser for formatted strings like "Wed 30-09 16:43"
+                let expMs = item.rawExpiryMs || 0;
+                if (!expMs && item.expiryTime) {
+                    const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
+                    const parts = cleanExp.split(/[\s-:]+/);
+                    if (parts.length >= 4) {
+                        const day = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10) - 1;
+                        const year = new Date().getFullYear();
+                        const hours = parseInt(parts[2], 10);
+                        const mins = parseInt(parts[3], 10);
+                        expMs = new Date(year, month, day, hours, mins).getTime();
+                    }
+                }
+                if (expMs > 0 && nowMs >= expMs) {
+                    status = "READY";
+                }
             }
 
             propertyGroups[prop].push({
                 rego: item.rego,
-                markedTime: item.markedTime,
-                expiryTime: item.expiryTime,
+                markedTime: item.markedTime || item.timestamp,
+                expiryTime: item.expiryTime || item.expiry,
                 status: status,
                 property: prop
             });
