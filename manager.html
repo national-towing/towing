@@ -78,6 +78,7 @@
         .section-header {
             font-size: 14px; font-weight: 900; color: #ab47bc; text-transform: uppercase;
             border-bottom: 1px solid #333; padding-bottom: 4px; margin-top: 18px; letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
         label { font-size: 13px; text-transform: uppercase; color: #bbb; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
@@ -104,6 +105,13 @@
             height: 58px; font-size: 21px; width: 100%; margin-top: 22px; cursor: pointer; letter-spacing: 1px;
         }
         .submit-btn-pass:active, .submit-btn-tow:active { transform: scale(0.98); }
+
+        .btn-today {
+            background: #2a2a2a; color: #00e676; border: 1px solid #00e676; font-weight: 900;
+            border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; letter-spacing: 0.5px;
+            margin-top: 14px; width: 100%; height: 42px; text-transform: uppercase;
+        }
+        .btn-today:active { transform: scale(0.98); background: #1b2e23; }
 
         .camera-box {
             border: 2px dashed #ff1744; border-radius: 12px; padding: 16px; text-align: center;
@@ -171,6 +179,8 @@
 
         <label>NOTES (OPTIONAL)</label>
         <input type="text" class="input-box" id="passNotesInput" placeholder="E.G. UNIT 402 VISITOR" style="font-size:16px;">
+
+        <button type="button" class="btn-today" onclick="resetToToday()">📅 RESET START DATE TO TODAY</button>
 
         <button class="submit-btn-pass" id="submitPassBtn">ISSUE PERMIT</button>
 
@@ -243,19 +253,23 @@
         const propElem = document.getElementById('propDisplay');
         if (propElem) propElem.innerText = selectedProperty;
 
-        const todayStr = getTodayIsoDate();
-        const startDateElem = document.getElementById('startDateInput');
-        if (startDateElem) {
-            startDateElem.min = todayStr;
-            startDateElem.value = todayStr;
-            handleDateChange('start');
-        }
+        resetToToday();
     });
 
     function getTodayIsoDate() {
         const d = new Date();
         const offset = d.getTimezoneOffset() * 60000;
         return (new Date(d.getTime() - offset)).toISOString().split('T')[0];
+    }
+
+    function resetToToday() {
+        const todayStr = getTodayIsoDate();
+        const startDateElem = document.getElementById('startDateInput');
+        if (startDateElem) {
+            startDateElem.min = todayStr; // Block picking past dates
+            startDateElem.value = todayStr;
+            handleDateChange('start');
+        }
     }
 
     function cleanRegoInput(elem) {
@@ -269,6 +283,13 @@
 
         if (!startDateElem || !startDateElem.value) return;
 
+        const todayStr = getTodayIsoDate();
+
+        // Enforce No Past Dates
+        if (startDateElem.value < todayStr) {
+            startDateElem.value = todayStr;
+        }
+
         let startD = new Date(startDateElem.value + 'T00:00:00');
 
         if (source === 'start' || source === 'duration') {
@@ -278,19 +299,19 @@
             endDateElem.min = startDateElem.value;
         } else if (source === 'end') {
             if (!endDateElem || !endDateElem.value) return;
-            let endD = new Date(endDateElem.value + 'T00:00:00');
 
-            if (endD <= startD) {
+            // Enforce End Date cannot be before Start Date
+            if (endDateElem.value < startDateElem.value) {
                 endDateElem.value = startDateElem.value;
                 durationElem.value = "1";
                 return;
             }
 
+            let endD = new Date(endDateElem.value + 'T00:00:00');
             const diffTime = Math.abs(endD - startD);
             let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
             if (diffDays < 1) diffDays = 1;
 
-            // Automatically select matching duration or add custom option for extended dates
             let existingOpt = Array.from(durationElem.options).find(opt => parseInt(opt.value, 10) === diffDays);
             if (existingOpt) {
                 durationElem.value = diffDays.toString();
