@@ -1,255 +1,509 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>Property Manager Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
-  <!-- iOS Web App Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TOW">
-  
-  <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: #121212; color: #fff; margin: 0; padding: 12px; font-size: 15px; }
+    <title>TOW</title>
+    
+    <link rel="apple-touch-icon" href="icon-manager.png?v=999">
+    <link rel="icon" type="image/png" href="icon-manager.png?v=999">
+    <link rel="manifest" href="manifest-manager.json?v=999">
 
-    /* Header & Title */
-    .header-card { background: #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid #333; text-align: center; }
-    .header-card h1 { font-size: 20px; margin: 0 0 4px 0; color: #ffab00; text-transform: uppercase; letter-spacing: 0.5px; }
-    .header-card p { font-size: 13px; color: #aaa; margin: 0; }
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; padding: 12px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+        }
+        .card { 
+            background: #1e1e1e; border-radius: 18px; padding: 20px; width: 100%; max-width: 440px; 
+            border: 1px solid #333; margin-top: 6px; 
+        }
+        
+        .header-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header-logo {
+            height: 65px;
+            width: auto;
+            object-fit: contain;
+            margin-bottom: 6px;
+        }
+        h1 { margin: 0; font-size: 24px; color: #fff; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        h2 { margin: 2px 0 0 0; font-size: 18px; color: #ab47bc; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .phone-link {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 17px;
+            font-weight: 900;
+            color: #00e676;
+            text-decoration: none;
+            letter-spacing: 1px;
+            background: #1b2e23;
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #00e676;
+        }
+        
+        .prop-title { 
+            text-align: center; font-size: 20px; color: #ffab00; font-weight: 900; 
+            margin-top: 12px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab-btn {
+            flex: 1; height: 50px; border-radius: 10px; border: none; font-weight: 900; font-size: 15px;
+            cursor: pointer; background: #2a2a2a; color: #aaa; transition: all 0.2s ease;
+        }
+        .tab-btn.active-pass { background: #ab47bc; color: #fff; }
+        .tab-btn.active-tow { background: #ff1744; color: #fff; }
 
-    /* Optional Safari Banner (Non-blocking) */
-    .ios-safari-banner {
-      display: none;
-      background: #332b00;
-      border: 1px solid #ffab00;
-      color: #ffca28;
-      font-size: 13px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      text-align: center;
-      line-height: 1.3;
-    }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-    /* Tabs */
-    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-    .tab-btn { flex: 1; padding: 12px 6px; background: #2a2a2a; color: #888; border: 1px solid #333; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; }
-    .tab-btn.active { background: #ffab00; color: #000; border-color: #ffab00; }
+        .section-header {
+            font-size: 14px; font-weight: 900; color: #ab47bc; text-transform: uppercase;
+            border-bottom: 1px solid #333; padding-bottom: 4px; margin-top: 18px; letter-spacing: 1px;
+        }
 
-    /* Forms & Cards */
-    .card { background: #1e1e1e; border-radius: 14px; padding: 16px; border: 1px solid #333; margin-bottom: 12px; display: none; }
-    .card.active { display: block; }
+        label { font-size: 13px; text-transform: uppercase; color: #bbb; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
+        .sub-text { font-size: 11px; color: #999; font-weight: 600; margin-top: 3px; }
 
-    label { font-size: 12px; font-weight: 700; color: #aaa; text-transform: uppercase; margin-bottom: 6px; display: block; }
-    input, select, textarea { width: 100%; padding: 12px; background: #111; border: 1px solid #444; border-radius: 8px; color: #fff; font-size: 15px; margin-bottom: 14px; box-sizing: border-box; }
-    input:focus, select:focus, textarea:focus { border-color: #ffab00; outline: none; }
+        .input-box, select {
+            width: 100%; height: 52px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 19px; font-weight: 900; margin-top: 4px; outline: none;
+            text-transform: uppercase; box-sizing: border-box;
+        }
 
-    .btn-submit { width: 100%; padding: 14px; background: #ffab00; color: #000; font-size: 16px; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
-    .btn-submit:active { transform: scale(0.98); }
+        input[type="date"].input-box {
+            font-size: 17px; font-family: inherit; color-scheme: dark; -webkit-appearance: none; appearance: none;
+        }
 
-    .btn-call { width: 100%; padding: 14px; background: #00e676; color: #000; font-size: 16px; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; text-decoration: none; display: block; text-align: center; }
+        .row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; box-sizing: border-box; }
 
-    /* Status Messages */
-    .status-msg { padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; text-align: center; margin-top: 10px; display: none; }
-    .status-msg.success { background: #1b5e20; color: #b9f6ca; border: 1px solid #2e7d32; }
-    .status-msg.error { background: #b71c1c; color: #ff8a80; border: 1px solid #c62828; }
-  </style>
+        .submit-btn-pass {
+            background: #ab47bc; color: #fff; font-weight: 900; border: none; border-radius: 12px;
+            height: 58px; font-size: 21px; width: 100%; margin-top: 22px; cursor: pointer; letter-spacing: 1px;
+        }
+        .submit-btn-tow {
+            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 12px;
+            height: 58px; font-size: 21px; width: 100%; margin-top: 22px; cursor: pointer; letter-spacing: 1px;
+        }
+        .submit-btn-pass:active, .submit-btn-tow:active { transform: scale(0.98); }
+
+        .camera-box {
+            border: 2px dashed #ff1744; border-radius: 12px; padding: 16px; text-align: center;
+            background: #2a1518; margin-top: 12px; cursor: pointer;
+        }
+        .camera-box img { max-width: 100%; max-height: 190px; border-radius: 8px; margin-top: 8px; display: none; }
+
+        .disclaimer-text {
+            font-size: 12px; color: #aaa; text-align: center; margin-top: 18px; line-height: 1.4; font-weight: 500;
+        }
+        .disclaimer-text b i { color: #fff; }
+
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 14px; min-height: 26px; color: #00e676; }
+    </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header-card">
-    <h1 id="propTitle">PROPERTY MANAGER PORTAL</h1>
-    <p>National Towing & Transporting Solutions</p>
-  </div>
+<div class="card">
+    <div class="header-box">
+        <img src="icon-manager.png?v=999" alt="National Towing Logo" class="header-logo">
+        <h1>NATIONAL TOWING</h1>
+        <h2>MANAGER PORTAL</h2>
+        <a href="tel:0450605370" class="phone-link">📞 0450 605 370</a>
+    </div>
+    <div class="prop-title" id="propDisplay">LOADING PROPERTY...</div>
 
-  <!-- Safari Info Banner (Only visible on iOS Chrome/Gmail, non-blocking) -->
-  <div id="safariBanner" class="ios-safari-banner">
-    💡 <b>Tip for iPhone:</b> Open this link in <b>Safari</b> and tap <b>Share ➔ Add to Home Screen</b> to install as an app.
-  </div>
+    <div class="tab-bar">
+        <button class="tab-btn active-pass" id="tabPassBtn" onclick="switchTab('pass')">🎫 ISSUE PASS</button>
+        <button class="tab-btn" id="tabTowBtn" onclick="switchTab('tow')">🚨 REQUEST TOW</button>
+    </div>
 
-  <!-- Navigation Tabs -->
-  <div class="tabs">
-    <div class="tab-btn active" onclick="switchTab('towTab', this)">🚨 REQUEST TOW</div>
-    <div class="tab-btn" onclick="switchTab('permitTab', this)">🎫 ISSUE PERMIT</div>
-    <div class="tab-btn" onclick="switchTab('callTab', this)">📞 CONTACT US</div>
-  </div>
+    <!-- TAB 1: ISSUE PASS -->
+    <div class="tab-content active" id="passTab">
+        <label>VEHICLE REGISTRATION</label>
+        <input type="text" class="input-box" id="passRegoInput" placeholder="ENTER REGO" maxlength="10" oninput="cleanRegoInput(this)">
 
-  <!-- TAB 1: TOW REQUEST -->
-  <div id="towTab" class="card active">
-    <form id="towForm" onsubmit="submitTowRequest(event)">
-      <label>Vehicle Registration *</label>
-      <input type="text" id="towRego" placeholder="e.g. 123ABC" required style="text-transform: uppercase;">
+        <div class="section-header">PERMIT DETAILS</div>
 
-      <label>Location / Bay Number *</label>
-      <input type="text" id="towLocation" placeholder="e.g. Visitor Bay 4 or Basement" required>
+        <label>START DATE</label>
+        <input type="date" class="input-box" id="startDateInput" onchange="handleDateChange('start')">
+        <div class="sub-text">Commencing midnight</div>
 
-      <label>Reason for Tow Request *</label>
-      <select id="towReason" required>
-        <option value="">-- Select Reason --</option>
-        <option value="Unauthorized Parking in Reserved Bay">Unauthorized Parking in Reserved Bay</option>
-        <option value="Parked in Visitor Bay Over Time Limit">Parked in Visitor Bay Over Time Limit</option>
-        <option value="Blocking Driveway / Access Route">Blocking Driveway / Access Route</option>
-        <option value="Parked in No Parking / Fire Zone">Parked in No Parking / Fire Zone</option>
-        <option value="Other">Other (Specify in Notes)</option>
-      </select>
+        <div class="row-grid">
+            <div>
+                <label>DURATION</label>
+                <select id="durationSelect" onchange="handleDateChange('duration')">
+                    <option value="1">1 DAY</option>
+                    <option value="2">2 DAYS</option>
+                    <option value="3">3 DAYS</option>
+                    <option value="4">4 DAYS</option>
+                    <option value="5">5 DAYS</option>
+                    <option value="6">6 DAYS</option>
+                    <option value="7">7 DAYS</option>
+                </select>
+            </div>
+            <div>
+                <label>END DATE</label>
+                <input type="date" class="input-box" id="endDateInput" onchange="handleDateChange('end')">
+                <div class="sub-text">Expires midnight</div>
+            </div>
+        </div>
 
-      <label>Authorizer Name *</label>
-      <input type="text" id="towAuthorizer" placeholder="Your Name / Position" required>
+        <label>NOTES (OPTIONAL)</label>
+        <input type="text" class="input-box" id="passNotesInput" placeholder="E.G. UNIT 402 VISITOR" style="font-size:16px;">
 
-      <label>Notes / Vehicle Make & Model (Optional)</label>
-      <textarea id="towNotes" rows="2" placeholder="e.g. White Toyota Corolla"></textarea>
+        <button class="submit-btn-pass" id="submitPassBtn">ISSUE PERMIT</button>
 
-      <button type="submit" id="towSubmitBtn" class="btn-submit">SUBMIT URGENT TOW REQUEST</button>
-      <div id="towStatus" class="status-msg"></div>
-    </form>
-  </div>
+        <div class="disclaimer-text">
+            Please ensure accuracy of entry. National Towing is unable to accept responsibility for towing vehicles that do not match <b><i>exact</i></b> details entered.
+        </div>
+    </div>
 
-  <!-- TAB 2: ISSUE PERMIT / PASS -->
-  <div id="permitTab" class="card">
-    <form id="permitForm" onsubmit="submitPermit(event)">
-      <label>Vehicle Registration *</label>
-      <input type="text" id="permitRego" placeholder="e.g. 123ABC" required style="text-transform: uppercase;">
+    <!-- TAB 2: REQUEST TOW -->
+    <div class="tab-content" id="towTab">
+        <label>VEHICLE PHOTO (PLATE SCANNER)</label>
+        <div class="camera-box" onclick="triggerCamera()">
+            <span id="cameraText" style="font-size: 14px; font-weight: 900; color: #ff1744;">📷 TAP TO SCAN REGO / ATTACH PHOTO</span>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="processTowPhoto(event)">
+            <img id="towPhotoPreview" alt="Tow Preview">
+        </div>
 
-      <label>Permit Duration *</label>
-      <select id="permitDuration" required>
-        <option value="1">1 Day</option>
-        <option value="2">2 Days</option>
-        <option value="3">3 Days</option>
-        <option value="7">7 Days (1 Week)</option>
-        <option value="14">14 Days (2 Weeks)</option>
-      </select>
+        <label>VEHICLE REGISTRATION</label>
+        <input type="text" class="input-box" id="towRegoInput" placeholder="ENTER REGO" maxlength="10" oninput="cleanRegoInput(this)">
 
-      <label>Notes / Resident Bay (Optional)</label>
-      <input type="text" id="permitNotes" placeholder="e.g. Visiting Unit 402">
+        <label>REASON FOR TOW</label>
+        <select id="towReasonSelect">
+            <option value="UNAUTHORIZED PARKING">UNAUTHORIZED PARKING</option>
+            <option value="PARKED IN RESERVED BAY">PARKED IN RESERVED BAY</option>
+            <option value="BLOCKING DRIVEWAY / ACCESS">BLOCKING DRIVEWAY / ACCESS</option>
+            <option value="EXPIRED TIME LIMIT">EXPIRED TIME LIMIT</option>
+            <option value="NO VISITOR PASS">NO VISITOR PASS</option>
+        </select>
 
-      <button type="submit" id="permitSubmitBtn" class="btn-submit">ISSUE PARKING PERMIT</button>
-      <div id="permitStatus" class="status-msg"></div>
-    </form>
-  </div>
+        <label>BAY # / LOCATION DETAILS</label>
+        <input type="text" class="input-box" id="towLocationInput" placeholder="E.G. BAY 12 OR VISITOR BAY" style="font-size:16px;">
 
-  <!-- TAB 3: CONTACT US -->
-  <div id="callTab" class="card">
-    <p style="text-align: center; color: #ccc; margin-bottom: 20px;">Need immediate assistance or have a priority inquiry? Call our dispatch team directly 24/7.</p>
-    <a href="tel:0450605370" class="btn-call">📞 CALL NATIONAL TOWING (0450 605 370)</a>
-  </div>
+        <label>REQUESTED BY (NAME / UNIT)</label>
+        <input type="text" class="input-box" id="towAuthorizerInput" placeholder="E.G. JANE (BUILDING MGR)" style="font-size:16px;">
 
-  <script>
-    // SCRIPT DEPLOYMENT URL (Web App Endpoint)
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqZ-K-QY6J5rV_M5m5g_wXg7K1_xN-94m5c6e7f8g/exec"; // Replaced by Apps Script
+        <button class="submit-btn-tow" id="submitTowBtn">REQUEST TOW NOW</button>
 
-    let currentProperty = "GENERAL";
+        <div class="disclaimer-text">
+            Please ensure accuracy of entry. National Towing is unable to accept responsibility for towing vehicles that do not match <b><i>exact</i></b> details entered.
+        </div>
+    </div>
 
-    window.addEventListener('DOMContentLoaded', () => {
-      // Parse Property parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      let prop = urlParams.get('prop') || urlParams.get('property') || 'GENERAL';
-      currentProperty = decodeURIComponent(prop).trim().toUpperCase();
+    <div id="status"></div>
+</div>
 
-      document.getElementById('propTitle').innerText = currentProperty + " MANAGER PORTAL";
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    const PLATE_RECOGNIZER_TOKEN = "74a8bb83a49461eef0266274ce63e1e198b4c888";
 
-      // Non-intrusive Safari tip check
-      const userAgent = navigator.userAgent || '';
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-      const isStandalone = (window.navigator.standalone === true) || window.matchMedia('(display-mode: standalone)').matches;
-      const isSafari = isIOS && /Safari/.test(userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS|GSA/.test(userAgent);
+    let selectedProperty = "";
+    let towPhotoBase64 = "";
 
-      if (isIOS && !isSafari && !isStandalone) {
-        document.getElementById('safariBanner').style.display = 'block';
-      }
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        selectedProperty = urlParams.get('prop') || "GENERAL";
+        document.getElementById('propDisplay').innerText = selectedProperty.toUpperCase();
+
+        const todayStr = getTodayIsoDate();
+        const startDateElem = document.getElementById('startDateInput');
+
+        startDateElem.min = todayStr;
+        startDateElem.value = todayStr;
+
+        handleDateChange('start');
     });
 
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
+    function getTodayIsoDate() {
+        const d = new Date();
+        const offset = d.getTimezoneOffset() * 60000;
+        const localIso = (new Date(d.getTime() - offset)).toISOString().split('T')[0];
+        return localIso;
     }
 
-    // Submit Tow Request
-    function submitTowRequest(e) {
-      e.preventDefault();
-      const btn = document.getElementById('towSubmitBtn');
-      const status = document.getElementById('towStatus');
-      
-      btn.disabled = true;
-      btn.innerText = "SUBMITTING REQUEST...";
-      status.style.display = 'none';
-
-      const payload = {
-        action: "log_mark",
-        isManagerRequest: true,
-        property: currentProperty,
-        rego: document.getElementById('towRego').value.trim().toUpperCase(),
-        location: document.getElementById('towLocation').value.trim(),
-        reason: document.getElementById('towReason').value,
-        authorizer: document.getElementById('towAuthorizer').value.trim(),
-        makeModel: document.getElementById('towNotes').value.trim(),
-        timestamp: new Date().toISOString()
-      };
-
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cor',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(() => {
-        status.className = 'status-msg success';
-        status.innerText = "✅ TOW REQUEST SUBMITTED! Priority email dispatched.";
-        status.style.display = 'block';
-        document.getElementById('towForm').reset();
-      }).catch(err => {
-        status.className = 'status-msg error';
-        status.innerText = "❌ ERROR: " + err.message;
-        status.style.display = 'block';
-      }).finally(() => {
-        btn.disabled = false;
-        btn.innerText = "SUBMIT URGENT TOW REQUEST";
-      });
+    function cleanRegoInput(elem) {
+        elem.value = elem.value.replace(/\s+/g, '').toUpperCase();
     }
 
-    // Submit Visitor Permit
-    function submitPermit(e) {
-      e.preventDefault();
-      const btn = document.getElementById('permitSubmitBtn');
-      const status = document.getElementById('permitStatus');
+    function handleDateChange(source) {
+        const startDateElem = document.getElementById('startDateInput');
+        const endDateElem = document.getElementById('endDateInput');
+        const durationElem = document.getElementById('durationSelect');
 
-      btn.disabled = true;
-      btn.innerText = "ISSUING PERMIT...";
-      status.style.display = 'none';
+        if (!startDateElem.value) return;
 
-      const payload = {
-        action: "add_pass",
-        property: currentProperty,
-        rego: document.getElementById('permitRego').value.trim().toUpperCase(),
-        duration: document.getElementById('permitDuration').value,
-        notes: document.getElementById('permitNotes').value.trim()
-      };
+        let startD = new Date(startDateElem.value + 'T00:00:00');
 
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(() => {
-        status.className = 'status-msg success';
-        status.innerText = "✅ PERMIT ISSUED SUCCESSFULLY!";
-        status.style.display = 'block';
-        document.getElementById('permitForm').reset();
-      }).catch(err => {
-        status.className = 'status-msg error';
-        status.innerText = "❌ ERROR: " + err.message;
-        status.style.display = 'block';
-      }).finally(() => {
-        btn.disabled = false;
-        btn.innerText = "ISSUE PARKING PERMIT";
-      });
+        if (source === 'start' || source === 'duration') {
+            const days = parseInt(durationElem.value, 10) || 1;
+            let endD = new Date(startD.getTime() + (days * 24 * 60 * 60 * 1000));
+            endDateElem.value = endD.toISOString().split('T')[0];
+            endDateElem.min = startDateElem.value;
+        } else if (source === 'end') {
+            if (!endDateElem.value) return;
+            let endD = new Date(endDateElem.value + 'T00:00:00');
+
+            if (endD <= startD) {
+                endDateElem.value = startDateElem.value;
+                durationElem.value = "1";
+                return;
+            }
+
+            const diffTime = Math.abs(endD - startD);
+            let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 1) diffDays = 1;
+            if (diffDays > 7) diffDays = 7;
+
+            durationElem.value = diffDays.toString();
+        }
     }
-  </script>
+
+    function switchTab(mode) {
+        const passBtn = document.getElementById('tabPassBtn');
+        const towBtn = document.getElementById('tabTowBtn');
+        const passTab = document.getElementById('passTab');
+        const towTab = document.getElementById('towTab');
+        const statusDiv = document.getElementById('status');
+
+        statusDiv.innerText = "";
+
+        if (mode === 'pass') {
+            passBtn.className = "tab-btn active-pass";
+            towBtn.className = "tab-btn";
+            passTab.className = "tab-content active";
+            towTab.className = "tab-content";
+        } else {
+            passBtn.className = "tab-btn";
+            towBtn.className = "tab-btn active-tow";
+            passTab.className = "tab-content";
+            towTab.className = "tab-content active";
+        }
+    }
+
+    function triggerCamera() {
+        document.getElementById('cameraInput').click();
+    }
+
+    function processTowPhoto(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const maxDim = 1200;
+
+                if (width > height && width > maxDim) {
+                    height = Math.round((height * maxDim) / width);
+                    width = maxDim;
+                } else if (height > maxDim) {
+                    width = Math.round((width * maxDim) / height);
+                    height = maxDim;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                towPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+                
+                const previewImg = document.getElementById('towPhotoPreview');
+                previewImg.src = towPhotoBase64;
+                previewImg.style.display = "block";
+                document.getElementById('cameraText').innerText = "📷 PHOTO ATTACHED (TAP TO CHANGE)";
+
+                // Run Plate Recognizer ANPR Engine
+                canvas.toBlob(async (blob) => {
+                    if (blob) runPlateRecognizerANPR(blob);
+                }, 'image/jpeg', 0.85);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function runPlateRecognizerANPR(imageBlob) {
+        const statusDiv = document.getElementById('status');
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "READING PLATE...";
+
+        try {
+            const formData = new FormData();
+            formData.append('upload', imageBlob, 'tow_scan.jpg');
+            formData.append('regions', 'au');
+
+            const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
+                method: 'POST',
+                headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
+                body: formData
+            });
+
+            if (!anprRes.ok) {
+                statusDiv.style.color = "#aaa";
+                statusDiv.innerText = "PHOTO SAVED. ENTER REGO MANUALLY.";
+                return;
+            }
+
+            const anprData = await anprRes.json();
+            
+            if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
+                const detectedRego = anprData.results[0].plate.toUpperCase();
+                document.getElementById('towRegoInput').value = detectedRego;
+                statusDiv.style.color = "#00e676";
+                statusDiv.innerText = `✔ REGO DETECTED: ${detectedRego}`;
+            } else {
+                statusDiv.style.color = "#aaa";
+                statusDiv.innerText = "PHOTO SAVED. ENTER REGO MANUALLY.";
+            }
+
+        } catch(err) {
+            statusDiv.style.color = "#aaa";
+            statusDiv.innerText = "PHOTO SAVED. ENTER REGO MANUALLY.";
+        }
+    }
+
+    // SUBMIT PASS
+    document.getElementById('submitPassBtn').addEventListener('click', async () => {
+        const rego = document.getElementById('passRegoInput').value.trim().toUpperCase();
+        const startDate = document.getElementById('startDateInput').value;
+        const duration = document.getElementById('durationSelect').value;
+        const endDate = document.getElementById('endDateInput').value;
+        const notes = document.getElementById('passNotesInput').value.trim();
+        const statusDiv = document.getElementById('status');
+
+        if (!rego) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "PLEASE ENTER VEHICLE REGO";
+            return;
+        }
+
+        if (!startDate) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "PLEASE SELECT START DATE";
+            return;
+        }
+
+        document.getElementById('submitPassBtn').disabled = true;
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "ISSUING PERMIT...";
+
+        const payload = {
+            action: 'add_pass',
+            property: selectedProperty,
+            rego: rego,
+            startDate: startDate,
+            duration: duration,
+            expiryDate: endDate,
+            notes: notes || "ISSUED VIA MANAGER PORTAL"
+        };
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = `✔ PERMIT ISSUED FOR ${rego}!`;
+            document.getElementById('passRegoInput').value = "";
+            document.getElementById('passNotesInput').value = "";
+        } catch(e) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "ERROR ISSUING PERMIT";
+        }
+
+        setTimeout(() => {
+            document.getElementById('submitPassBtn').disabled = false;
+            statusDiv.innerText = "";
+        }, 2500);
+    });
+
+    // SUBMIT TOW REQUEST
+    document.getElementById('submitTowBtn').addEventListener('click', async () => {
+        const rego = document.getElementById('towRegoInput').value.trim().toUpperCase();
+        const reason = document.getElementById('towReasonSelect').value;
+        const location = document.getElementById('towLocationInput').value.trim();
+        const authorizer = document.getElementById('towAuthorizerInput').value.trim();
+        const statusDiv = document.getElementById('status');
+
+        if (!rego) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "PLEASE ENTER VEHICLE REGO";
+            return;
+        }
+
+        document.getElementById('submitTowBtn').disabled = true;
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "SENDING TOW REQUEST...";
+
+        const payload = {
+            action: 'log_mark',
+            property: selectedProperty,
+            rego: rego,
+            makeModel: `${reason} ${location ? '(' + location + ')' : ''}`,
+            confidence: "HIGH",
+            isManagerRequest: true,
+            reason: reason,
+            location: location,
+            authorizer: authorizer,
+            photoBytes: towPhotoBase64,
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = `✔ TOW REQUESTED FOR ${rego}!`;
+            document.getElementById('towRegoInput').value = "";
+            document.getElementById('towLocationInput').value = "";
+            document.getElementById('towAuthorizerInput').value = "";
+            towPhotoBase64 = "";
+            document.getElementById('towPhotoPreview').style.display = "none";
+            document.getElementById('cameraText').innerText = "📷 TAP TO SCAN REGO / ATTACH PHOTO";
+        } catch(e) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "ERROR SENDING TOW REQUEST";
+        }
+
+        setTimeout(() => {
+            document.getElementById('submitTowBtn').disabled = false;
+            statusDiv.innerText = "";
+        }, 2500);
+    });
+</script>
 </body>
 </html>
