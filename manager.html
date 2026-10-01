@@ -221,17 +221,27 @@
     let towPhotoBase64 = "";
 
     window.addEventListener('load', () => {
+        // Persistent Property Memory Setup
         const urlParams = new URLSearchParams(window.location.search);
-        selectedProperty = urlParams.get('prop') || "GENERAL";
+        let propFromUrl = urlParams.get('prop') || urlParams.get('property');
+
+        if (propFromUrl) {
+            selectedProperty = decodeURIComponent(propFromUrl).trim().toUpperCase();
+            localStorage.setItem('saved_tow_prop', selectedProperty);
+        } else {
+            selectedProperty = localStorage.getItem('saved_tow_prop') || "GENERAL";
+        }
+
         document.getElementById('propDisplay').innerText = selectedProperty.toUpperCase();
 
         const todayStr = getTodayIsoDate();
         const startDateElem = document.getElementById('startDateInput');
 
-        startDateElem.min = todayStr;
-        startDateElem.value = todayStr;
-
-        handleDateChange('start');
+        if (startDateElem) {
+            startDateElem.min = todayStr;
+            startDateElem.value = todayStr;
+            handleDateChange('start');
+        }
     });
 
     function getTodayIsoDate() {
@@ -468,7 +478,7 @@
             action: 'log_mark',
             property: selectedProperty,
             rego: rego,
-            makeModel: `${reason} ${location ? '(' + location + ')' : ''}`,
+            makeModel: "",
             confidence: "HIGH",
             isManagerRequest: true,
             reason: reason,
