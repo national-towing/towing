@@ -1,175 +1,128 @@
-<style>
-  /* FULL-SCREEN OVERLAY FOR NON-SAFARI IOS BROWSERS */
-  .ios-modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #121212;
-    z-index: 99999;
-    padding: 24px 18px;
-    box-sizing: border-box;
-    overflow-y: auto;
-  }
-
-  .ios-modal-card {
-    background: #1e1e1e;
-    border: 3px solid #ffab00;
-    border-radius: 20px;
-    padding: 24px 18px;
-    text-align: center;
-    color: #fff;
-    max-width: 440px;
-    margin: 0 auto;
-  }
-
-  .ios-modal-card h2 {
-    color: #ffab00;
-    font-size: 26px;
-    font-weight: 900;
-    margin: 0 0 12px 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .ios-modal-card p {
-    font-size: 18px;
-    line-height: 1.5;
-    color: #ddd;
-    margin: 10px 0;
-    font-weight: 600;
-  }
-
-  .ios-step-box {
-    background: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 14px;
-    padding: 16px;
-    margin: 16px 0;
-    text-align: left;
-  }
-
-  .ios-step {
-    font-size: 17px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .ios-step:last-child { margin-bottom: 0; }
-
-  .ios-btn-main {
-    width: 100%;
-    height: 60px;
-    background: #ffab00;
-    color: #000;
-    font-size: 20px;
-    font-weight: 900;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 10px;
-  }
-
-  .ios-btn-main:active { transform: scale(0.97); }
-
-  .ios-copied-badge {
-    display: none;
-    background: #00e676;
-    color: #000;
-    font-size: 18px;
-    font-weight: 900;
-    padding: 12px;
-    border-radius: 10px;
-    margin-top: 14px;
-    text-align: center;
-  }
-
-  .url-text-box {
-    background: #111;
-    border: 1px dashed #666;
-    color: #ffab00;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 10px;
-    border-radius: 8px;
-    word-break: break-all;
-    margin-top: 10px;
-  }
-</style>
-
-<!-- Full-Screen Modal Overlay -->
-<div id="iosModalOverlay" class="ios-modal-overlay">
-  <div class="ios-modal-card">
-    <h2>📱 SAFARI REQUIRED</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Property Manager Portal</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #121212; color: #fff; margin: 0; padding: 16px; font-size: 16px; }
     
-    <p>Apple only allows saving apps to your Home Screen using the <b>Safari</b> browser.</p>
-
-    <div class="ios-step-box">
-      <div class="ios-step">
-        <span style="font-size:24px;">1️⃣</span>
-        <span>Tap the button below to <b>Copy Property Link</b>.</span>
-      </div>
-      <div class="ios-step">
-        <span style="font-size:24px;">2️⃣</span>
-        <span>Open <b>Safari</b> on your iPhone.</span>
-      </div>
-      <div class="ios-step">
-        <span style="font-size:24px;">3️⃣</span>
-        <span>Tap address bar, select <b>Paste & Go</b>.</span>
-      </div>
-      <div class="ios-step">
-        <span style="font-size:24px;">4️⃣</span>
-        <span>Tap <b>Share (Square + Arrow)</b> ➔ <b>Add to Home Screen</b>.</span>
-      </div>
-    </div>
-
-    <button class="ios-btn-main" onclick="copyLinkForSafari()">📋 COPY LINK FOR SAFARI</button>
+    .card { background: #1e1e1e; border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid #333; }
+    h1 { font-size: 22px; margin: 0 0 10px 0; color: #ffab00; text-transform: uppercase; }
     
-    <div id="iosCopiedBadge" class="ios-copied-badge">
-      ✔ LINK COPIED!<br>
-      <span style="font-size:14px; font-weight:700;">Now open Safari and Paste & Go</span>
-    </div>
+    /* FULL SCREEN OVERLAY FOR NON-SAFARI IOS BROWSERS */
+    .ios-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #121212;
+      z-index: 99999;
+      padding: 24px 18px;
+      overflow-y: auto;
+    }
+    .ios-modal-card {
+      background: #1e1e1e;
+      border: 3px solid #ffab00;
+      border-radius: 20px;
+      padding: 24px 18px;
+      text-align: center;
+      color: #fff;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    .ios-modal-card h2 { color: #ffab00; font-size: 24px; margin: 0 0 12px 0; }
+    .ios-modal-card p { font-size: 16px; color: #ddd; margin: 10px 0; line-height: 1.4; }
+    
+    .ios-step-box { background: #2a2a2a; border-radius: 12px; padding: 14px; margin: 16px 0; text-align: left; }
+    .ios-step { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    
+    .ios-btn-main {
+      width: 100%; height: 54px; background: #ffab00; color: #000;
+      font-size: 18px; font-weight: 900; border: none; border-radius: 12px;
+      cursor: pointer; text-transform: uppercase; margin-top: 10px;
+    }
+    .ios-copied-badge {
+      display: none; background: #00e676; color: #000; font-size: 16px;
+      font-weight: 900; padding: 10px; border-radius: 8px; margin-top: 12px;
+    }
+    .url-text-box {
+      background: #111; border: 1px dashed #666; color: #ffab00;
+      font-size: 13px; padding: 8px; border-radius: 6px; word-break: break-all; margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
 
-    <div class="url-text-box" id="urlDisplayBox"></div>
+  <!-- Full-Screen Safari Overlay for non-Safari iOS -->
+  <div id="iosModalOverlay" class="ios-modal-overlay">
+    <div class="ios-modal-card">
+      <h2>📱 SAFARI REQUIRED</h2>
+      <p>Apple requires <b>Safari</b> to save this app to your Home Screen.</p>
+
+      <div class="ios-step-box">
+        <div class="ios-step"><span>1️⃣</span> <span>Tap button below to <b>Copy Link</b>.</span></div>
+        <div class="ios-step"><span>2️⃣</span> <span>Open <b>Safari</b> browser on iPhone.</span></div>
+        <div class="ios-step"><span>3️⃣</span> <span>Tap address bar ➔ <b>Paste & Go</b>.</span></div>
+        <div class="ios-step"><span>4️⃣</span> <span>Tap <b>Share (Square + Arrow)</b> ➔ <b>Add to Home Screen</b>.</span></div>
+      </div>
+
+      <button class="ios-btn-main" onclick="copyLinkForSafari()">📋 COPY LINK FOR SAFARI</button>
+      
+      <div id="iosCopiedBadge" class="ios-copied-badge">
+        ✔ LINK COPIED!<br><span style="font-size:13px;">Open Safari ➔ Paste & Go</span>
+      </div>
+
+      <div class="url-text-box" id="urlDisplayBox"></div>
+    </div>
   </div>
-</div>
 
-<script>
-  window.addEventListener('load', () => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-    const isSafari = isIOS && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS|GSA/.test(navigator.userAgent);
+  <div class="card">
+    <h1 id="propTitle">PROPERTY MANAGER PORTAL</h1>
+    <p>Select an option below to request a tow or issue a visitor parking permit.</p>
+  </div>
 
-    const currentUrl = window.location.href;
-    document.getElementById('urlDisplayBox').innerText = currentUrl;
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Get Property parameter from URL (?prop=Riverlink)
+      const urlParams = new URLSearchParams(window.location.search);
+      let propName = urlParams.get('prop') || urlParams.get('property') || 'GENERAL';
+      propName = decodeURIComponent(propName).toUpperCase();
 
-    // Trigger full screen overlay if opened on iOS outside of Safari
-    if (isIOS && !isSafari && !isStandalone) {
-      document.getElementById('iosModalOverlay').style.display = 'block';
+      document.getElementById('propTitle').innerText = propName + " MANAGER PORTAL";
+      
+      const currentUrl = window.location.href;
+      document.getElementById('urlDisplayBox').innerText = currentUrl;
+
+      // 2. Safely detect iOS browser type
+      const userAgent = navigator.userAgent || '';
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+      const isStandalone = (window.navigator.standalone === true) || window.matchMedia('(display-mode: standalone)').matches;
+      const isSafari = isIOS && /Safari/.test(userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS|GSA/.test(userAgent);
+
+      // Show overlay if on iPhone, NOT in Safari, and NOT already saved to Home Screen
+      if (isIOS && !isSafari && !isStandalone) {
+        document.getElementById('iosModalOverlay').style.display = 'block';
+      }
+    });
+
+    function copyLinkForSafari() {
+      const currentUrl = window.location.href;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(currentUrl);
+      } else {
+        const dummy = document.createElement('textarea');
+        document.body.appendChild(dummy);
+        dummy.value = currentUrl;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+      }
+
+      document.getElementById('iosCopiedBadge').style.display = 'block';
     }
-  });
+  </script>
 
-  function copyLinkForSafari() {
-    const currentUrl = window.location.href;
-    
-    // Copy to clipboard
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(currentUrl);
-    } else {
-      const dummy = document.createElement('textarea');
-      document.body.appendChild(dummy);
-      dummy.value = currentUrl;
-      dummy.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummy);
-    }
-
-    // Show bright green notification
-    document.getElementById('iosCopiedBadge').style.display = 'block';
-  }
-</script>
+</body>
+</html>
