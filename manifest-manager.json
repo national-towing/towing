@@ -1,0 +1,21 @@
+{
+  "short_name": "TOW",
+  "name": "TOW",
+  "icons": [
+    {
+      "src": "icon-manager.png?v=999",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-manager.png?v=999",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./manager.html",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "display": "standalone",
+  "orientation": "portrait"
+}
