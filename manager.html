@@ -4,34 +4,81 @@
     display: none;
     background: #ffab00;
     color: #000;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 12px;
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 14px;
     text-align: center;
     line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  .safari-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 18px;
+    background: #000;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .safari-btn:active {
+    transform: scale(0.96);
   }
 </style>
 
-<!-- Add this banner right above <div class="card"> in the <body> -->
+<!-- Banner placed inside <body> right above <div class="card"> -->
 <div id="iosNotice" class="ios-notice">
-  ⚠️ <b>Safari Required to Install App</b><br>
-  To save this app to your Home Screen, please open this page in <b>Safari</b> (Tap Share ➔ Open in Safari).
+  📲 <b>INSTALL APP VIA SAFARI</b><br>
+  Apple requires <b>Safari</b> to save this app to your Home Screen.<br>
+  <button class="safari-btn" onclick="openInSafari()">1-TAP COPY & OPEN SAFARI 🧭</button>
+  <div id="safariStatus" style="font-size:12px; font-weight:700; margin-top:6px; color:#333; display:none;">
+    ✔ Link copied! Opening Safari...
+  </div>
 </div>
 
 <script>
   window.addEventListener('load', () => {
     // Detect iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    // Detect standalone PWA mode (already added to home screen)
+    // Detect standalone PWA mode (already saved to home screen)
     const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-    // Detect actual Safari browser vs Chrome/Firefox/In-App on iOS
+    // Detect Safari browser vs Chrome/Firefox/Gmail on iOS
     const isSafari = isIOS && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS|GSA/.test(navigator.userAgent);
 
-    // If on iOS, not in Safari, and not already installed as an app:
+    // Show popup if on iPhone but not in Safari & not saved to homescreen yet
     if (isIOS && !isSafari && !isStandalone) {
       document.getElementById('iosNotice').style.display = 'block';
     }
   });
+
+  function openInSafari() {
+    const currentUrl = window.location.href;
+    const statusDiv = document.getElementById('safariStatus');
+
+    // 1. Copy link to clipboard automatically
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(currentUrl);
+    } else {
+      const dummy = document.createElement('input');
+      document.body.appendChild(dummy);
+      dummy.value = currentUrl;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+    }
+
+    statusDiv.style.display = 'block';
+
+    // 2. Try launching Safari via custom iOS scheme
+    setTimeout(() => {
+      // Attempt redirecting via x-web-search or HTTP Safari fallback
+      window.location.href = "x-web-search://?" + encodeURIComponent(currentUrl);
+    }, 300);
+  }
 </script>
