@@ -1,6 +1,6 @@
 {
   "short_name": "TOW",
-  "name": "TOW",
+  "name": "TOW Manager Portal",
   "icons": [
     {
       "src": "icon-manager.png?v=999",
@@ -13,7 +13,6 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "./manager.html",
   "background_color": "#121212",
   "theme_color": "#121212",
   "display": "standalone",
