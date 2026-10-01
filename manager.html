@@ -233,7 +233,7 @@
     let selectedProperty = "GENERAL";
     let towPhotoBase64 = "";
 
-    // Immediate Property Resolution
+    // Immediate Property Resolution & Activity Tracking
     (function resolveProperty() {
         const urlParams = new URLSearchParams(window.location.search);
         let propParam = urlParams.get('prop') || urlParams.get('property');
@@ -247,6 +247,20 @@
                 if (storedProp) selectedProperty = storedProp;
             } catch(e) {}
         }
+
+        // Silent background activity logging
+        const isStandalone = (window.navigator.standalone === true) || window.matchMedia('(display-mode: standalone)').matches;
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'log_app_open',
+                property: selectedProperty,
+                isStandalone: isStandalone,
+                userAgent: navigator.userAgent
+            })
+        }).catch(() => {});
     })();
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -266,7 +280,7 @@
         const todayStr = getTodayIsoDate();
         const startDateElem = document.getElementById('startDateInput');
         if (startDateElem) {
-            startDateElem.min = todayStr; // Block picking past dates
+            startDateElem.min = todayStr;
             startDateElem.value = todayStr;
             handleDateChange('start');
         }
@@ -285,7 +299,6 @@
 
         const todayStr = getTodayIsoDate();
 
-        // Enforce No Past Dates
         if (startDateElem.value < todayStr) {
             startDateElem.value = todayStr;
         }
@@ -300,7 +313,6 @@
         } else if (source === 'end') {
             if (!endDateElem || !endDateElem.value) return;
 
-            // Enforce End Date cannot be before Start Date
             if (endDateElem.value < startDateElem.value) {
                 endDateElem.value = startDateElem.value;
                 durationElem.value = "1";
