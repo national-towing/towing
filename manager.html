@@ -19,11 +19,14 @@
     <style>
         * { box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; padding: 12px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
         }
-        .card { background: #1e1e1e; border-radius: 18px; padding: 20px; width: 100%; max-width: 420px; border: 1px solid #333; margin-top: 10px; }
+        .card { 
+            background: #1e1e1e; border-radius: 18px; padding: 20px; width: 100%; max-width: 440px; 
+            border: 1px solid #333; margin-top: 6px; 
+        }
         
         .header-box {
             display: flex;
@@ -31,21 +34,39 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .header-logo {
-            height: 60px;
+            height: 65px;
             width: auto;
             object-fit: contain;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
-        h1 { margin: 0; font-size: 22px; color: #fff; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-        h2 { margin: 2px 0 0 0; font-size: 16px; color: #ab47bc; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        .prop-title { text-align: center; font-size: 18px; color: #ffab00; font-weight: 900; margin-top: 6px; margin-bottom: 16px; text-transform: uppercase; }
+        h1 { margin: 0; font-size: 24px; color: #fff; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        h2 { margin: 2px 0 0 0; font-size: 18px; color: #ab47bc; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .phone-link {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 17px;
+            font-weight: 900;
+            color: #00e676;
+            text-decoration: none;
+            letter-spacing: 1px;
+            background: #1b2e23;
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #00e676;
+        }
+        
+        .prop-title { 
+            text-align: center; font-size: 20px; color: #ffab00; font-weight: 900; 
+            margin-top: 12px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
         
         .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
         .tab-btn {
-            flex: 1; height: 46px; border-radius: 10px; border: none; font-weight: 900; font-size: 14px;
+            flex: 1; height: 50px; border-radius: 10px; border: none; font-weight: 900; font-size: 15px;
             cursor: pointer; background: #2a2a2a; color: #aaa; transition: all 0.2s ease;
         }
         .tab-btn.active-pass { background: #ab47bc; color: #fff; }
@@ -55,46 +76,47 @@
         .tab-content.active { display: block; }
 
         .section-header {
-            font-size: 13px; font-weight: 900; color: #ab47bc; text-transform: uppercase;
-            border-bottom: 1px solid #333; padding-bottom: 4px; margin-top: 16px; letter-spacing: 1px;
+            font-size: 14px; font-weight: 900; color: #ab47bc; text-transform: uppercase;
+            border-bottom: 1px solid #333; padding-bottom: 4px; margin-top: 18px; letter-spacing: 1px;
         }
 
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 12px; font-weight: 900; letter-spacing: 1px; }
-        .sub-text { font-size: 10px; color: #888; font-weight: normal; margin-top: 2px; }
+        label { font-size: 13px; text-transform: uppercase; color: #bbb; display: block; margin-top: 14px; font-weight: 900; letter-spacing: 1px; }
+        .sub-text { font-size: 11px; color: #999; font-weight: 600; margin-top: 3px; }
 
-        input, select {
-            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
-            text-transform: uppercase;
-        }
-        input[type="date"] {
-            font-size: 16px; font-family: inherit; color-scheme: dark;
+        .input-box, select {
+            width: 100%; height: 52px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 19px; font-weight: 900; margin-top: 4px; outline: none;
+            text-transform: uppercase; box-sizing: border-box;
         }
 
-        .row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        input[type="date"].input-box {
+            font-size: 17px; font-family: inherit; color-scheme: dark; -webkit-appearance: none; appearance: none;
+        }
+
+        .row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; box-sizing: border-box; }
 
         .submit-btn-pass {
             background: #ab47bc; color: #fff; font-weight: 900; border: none; border-radius: 12px;
-            height: 56px; font-size: 20px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 1px;
+            height: 58px; font-size: 21px; width: 100%; margin-top: 22px; cursor: pointer; letter-spacing: 1px;
         }
         .submit-btn-tow {
             background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 12px;
-            height: 56px; font-size: 20px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 1px;
+            height: 58px; font-size: 21px; width: 100%; margin-top: 22px; cursor: pointer; letter-spacing: 1px;
         }
         .submit-btn-pass:active, .submit-btn-tow:active { transform: scale(0.98); }
 
         .camera-box {
-            border: 2px dashed #ff1744; border-radius: 12px; padding: 14px; text-align: center;
+            border: 2px dashed #ff1744; border-radius: 12px; padding: 16px; text-align: center;
             background: #2a1518; margin-top: 12px; cursor: pointer;
         }
-        .camera-box img { max-width: 100%; max-height: 180px; border-radius: 8px; margin-top: 8px; display: none; }
+        .camera-box img { max-width: 100%; max-height: 190px; border-radius: 8px; margin-top: 8px; display: none; }
 
         .disclaimer-text {
-            font-size: 10px; color: #888; text-align: center; margin-top: 16px; line-height: 1.4;
+            font-size: 12px; color: #aaa; text-align: center; margin-top: 18px; line-height: 1.4; font-weight: 500;
         }
-        .disclaimer-text b i { color: #ccc; }
+        .disclaimer-text b i { color: #fff; }
 
-        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 14px; min-height: 24px; color: #00e676; }
+        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 14px; min-height: 26px; color: #00e676; }
     </style>
 </head>
 <body>
@@ -104,6 +126,7 @@
         <img src="icon-manager.png?v=999" alt="National Towing Logo" class="header-logo">
         <h1>NATIONAL TOWING</h1>
         <h2>MANAGER PORTAL</h2>
+        <a href="tel:0450605370" class="phone-link">📞 0450 605 370</a>
     </div>
     <div class="prop-title" id="propDisplay">LOADING PROPERTY...</div>
 
@@ -115,12 +138,12 @@
     <!-- TAB 1: ISSUE PASS -->
     <div class="tab-content active" id="passTab">
         <label>VEHICLE REGISTRATION</label>
-        <input type="text" id="passRegoInput" placeholder="ENTER REGO" maxlength="10" oninput="cleanRegoInput(this)">
+        <input type="text" class="input-box" id="passRegoInput" placeholder="ENTER REGO" maxlength="10" oninput="cleanRegoInput(this)">
 
         <div class="section-header">PERMIT DETAILS</div>
 
         <label>START DATE</label>
-        <input type="date" id="startDateInput" onchange="handleDateChange('start')">
+        <input type="date" class="input-box" id="startDateInput" onchange="handleDateChange('start')">
         <div class="sub-text">Commencing midnight</div>
 
         <div class="row-grid">
@@ -138,13 +161,13 @@
             </div>
             <div>
                 <label>END DATE</label>
-                <input type="date" id="endDateInput" onchange="handleDateChange('end')">
+                <input type="date" class="input-box" id="endDateInput" onchange="handleDateChange('end')">
                 <div class="sub-text">Expires midnight</div>
             </div>
         </div>
 
         <label>NOTES (OPTIONAL)</label>
-        <input type="text" id="passNotesInput" placeholder="E.G. UNIT 402 VISITOR" style="font-size:15px;">
+        <input type="text" class="input-box" id="passNotesInput" placeholder="E.G. UNIT 402 VISITOR" style="font-size:16px;">
 
         <button class="submit-btn-pass" id="submitPassBtn">ISSUE PERMIT</button>
 
@@ -155,15 +178,15 @@
 
     <!-- TAB 2: REQUEST TOW -->
     <div class="tab-content" id="towTab">
-        <label>VEHICLE PHOTO (OPTIONAL / ALPR SCAN)</label>
+        <label>VEHICLE PHOTO (PLATE SCANNER)</label>
         <div class="camera-box" onclick="triggerCamera()">
-            <span id="cameraText" style="font-size: 13px; font-weight: 900; color: #ff1744;">📷 TAP TO SNAP/UPLOAD PHOTO</span>
+            <span id="cameraText" style="font-size: 14px; font-weight: 900; color: #ff1744;">📷 TAP TO SCAN REGO / ATTACH PHOTO</span>
             <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="processTowPhoto(event)">
             <img id="towPhotoPreview" alt="Tow Preview">
         </div>
 
         <label>VEHICLE REGISTRATION</label>
-        <input type="text" id="towRegoInput" placeholder="ENTER REGO" maxlength="10" oninput="cleanRegoInput(this)">
+        <input type="text" class="input-box" id="towRegoInput" placeholder="ENTER REGO" maxlength="10" oninput="cleanRegoInput(this)">
 
         <label>REASON FOR TOW</label>
         <select id="towReasonSelect">
@@ -175,10 +198,10 @@
         </select>
 
         <label>BAY # / LOCATION DETAILS</label>
-        <input type="text" id="towLocationInput" placeholder="E.G. BAY 12 OR VISITOR BAY" style="font-size:15px;">
+        <input type="text" class="input-box" id="towLocationInput" placeholder="E.G. BAY 12 OR VISITOR BAY" style="font-size:16px;">
 
         <label>REQUESTED BY (NAME / UNIT)</label>
-        <input type="text" id="towAuthorizerInput" placeholder="E.G. JANE (BUILDING MGR)" style="font-size:15px;">
+        <input type="text" class="input-box" id="towAuthorizerInput" placeholder="E.G. JANE (BUILDING MGR)" style="font-size:16px;">
 
         <button class="submit-btn-tow" id="submitTowBtn">REQUEST TOW NOW</button>
 
@@ -192,6 +215,7 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    const PLATE_RECOGNIZER_TOKEN = "74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     let selectedProperty = "";
     let towPhotoBase64 = "";
@@ -201,15 +225,12 @@
         selectedProperty = urlParams.get('prop') || "GENERAL";
         document.getElementById('propDisplay').innerText = selectedProperty.toUpperCase();
 
-        // Lock Start Date picker min to today (Australia/Brisbane local date)
         const todayStr = getTodayIsoDate();
         const startDateElem = document.getElementById('startDateInput');
-        const endDateElem = document.getElementById('endDateInput');
 
         startDateElem.min = todayStr;
         startDateElem.value = todayStr;
 
-        // Auto calculate default initial End Date (+1 day)
         handleDateChange('start');
     });
 
@@ -220,12 +241,10 @@
         return localIso;
     }
 
-    // Force uppercase and strip spaces
     function cleanRegoInput(elem) {
         elem.value = elem.value.replace(/\s+/g, '').toUpperCase();
     }
 
-    // Dynamic Date & Duration Calculation Logic
     function handleDateChange(source) {
         const startDateElem = document.getElementById('startDateInput');
         const endDateElem = document.getElementById('endDateInput');
@@ -245,7 +264,6 @@
             let endD = new Date(endDateElem.value + 'T00:00:00');
 
             if (endD <= startD) {
-                // End date cannot be before start date
                 endDateElem.value = startDateElem.value;
                 durationElem.value = "1";
                 return;
@@ -283,7 +301,6 @@
         }
     }
 
-    // TOW ALPR / CAMERA OCR
     function triggerCamera() {
         document.getElementById('cameraInput').click();
     }
@@ -299,7 +316,7 @@
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const maxDim = 1000;
+                const maxDim = 1200;
 
                 if (width > height && width > maxDim) {
                     height = Math.round((height * maxDim) / width);
@@ -314,64 +331,58 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                towPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                towPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
                 
                 const previewImg = document.getElementById('towPhotoPreview');
                 previewImg.src = towPhotoBase64;
                 previewImg.style.display = "block";
                 document.getElementById('cameraText').innerText = "📷 PHOTO ATTACHED (TAP TO CHANGE)";
 
-                // Perform OCR parsing on license plate
-                runPlateOcr(towPhotoBase64);
+                // Run Plate Recognizer ANPR Engine
+                canvas.toBlob(async (blob) => {
+                    if (blob) runPlateRecognizerANPR(blob);
+                }, 'image/jpeg', 0.85);
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    async function runPlateOcr(base64Image) {
+    async function runPlateRecognizerANPR(imageBlob) {
         const statusDiv = document.getElementById('status');
         statusDiv.style.color = "#ffab00";
         statusDiv.innerText = "READING PLATE...";
 
-        const payload = {
-            base64Image: base64Image,
-            apikey: "helloworld",
-            language: "eng",
-            isTable: "false"
-        };
-
         try {
-            const resp = await fetch("https://api.ocr.space/parse/image", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams(payload)
+            const formData = new FormData();
+            formData.append('upload', imageBlob, 'tow_scan.jpg');
+            formData.append('regions', 'au');
+
+            const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
+                method: 'POST',
+                headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
+                body: formData
             });
-            const json = await resp.json();
 
-            if (json.ParsedResults && json.ParsedResults.length > 0) {
-                const text = json.ParsedResults[0].ParsedText || "";
-                const tokens = text.toUpperCase().split(/[\s,;|]+/);
-                
-                let foundRego = "";
-                for (let rawToken of tokens) {
-                    let clean = rawToken.replace(/[^A-Z0-9]/g, "");
-                    if (clean.length >= 5 && clean.length <= 7 && /[A-Z]/.test(clean) && !/^\d+$/.test(clean)) {
-                        foundRego = clean;
-                        break;
-                    }
-                }
-
-                if (foundRego) {
-                    document.getElementById('towRegoInput').value = foundRego;
-                    statusDiv.style.color = "#00e676";
-                    statusDiv.innerText = `✔ REGO DETECTED: ${foundRego}`;
-                } else {
-                    statusDiv.style.color = "#aaa";
-                    statusDiv.innerText = "PHOTO SAVED. ENTER REGO MANUALLY.";
-                }
+            if (!anprRes.ok) {
+                statusDiv.style.color = "#aaa";
+                statusDiv.innerText = "PHOTO SAVED. ENTER REGO MANUALLY.";
+                return;
             }
-        } catch(e) {
+
+            const anprData = await anprRes.json();
+            
+            if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
+                const detectedRego = anprData.results[0].plate.toUpperCase();
+                document.getElementById('towRegoInput').value = detectedRego;
+                statusDiv.style.color = "#00e676";
+                statusDiv.innerText = `✔ REGO DETECTED: ${detectedRego}`;
+            } else {
+                statusDiv.style.color = "#aaa";
+                statusDiv.innerText = "PHOTO SAVED. ENTER REGO MANUALLY.";
+            }
+
+        } catch(err) {
             statusDiv.style.color = "#aaa";
             statusDiv.innerText = "PHOTO SAVED. ENTER REGO MANUALLY.";
         }
@@ -482,7 +493,7 @@
             document.getElementById('towAuthorizerInput').value = "";
             towPhotoBase64 = "";
             document.getElementById('towPhotoPreview').style.display = "none";
-            document.getElementById('cameraText').innerText = "📷 TAP TO SNAP/UPLOAD PHOTO";
+            document.getElementById('cameraText').innerText = "📷 TAP TO SCAN REGO / ATTACH PHOTO";
         } catch(e) {
             statusDiv.style.color = "#ff1744";
             statusDiv.innerText = "ERROR SENDING TOW REQUEST";
