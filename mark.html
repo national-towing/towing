@@ -403,7 +403,7 @@
 
         let currentRego = regoInput.value.trim().toUpperCase();
 
-        // ONLINE ANPR SCAN
+        // ONLINE: ATTEMPT ANPR CLOUD SCAN IF REGO IS EMPTY
         if (!currentRego && navigator.onLine) {
             statusDiv.innerText = "🔍 SCANNING...";
             try {
@@ -425,18 +425,21 @@
             } catch(e) {}
         }
 
-        // OFFLINE OR FAILED SCAN WARNING
+        // OFFLINE MODE: GENERATE OFFLINE PLACEHOLDER TAG IF EMPTY SO USER NEVER STOPS PATROLLING
         if (!currentRego) {
             if (!navigator.onLine) {
-                statusDiv.innerText = "⚠️ OFFLINE - TYPE REGO TO MARK";
+                const now = new Date();
+                const timeTag = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') + String(now.getSeconds()).padStart(2,'0');
+                currentRego = `OFFLINE_${timeTag}`;
             } else {
+                // Online but failed ANPR read and no manually typed rego
+                triggerRedOverlay();
                 statusDiv.innerText = "⚠️ TYPE REGO OR ALIGN PLATE CLEARLY";
+                return;
             }
-            triggerRedOverlay();
-            return;
         }
 
-        // SUCCESS
+        // GREEN OVERLAY & UPDATE HEADER BAR TO GREEN
         triggerGreenOverlay();
         statusDiv.innerText = `✔ MARKED ${currentRego}`;
         regoInput.value = "";
@@ -466,7 +469,6 @@
         headerBox.classList.remove('error-bg');
         headerBox.classList.add('success-bg');
         
-        // Dynamically turn top status bar & body background solid green
         document.body.style.background = "#00e676";
         themeMeta.setAttribute('content', '#00e676');
 
@@ -482,7 +484,6 @@
         headerBox.classList.remove('success-bg');
         headerBox.classList.add('error-bg');
         
-        // Dynamically turn top status bar & body background solid red
         document.body.style.background = "#ff1744";
         themeMeta.setAttribute('content', '#ff1744');
 
