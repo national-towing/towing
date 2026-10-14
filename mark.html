@@ -401,12 +401,14 @@
             try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
         }
 
+        // FAST OPTIMIZED CANVAS SNAPSHOT (PRESERVES 16:9 ASPECT RATIO & LIGHTWEIGHT PAYLOAD)
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 1280;
-        canvas.height = videoElem.videoHeight || 720;
+        const aspect = (videoElem.videoHeight && videoElem.videoWidth) ? (videoElem.videoHeight / videoElem.videoWidth) : 0.5625;
+        canvas.width = 800;
+        canvas.height = Math.round(800 * aspect);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-        const b64 = canvas.toDataURL('image/jpeg', 0.80);
+        const b64 = canvas.toDataURL('image/jpeg', 0.60);
 
         if (videoTrack && trackCapabilities.torch) {
             setTimeout(async () => {
