@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" href="icon-release.png?v=999">
     <link rel="manifest" href="manifest-release.json?v=999">
 
-    <!-- OCR ENGINE FOR ID CARD EXTRACTION -->
+    <!-- RELIABLE TESSERACT OCR CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
@@ -205,8 +205,8 @@
             <input type="number" step="0.01" id="releaseFeeInput" value="310.05">
         </div>
         <div>
-            <label>STORAGE / AH FEE ($)</label>
-            <input type="number" step="0.01" id="storageFeeInput" value="140.95">
+            <label>AH RELEASE FEE ($)</label>
+            <input type="number" step="0.01" id="storageFeeInput" value="0.00">
         </div>
     </div>
 
@@ -268,6 +268,7 @@
     let idPhotos = [];
     let ownerSigConfirmed = false;
     let officerSigConfirmed = false;
+    let ocrWorker = null;
 
     window.addEventListener('load', () => {
         loadYardVehicles();
@@ -275,11 +276,20 @@
         initSignatureCanvas('ownerSigCanvas');
         initSignatureCanvas('officerSigCanvas');
         setupLiveValidation();
+        initOCRWorker();
     });
 
     refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
     });
+
+    async function initOCRWorker() {
+        if (window.Tesseract) {
+            try {
+                ocrWorker = await Tesseract.createWorker('eng');
+            } catch(e) {}
+        }
+    }
 
     function checkOfficerOther(selectElem) {
         if (selectElem.value === "OTHER") {
@@ -339,13 +349,35 @@
         } catch(e) {}
     }
 
-    snapBtn.addEventListener('click', async () => {
+    // HIGH CONTRAST CANVAS BINARIZATION FOR OCR READABILITY
+    function processCanvasForOCR(sourceVideo) {
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 640;
-        canvas.height = videoElem.videoHeight || 480;
+        canvas.width = sourceVideo.videoWidth || 640;
+        canvas.height = sourceVideo.videoHeight || 480;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0);
-        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+        ctx.drawImage(sourceVideo, 0, 0);
+
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            const threshold = avg > 110 ? 255 : 0;
+            data[i] = threshold;
+            data[i + 1] = threshold;
+            data[i + 2] = threshold;
+        }
+        ctx.putImageData(imgData, 0, 0);
+        return canvas;
+    }
+
+    snapBtn.addEventListener('click', async () => {
+        const rawCanvas = document.createElement('canvas');
+        rawCanvas.width = videoElem.videoWidth || 640;
+        rawCanvas.height = videoElem.videoHeight || 480;
+        const rawCtx = rawCanvas.getContext('2d');
+        rawCtx.drawImage(videoElem, 0, 0);
+
+        const b64 = rawCanvas.toDataURL('image/jpeg', 0.85);
         idPhotos.push(b64);
 
         const photoIndex = idPhotos.length;
@@ -366,36 +398,47 @@
         thumbWrap.appendChild(lbl);
         thumbGallery.appendChild(thumbWrap);
         
-        statusDiv.innerText = `🔍 EXTRACTING ID DETAILS (#${photoIndex} ${labelText})...`;
+        statusDiv.innerText = `🔍 SCANNING ID CARD (#${photoIndex} ${labelText})...`;
 
-        if (window.Tesseract) {
-            try {
-                const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
-                
+        // EXECUTE FAST HIGH-CONTRAST OCR
+        try {
+            const processedCanvas = processCanvasForOCR(videoElem);
+            let text = "";
+
+            if (ocrWorker) {
+                const ret = await ocrWorker.recognize(processedCanvas);
+                text = ret.data.text || "";
+            } else if (window.Tesseract) {
+                const ret = await Tesseract.recognize(processedCanvas, 'eng');
+                text = ret.data.text || "";
+            }
+
+            if (text) {
+                // LICENCE NUMBER REGEX
                 const idMatch = text.match(/(?:LIC|NO|ID|CARD|NUMBER|LICENCE)[\s#:]*([A-Z0-9]{7,10})/i) || 
                                 text.match(/\b[0-9]{7,9}\b/);
                 if (idMatch && (!idNumInput.value || idNumInput.value.length < 5)) {
                     idNumInput.value = idMatch[1] || idMatch[0];
                 }
 
+                // NAME REGEX
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
                 for (let line of lines) {
-                    if (/^[A-Z\s]{4,30}$/.test(line) && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA|NEW\s+SOUTH\s+WALES|VICTORIA/i.test(line)) {
+                    if (/^[A-Z\s]{4,30}$/.test(line) && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA|NEW\s+SOUTH\s+WALES|VICTORIA|DATE|BIRTH|EXP/i.test(line)) {
                         if (!ownerNameInput.value) ownerNameInput.value = line;
                         break;
                     }
                 }
 
+                // ADDRESS REGEX
                 const addressMatch = lines.find(l => /\d+\s+[A-Z0-9\s]+(?:ST|RD|AVE|DR|WAY|QLD|NSW|VIC|STREET|ROAD)/i.test(l));
                 if (addressMatch && !ownerAddressInput.value) {
                     ownerAddressInput.value = addressMatch;
                 }
-
-                statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
-            } catch(e) {
-                statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
             }
-        } else {
+
+            statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
+        } catch(e) {
             statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
         }
 
@@ -427,7 +470,7 @@
         function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
         function stopDrawing() { drawing = false; }
 
-       canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing);
 
@@ -470,7 +513,7 @@
         validateForm();
     }
 
-function validateForm() {
+    function validateForm() {
         let isValid = true;
 
         function mark(elem, condition) {
