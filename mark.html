@@ -187,7 +187,7 @@
     let videoStream = null;
     let videoTrack = null;
     let trackCapabilities = {};
-    let flashMode = "AUTO"; // "AUTO" or "OFF"
+    let flashMode = "AUTO";
 
     let initialPinchDistance = null;
     let initialZoom = 1;
@@ -250,7 +250,6 @@
         }
     }
 
-    // FLASH MODE TOGGLE
     torchBtn.addEventListener('click', () => {
         if (flashMode === "AUTO") {
             flashMode = "OFF";
@@ -334,7 +333,7 @@
         ctx.drawImage(videoElem, 0, 0);
         const b64 = canvas.toDataURL('image/jpeg', 0.85);
 
-        // TURN FLASH OFF IMMEDIATELY AFTER CAPTURE
+        // TURN FLASH OFF IMMEDIATELY
         if (videoTrack && trackCapabilities.torch) {
             setTimeout(async () => {
                 try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
@@ -349,13 +348,15 @@
             try {
                 const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
                         action: 'scan_npr',
                         photoBytes: b64
                     })
                 });
-                const nprResult = await nprRes.json();
+                
+                const nprText = await nprRes.text();
+                const nprResult = JSON.parse(nprText);
+
                 if (nprResult && nprResult.rego) {
                     currentRego = nprResult.rego.toUpperCase();
                     regoInput.value = currentRego;
