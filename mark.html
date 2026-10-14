@@ -157,4 +157,408 @@
         .sync-modal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column;
-            align-items: center; justify-content: center; padding: 20px; z-index: 10
+            align-items: center; justify-content: center; padding: 20px; z-index: 10000;
+        }
+        .sync-modal.show { display: flex; }
+        .sync-card {
+            background: #1e1e1e; border: 2px solid #ffab00; border-radius: 16px;
+            padding: 20px; width: 100%; max-width: 400px; max-height: 80vh;
+            display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .sync-card h2 { margin: 0 0 12px 0; color: #ffab00; font-size: 20px; text-align: center; }
+        .sync-list { flex: 1; overflow-y: auto; margin-bottom: 16px; border: 1px solid #333; border-radius: 8px; padding: 8px; background: #121212; }
+        .sync-item { font-size: 13px; font-weight: 700; padding: 6px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .sync-item.ok { color: #00e676; }
+        .sync-item.fail { color: #ff1744; }
+        .sync-clear-btn {
+            background: #ffab00; color: #000; border: none; border-radius: 10px;
+            padding: 14px; font-weight: 900; font-size: 15px; cursor: pointer; text-align: center;
+        }
+        .sync-clear-btn:active { transform: scale(0.96); }
+
+        #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 6px; color: #ffab00; flex-shrink: 0; min-height: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="full-overlay green" id="greenOverlay"><div class="full-overlay-symbol">✔</div></div>
+<div class="full-overlay red" id="redOverlay"><div class="full-overlay-symbol">✖</div></div>
+
+<div class="sync-modal" id="syncModal">
+    <div class="sync-card">
+        <h2>OFFLINE SYNC SUMMARY</h2>
+        <div class="sync-list" id="syncList"></div>
+        <button class="sync-clear-btn" id="clearSyncBtn">RETURN TO MARKING</button>
+    </div>
+</div>
+
+<div class="header-box" id="headerBox">
+    <h1>MARK</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
+</div>
+
+<div class="card">
+    <label>PROPERTY</label>
+    <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
+
+    <label>REGO</label>
+    <input type="text" id="regoInput" placeholder="SCAN OR TYPE REGO..." style="text-transform:uppercase; color:#ffab00;">
+
+    <label>MARKING CAMERA</label>
+    <div class="camera-box">
+        <video id="videoElem" autoplay playsinline></video>
+        <button class="torch-btn" id="torchBtn">⚡ FLASH: OFF</button>
+        <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
+    </div>
+
+    <div id="status">READY</div>
+</div>
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+    const propertySelect = document.getElementById('propertySelect');
+    const regoInput = document.getElementById('regoInput');
+    const videoElem = document.getElementById('videoElem');
+    const torchBtn = document.getElementById('torchBtn');
+    const snapBtn = document.getElementById('snapBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statusDiv = document.getElementById('status');
+    const greenOverlay = document.getElementById('greenOverlay');
+    const redOverlay = document.getElementById('redOverlay');
+    const headerBox = document.getElementById('headerBox');
+    const themeMeta = document.getElementById('themeColor');
+    const syncModal = document.getElementById('syncModal');
+    const syncList = document.getElementById('syncList');
+    const clearSyncBtn = document.getElementById('clearSyncBtn');
+
+    let videoStream = null;
+    let videoTrack = null;
+    let trackCapabilities = {};
+    let flashOn = false;
+
+    let initialPinchDistance = null;
+    let initialZoom = 1;
+
+    window.addEventListener('load', () => {
+        loadProperties();
+        initCamera();
+        setupPinchZoom();
+        syncOfflineQueue();
+    });
+
+    window.addEventListener('online', syncOfflineQueue);
+
+    refreshBtn.addEventListener('click', () => {
+        window.location.reload(true);
+    });
+
+    clearSyncBtn.addEventListener('click', () => {
+        syncModal.classList.remove('show');
+        statusDiv.innerText = "READY";
+    });
+
+    async function loadProperties() {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties", {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            const properties = await res.json();
+            if (Array.isArray(properties) && properties.length > 0) {
+                localStorage.setItem('cached_properties', JSON.stringify(properties));
+                populatePropertyDropdown(properties);
+            } else {
+                useCachedProperties();
+            }
+        } catch(e) {
+            clearTimeout(timeoutId);
+            useCachedProperties();
+        }
+    }
+
+    function useCachedProperties() {
+        const cached = localStorage.getItem('cached_properties');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    populatePropertyDropdown(parsed);
+                    return;
+                }
+            } catch(e) {}
+        }
+        propertySelect.innerHTML = "<option value=''>OFFLINE - SELECT PROPERTY</option>";
+    }
+
+    function populatePropertyDropdown(properties) {
+        propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+        properties.forEach(p => {
+            const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+            if (propName) {
+                const opt = document.createElement('option');
+                opt.value = propName;
+                opt.innerText = propName;
+                propertySelect.appendChild(opt);
+            }
+        });
+    }
+
+    async function initCamera() {
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+
+            videoElem.srcObject = videoStream;
+            videoTrack = videoStream.getVideoTracks()[0];
+            
+            if (videoTrack) {
+                trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+                if (!trackCapabilities.torch) {
+                    torchBtn.style.display = 'none';
+                }
+            }
+        } catch(e) {
+            statusDiv.innerText = "CAMERA ACCESS ERROR";
+        }
+    }
+
+    torchBtn.addEventListener('click', () => {
+        flashOn = !flashOn;
+        torchBtn.innerText = flashOn ? "⚡ FLASH: ON" : "⚡ FLASH: OFF";
+        torchBtn.style.borderColor = flashOn ? "#00e676" : "#ff1744";
+        torchBtn.style.color = flashOn ? "#00e676" : "#ff1744";
+    });
+
+    function setupPinchZoom() {
+        const cameraContainer = document.querySelector('.camera-box');
+
+        cameraContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                if (videoTrack && videoTrack.getSettings) {
+                    const settings = videoTrack.getSettings();
+                    initialZoom = settings.zoom || 1;
+                }
+            }
+        }, { passive: true });
+
+        cameraContainer.addEventListener('touchmove', async (e) => {
+            if (e.touches.length === 2 && initialPinchDistance && videoTrack && trackCapabilities.zoom) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+
+                const zoomFactor = currentDistance / initialPinchDistance;
+                let targetZoom = initialZoom * zoomFactor;
+
+                const minZoom = trackCapabilities.zoom.min || 1;
+                const maxZoom = trackCapabilities.zoom.max || 5;
+                targetZoom = Math.min(Math.max(targetZoom, minZoom), maxZoom);
+
+                try {
+                    await videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] });
+                    statusDiv.innerText = `🔍 ZOOM: ${targetZoom.toFixed(1)}x`;
+                } catch(err) {}
+            }
+        }, { passive: true });
+
+        cameraContainer.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                initialPinchDistance = null;
+                setTimeout(() => {
+                    if (statusDiv.innerText.includes("ZOOM")) {
+                        statusDiv.innerText = "READY";
+                    }
+                }, 800);
+            }
+        });
+    }
+
+    snapBtn.addEventListener('click', async () => {
+        const property = propertySelect.value;
+        if (!property) {
+            statusDiv.innerText = "⚠️ SELECT A PROPERTY FIRST";
+            triggerRedOverlay();
+            return;
+        }
+
+        if (flashOn && videoTrack && trackCapabilities.torch) {
+            try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElem.videoWidth || 1280;
+        canvas.height = videoElem.videoHeight || 720;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        const b64 = canvas.toDataURL('image/jpeg', 0.80);
+
+        if (videoTrack && trackCapabilities.torch) {
+            setTimeout(async () => {
+                try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
+            }, 150);
+        }
+
+        let currentRego = regoInput.value.trim().toUpperCase();
+
+        if (!currentRego && navigator.onLine) {
+            statusDiv.innerText = "🔍 SCANNING...";
+            try {
+                const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'scan_npr',
+                        photoBytes: b64
+                    })
+                });
+                
+                const nprText = await nprRes.text();
+                const nprResult = JSON.parse(nprText);
+
+                if (nprResult && nprResult.rego) {
+                    currentRego = nprResult.rego.toUpperCase();
+                    regoInput.value = currentRego;
+                }
+            } catch(e) {}
+        }
+
+        let isOfflineCache = false;
+        if (!currentRego) {
+            if (!navigator.onLine) {
+                isOfflineCache = true;
+                currentRego = "PENDING_OCR";
+            } else {
+                triggerRedOverlay();
+                statusDiv.innerText = "⚠️ TYPE REGO OR ALIGN PLATE CLEARLY";
+                return;
+            }
+        }
+
+        triggerGreenOverlay();
+        statusDiv.innerText = isOfflineCache ? "✔ LOGGED OFFLINE" : `✔ MARKED ${currentRego}`;
+        regoInput.value = "";
+
+        const payload = {
+            action: 'log_mark',
+            property: property,
+            rego: currentRego,
+            photoBytes: b64,
+            isOfflinePending: isOfflineCache,
+            timestamp: new Date().toISOString()
+        };
+
+        if (navigator.onLine && !isOfflineCache) {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).catch(() => queueOfflineMark(payload));
+        } else {
+            queueOfflineMark(payload);
+        }
+    });
+
+    function triggerGreenOverlay() {
+        greenOverlay.classList.add('show');
+        headerBox.classList.remove('error-bg');
+        headerBox.classList.add('success-bg');
+        
+        document.body.style.background = "#00e676";
+        themeMeta.setAttribute('content', '#00e676');
+
+        setTimeout(() => {
+            greenOverlay.classList.remove('show');
+            document.body.style.background = "#121212";
+            themeMeta.setAttribute('content', '#121212');
+        }, 600);
+    }
+
+    function triggerRedOverlay() {
+        redOverlay.classList.add('show');
+        headerBox.classList.remove('success-bg');
+        headerBox.classList.add('error-bg');
+        
+        document.body.style.background = "#ff1744";
+        themeMeta.setAttribute('content', '#ff1744');
+
+        setTimeout(() => {
+            redOverlay.classList.remove('show');
+            document.body.style.background = "#121212";
+            themeMeta.setAttribute('content', '#121212');
+        }, 600);
+    }
+
+    function queueOfflineMark(payload) {
+        let queue = JSON.parse(localStorage.getItem('offline_marks_queue') || '[]');
+        queue.push(payload);
+        localStorage.setItem('offline_marks_queue', JSON.stringify(queue));
+    }
+
+    async function syncOfflineQueue() {
+        if (!navigator.onLine) return;
+        let queue = JSON.parse(localStorage.getItem('offline_marks_queue') || '[]');
+        if (queue.length === 0) return;
+
+        statusDiv.innerText = `🔄 SYNCING ${queue.length} OFFLINE MARKS...`;
+        syncList.innerHTML = "";
+
+        for (let i = 0; i < queue.length; i++) {
+            let item = queue[i];
+
+            if (item.isOfflinePending || item.rego === "PENDING_OCR" || item.rego.startsWith("OFFLINE_")) {
+                try {
+                    const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'scan_npr',
+                            photoBytes: item.photoBytes
+                        })
+                    });
+                    const nprText = await nprRes.text();
+                    const nprResult = JSON.parse(nprText);
+
+                    if (nprResult && nprResult.rego) {
+                        item.rego = nprResult.rego.toUpperCase();
+                    } else {
+                        item.rego = "UNREADABLE_PLATE";
+                    }
+                } catch(e) {
+                    item.rego = "UNREADABLE_PLATE";
+                }
+            }
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
+                
+                syncList.innerHTML += `<div class="sync-item ok"><span>✔ ${item.rego} (${item.property})</span><span>LOGGED</span></div>`;
+            } catch(e) {
+                syncList.innerHTML += `<div class="sync-item fail"><span>✖ ${item.rego} (${item.property})</span><span>FAILED</span></div>`;
+            }
+        }
+
+        localStorage.removeItem('offline_marks_queue');
+        syncModal.classList.add('show');
+        statusDiv.innerText = "✔ OFFLINE SYNC COMPLETE";
+    }
+</script>
+</body>
+</html>
