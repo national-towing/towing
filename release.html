@@ -427,4 +427,145 @@
         function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
         function stopDrawing() { drawing = false; }
 
-        canvas
+       canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function clearSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        canvas.classList.remove('sig-locked');
+        
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
+        
+        statusDiv.innerText = "";
+        validateForm();
+    }
+
+    function confirmSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        canvas.classList.add('sig-locked');
+        
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
+        
+        statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
+        validateForm();
+    }
+
+    function setupLiveValidation() {
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        inputs.forEach(elem => {
+            elem.addEventListener('input', validateForm);
+            elem.addEventListener('change', validateForm);
+        });
+        validateForm();
+    }
+
+    function validateForm() {
+        let isValid = true;
+
+        function mark(elem, condition) {
+            if (condition) {
+                elem.classList.remove('field-missing');
+                elem.classList.add('field-valid');
+            } else {
+                elem.classList.remove('field-valid');
+                elem.classList.add('field-missing');
+                isValid = false;
+            }
+        }
+
+        mark(vehicleSelect, vehicleSelect.value !== "");
+        mark(svnInput, svnInput.value.trim() !== "");
+        mark(regoInput, regoInput.value.trim() !== "");
+        mark(colourInput, colourInput.value.trim() !== "");
+        mark(makeInput, makeInput.value.trim() !== "");
+        mark(modelInput, modelInput.value.trim() !== "");
+
+        mark(ownerNameInput, ownerNameInput.value.trim() !== "");
+        mark(idNumInput, idNumInput.value.trim() !== "");
+        mark(ownerAddressInput, ownerAddressInput.value.trim() !== "");
+
+        const hasPhone = ownerPhoneInput.value.trim() !== "";
+        const hasEmail = ownerEmailInput.value.trim() !== "";
+        if (hasPhone || hasEmail) {
+            ownerPhoneInput.classList.remove('field-missing'); ownerPhoneInput.classList.add('field-valid');
+            ownerEmailInput.classList.remove('field-missing'); ownerEmailInput.classList.add('field-valid');
+        } else {
+            ownerPhoneInput.classList.add('field-missing');
+            ownerEmailInput.classList.add('field-missing');
+            isValid = false;
+        }
+
+        mark(releaseFeeInput, releaseFeeInput.value !== "");
+        mark(storageFeeInput, storageFeeInput.value !== "");
+
+        if (officerSelect.value === "OTHER") {
+            mark(officerOtherInput, officerOtherInput.value.trim() !== "");
+        }
+
+        if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
+
+        return isValid;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        if (!validateForm()) {
+            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM BOTH SIGS";
+            return;
+        }
+
+        const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
+        const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
+        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
+
+        const payload = {
+            action: 'process_release',
+            rego: regoInput.value.trim().toUpperCase(),
+            svnNumber: svnInput.value.trim(),
+            make: makeInput.value.trim(),
+            model: modelInput.value.trim(),
+            colour: colourInput.value.trim(),
+            property: propertyInput.value.trim(),
+            ownerName: ownerNameInput.value.trim(),
+            idNumber: idNumInput.value.trim(),
+            ownerAddress: ownerAddressInput.value.trim(),
+            ownerPhone: ownerPhoneInput.value.trim(),
+            ownerEmail: ownerEmailInput.value.trim(),
+            releaseFee: releaseFeeInput.value,
+            storageFee: storageFeeInput.value,
+            officer: finalOfficer,
+            idPhotos: idPhotos,
+            ownerSigBytes: ownerSig,
+            officerSigBytes: officerSig
+        };
+
+        statusDiv.innerText = "GENERATING INVOICE & RELEASING...";
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
+            });
+            statusDiv.innerText = "✔ PAID - VEHICLE RELEASED & INVOICE SENT!";
+        } catch(err) {
+            statusDiv.innerText = "ERROR PROCESSING RELEASE";
+        }
+
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 1500);
+    });
+</script>
+</body>
+</html>
