@@ -16,8 +16,8 @@
     <link rel="icon" type="image/png" href="icon-release.png?v=999">
     <link rel="manifest" href="manifest-release.json?v=999">
 
-    <!-- OCR ENGINE FOR ID CARD EXTRACTION (ASYNC LOAD) -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" async></script>
+    <!-- OCR ENGINE FOR ID CARD EXTRACTION -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
         * { box-sizing: border-box; }
@@ -236,6 +236,195 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-</script>
-</body>
-</html>
+
+    const vehicleSelect = document.getElementById('vehicleSelect');
+    const propertyInput = document.getElementById('propertyInput');
+    const svnInput = document.getElementById('svnInput');
+    const regoInput = document.getElementById('regoInput');
+    const colourInput = document.getElementById('colourInput');
+    const makeInput = document.getElementById('makeInput');
+    const modelInput = document.getElementById('modelInput');
+
+    const ownerNameInput = document.getElementById('ownerNameInput');
+    const idNumInput = document.getElementById('idNumInput');
+    const ownerAddressInput = document.getElementById('ownerAddressInput');
+    const ownerPhoneInput = document.getElementById('ownerPhoneInput');
+    const ownerEmailInput = document.getElementById('ownerEmailInput');
+
+    const releaseFeeInput = document.getElementById('releaseFeeInput');
+    const storageFeeInput = document.getElementById('storageFeeInput');
+
+    const officerSelect = document.getElementById('officerSelect');
+    const officerOtherInput = document.getElementById('officerOtherInput');
+
+    const videoElem = document.getElementById('videoElem');
+    const snapBtn = document.getElementById('snapBtn');
+    const thumbGallery = document.getElementById('thumbGallery');
+    const submitBtn = document.getElementById('submitBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statusDiv = document.getElementById('status');
+
+    let yardVehicles = [];
+    let idPhotos = [];
+    let ownerSigConfirmed = false;
+    let officerSigConfirmed = false;
+
+    window.addEventListener('load', () => {
+        loadYardVehicles();
+        initCamera();
+        initSignatureCanvas('ownerSigCanvas');
+        initSignatureCanvas('officerSigCanvas');
+        setupLiveValidation();
+    });
+
+    refreshBtn.addEventListener('click', () => {
+        window.location.reload(true);
+    });
+
+    function checkOfficerOther(selectElem) {
+        if (selectElem.value === "OTHER") {
+            officerOtherInput.style.display = 'block';
+            officerOtherInput.focus();
+        } else {
+            officerOtherInput.style.display = 'none';
+        }
+        validateForm();
+    }
+
+    vehicleSelect.addEventListener('change', () => {
+        const selectedRego = vehicleSelect.value;
+        const veh = yardVehicles.find(v => v.rego === selectedRego);
+        if (veh) {
+            propertyInput.value = veh.property || '';
+            regoInput.value = veh.rego || '';
+            makeInput.value = veh.make || '';
+            modelInput.value = veh.model || '';
+            colourInput.value = veh.colour || '';
+        } else {
+            propertyInput.value = '';
+            regoInput.value = '';
+            makeInput.value = '';
+            modelInput.value = '';
+            colourInput.value = '';
+        }
+        validateForm();
+    });
+
+    async function loadYardVehicles() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
+            yardVehicles = await res.json();
+            vehicleSelect.innerHTML = "<option value=''>-- SELECT FROM YARD --</option>";
+
+            if (!Array.isArray(yardVehicles) || yardVehicles.length === 0) {
+                vehicleSelect.innerHTML = "<option value=''>NO VEHICLES IN YARD</option>";
+                return;
+            }
+
+            yardVehicles.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.rego;
+                opt.innerText = `${v.rego} (${v.property || ''} - ${v.make || ''} ${v.model || ''})`;
+                vehicleSelect.appendChild(opt);
+            });
+        } catch(e) {
+            vehicleSelect.innerHTML = "<option value=''>ERROR LOADING YARD</option>";
+        }
+    }
+
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            videoElem.srcObject = stream;
+        } catch(e) {}
+    }
+
+    snapBtn.addEventListener('click', async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElem.videoWidth || 640;
+        canvas.height = videoElem.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0);
+        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+        idPhotos.push(b64);
+
+        const photoIndex = idPhotos.length;
+        const labelText = photoIndex === 1 ? "FRONT" : (photoIndex === 2 ? "BACK" : `SNAP ${photoIndex}`);
+
+        const thumbWrap = document.createElement('div');
+        thumbWrap.className = 'thumb-container';
+
+        const img = document.createElement('img');
+        img.src = b64; 
+        img.className = 'thumb-img';
+
+        const lbl = document.createElement('span');
+        lbl.className = 'thumb-label';
+        lbl.innerText = `#${photoIndex} ${labelText}`;
+
+        thumbWrap.appendChild(img);
+        thumbWrap.appendChild(lbl);
+        thumbGallery.appendChild(thumbWrap);
+        
+        statusDiv.innerText = `🔍 EXTRACTING ID DETAILS (#${photoIndex} ${labelText})...`;
+
+        if (window.Tesseract) {
+            try {
+                const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
+                
+                const idMatch = text.match(/(?:LIC|NO|ID|CARD|NUMBER|LICENCE)[\s#:]*([A-Z0-9]{7,10})/i) || 
+                                text.match(/\b[0-9]{7,9}\b/);
+                if (idMatch && (!idNumInput.value || idNumInput.value.length < 5)) {
+                    idNumInput.value = idMatch[1] || idMatch[0];
+                }
+
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+                for (let line of lines) {
+                    if (/^[A-Z\s]{4,30}$/.test(line) && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA|NEW\s+SOUTH\s+WALES|VICTORIA/i.test(line)) {
+                        if (!ownerNameInput.value) ownerNameInput.value = line;
+                        break;
+                    }
+                }
+
+                const addressMatch = lines.find(l => /\d+\s+[A-Z0-9\s]+(?:ST|RD|AVE|DR|WAY|QLD|NSW|VIC|STREET|ROAD)/i.test(l));
+                if (addressMatch && !ownerAddressInput.value) {
+                    ownerAddressInput.value = addressMatch;
+                }
+
+                statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
+            } catch(e) {
+                statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
+            }
+        } else {
+            statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
+        }
+
+        validateForm();
+    });
+
+    function initSignatureCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+        }
+        resizeCanvas();
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDrawing(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+        function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+        function stopDrawing() { drawing = false; }
+
+        canvas
