@@ -140,7 +140,7 @@
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
         .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #000; }
 
-        /* FULL-SCREEN TICK / CROSS OVERLAYS */
+        /* FULL-SCREEN OVERLAYS */
         .full-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -148,8 +148,8 @@
             z-index: 9999; pointer-events: none; opacity: 0;
             transition: opacity 0.15s ease-in-out;
         }
-        .full-overlay.green { background: rgba(0, 230, 118, 0.88); }
-        .full-overlay.red { background: rgba(255, 23, 68, 0.88); }
+        .full-overlay.green { background: rgba(0, 230, 118, 0.92); }
+        .full-overlay.red { background: rgba(255, 23, 68, 0.92); }
         .full-overlay.show { opacity: 1; }
         .full-overlay-symbol { font-size: 160px; color: #fff; text-shadow: 0 8px 32px rgba(0,0,0,0.5); }
 
@@ -184,7 +184,6 @@
 <div class="full-overlay green" id="greenOverlay"><div class="full-overlay-symbol">✔</div></div>
 <div class="full-overlay red" id="redOverlay"><div class="full-overlay-symbol">✖</div></div>
 
-<!-- SYNC SUMMARY MODAL -->
 <div class="sync-modal" id="syncModal">
     <div class="sync-card">
         <h2>OFFLINE SYNC SUMMARY</h2>
@@ -280,7 +279,7 @@
         if (cached) {
             populatePropertyDropdown(JSON.parse(cached));
         } else {
-            propertySelect.innerHTML = "<option value=''>OFFLINE - NO CACHED PROPERTIES</option>";
+            propertySelect.innerHTML = "<option value=''>OFFLINE - SELECT PROPERTY</option>";
         }
     }
 
@@ -404,7 +403,7 @@
 
         let currentRego = regoInput.value.trim().toUpperCase();
 
-        // IF REGO IS EMPTY AND DEVICE IS ONLINE, ATTEMPT CLOUD ANPR SCAN
+        // ONLINE ANPR SCAN
         if (!currentRego && navigator.onLine) {
             statusDiv.innerText = "🔍 SCANNING...";
             try {
@@ -426,13 +425,18 @@
             } catch(e) {}
         }
 
-        // IF NO REGO ENTERED OR DETECTED
+        // OFFLINE OR FAILED SCAN WARNING
         if (!currentRego) {
+            if (!navigator.onLine) {
+                statusDiv.innerText = "⚠️ OFFLINE - TYPE REGO TO MARK";
+            } else {
+                statusDiv.innerText = "⚠️ TYPE REGO OR ALIGN PLATE CLEARLY";
+            }
             triggerRedOverlay();
             return;
         }
 
-        // GREEN OVERLAY & UPDATE HEADER TO GREEN
+        // SUCCESS
         triggerGreenOverlay();
         statusDiv.innerText = `✔ MARKED ${currentRego}`;
         regoInput.value = "";
@@ -461,18 +465,32 @@
         greenOverlay.classList.add('show');
         headerBox.classList.remove('error-bg');
         headerBox.classList.add('success-bg');
+        
+        // Dynamically turn top status bar & body background solid green
+        document.body.style.background = "#00e676";
         themeMeta.setAttribute('content', '#00e676');
 
-        setTimeout(() => greenOverlay.classList.remove('show'), 600);
+        setTimeout(() => {
+            greenOverlay.classList.remove('show');
+            document.body.style.background = "#121212";
+            themeMeta.setAttribute('content', '#121212');
+        }, 600);
     }
 
     function triggerRedOverlay() {
         redOverlay.classList.add('show');
         headerBox.classList.remove('success-bg');
         headerBox.classList.add('error-bg');
+        
+        // Dynamically turn top status bar & body background solid red
+        document.body.style.background = "#ff1744";
         themeMeta.setAttribute('content', '#ff1744');
 
-        setTimeout(() => redOverlay.classList.remove('show'), 600);
+        setTimeout(() => {
+            redOverlay.classList.remove('show');
+            document.body.style.background = "#121212";
+            themeMeta.setAttribute('content', '#121212');
+        }, 600);
     }
 
     function queueOfflineMark(payload) {
