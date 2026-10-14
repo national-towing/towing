@@ -213,6 +213,7 @@
 
     <div id="status">READY</div>
 </div>
+
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
@@ -258,24 +259,25 @@
     });
 
     async function loadProperties() {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        useCachedProperties();
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties", {
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
-            
-            const properties = await res.json();
-            if (Array.isArray(properties) && properties.length > 0) {
-                localStorage.setItem('cached_properties', JSON.stringify(properties));
-                populatePropertyDropdown(properties);
-            } else {
-                useCachedProperties();
+
+            if (res.ok) {
+                const properties = await res.json();
+                if (Array.isArray(properties) && properties.length > 0) {
+                    localStorage.setItem('cached_properties', JSON.stringify(properties));
+                    populatePropertyDropdown(properties);
+                }
             }
         } catch(e) {
-            clearTimeout(timeoutId);
             useCachedProperties();
         }
     }
@@ -291,7 +293,7 @@
                 }
             } catch(e) {}
         }
-        propertySelect.innerHTML = "<option value=''>OFFLINE - SELECT PROPERTY</option>";
+        propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
     }
 
     function populatePropertyDropdown(properties) {
