@@ -130,14 +130,14 @@
 
         .overlay-tick {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 110px; color: #00e676; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 110px; color: #00e676; z-index: 20; pointer-events: none; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-shadow: 0 4px 16px rgba(0,0,0,0.8);
         }
         .overlay-tick.show { transform: translate(-50%, -50%) scale(1); }
 
         .overlay-cross {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 110px; color: #ff1744; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 110px; color: #ff1744; z-index: 20; pointer-events: none; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-shadow: 0 4px 16px rgba(0,0,0,0.8);
         }
         .overlay-cross.show { transform: translate(-50%, -50%) scale(1); }
@@ -231,8 +231,8 @@
             videoStream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     facingMode: 'environment',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 } 
             });
 
@@ -308,7 +308,7 @@
                     if (statusDiv.innerText.includes("ZOOM")) {
                         statusDiv.innerText = "READY";
                     }
-                }, 1000);
+                }, 800);
             }
         });
     }
@@ -326,25 +326,26 @@
             try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
         }
 
+        // COMPRESSED CANVAS SNAPSHOT (800x600 AT 0.65 QUALITY FOR ULTRA FAST TRANSFER)
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 1280;
-        canvas.height = videoElem.videoHeight || 720;
+        canvas.width = 800;
+        canvas.height = 600;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0);
-        const b64 = canvas.toDataURL('image/jpeg', 0.85);
+        ctx.drawImage(videoElem, 0, 0, 800, 600);
+        const b64 = canvas.toDataURL('image/jpeg', 0.65);
 
         // TURN FLASH OFF IMMEDIATELY
         if (videoTrack && trackCapabilities.torch) {
             setTimeout(async () => {
                 try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
-            }, 300);
+            }, 150);
         }
 
         let currentRego = regoInput.value.trim().toUpperCase();
 
         // RUN NPR RECOGNITION IF REGO FIELD IS EMPTY
         if (!currentRego) {
-            statusDiv.innerText = "🔍 SCANNING PLATE (NPR)...";
+            statusDiv.innerText = "🔍 SCANNING...";
             try {
                 const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -370,39 +371,34 @@
             return;
         }
 
-        statusDiv.innerText = "LOGGING MARK...";
+        // INSTANT VISUAL FEEDBACK & IMMEDIATE RESET FOR NEXT VEHICLE
         triggerTick();
+        statusDiv.innerText = `✔ MARKED ${currentRego}`;
+        regoInput.value = "";
 
-        const payload = {
-            action: 'log_mark',
-            property: property,
-            rego: currentRego,
-            photoBytes: b64,
-            timestamp: new Date().toISOString()
-        };
-
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-            statusDiv.innerText = `✔ MARKED ${currentRego}`;
-            regoInput.value = "";
-        } catch(err) {
-            statusDiv.innerText = "ERROR LOGGING MARK";
-        }
+        // ASYNCHRONOUS BACKEND LOGGING (RUNS IN BACKGROUND WHILE USER CARRIES ON)
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'log_mark',
+                property: property,
+                rego: currentRego,
+                photoBytes: b64,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(err => console.error("Logging background error:", err));
     });
 
     function triggerTick() {
         overlayTick.classList.add('show');
-        setTimeout(() => overlayTick.classList.remove('show'), 800);
+        setTimeout(() => overlayTick.classList.remove('show'), 600);
     }
 
     function triggerCross() {
         overlayCross.classList.add('show');
-        setTimeout(() => overlayCross.classList.remove('show'), 800);
+        setTimeout(() => overlayCross.classList.remove('show'), 600);
     }
 </script>
 </body>
