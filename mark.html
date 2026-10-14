@@ -204,10 +204,13 @@
             
             if (Array.isArray(properties) && properties.length > 0) {
                 properties.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p;
-                    opt.innerText = p;
-                    propertySelect.appendChild(opt);
+                    const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+                    if (propName) {
+                        const opt = document.createElement('option');
+                        opt.value = propName;
+                        opt.innerText = propName;
+                        propertySelect.appendChild(opt);
+                    }
                 });
             } else {
                 propertySelect.innerHTML = "<option value=''>NO PROPERTIES FOUND</option>";
