@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <meta id="themeColor" name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -26,6 +27,7 @@
             background: #121212; 
             color: #fff; 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            transition: background 0.3s ease;
         }
 
         body {
@@ -45,7 +47,13 @@
             max-width: 440px; 
             margin-bottom: 8px; 
             flex-shrink: 0;
+            padding: 6px 10px;
+            border-radius: 12px;
+            transition: background 0.3s ease;
         }
+        .header-box.success-bg { background: #00e676; }
+        .header-box.error-bg { background: #ff1744; }
+
         .header-box h1 { 
             margin: 0; 
             font-size: 34px; 
@@ -53,10 +61,13 @@
             color: #ffab00; 
             letter-spacing: 2px; 
             text-align: center; 
+            transition: color 0.3s ease;
         }
+        .header-box.success-bg h1, .header-box.error-bg h1 { color: #fff; }
+
         .icon-btn { 
             position: absolute; 
-            right: 0; 
+            right: 8px; 
             background: #2a2a2a; 
             border: 1px solid #444; 
             border-radius: 10px; 
@@ -129,7 +140,7 @@
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
         .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #000; }
 
-        /* FULL-SCREEN OVERLAYS FOR SUCCESS / FAILURE */
+        /* FULL-SCREEN TICK / CROSS OVERLAYS */
         .full-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -142,16 +153,47 @@
         .full-overlay.show { opacity: 1; }
         .full-overlay-symbol { font-size: 160px; color: #fff; text-shadow: 0 8px 32px rgba(0,0,0,0.5); }
 
+        /* OFFLINE SYNC MODAL */
+        .sync-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px; z-index: 10000;
+        }
+        .sync-modal.show { display: flex; }
+        .sync-card {
+            background: #1e1e1e; border: 2px solid #ffab00; border-radius: 16px;
+            padding: 20px; width: 100%; max-width: 400px; max-height: 80vh;
+            display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .sync-card h2 { margin: 0 0 12px 0; color: #ffab00; font-size: 20px; text-align: center; }
+        .sync-list { flex: 1; overflow-y: auto; margin-bottom: 16px; border: 1px solid #333; border-radius: 8px; padding: 8px; background: #121212; }
+        .sync-item { font-size: 13px; font-weight: 700; padding: 6px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .sync-item.ok { color: #00e676; }
+        .sync-item.fail { color: #ff1744; }
+        .sync-clear-btn {
+            background: #ffab00; color: #000; border: none; border-radius: 10px;
+            padding: 14px; font-weight: 900; font-size: 15px; cursor: pointer; text-align: center;
+        }
+        .sync-clear-btn:active { transform: scale(0.96); }
+
         #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 6px; color: #ffab00; flex-shrink: 0; min-height: 20px; }
     </style>
 </head>
 <body>
 
-<!-- FULL-SCREEN OVERLAY CONTAINERS -->
 <div class="full-overlay green" id="greenOverlay"><div class="full-overlay-symbol">✔</div></div>
 <div class="full-overlay red" id="redOverlay"><div class="full-overlay-symbol">✖</div></div>
 
-<div class="header-box">
+<!-- SYNC SUMMARY MODAL -->
+<div class="sync-modal" id="syncModal">
+    <div class="sync-card">
+        <h2>OFFLINE SYNC SUMMARY</h2>
+        <div class="sync-list" id="syncList"></div>
+        <button class="sync-clear-btn" id="clearSyncBtn">RETURN TO MARKING</button>
+    </div>
+</div>
+
+<div class="header-box" id="headerBox">
     <h1>MARK</h1>
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
@@ -185,6 +227,11 @@
     const statusDiv = document.getElementById('status');
     const greenOverlay = document.getElementById('greenOverlay');
     const redOverlay = document.getElementById('redOverlay');
+    const headerBox = document.getElementById('headerBox');
+    const themeMeta = document.getElementById('themeColor');
+    const syncModal = document.getElementById('syncModal');
+    const syncList = document.getElementById('syncList');
+    const clearSyncBtn = document.getElementById('clearSyncBtn');
 
     let videoStream = null;
     let videoTrack = null;
@@ -198,13 +245,18 @@
         loadProperties();
         initCamera();
         setupPinchZoom();
-        syncOfflineQueue(); // Flushes queued marks if coming back online
+        syncOfflineQueue();
     });
 
     window.addEventListener('online', syncOfflineQueue);
 
     refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
+    });
+
+    clearSyncBtn.addEventListener('click', () => {
+        syncModal.classList.remove('show');
+        statusDiv.innerText = "READY";
     });
 
     async function loadProperties() {
@@ -269,7 +321,6 @@
         }
     }
 
-    // TOGGLE FLASH BETWEEN OFF AND ON
     torchBtn.addEventListener('click', () => {
         flashOn = !flashOn;
         torchBtn.innerText = flashOn ? "⚡ FLASH: ON" : "⚡ FLASH: OFF";
@@ -334,7 +385,6 @@
             return;
         }
 
-        // FLASH PULSE ON CAPTURE IF FLASH IS ON
         if (flashOn && videoTrack && trackCapabilities.torch) {
             try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
         }
@@ -346,7 +396,6 @@
         ctx.drawImage(videoElem, 0, 0, 800, 600);
         const b64 = canvas.toDataURL('image/jpeg', 0.65);
 
-        // TURN FLASH OFF IMMEDIATELY AFTER CAPTURE
         if (videoTrack && trackCapabilities.torch) {
             setTimeout(async () => {
                 try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
@@ -355,7 +404,7 @@
 
         let currentRego = regoInput.value.trim().toUpperCase();
 
-        // RUN ONLINE NPR RECOGNITION IF REGO FIELD IS EMPTY AND DEVICE IS ONLINE
+        // IF REGO IS EMPTY AND DEVICE IS ONLINE, ATTEMPT CLOUD ANPR SCAN
         if (!currentRego && navigator.onLine) {
             statusDiv.innerText = "🔍 SCANNING...";
             try {
@@ -377,12 +426,13 @@
             } catch(e) {}
         }
 
+        // IF NO REGO ENTERED OR DETECTED
         if (!currentRego) {
             triggerRedOverlay();
             return;
         }
 
-        // FULL GREEN OVERLAY FEEDBACK & STATUS BAR LOG
+        // GREEN OVERLAY & UPDATE HEADER TO GREEN
         triggerGreenOverlay();
         statusDiv.innerText = `✔ MARKED ${currentRego}`;
         regoInput.value = "";
@@ -395,7 +445,6 @@
             timestamp: new Date().toISOString()
         };
 
-        // IF ONLINE, SEND IMMEDIATELY; IF OFFLINE (BASEMENT), QUEUE IN LOCALSTORAGE
         if (navigator.onLine) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -410,11 +459,19 @@
 
     function triggerGreenOverlay() {
         greenOverlay.classList.add('show');
+        headerBox.classList.remove('error-bg');
+        headerBox.classList.add('success-bg');
+        themeMeta.setAttribute('content', '#00e676');
+
         setTimeout(() => greenOverlay.classList.remove('show'), 600);
     }
 
     function triggerRedOverlay() {
         redOverlay.classList.add('show');
+        headerBox.classList.remove('success-bg');
+        headerBox.classList.add('error-bg');
+        themeMeta.setAttribute('content', '#ff1744');
+
         setTimeout(() => redOverlay.classList.remove('show'), 600);
     }
 
@@ -431,20 +488,27 @@
         if (queue.length === 0) return;
 
         statusDiv.innerText = `🔄 SYNCING ${queue.length} OFFLINE MARKS...`;
+        syncList.innerHTML = "";
 
         for (let i = 0; i < queue.length; i++) {
+            const item = queue[i];
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(queue[i])
+                    body: JSON.stringify(item)
                 });
-            } catch(e) {}
+                
+                syncList.innerHTML += `<div class="sync-item ok"><span>✔ ${item.rego} (${item.property})</span><span>LOGGED</span></div>`;
+            } catch(e) {
+                syncList.innerHTML += `<div class="sync-item fail"><span>✖ ${item.rego} (${item.property})</span><span>FAILED</span></div>`;
+            }
         }
 
         localStorage.removeItem('offline_marks_queue');
-        statusDiv.innerText = "✔ ALL OFFLINE MARKS SYNCED";
+        syncModal.classList.add('show');
+        statusDiv.innerText = "✔ OFFLINE SYNC COMPLETE";
     }
 </script>
 </body>
