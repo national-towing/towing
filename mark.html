@@ -388,12 +388,13 @@
             try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
         }
 
+        // DYNAMICALLY MATCH CANVAS ASPECT RATIO TO VIDEO FEED TO PREVENT SQUISHING
         const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = videoElem.videoWidth || 1280;
+        canvas.height = videoElem.videoHeight || 720;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, 800, 600);
-        const b64 = canvas.toDataURL('image/jpeg', 0.65);
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        const b64 = canvas.toDataURL('image/jpeg', 0.80);
 
         if (videoTrack && trackCapabilities.torch) {
             setTimeout(async () => {
@@ -425,23 +426,22 @@
             } catch(e) {}
         }
 
-        // OFFLINE MODE: GENERATE OFFLINE PLACEHOLDER TAG IF EMPTY SO USER NEVER STOPS PATROLLING
+        // OFFLINE MODE: IF NO REGO ENTERED, SET TEMPORARY QUEUE FLAG
+        let isOfflineCache = false;
         if (!currentRego) {
             if (!navigator.onLine) {
-                const now = new Date();
-                const timeTag = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') + String(now.getSeconds()).padStart(2,'0');
-                currentRego = `OFFLINE_${timeTag}`;
+                isOfflineCache = true;
+                currentRego = "PENDING_OCR";
             } else {
-                // Online but failed ANPR read and no manually typed rego
                 triggerRedOverlay();
                 statusDiv.innerText = "⚠️ TYPE REGO OR ALIGN PLATE CLEARLY";
                 return;
             }
         }
 
-        // GREEN OVERLAY & UPDATE HEADER BAR TO GREEN
+        // SUCCESS FEEDBACK
         triggerGreenOverlay();
-        statusDiv.innerText = `✔ MARKED ${currentRego}`;
+        statusDiv.innerText = isOfflineCache ? "✔ LOGGED OFFLINE" : `✔ MARKED ${currentRego}`;
         regoInput.value = "";
 
         const payload = {
@@ -449,10 +449,11 @@
             property: property,
             rego: currentRego,
             photoBytes: b64,
+            isOfflinePending: isOfflineCache,
             timestamp: new Date().toISOString()
         };
 
-        if (navigator.onLine) {
+        if (navigator.onLine && !isOfflineCache) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -482,53 +483,4 @@
     function triggerRedOverlay() {
         redOverlay.classList.add('show');
         headerBox.classList.remove('success-bg');
-        headerBox.classList.add('error-bg');
-        
-        document.body.style.background = "#ff1744";
-        themeMeta.setAttribute('content', '#ff1744');
-
-        setTimeout(() => {
-            redOverlay.classList.remove('show');
-            document.body.style.background = "#121212";
-            themeMeta.setAttribute('content', '#121212');
-        }, 600);
-    }
-
-    function queueOfflineMark(payload) {
-        let queue = JSON.parse(localStorage.getItem('offline_marks_queue') || '[]');
-        queue.push(payload);
-        localStorage.setItem('offline_marks_queue', JSON.stringify(queue));
-        statusDiv.innerText = `✔ MARKED ${payload.rego} (QUEUED OFFLINE)`;
-    }
-
-    async function syncOfflineQueue() {
-        if (!navigator.onLine) return;
-        let queue = JSON.parse(localStorage.getItem('offline_marks_queue') || '[]');
-        if (queue.length === 0) return;
-
-        statusDiv.innerText = `🔄 SYNCING ${queue.length} OFFLINE MARKS...`;
-        syncList.innerHTML = "";
-
-        for (let i = 0; i < queue.length; i++) {
-            const item = queue[i];
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(item)
-                });
-                
-                syncList.innerHTML += `<div class="sync-item ok"><span>✔ ${item.rego} (${item.property})</span><span>LOGGED</span></div>`;
-            } catch(e) {
-                syncList.innerHTML += `<div class="sync-item fail"><span>✖ ${item.rego} (${item.property})</span><span>FAILED</span></div>`;
-            }
-        }
-
-        localStorage.removeItem('offline_marks_queue');
-        syncModal.classList.add('show');
-        statusDiv.innerText = "✔ OFFLINE SYNC COMPLETE";
-    }
-</script>
-</body>
-</html>
+        headerBox
