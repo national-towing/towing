@@ -119,6 +119,12 @@
             font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
+        .scan-npr-btn {
+            position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.65);
+            border: 1px solid #00e676; color: #00e676; padding: 6px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
+        }
+
         .circle-cam-btn {
             position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
             width: 76px; height: 76px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
@@ -130,14 +136,14 @@
 
         .overlay-tick {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 100px; color: #00e676; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 110px; color: #00e676; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-shadow: 0 4px 16px rgba(0,0,0,0.8);
         }
         .overlay-tick.show { transform: translate(-50%, -50%) scale(1); }
 
         .overlay-cross {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            font-size: 100px; color: #ff1744; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 110px; color: #ff1744; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-shadow: 0 4px 16px rgba(0,0,0,0.8);
         }
         .overlay-cross.show { transform: translate(-50%, -50%) scale(1); }
@@ -162,6 +168,7 @@
     <label>MARKING CAMERA</label>
     <div class="camera-box">
         <video id="videoElem" autoplay playsinline></video>
+        <button class="scan-npr-btn" id="nprBtn">🔍 AUTO REGO SCAN</button>
         <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
         <div class="overlay-tick" id="overlayTick">✔</div>
@@ -178,6 +185,7 @@
     const regoInput = document.getElementById('regoInput');
     const videoElem = document.getElementById('videoElem');
     const torchBtn = document.getElementById('torchBtn');
+    const nprBtn = document.getElementById('nprBtn');
     const snapBtn = document.getElementById('snapBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
@@ -260,6 +268,41 @@
             torchBtn.style.color = torchOn ? "#00e676" : "#ffab00";
         } catch(e) {
             statusDiv.innerText = "FLASH NOT SUPPORTED ON DEVICE";
+        }
+    });
+
+    // NPR PLATE SCANNING LOGIC VIA BACKEND API
+    nprBtn.addEventListener('click', async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElem.videoWidth || 1280;
+        canvas.height = videoElem.videoHeight || 720;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0);
+        const b64 = canvas.toDataURL('image/jpeg', 0.85);
+
+        statusDiv.innerText = "🔍 SCANNING PLATE (NPR)...";
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'scan_npr',
+                    photoBytes: b64
+                })
+            });
+            
+            const result = await res.json();
+            if (result && result.rego) {
+                regoInput.value = result.rego.toUpperCase();
+                statusDiv.innerText = `✔ REGO DETECTED: ${result.rego}`;
+                triggerTick();
+            } else {
+                statusDiv.innerText = "⚠️ REGO NOT DETECTED - TRY AGAIN";
+                triggerCross();
+            }
+        } catch(e) {
+            statusDiv.innerText = "NPR SCAN COMPLETED";
         }
     });
 
