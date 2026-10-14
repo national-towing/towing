@@ -105,6 +105,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            touch-action: none;
         }
         video { 
             width: 100%; 
@@ -184,12 +185,17 @@
     const overlayCross = document.getElementById('overlayCross');
 
     let videoStream = null;
-    let trackCapabilities = null;
+    let videoTrack = null;
+    let trackCapabilities = {};
     let torchOn = false;
+
+    let initialPinchDistance = null;
+    let initialZoom = 1;
 
     window.addEventListener('load', () => {
         loadProperties();
         initCamera();
+        setupPinchZoom();
     });
 
     refreshBtn.addEventListener('click', () => {
@@ -222,14 +228,21 @@
 
     async function initCamera() {
         try {
-            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                } 
+            });
+
             videoElem.srcObject = videoStream;
+            videoTrack = videoStream.getVideoTracks()[0];
             
-            const track = videoStream.getVideoTracks()[0];
-            if (track) {
-                trackCapabilities = track.getCapabilities ? track.getCapabilities() : {};
-                if (!trackCapabilities.torch) {
-                    torchBtn.style.display = 'none';
+            if (videoTrack) {
+                trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+                if (trackCapabilities.torch) {
+                    torchBtn.style.display = 'block';
                 }
             }
         } catch(e) {
@@ -238,18 +251,66 @@
     }
 
     torchBtn.addEventListener('click', async () => {
-        if (!videoStream) return;
-        const track = videoStream.getVideoTracks()[0];
-        if (track && trackCapabilities.torch) {
-            torchOn = !torchOn;
-            try {
-                await track.applyConstraints({ advanced: [{ torch: torchOn }] });
-                torchBtn.innerText = torchOn ? "⚡ FLASH ON" : "⚡ FLASH OFF";
-                torchBtn.style.borderColor = torchOn ? "#00e676" : "#ffab00";
-                torchBtn.style.color = torchOn ? "#00e676" : "#ffab00";
-            } catch(e) {}
+        if (!videoTrack || !trackCapabilities.torch) return;
+        torchOn = !torchOn;
+        try {
+            await videoTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+            torchBtn.innerText = torchOn ? "⚡ FLASH ON" : "⚡ FLASH OFF";
+            torchBtn.style.borderColor = torchOn ? "#00e676" : "#ffab00";
+            torchBtn.style.color = torchOn ? "#00e676" : "#ffab00";
+        } catch(e) {
+            statusDiv.innerText = "FLASH NOT SUPPORTED ON DEVICE";
         }
     });
+
+    function setupPinchZoom() {
+        const cameraContainer = document.querySelector('.camera-box');
+
+        cameraContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                if (videoTrack && videoTrack.getSettings) {
+                    const settings = videoTrack.getSettings();
+                    initialZoom = settings.zoom || 1;
+                }
+            }
+        }, { passive: true });
+
+        cameraContainer.addEventListener('touchmove', async (e) => {
+            if (e.touches.length === 2 && initialPinchDistance && videoTrack && trackCapabilities.zoom) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+
+                const zoomFactor = currentDistance / initialPinchDistance;
+                let targetZoom = initialZoom * zoomFactor;
+
+                const minZoom = trackCapabilities.zoom.min || 1;
+                const maxZoom = trackCapabilities.zoom.max || 5;
+                targetZoom = Math.min(Math.max(targetZoom, minZoom), maxZoom);
+
+                try {
+                    await videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] });
+                    statusDiv.innerText = `🔍 ZOOM: ${targetZoom.toFixed(1)}x`;
+                } catch(err) {}
+            }
+        }, { passive: true });
+
+        cameraContainer.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                initialPinchDistance = null;
+                setTimeout(() => {
+                    if (statusDiv.innerText.includes("ZOOM")) {
+                        statusDiv.innerText = "READY";
+                    }
+                }, 1000);
+            }
+        });
+    }
 
     snapBtn.addEventListener('click', async () => {
         const property = propertySelect.value;
@@ -268,11 +329,11 @@
         }
 
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 640;
-        canvas.height = videoElem.videoHeight || 480;
+        canvas.width = videoElem.videoWidth || 1280;
+        canvas.height = videoElem.videoHeight || 720;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0);
-        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+        const b64 = canvas.toDataURL('image/jpeg', 0.85);
 
         statusDiv.innerText = "LOGGING MARK...";
         triggerTick();
