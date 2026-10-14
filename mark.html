@@ -7,51 +7,95 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=70000">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=70000">
-    <link rel="manifest" href="manifest-mark.json?v=70000">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=999">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=999">
+    <link rel="manifest" href="manifest-mark.json?v=999">
 
     <style>
         * { box-sizing: border-box; }
-        body { 
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: #121212; 
+            color: #fff; 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            touch-action: manipulation; user-select: none; -webkit-user-select: none;
-        }
-        
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
-        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
-
-        .sync-badge {
-            background: #ffab00; color: #000; font-weight: 900; font-size: 11px;
-            padding: 8px 14px; border-radius: 20px; margin-bottom: 10px; display: none;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; text-align: center;
         }
 
-        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
-        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
-        .nav-run { background: #ffab00; }
-        .nav-tow { background: #ff1744; color: #fff; }
-        .nav-rel { background: #00e676; }
-        .nav-pass { background: #ab47bc; color: #fff; }
-
-        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+        }
         
-        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
+        .header-box { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            width: 100%; 
+            max-width: 440px; 
+            margin-bottom: 8px; 
+            flex-shrink: 0;
+        }
+        .header-box h1 { 
+            margin: 0; 
+            font-size: 34px; 
+            font-weight: 900; 
+            color: #ffab00; 
+            letter-spacing: 2px; 
+            text-align: center; 
+        }
+        .icon-btn { 
+            position: absolute; 
+            right: 0; 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            color: #fff; 
+        }
+        .icon-btn:active { transform: scale(0.9); }
+
+        .card { 
+            background: #1e1e1e; 
+            border-radius: 18px; 
+            padding: 14px; 
+            width: 100%; 
+            max-width: 440px; 
+            border: 1px solid #333; 
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 8px;
+        }
+
+        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 6px; font-weight: 900; letter-spacing: 1px; flex-shrink: 0; }
         input, select {
-            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
-            -webkit-appearance: none;
+            width: 100%; height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 900; margin-top: 3px; outline: none;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+            flex-shrink: 0;
         }
 
         .camera-box {
             width: 100%;
-            height: 380px;
+            flex: 1;
+            min-height: 0;
             background: #000;
             border-radius: 14px;
             border: 2px solid #333;
@@ -67,44 +111,37 @@
             height: 100%; 
             object-fit: cover; 
         }
+
         .torch-btn {
-            position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.65);
-            border: 1px solid #ffab00; color: #ffab00; padding: 6px 14px; border-radius: 20px;
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
+            border: 1px solid #ffab00; color: #ffab00; padding: 6px 12px; border-radius: 20px;
             font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
         }
 
         .circle-cam-btn {
             position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
-            width: 94px; height: 94px; background: #ffab00; border: 5px solid #fff; border-radius: 50%;
+            width: 76px; height: 76px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 22px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
         }
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
-        .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
+        .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #000; }
 
         .overlay-tick {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 230, 118, 0.85); display: flex; align-items: center; justify-content: center;
-            font-size: 120px; color: #fff; z-index: 20; opacity: 0; pointer-events: none;
-            transition: opacity 0.15s ease-in-out;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            font-size: 100px; color: #00e676; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 4px 16px rgba(0,0,0,0.8);
         }
-        .overlay-tick.show { opacity: 1; }
+        .overlay-tick.show { transform: translate(-50%, -50%) scale(1); }
 
         .overlay-cross {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 23, 68, 0.85); display: flex; align-items: center; justify-content: center;
-            font-size: 120px; color: #fff; z-index: 20; opacity: 0; pointer-events: none;
-            transition: opacity 0.15s ease-in-out;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            font-size: 100px; color: #ff1744; z-index: 20; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 4px 16px rgba(0,0,0,0.8);
         }
-        .overlay-cross.show { opacity: 1; }
+        .overlay-cross.show { transform: translate(-50%, -50%) scale(1); }
 
-        .manual-btn {
-            background: #ffab00; color: #000; font-weight: 900; border: none; border-radius: 10px;
-            height: 46px; font-size: 18px; width: 100%; margin-top: 10px; cursor: pointer; letter-spacing: 1px;
-            display: none;
-        }
-
-        #status { text-align: center; font-weight: 900; font-size: 16px; margin-top: 12px; min-height: 24px; color: #ffab00; letter-spacing: 1px; }
+        #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 6px; color: #ffab00; flex-shrink: 0; min-height: 20px; }
     </style>
 </head>
 <body>
@@ -114,384 +151,159 @@
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
-<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC / DOUBLE-TAP CLEAR)</div>
-
-<div class="nav-bar">
-    <a href="run.html" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
-</div>
-
 <div class="card">
     <label>PROPERTY</label>
     <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
 
     <label>REGO</label>
-    <input type="text" id="regoInput" placeholder="SCAN OR TYPE REGO..." style="color:#ffab00; text-transform:uppercase;">
+    <input type="text" id="regoInput" placeholder="SCAN OR TYPE REGO..." style="text-transform:uppercase; color:#ffab00;">
 
     <label>MARKING CAMERA</label>
     <div class="camera-box">
-        <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <video id="videoElem" autoplay playsinline></video>
+        <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
         <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
         <div class="overlay-tick" id="overlayTick">✔</div>
         <div class="overlay-cross" id="overlayCross">✖</div>
     </div>
 
-    <button class="manual-btn" id="manualLogBtn">LOG REGO MANUALLY</button>
     <div id="status">READY</div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-    const PLATE_RECOGNIZER_TOKEN = "74a8bb83a49461eef0266274ce63e1e198b4c888";
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(()=>{});
-    }
 
     const propertySelect = document.getElementById('propertySelect');
     const regoInput = document.getElementById('regoInput');
     const videoElem = document.getElementById('videoElem');
-    const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
+    const snapBtn = document.getElementById('snapBtn');
     const refreshBtn = document.getElementById('refreshBtn');
-    const manualLogBtn = document.getElementById('manualLogBtn');
     const statusDiv = document.getElementById('status');
     const overlayTick = document.getElementById('overlayTick');
     const overlayCross = document.getElementById('overlayCross');
-    const syncBadge = document.getElementById('syncBadge');
-    const queueCount = document.getElementById('queueCount');
 
-    let isProcessing = false;
-    let videoTrack = null;
+    let videoStream = null;
+    let trackCapabilities = null;
     let torchOn = false;
-    let lastCapturedB64 = "";
 
-    window.addEventListener('load', async () => {
+    window.addEventListener('load', () => {
         loadProperties();
         initCamera();
-        updateQueueUI();
-        window.addEventListener('online', processOfflineQueue);
     });
 
     refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
     });
 
-    function loadProperties() {
-        const cached = localStorage.getItem('cached_properties');
-        if (cached) {
-            populatePropertiesUI(JSON.parse(cached));
+    async function loadProperties() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
+            const properties = await res.json();
+            propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+            
+            if (Array.isArray(properties) && properties.length > 0) {
+                properties.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    opt.innerText = p;
+                    propertySelect.appendChild(opt);
+                });
+            } else {
+                propertySelect.innerHTML = "<option value=''>NO PROPERTIES FOUND</option>";
+            }
+        } catch(e) {
+            propertySelect.innerHTML = "<option value=''>ERROR LOADING PROPERTIES</option>";
         }
-
-        if (navigator.onLine) {
-            fetch(GOOGLE_SCRIPT_URL + "?action=get_properties")
-                .then(res => res.json())
-                .then(data => {
-                    if (Array.isArray(data) && data.length > 0) {
-                        localStorage.setItem('cached_properties', JSON.stringify(data));
-                        populatePropertiesUI(data);
-                    }
-                })
-                .catch(() => {});
-        }
-    }
-
-    function populatePropertiesUI(data) {
-        propertySelect.innerHTML = "";
-        data.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.name; opt.innerText = p.name;
-            propertySelect.appendChild(opt);
-        });
     }
 
     async function initCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                } 
-            });
-            videoElem.srcObject = stream;
-            videoTrack = stream.getVideoTracks()[0];
-        } catch(e) {}
+            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            videoElem.srcObject = videoStream;
+            
+            const track = videoStream.getVideoTracks()[0];
+            if (track) {
+                trackCapabilities = track.getCapabilities ? track.getCapabilities() : {};
+                if (!trackCapabilities.torch) {
+                    torchBtn.style.display = 'none';
+                }
+            }
+        } catch(e) {
+            statusDiv.innerText = "CAMERA ACCESS ERROR";
+        }
     }
 
-    torchBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (!videoTrack) return;
-        try {
+    torchBtn.addEventListener('click', async () => {
+        if (!videoStream) return;
+        const track = videoStream.getVideoTracks()[0];
+        if (track && trackCapabilities.torch) {
             torchOn = !torchOn;
-            await videoTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
-            torchBtn.innerText = torchOn ? "⚡ FLASH ON" : "⚡ FLASH OFF";
-            torchBtn.style.color = torchOn ? "#00e676" : "#ffab00";
-        } catch(e) {}
+            try {
+                await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+                torchBtn.innerText = torchOn ? "⚡ FLASH ON" : "⚡ FLASH OFF";
+                torchBtn.style.borderColor = torchOn ? "#00e676" : "#ffab00";
+                torchBtn.style.color = torchOn ? "#00e676" : "#ffab00";
+            } catch(e) {}
+        }
     });
 
-    snapBtn.addEventListener('click', async (e) => {
-        e.preventDefault(); e.stopPropagation();
-        if (isProcessing) return;
+    snapBtn.addEventListener('click', async () => {
+        const property = propertySelect.value;
+        const rego = regoInput.value.trim().toUpperCase();
 
-        isProcessing = true;
-        statusDiv.innerText = "CAPTURING...";
+        if (!property) {
+            statusDiv.innerText = "⚠️ SELECT A PROPERTY FIRST";
+            triggerCross();
+            return;
+        }
+
+        if (!rego) {
+            statusDiv.innerText = "⚠️ ENTER OR SCAN A REGO";
+            triggerCross();
+            return;
+        }
 
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 1280;
-        canvas.height = videoElem.videoHeight || 720;
+        canvas.width = videoElem.videoWidth || 640;
+        canvas.height = videoElem.videoHeight || 480;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(videoElem, 0, 0);
+        const b64 = canvas.toDataURL('image/jpeg', 0.8);
 
-        const offCanvas = document.createElement('canvas');
-        offCanvas.width = 720;
-        offCanvas.height = Math.round(720 * (canvas.height / canvas.width));
-        const offCtx = offCanvas.getContext('2d');
-        offCtx.drawImage(canvas, 0, 0, offCanvas.width, offCanvas.height);
-        
-        lastCapturedB64 = offCanvas.toDataURL('image/jpeg', 0.70);
-
-        if (!navigator.onLine) {
-            flashTickOverlay();
-            statusDiv.innerText = "⚡ QUEUED FOR AUTO-OCR";
-
-            const payload = {
-                id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                action: 'log_mark',
-                property: propertySelect.value,
-                rego: regoInput.value.trim().toUpperCase() || "PENDING_OCR",
-                photoBytes: lastCapturedB64,
-                timestamp: new Date().toISOString(),
-                needsOcr: !regoInput.value.trim()
-            };
-
-            saveToOfflineQueue(payload);
-            setTimeout(() => { resetForm(); }, 800);
-            return;
-        }
-
-        statusDiv.innerText = "READING PLATE...";
-
-        canvas.toBlob(async (blob) => {
-            if (!blob) {
-                handleUnreadableState();
-                return;
-            }
-
-            try {
-                const formData = new FormData();
-                formData.append('upload', blob, 'scan.jpg');
-                formData.append('regions', 'au');
-
-                const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
-                    body: formData
-                });
-
-                if (!anprRes.ok) {
-                    handleUnreadableState();
-                    return;
-                }
-
-                const anprData = await anprRes.json();
-                
-                if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
-                    const detectedRego = anprData.results[0].plate.toUpperCase();
-                    regoInput.value = detectedRego;
-                    
-                    flashTickOverlay();
-                    statusDiv.innerText = `✔ LOGGED: ${detectedRego}`;
-
-                    const payload = {
-                        id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                        action: 'log_mark',
-                        property: propertySelect.value,
-                        rego: detectedRego,
-                        photoBytes: lastCapturedB64,
-                        timestamp: new Date().toISOString()
-                    };
-
-                    sendOrQueuePayload(payload);
-                    setTimeout(() => { resetForm(); }, 800);
-                } else {
-                    handleUnreadableState();
-                }
-
-            } catch(err) {
-                handleUnreadableState();
-            }
-        }, 'image/jpeg', 0.85);
-    });
-
-    function handleUnreadableState() {
-        flashCrossOverlay();
-        statusDiv.innerText = "❌ UNREADABLE - TYPE REGO BELOW";
-        regoInput.focus();
-        manualLogBtn.style.display = 'block';
-        isProcessing = false;
-    }
-
-    manualLogBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const typedRego = regoInput.value.trim().toUpperCase();
-        if (!typedRego) {
-            statusDiv.innerText = "ENTER A REGO FIRST";
-            regoInput.focus();
-            return;
-        }
-
-        flashTickOverlay();
-        statusDiv.innerText = `✔ MANUALLY LOGGED: ${typedRego}`;
+        statusDiv.innerText = "LOGGING MARK...";
+        triggerTick();
 
         const payload = {
-            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_mark',
-            property: propertySelect.value,
-            rego: typedRego,
-            photoBytes: lastCapturedB64,
-            timestamp: new Date().toISOString(),
-            needsOcr: false
+            property: property,
+            rego: rego,
+            photoBytes: b64,
+            timestamp: new Date().toISOString()
         };
 
-        sendOrQueuePayload(payload);
-        setTimeout(() => { resetForm(); }, 800);
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            statusDiv.innerText = `✔ MARKED ${rego}`;
+            regoInput.value = "";
+        } catch(err) {
+            statusDiv.innerText = "ERROR LOGGING MARK";
+        }
     });
 
-    function sendOrQueuePayload(payload) {
-        if (!navigator.onLine) {
-            saveToOfflineQueue(payload);
-            return;
-        }
-
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
-        })
-        .catch(() => saveToOfflineQueue(payload));
-    }
-
-    function flashTickOverlay() {
+    function triggerTick() {
         overlayTick.classList.add('show');
-        setTimeout(() => { overlayTick.classList.remove('show'); }, 400);
+        setTimeout(() => overlayTick.classList.remove('show'), 800);
     }
 
-    function flashCrossOverlay() {
+    function triggerCross() {
         overlayCross.classList.add('show');
-        setTimeout(() => { overlayCross.classList.remove('show'); }, 400);
-    }
-
-    function resetForm() {
-        regoInput.value = "";
-        statusDiv.innerText = "READY";
-        manualLogBtn.style.display = 'none';
-        isProcessing = false;
-    }
-
-    function saveToOfflineQueue(payload) {
-        try {
-            let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
-            if (!queue.some(item => item.id === payload.id)) {
-                queue.push(payload);
-                localStorage.setItem('mark_offline_queue', JSON.stringify(queue));
-            }
-            updateQueueUI();
-        } catch(e) {
-            alert("Storage full! Reconnect to network to sync.");
-        }
-    }
-
-    function updateQueueUI() {
-        let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
-        if (queue.length > 0) {
-            queueCount.innerText = queue.length;
-            syncBadge.style.display = 'block';
-        } else {
-            syncBadge.style.display = 'none';
-        }
-    }
-
-    let lastSyncTap = 0;
-    async function processOfflineQueue() {
-        const now = Date.now();
-        if (now - lastSyncTap < 1000) {
-            if (confirm("Clear stuck offline queue items?")) {
-                localStorage.removeItem('mark_offline_queue');
-                updateQueueUI();
-                statusDiv.innerText = "QUEUE CLEARED";
-                return;
-            }
-        }
-        lastSyncTap = now;
-
-        let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
-        if (queue.length === 0 || !navigator.onLine) return;
-
-        statusDiv.innerText = "RUNNING BACKLOG OCR & SYNC...";
-        let remaining = [];
-
-        for (let item of queue) {
-            try {
-                if (item.needsOcr && item.photoBytes) {
-                    const blob = b64ToBlob(item.photoBytes);
-                    const formData = new FormData();
-                    formData.append('upload', blob, 'scan.jpg');
-                    formData.append('regions', 'au');
-
-                    const anprRes = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Token ' + PLATE_RECOGNIZER_TOKEN },
-                        body: formData
-                    });
-
-                    if (anprRes.ok) {
-                        const anprData = await anprRes.json();
-                        if (anprData.results && anprData.results.length > 0 && anprData.results[0].plate) {
-                            item.rego = anprData.results[0].plate.toUpperCase();
-                        }
-                    }
-                }
-
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(item)
-                });
-
-            } catch(e) {
-                const itemTime = new Date(item.timestamp).getTime();
-                if (Date.now() - itemTime < 86400000) {
-                    remaining.push(item);
-                }
-            }
-        }
-
-        localStorage.setItem('mark_offline_queue', JSON.stringify(remaining));
-        updateQueueUI();
-        
-        if (remaining.length === 0) {
-            statusDiv.innerText = "✔ ALL OFFLINE MARKS PROCESSED!";
-            setTimeout(() => { statusDiv.innerText = "READY"; }, 1500);
-        } else {
-            statusDiv.innerText = "PARTIAL SYNC. TAP BADGE TO RETRY.";
-        }
-    }
-
-    function b64ToBlob(b64Data) {
-        const clean = b64Data.replace(/^data:image\/\w+;base64,/, "");
-        const byteCharacters = atob(clean);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        return new Blob([byteArray], { type: 'image/jpeg' });
+        setTimeout(() => overlayCross.classList.remove('show'), 800);
     }
 </script>
 </body>
