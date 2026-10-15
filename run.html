@@ -504,11 +504,11 @@
         overlayModal.classList.remove('show');
     }
 
-    matchBtn.addEventListener('click', async () => {
+matchBtn.addEventListener('click', async () => {
         if (!activeCar) return;
 
         matchBtn.disabled = true;
-        matchBtn.innerText = "MERGING EVIDENCE...";
+        matchBtn.innerText = "GENERATING COMPARISON...";
 
         const liveCanvas = document.createElement('canvas');
         const aspect = (overlayVideo.videoHeight && overlayVideo.videoWidth) ? (overlayVideo.videoHeight / overlayVideo.videoWidth) : 0.5625;
@@ -522,29 +522,36 @@
         compositeCanvas.height = liveCanvas.height;
         const compCtx = compositeCanvas.getContext('2d');
 
+        // Draw Live photo on Right side
         compCtx.drawImage(liveCanvas, 800, 0);
 
+        // Draw Mark photo on Left side
         const markImg = new Image();
         markImg.crossOrigin = "anonymous";
-        
+
+        const executeUpload = async (canvasToUpload) => {
+            const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.65);
+            await uploadEvidenceAndRedirect(compositeB64);
+        };
+
         markImg.onload = async () => {
-            compCtx.drawImage(markImg, 0, 0, 800, liveCanvas.height);
-            
+            try {
+                compCtx.drawImage(markImg, 0, 0, 800, liveCanvas.height);
+            } catch(e) {}
+
             compCtx.fillStyle = "#ff1744";
             compCtx.font = "bold 24px sans-serif";
-            compCtx.fillText("MARKED SNAPSHOT", 20, 35);
-            compCtx.fillText("TOW VERIFICATION", 820, 35);
+            compCtx.fillText("ORIGINAL MARK PHOTO", 20, 35);
+            compCtx.fillText("TOW VERIFICATION PHOTO", 820, 35);
 
-            const compositeB64 = compositeCanvas.toDataURL('image/jpeg', 0.60);
-            await uploadEvidenceAndRedirect(compositeB64);
+            await executeUpload(compositeCanvas);
         };
 
         markImg.onerror = async () => {
-            const compositeB64 = liveCanvas.toDataURL('image/jpeg', 0.60);
-            await uploadEvidenceAndRedirect(compositeB64);
+            await executeUpload(liveCanvas);
         };
 
-        if (ghostImage.src) {
+        if (ghostImage.src && ghostImage.src !== "") {
             markImg.src = ghostImage.src;
         } else {
             markImg.onerror();
@@ -552,7 +559,7 @@
     });
 
     async function uploadEvidenceAndRedirect(b64Data) {
-        matchBtn.innerText = "LOGGING PROOF...";
+        matchBtn.innerText = "SAVING COMPARISON...";
 
         const payload = {
             action: 'log_tow_confirmation',
@@ -573,10 +580,10 @@
 
         stopOverlayCamera();
 
-        // Short delay to allow Apps Script execution before redirecting
+        // Redirect to Tow app after short pause for transmission
         setTimeout(() => {
             window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
-        }, 800);
+        }, 1200);
     }
 </script>
 </body>
