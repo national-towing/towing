@@ -446,7 +446,7 @@
         window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
     });
 
-    matchBtn.addEventListener('click', async () => {
+    matchBtn.addEventListener('click', () => {
         if (!activeCar) return;
 
         matchBtn.disabled = true;
@@ -475,10 +475,9 @@
         const markImg = new Image();
         markImg.crossOrigin = "anonymous";
 
-        // Format Date/Time for Image Watermarks
         const now = new Date();
         const towTimeTag = formatDateTag(now);
-        const markTimeTag = activeCar.rawMarkedStr ? formatDateTag(new Date(activeCar.rawMarkedStr)) : towTimeTag;
+        const markTimeTag = activeCar.markedTimeStr ? activeCar.markedTimeStr : towTimeTag;
 
         const processUploadAndRedirect = (canvasToUpload) => {
             const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.50);
