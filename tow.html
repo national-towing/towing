@@ -325,8 +325,8 @@
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     facingMode: 'environment',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 } 
             });
             videoElem.srcObject = stream;
@@ -348,16 +348,18 @@
     snapBtn.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
 
-        const realW = videoElem.videoWidth || 1080;
-        const realH = videoElem.videoHeight || 1920;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = realW;
-        canvas.height = realH;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, realW, realH);
+        // Optimized downsampling (Max width 600px, 0.45 JPEG compression)
+        const vW = videoElem.videoWidth || 1280;
+        const vH = videoElem.videoHeight || 720;
+        const aspect = vH / vW;
         
-        const b64 = canvas.toDataURL('image/jpeg', 0.65);
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = Math.round(600 * aspect);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        
+        const b64 = canvas.toDataURL('image/jpeg', 0.45);
         conditionPhotos.push(b64);
 
         const img = document.createElement('img');
