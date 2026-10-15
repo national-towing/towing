@@ -445,6 +445,7 @@
         modalRegoTitle.innerText = `${car.rego} (${car.property})`;
         
         if (car.imageUrl) {
+            ghostImage.crossOrigin = "anonymous";
             ghostImage.src = car.imageUrl;
         } else {
             ghostImage.src = "";
