@@ -427,23 +427,27 @@
         matchBtn.disabled = true;
         matchBtn.innerText = "SAVING PROOF...";
 
-        // Dynamic aspect ratio calculation based on active camera stream
-        const vW = overlayVideo.videoWidth || 1280;
-        const vH = overlayVideo.videoHeight || 720;
-        const targetH = Math.round(600 * (vH / vW));
+        // Calculate exact stream aspect ratio to prevent stretching
+        const videoRatio = (overlayVideo.videoHeight && overlayVideo.videoWidth) 
+            ? (overlayVideo.videoHeight / overlayVideo.videoWidth) 
+            : 0.75;
+
+        const frameW = 600;
+        const frameH = Math.round(frameW * videoRatio);
 
         const liveCanvas = document.createElement('canvas');
-        liveCanvas.width = 600;
-        liveCanvas.height = targetH;
+        liveCanvas.width = frameW;
+        liveCanvas.height = frameH;
         const liveCtx = liveCanvas.getContext('2d');
-        liveCtx.drawImage(overlayVideo, 0, 0, 600, targetH);
+        liveCtx.drawImage(overlayVideo, 0, 0, frameW, frameH);
 
         const compositeCanvas = document.createElement('canvas');
-        compositeCanvas.width = 1200;
-        compositeCanvas.height = targetH;
+        compositeCanvas.width = frameW * 2;
+        compositeCanvas.height = frameH;
         const compCtx = compositeCanvas.getContext('2d');
 
-        compCtx.drawImage(liveCanvas, 600, 0);
+        // Right side: Tow verification photo
+        compCtx.drawImage(liveCanvas, frameW, 0);
 
         const markImg = new Image();
         markImg.crossOrigin = "anonymous";
@@ -455,13 +459,14 @@
 
         markImg.onload = async () => {
             try {
-                compCtx.drawImage(markImg, 0, 0, 600, targetH);
+                // Left side: Original mark photo drawn in natural aspect ratio
+                compCtx.drawImage(markImg, 0, 0, frameW, frameH);
             } catch(e) {}
 
             compCtx.fillStyle = "#ff1744";
             compCtx.font = "bold 18px sans-serif";
             compCtx.fillText("ORIGINAL MARK", 15, 25);
-            compCtx.fillText("TOW VERIFICATION", 615, 25);
+            compCtx.fillText("TOW VERIFICATION", frameW + 15, 25);
 
             await executeUpload(compositeCanvas);
         };
