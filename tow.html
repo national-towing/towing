@@ -324,16 +324,29 @@
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
-                    facingMode: 'environment',
+                    facingMode: { exact: "environment" },
                     width: { ideal: 1280 },
                     height: { ideal: 720 }
-                } 
+                },
+                audio: false
             });
             videoElem.srcObject = stream;
             videoTrack = stream.getVideoTracks()[0];
-        } catch(e) {}
+        } catch(e) {
+            // Fallback for devices that reject exact environment facingMode constraint
+            try {
+                const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" },
+                    audio: false
+                });
+                videoElem.srcObject = fallbackStream;
+                videoTrack = fallbackStream.getVideoTracks()[0];
+            } catch(fallbackErr) {
+                statusDiv.innerText = "CAMERA ACCESS DENIED OR BUSY";
+            }
+        }
     }
-
+    
     torchBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (!videoTrack) return;
