@@ -395,12 +395,13 @@
             modalRegoTitle.innerText = `${car.rego} (${car.property})`;
             
             if (car.imageUrl) {
-                ghostImage.crossOrigin = "anonymous";
                 let fastUrl = car.imageUrl;
                 const idMatch = car.imageUrl.match(/[-\w]{25,}/);
                 if (idMatch) {
-                    fastUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0] + "=s800";
+                    // Use Google Drive proxy URL to prevent CORS canvas blocks
+                    fastUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0];
                 }
+                ghostImage.crossOrigin = "anonymous";
                 ghostImage.src = fastUrl;
             } else {
                 ghostImage.removeAttribute("crossOrigin");
@@ -413,7 +414,7 @@
             alert("Error opening comparison: " + err.message);
         }
     }
-
+    
     async function startOverlayCamera() {
         try {
             videoStream = await navigator.mediaDevices.getUserMedia({
