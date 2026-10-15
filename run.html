@@ -275,10 +275,10 @@
             let status = "WAIT";
             if (item.pass === "YES") {
                 status = "PASS";
-            } else if (item.rawExpiryMs > 0 && nowMs >= item.rawExpiryMs) {
-                status = "READY";
             } else {
                 let expMs = item.rawExpiryMs || 0;
+                
+                // If rawExpiryMs wasn't calculated by backend, parse here
                 if (!expMs && item.expiryTime) {
                     const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
                     const parts = cleanExp.split(/[\s-:]+/);
@@ -289,8 +289,13 @@
                         const hours = parseInt(parts[2], 10);
                         const mins = parseInt(parts[3], 10);
                         expMs = new Date(year, month, day, hours, mins).getTime();
+                    } else {
+                        const d = new Date(item.expiryTime);
+                        if (!isNaN(d.getTime())) expMs = d.getTime();
                     }
                 }
+
+                // If Expiry <= Now, it is READY (RED)
                 if (expMs > 0 && nowMs >= expMs) {
                     status = "READY";
                 }
@@ -311,7 +316,6 @@
 
         renderSummaryView();
     }
-
     function formatCleanDisplayTime(rawStr) {
         if (!rawStr) return "N/A";
         
