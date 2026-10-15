@@ -348,7 +348,6 @@
     snapBtn.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
 
-        // Optimized downsampling (Max width 600px, 0.45 JPEG compression)
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
         const aspect = vH / vW;
@@ -369,7 +368,7 @@
         statusDiv.innerText = `✔ PHOTO ${conditionPhotos.length} CAPTURED`;
     });
 
-submitBtn.addEventListener('click', (e) => {
+    submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -400,7 +399,7 @@ submitBtn.addEventListener('click', (e) => {
             timestamp: new Date().toISOString()
         };
 
-        // Optimistically remove vehicle from local cached run data so it instantly disappears from UI
+        // Optimistically hide vehicle from local cached run list immediately
         try {
             let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
             cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
@@ -410,35 +409,30 @@ submitBtn.addEventListener('click', (e) => {
         if (!navigator.onLine) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE!";
-            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 300);
+            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 500);
             return;
         }
 
-        statusDiv.innerText = "SAVING IN BACKGROUND...";
+        statusDiv.innerText = "LOGGING TOW TO YARD...";
 
-        // Use Form-UrlEncoded payload for reliable asynchronous background delivery to Apps Script
-        const formData = new URLSearchParams();
-        formData.append('postData', JSON.stringify(payload));
+        try {
+            // Synchronous delivery ensures browser finishes transmission before redirecting
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
 
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-        }).then(res => res.json())
-          .then(data => {
-              if (data.status === "ERROR") {
-                  saveToOfflineQueue(payload);
-              }
-          })
-          .catch(() => {
-              saveToOfflineQueue(payload);
-          });
-
-        // Instant sub-second redirect back to RUN app
-        setTimeout(() => {
-            window.location.href = "run.html?v=10000";
-        }, 300);
+            statusDiv.innerText = "✔ TOW LOGGED SUCCESS!";
+            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 400);
+        } catch(err) {
+            saveToOfflineQueue(payload);
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 500);
+        }
     });
-    
+
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
         if (!queue.some(item => item.id === payload.id)) {
