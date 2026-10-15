@@ -416,13 +416,21 @@
             
             if (car.status === "READY") {
                 tile.className = 'car-tile tile-ready';
-                tile.onclick = () => (car);
+                // Direct event binding to avoid inline string escaping issues
+                tile.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openOverlayModal(car);
+                });
             } else if (car.status === "WAIT") {
                 tile.className = 'car-tile tile-wait';
-                tile.onclick = () => { window.location.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`; };
+                tile.addEventListener('click', () => {
+                    window.location.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`;
+                });
             } else {
                 tile.className = 'car-tile tile-pass';
-                tile.onclick = () => { window.location.href = `passes.html`; };
+                tile.addEventListener('click', () => {
+                    window.location.href = `passes.html`;
+                });
             }
 
             tile.innerHTML = `
@@ -440,19 +448,24 @@
         });
     }
     async function openOverlayModal(car) {
-        activeCar = car;
-        modalRegoTitle.innerText = `${car.rego} (${car.property})`;
-        
-        if (car.imageUrl) {
-            ghostImage.crossOrigin = "anonymous";
-            ghostImage.src = car.imageUrl;
-        } else {
-            ghostImage.src = "";
-            alert("No original mark photo found for this vehicle.");
-        }
+        try {
+            activeCar = car;
+            modalRegoTitle.innerText = `${car.rego} (${car.property})`;
+            
+            // Set image with crossOrigin before setting source
+            if (car.imageUrl) {
+                ghostImage.crossOrigin = "anonymous";
+                ghostImage.src = car.imageUrl;
+            } else {
+                ghostImage.removeAttribute("crossOrigin");
+                ghostImage.src = "";
+            }
 
-        overlayModal.classList.add('show');
-        await startOverlayCamera();
+            overlayModal.classList.add('show');
+            await startOverlayCamera();
+        } catch(err) {
+            alert("Error opening comparison: " + err.message);
+        }
     }
     async function startOverlayCamera() {
         try {
