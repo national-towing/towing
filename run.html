@@ -248,7 +248,6 @@
             propertyGroups[prop].push({
                 rego: item.rego,
                 markedTimeStr: cleanMkd,
-                rawMarkedStr: item.markedTime,
                 expiryTimeStr: cleanExp,
                 status: status,
                 property: prop,
@@ -439,18 +438,17 @@
         }
     }
 
-    // Direct Bypass Button ("SKIP & TOW")
     skipBtn.addEventListener('click', () => {
         if (!activeCar) return;
         stopOverlayCamera();
         window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
     });
 
-    matchBtn.addEventListener('click', () => {
+    matchBtn.addEventListener('click', async () => {
         if (!activeCar) return;
 
         matchBtn.disabled = true;
-        matchBtn.innerText = "MATCHING...";
+        matchBtn.innerText = "SAVING PROOF...";
 
         const videoRatio = (overlayVideo.videoHeight && overlayVideo.videoWidth) 
             ? (overlayVideo.videoHeight / overlayVideo.videoWidth) 
@@ -479,29 +477,30 @@
         const towTimeTag = formatDateTag(now);
         const markTimeTag = activeCar.markedTimeStr ? activeCar.markedTimeStr : towTimeTag;
 
-        const processUploadAndRedirect = (canvasToUpload) => {
+        const processUploadAndRedirect = async (canvasToUpload) => {
             const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.50);
 
-            // Asynchronous Background Upload
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'log_tow_confirmation',
-                    rego: activeCar.rego,
-                    property: activeCar.property,
-                    photoBytes: compositeB64,
-                    timestamp: now.toISOString()
-                })
-            }).catch(()=>{});
+            try {
+                // Synchronous fetch guarantees upload finishes before redirect
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'log_tow_confirmation',
+                        rego: activeCar.rego,
+                        property: activeCar.property,
+                        photoBytes: compositeB64,
+                        timestamp: now.toISOString()
+                    })
+                });
+            } catch(e) {}
 
-            // Instant Sub-Second Handoff to Tow App
             stopOverlayCamera();
             window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
         };
 
-        markImg.onload = () => {
+        markImg.onload = async () => {
             try {
                 compCtx.drawImage(markImg, 0, 0, frameW, frameH);
             } catch(e) {}
@@ -511,11 +510,11 @@
             compCtx.fillText(`ORIGINAL MARK ${markTimeTag}`, 15, 25);
             compCtx.fillText(`TOW VERIFICATION ${towTimeTag}`, frameW + 15, 25);
 
-            processUploadAndRedirect(compositeCanvas);
+            await processUploadAndRedirect(compositeCanvas);
         };
 
-        markImg.onerror = () => {
-            processUploadAndRedirect(liveCanvas);
+        markImg.onerror = async () => {
+            await processUploadAndRedirect(liveCanvas);
         };
 
         if (ghostImage.src && ghostImage.src !== "") {
@@ -533,7 +532,7 @@
         const min = String(d.getMinutes()).padStart(2, '0');
         const ampm = hh >= 12 ? 'PM' : 'AM';
         hh = hh % 12;
-        hh = hh ? hh : 12; // convert 0 to 12
+        hh = hh ? hh : 12;
         return `${dd}/${mm} ${String(hh).padStart(2, '0')}:${min} ${ampm}`;
     }
 </script>
