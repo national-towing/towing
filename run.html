@@ -97,6 +97,55 @@
         .badge-pass { background: #29b6f6; color: #000; }
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
+
+        /* GHOST OVERLAY VERIFICATION MODAL */
+        .overlay-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; display: none; flex-direction: column;
+            align-items: center; justify-content: space-between; padding: 12px; z-index: 9999;
+        }
+        .overlay-modal.show { display: flex; }
+
+        .overlay-header {
+            width: 100%; max-width: 440px; display: flex; justify-content: space-between;
+            align-items: center; background: #1e1e1e; padding: 8px 12px; border-radius: 12px; border: 1px solid #333;
+        }
+        .overlay-title { font-size: 18px; font-weight: 900; color: #ff1744; letter-spacing: 1px; }
+        .close-modal-btn { background: #333; color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 8px; font-weight: 900; cursor: pointer; }
+
+        .camera-overlay-box {
+            position: relative; width: 100%; max-width: 440px; flex: 1; margin: 8px 0;
+            border-radius: 14px; overflow: hidden; background: #000; display: flex;
+            align-items: center; justify-content: center; border: 2px solid #ff1744;
+        }
+
+        #overlayVideo { width: 100%; height: 100%; object-fit: cover; }
+
+        #ghostImage {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.5; pointer-events: none; transition: opacity 0.1s ease;
+        }
+
+        .torch-overlay-btn {
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
+            border: 1px solid #ff1744; color: #ff1744; padding: 6px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
+        }
+
+        .controls-card {
+            width: 100%; max-width: 440px; background: #1e1e1e; border-radius: 14px;
+            padding: 12px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .slider-row { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 900; color: #aaa; }
+        .slider-row input[type="range"] { flex: 1; height: 6px; border-radius: 3px; background: #444; outline: none; }
+
+        .match-btn {
+            width: 100%; height: 52px; background: #ff1744; color: #fff; border: none;
+            border-radius: 12px; font-size: 20px; font-weight: 900; letter-spacing: 1px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
+        }
+        .match-btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
@@ -117,6 +166,29 @@
     <div class="empty-msg">LOADING RUN...</div>
 </div>
 
+<!-- GHOST OVERLAY VERIFICATION MODAL -->
+<div class="overlay-modal" id="overlayModal">
+    <div class="overlay-header">
+        <span class="overlay-title" id="modalRegoTitle">VERIFY REGO</span>
+        <button class="close-modal-btn" id="closeModalBtn">CANCEL</button>
+    </div>
+
+    <div class="camera-overlay-box">
+        <video id="overlayVideo" autoplay playsinline></video>
+        <img id="ghostImage" src="" alt="Mark Photo Overlay">
+        <button class="torch-overlay-btn" id="torchOverlayBtn">⚡ FLASH: OFF</button>
+    </div>
+
+    <div class="controls-card">
+        <div class="slider-row">
+            <span>LIVE</span>
+            <input type="range" id="opacitySlider" min="0.1" max="0.9" step="0.05" value="0.5">
+            <span>MARK</span>
+        </div>
+        <button class="match-btn" id="matchBtn">MATCH & TOW</button>
+    </div>
+</div>
+
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
@@ -127,209 +199,18 @@
     const runContainer = document.getElementById('runContainer');
     const refreshBtn = document.getElementById('refreshBtn');
 
+    // Modal elements
+    const overlayModal = document.getElementById('overlayModal');
+    const modalRegoTitle = document.getElementById('modalRegoTitle');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const overlayVideo = document.getElementById('overlayVideo');
+    const ghostImage = document.getElementById('ghostImage');
+    const opacitySlider = document.getElementById('opacitySlider');
+    const torchOverlayBtn = document.getElementById('torchOverlayBtn');
+    const matchBtn = document.getElementById('matchBtn');
+
     let rawData = [];
     let propertyGroups = {};
+    let activeCar = null;
 
-    window.addEventListener('load', loadTowRun);
-
-    refreshBtn.addEventListener('click', () => {
-        runContainer.innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
-        loadTowRun();
-    });
-
-    async function loadTowRun() {
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_run");
-            rawData = await res.json();
-            localStorage.setItem('cached_run_data', JSON.stringify(rawData));
-            parseAndRenderRun(rawData);
-        } catch(e) {
-            const cached = localStorage.getItem('cached_run_data');
-            if (cached) {
-                rawData = JSON.parse(cached);
-                parseAndRenderRun(rawData);
-            } else {
-                runContainer.innerHTML = "<div class='empty-msg'>NO OFFLINE DATA STORED</div>";
-            }
-        }
-    }
-
-    function parseAndRenderRun(data) {
-        if (!data || !Array.isArray(data) || data.length === 0) {
-            runContainer.innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
-            return;
-        }
-
-        const nowMs = Date.now();
-        propertyGroups = {};
-
-        data.forEach(item => {
-            const prop = item.property || "GENERAL";
-            if (!propertyGroups[prop]) propertyGroups[prop] = [];
-
-            let status = "WAIT";
-            if (item.pass === "YES") {
-                status = "PASS";
-            } else if (item.rawExpiryMs > 0 && nowMs >= item.rawExpiryMs) {
-                status = "READY";
-            } else {
-                let expMs = item.rawExpiryMs || 0;
-                if (!expMs && item.expiryTime) {
-                    const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
-                    const parts = cleanExp.split(/[\s-:]+/);
-                    if (parts.length >= 4) {
-                        const day = parseInt(parts[0], 10);
-                        const month = parseInt(parts[1], 10) - 1;
-                        const year = new Date().getFullYear();
-                        const hours = parseInt(parts[2], 10);
-                        const mins = parseInt(parts[3], 10);
-                        expMs = new Date(year, month, day, hours, mins).getTime();
-                    }
-                }
-                if (expMs > 0 && nowMs >= expMs) {
-                    status = "READY";
-                }
-            }
-
-            // Format clean Day HH:MM timestamps
-            const cleanMkd = formatCleanDisplayTime(item.markedTime);
-            const cleanExp = formatCleanDisplayTime(item.expiryTime);
-
-            propertyGroups[prop].push({
-                rego: item.rego,
-                markedTimeStr: cleanMkd,
-                expiryTimeStr: cleanExp,
-                status: status,
-                property: prop
-            });
-        });
-
-        renderSummaryView();
-    }
-
-    function formatCleanDisplayTime(rawStr) {
-        if (!rawStr) return "N/A";
-        // If string contains ISO date like 2026-09-30T05:53:00.000Z
-        if (String(rawStr).includes("T")) {
-            const d = new Date(rawStr);
-            if (!isNaN(d.getTime())) {
-                const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-                const dayName = days[d.getDay()];
-                const hh = String(d.getHours()).padStart(2, '0');
-                const mm = String(d.getMinutes()).padStart(2, '0');
-                return `${dayName} ${hh}:${mm}`;
-            }
-        }
-        // If already formatted like "Wed 30-09 10:43"
-        const parts = String(rawStr).trim().split(/\s+/);
-        if (parts.length >= 3) {
-            return `${parts[0]} ${parts[2]}`; // "Wed 10:43"
-        }
-        return String(rawStr);
-    }
-
-    function renderSummaryView() {
-        const sortedProps = Object.keys(propertyGroups).sort((a, b) => {
-            let redA = propertyGroups[a].filter(c => c.status === "READY").length;
-            let redB = propertyGroups[b].filter(c => c.status === "READY").length;
-            if (redB !== redA) return redB - redA;
-
-            let orangeA = propertyGroups[a].filter(c => c.status === "WAIT").length;
-            let orangeB = propertyGroups[b].filter(c => c.status === "WAIT").length;
-            if (orangeB !== orangeA) return orangeB - orangeA;
-
-            let blueA = propertyGroups[a].filter(c => c.status === "PASS").length;
-            let blueB = propertyGroups[b].filter(c => c.status === "PASS").length;
-            if (blueB !== blueA) return blueB - blueA;
-
-            return a.localeCompare(b);
-        });
-
-        runContainer.innerHTML = "";
-
-        sortedProps.forEach(prop => {
-            const redCount = propertyGroups[prop].filter(c => c.status === "READY").length;
-            const orangeCount = propertyGroups[prop].filter(c => c.status === "WAIT").length;
-            const blueCount = propertyGroups[prop].filter(c => c.status === "PASS").length;
-
-            const card = document.createElement('div');
-            card.className = 'prop-summary-card';
-
-            card.innerHTML = `
-                <div class="prop-name" onclick="renderDetailView('${prop}', 'ALL')">${prop}</div>
-                <div class="count-btns">
-                    <button class="cnt-btn btn-red" onclick="renderDetailView('${prop}', 'READY')">
-                        <span class="cnt-num">${redCount}</span>
-                        <span class="cnt-lbl">TOW</span>
-                    </button>
-                    <button class="cnt-btn btn-orange" onclick="renderDetailView('${prop}', 'WAIT')">
-                        <span class="cnt-num">${orangeCount}</span>
-                        <span class="cnt-lbl">WAIT</span>
-                    </button>
-                    <button class="cnt-btn btn-blue" onclick="renderDetailView('${prop}', 'PASS')">
-                        <span class="cnt-num">${blueCount}</span>
-                        <span class="cnt-lbl">PASS</span>
-                    </button>
-                </div>
-            `;
-
-            runContainer.appendChild(card);
-        });
-    }
-
-    function renderDetailView(prop, filterStatus) {
-        runContainer.innerHTML = "";
-
-        const backBtn = document.createElement('div');
-        backBtn.className = 'back-btn';
-        backBtn.innerText = "← BACK TO ALL PROPERTIES";
-        backBtn.onclick = renderSummaryView;
-        runContainer.appendChild(backBtn);
-
-        const title = document.createElement('div');
-        title.className = 'detail-title';
-        title.innerText = `${prop} ${filterStatus !== 'ALL' ? '(' + filterStatus + ')' : ''}`;
-        runContainer.appendChild(title);
-
-        let cars = propertyGroups[prop] || [];
-        if (filterStatus !== 'ALL') {
-            cars = cars.filter(c => c.status === filterStatus);
-        }
-
-        const statusOrder = { "READY": 1, "WAIT": 2, "PASS": 3 };
-        cars.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-
-        if (cars.length === 0) {
-            runContainer.innerHTML += `<div class="empty-msg">NO ${filterStatus} VEHICLES</div>`;
-            return;
-        }
-
-        cars.forEach(car => {
-            const tile = document.createElement('a');
-            tile.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`;
-            
-            if (car.status === "READY") {
-                tile.className = 'car-tile tile-ready';
-            } else if (car.status === "WAIT") {
-                tile.className = 'car-tile tile-wait';
-            } else {
-                tile.className = 'car-tile tile-pass';
-            }
-
-            tile.innerHTML = `
-                <div>
-                    <div class="rego-header-line">
-                        <span class="car-rego">${car.rego}</span>
-                        <span class="car-time-mkd">MKD: ${car.markedTimeStr}</span>
-                    </div>
-                    <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
-                </div>
-                <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
-            `;
-
-            runContainer.appendChild(tile);
-        });
-    }
-</script>
-</body>
-</html>
+    let videoStream = null;
