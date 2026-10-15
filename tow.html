@@ -369,7 +369,7 @@
         statusDiv.innerText = `✔ PHOTO ${conditionPhotos.length} CAPTURED`;
     });
 
-    submitBtn.addEventListener('click', async (e) => {
+    submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -402,29 +402,28 @@
 
         if (!navigator.onLine) {
             saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 800);
+            statusDiv.innerText = "⚡ SAVED OFFLINE!";
+            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 300);
             return;
         }
 
-        statusDiv.innerText = "LOGGING TOW TO YARD...";
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
+        statusDiv.innerText = "SAVING IN BACKGROUND...";
 
-            statusDiv.innerText = "✔ TOW LOGGED SUCCESS!";
-            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 800);
-        } catch(err) {
+        // Fire request in background without await
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        }).catch(() => {
             saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
-            setTimeout(() => { window.location.href = "run.html?v=10000"; }, 800);
-        }
-    });
+        });
 
+        // Instant redirect back to Run Log in under 300ms
+        setTimeout(() => {
+            window.location.href = "run.html?v=10000";
+        }, 300);
+    });
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
         if (!queue.some(item => item.id === payload.id)) {
