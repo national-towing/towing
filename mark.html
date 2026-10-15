@@ -4,60 +4,125 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <meta id="themeColor" name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=10000">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=10000">
-    <link rel="manifest" href="manifest-mark.json?v=10000">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=999">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=999">
+    <link rel="manifest" href="manifest-mark.json?v=999">
 
     <style>
         * { box-sizing: border-box; }
-        body { 
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: #121212; 
+            color: #fff; 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            position: relative;
         }
         
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
-        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .header-box { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            width: 100%; 
+            max-width: 440px; 
+            margin-bottom: 8px; 
+            flex-shrink: 0;
+            padding: 6px 10px;
+            border-radius: 12px;
+            transition: background 0.3s ease;
+        }
+        .header-box.success-bg { background: #00e676; }
+        .header-box.error-bg { background: #ff1744; }
 
-        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
-        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
-        .nav-run { background: #ffab00; }
-        .nav-tow { background: #ff1744; color: #fff; }
-        .nav-rel { background: #00e676; }
-        .nav-pass { background: #ab47bc; color: #fff; }
+        .header-box h1 { 
+            margin: 0; 
+            font-size: 34px; 
+            font-weight: 900; 
+            color: #ffab00; 
+            letter-spacing: 2px; 
+            text-align: center; 
+            transition: color 0.3s ease;
+        }
+        .header-box.success-bg h1, .header-box.error-bg h1 { color: #fff; }
 
-        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
-        
-        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
+        .icon-btn { 
+            position: absolute; 
+            right: 8px; 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            color: #fff; 
+        }
+        .icon-btn:active { transform: scale(0.9); }
+
+        .card { 
+            background: #1e1e1e; 
+            border-radius: 18px; 
+            padding: 14px; 
+            width: 100%; 
+            max-width: 440px; 
+            border: 1px solid #333; 
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 8px;
+        }
+
+        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 6px; font-weight: 900; letter-spacing: 1px; flex-shrink: 0; }
         input, select {
-            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
-            -webkit-appearance: none;
+            width: 100%; height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 900; margin-top: 3px; outline: none;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+            flex-shrink: 0;
         }
-
-        .row-rego-state { display: flex; gap: 10px; }
-        .row-rego-state > div:first-child { flex: 2; }
-        .row-rego-state > div:last-child { flex: 1; }
-
-        .row-2 { display: flex; gap: 10px; }
-        .row-2 > div { flex: 1; }
 
         .camera-box {
-            width: 100%; height: 340px; background: #000; border-radius: 12px; border: 2px solid #333;
-            margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            background: #000;
+            border-radius: 14px;
+            border: 2px solid #333;
+            margin-top: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            touch-action: none;
         }
-        video { width: 100%; height: 100%; object-fit: cover; }
-
-        .scan-guide {
-            position: absolute; width: 80%; height: 80px; border: 2px dashed #ff1744;
-            border-radius: 10px; pointer-events: none; box-shadow: 0 0 0 4000px rgba(0,0,0,0.45);
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
         }
 
         .torch-btn {
@@ -67,219 +132,437 @@
         }
 
         .circle-cam-btn {
-            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-            width: 84px; height: 84px; background: #ff1744; border: 4px solid #fff; border-radius: 50%;
+            position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+            width: 76px; height: 76px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 22px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
         }
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
-        .circle-cam-inner { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #000; }
+        .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #000; }
 
-        .submit-btn {
-            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+        /* FULL-SCREEN OVERLAYS */
+        .full-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; pointer-events: none; opacity: 0;
+            transition: opacity 0.15s ease-in-out;
         }
+        .full-overlay.green { background: rgba(0, 230, 118, 0.92); }
+        .full-overlay.red { background: rgba(255, 23, 68, 0.92); }
+        .full-overlay.show { opacity: 1; }
+        .full-overlay-symbol { font-size: 160px; color: #fff; text-shadow: 0 8px 32px rgba(0,0,0,0.5); }
 
-        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
+        /* OFFLINE SYNC MODAL */
+        .sync-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px; z-index: 10000;
+        }
+        .sync-modal.show { display: flex; }
+        .sync-card {
+            background: #1e1e1e; border: 2px solid #ffab00; border-radius: 16px;
+            padding: 20px; width: 100%; max-width: 400px; max-height: 80vh;
+            display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .sync-card h2 { margin: 0 0 12px 0; color: #ffab00; font-size: 20px; text-align: center; }
+        .sync-list { flex: 1; overflow-y: auto; margin-bottom: 16px; border: 1px solid #333; border-radius: 8px; padding: 8px; background: #121212; }
+        .sync-item { font-size: 13px; font-weight: 700; padding: 6px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .sync-item.ok { color: #00e676; }
+        .sync-item.fail { color: #ff1744; }
+        .sync-clear-btn {
+            background: #ffab00; color: #000; border: none; border-radius: 10px;
+            padding: 14px; font-weight: 900; font-size: 15px; cursor: pointer; text-align: center;
+        }
+        .sync-clear-btn:active { transform: scale(0.96); }
+
+        #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 6px; color: #ffab00; flex-shrink: 0; min-height: 20px; }
     </style>
 </head>
 <body>
 
-<div class="header-box">
-    <h1>MARK</h1>
-    <div class="icon-btn" id="refreshBtn">🔄</div>
+<div class="full-overlay green" id="greenOverlay"><div class="full-overlay-symbol">✔</div></div>
+<div class="full-overlay red" id="redOverlay"><div class="full-overlay-symbol">✖</div></div>
+
+<div class="sync-modal" id="syncModal">
+    <div class="sync-card">
+        <h2>OFFLINE SYNC SUMMARY</h2>
+        <div class="sync-list" id="syncList"></div>
+        <button class="sync-clear-btn" id="clearSyncBtn">RETURN TO MARKING</button>
+    </div>
 </div>
 
-<div class="nav-bar">
-    <a href="run.html?v=10000" class="nav-tile nav-run">RUN</a>
-    <a href="tow.html?v=10000" class="nav-tile nav-tow">TOW</a>
-    <a href="release.html?v=10000" class="nav-tile nav-rel">REL</a>
-    <a href="passes.html?v=10000" class="nav-tile nav-pass">PASS</a>
+<div class="header-box" id="headerBox">
+    <h1>MARK</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
 <div class="card">
     <label>PROPERTY</label>
     <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
 
-    <div class="row-rego-state">
-        <div>
-            <label>REGO</label>
-            <input type="text" id="regoInput" placeholder="REGO OR SNAP" style="color:#ff1744; text-transform:uppercase;">
-        </div>
-        <div>
-            <label>STATE</label>
-            <select id="stateSelect" style="color:#ffab00;">
-                <option value="QLD" selected>QLD</option>
-                <option value="NSW">NSW</option>
-                <option value="VIC">VIC</option>
-                <option value="NT">NT</option>
-                <option value="SA">SA</option>
-                <option value="TAS">TAS</option>
-                <option value="ACT">ACT</option>
-                <option value="WA">WA</option>
-            </select>
-        </div>
-    </div>
+    <label>REGO</label>
+    <input type="text" id="regoInput" placeholder="SCAN OR TYPE REGO..." style="text-transform:uppercase; color:#ffab00;">
 
-    <div class="row-2">
-        <div>
-            <label>MAKE</label>
-            <select id="makeSelect" onchange="checkMakeOther(this)">
-                <option value="">MAKE</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Holden">Holden</option>
-                <option value="Ford">Ford</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Nissan">Nissan</option>
-                <option value="Mitsubishi">Mitsubishi</option>
-                <option value="Mazda">Mazda</option>
-                <option value="Subaru">Subaru</option>
-                <option value="Honda">Honda</option>
-                <option value="Volkswagen">Volkswagen</option>
-                <option value="Kia">Kia</option>
-                <option value="BMW">BMW</option>
-                <option value="Mercedes-Benz">Mercedes-Benz</option>
-                <option value="Audi">Audi</option>
-                <option value="Jeep">Jeep</option>
-                <option value="Other">Other</option>
-            </select>
-            <input type="text" id="makeOtherInput" placeholder="ENTER MAKE" style="display:none; margin-top:4px; font-size:18px;">
-        </div>
-        <div>
-            <label>MODEL</label>
-            <input type="text" id="modelInput" placeholder="MODEL">
-        </div>
-    </div>
-
-    <div class="row-2">
-        <div>
-            <label>COLOUR</label>
-            <select id="colourSelect" onchange="checkColourOther(this)">
-                <option value="">COLOUR</option>
-                <option value="White">White</option>
-                <option value="Black">Black</option>
-                <option value="Silver">Silver</option>
-                <option value="Grey">Grey</option>
-                <option value="Blue">Blue</option>
-                <option value="Red">Red</option>
-                <option value="Green">Green</option>
-                <option value="Yellow">Yellow</option>
-                <option value="Gold">Gold</option>
-                <option value="Bronze">Bronze</option>
-                <option value="Orange">Orange</option>
-                <option value="Purple">Purple</option>
-                <option value="Brown">Brown</option>
-                <option value="Other">Other</option>
-            </select>
-            <input type="text" id="colourOtherInput" placeholder="ENTER COLOUR" style="display:none; margin-top:4px; font-size:18px;">
-        </div>
-        <div>
-            <label>BODY TYPE</label>
-            <select id="bodyTypeSelect">
-                <option value="Sedan" selected>Sedan</option>
-                <option value="Hatchback">Hatchback</option>
-                <option value="Station Wagon">Station Wagon</option>
-                <option value="Utility">Utility</option>
-                <option value="Van">Van</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-    </div>
-
+    <label>MARKING CAMERA</label>
     <div class="camera-box">
-        <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
-        <div class="scan-guide"></div>
-        <video id="videoElem" autoplay playsinline muted></video>
+        <video id="videoElem" autoplay playsinline></video>
+        <button class="torch-btn" id="torchBtn">⚡ FLASH: OFF</button>
         <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
     </div>
 
-    <button class="submit-btn" id="submitBtn">MARK VEHICLE</button>
-    <div id="status"></div>
+    <div id="status">READY</div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=10000').catch(()=>{});
-    }
-
     const propertySelect = document.getElementById('propertySelect');
     const regoInput = document.getElementById('regoInput');
-    const stateSelect = document.getElementById('stateSelect');
-    const makeSelect = document.getElementById('makeSelect');
-    const makeOtherInput = document.getElementById('makeOtherInput');
-    const modelInput = document.getElementById('modelInput');
-    const colourSelect = document.getElementById('colourSelect');
-    const colourOtherInput = document.getElementById('colourOtherInput');
-    const bodyTypeSelect = document.getElementById('bodyTypeSelect');
-
     const videoElem = document.getElementById('videoElem');
-    const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
-    const submitBtn = document.getElementById('submitBtn');
+    const snapBtn = document.getElementById('snapBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
+    const greenOverlay = document.getElementById('greenOverlay');
+    const redOverlay = document.getElementById('redOverlay');
+    const headerBox = document.getElementById('headerBox');
+    const themeMeta = document.getElementById('themeColor');
+    const syncModal = document.getElementById('syncModal');
+    const syncList = document.getElementById('syncList');
+    const clearSyncBtn = document.getElementById('clearSyncBtn');
 
-    let capturedPhotoB64 = "";
-    let isSubmitting = false;
+    let videoStream = null;
     let videoTrack = null;
-    let torchOn = false;
+    let trackCapabilities = {};
+    let flashOn = false;
 
-    window.addEventListener('load', async () => {
-        await loadProperties();
+    let initialPinchDistance = null;
+    let initialZoom = 1;
+
+    window.addEventListener('load', () => {
+        loadProperties();
         initCamera();
+        setupPinchZoom();
+        syncOfflineQueue();
     });
 
-    refreshBtn.addEventListener('click', async () => {
-        if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (let registration of registrations) {
-                await registration.unregister();
-            }
-        }
+    window.addEventListener('online', syncOfflineQueue);
+
+    refreshBtn.addEventListener('click', () => {
         window.location.reload(true);
     });
 
-    function checkMakeOther(selectElem) {
-        if (selectElem.value === "Other") {
-            makeOtherInput.style.display = 'block'; makeOtherInput.focus();
-        } else { makeOtherInput.style.display = 'none'; }
-    }
-
-    function checkColourOther(selectElem) {
-        if (selectElem.value === "Other") {
-            colourOtherInput.style.display = 'block'; colourOtherInput.focus();
-        } else { colourOtherInput.style.display = 'none'; }
-    }
+    clearSyncBtn.addEventListener('click', () => {
+        syncModal.classList.remove('show');
+        statusDiv.innerText = "READY";
+    });
 
     async function loadProperties() {
+        useCachedProperties();
+
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
-            const data = await res.json();
-            localStorage.setItem('cached_properties', JSON.stringify(data));
-            populatePropertiesUI(data);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties", {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const properties = await res.json();
+                if (Array.isArray(properties) && properties.length > 0) {
+                    localStorage.setItem('cached_properties', JSON.stringify(properties));
+                    populatePropertyDropdown(properties);
+                }
+            }
         } catch(e) {
-            const cached = localStorage.getItem('cached_properties');
-            if (cached) populatePropertiesUI(JSON.parse(cached));
+            useCachedProperties();
         }
     }
 
-    function populatePropertiesUI(data) {
-        propertySelect.innerHTML = "";
-        data.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.name; opt.innerText = p.name;
-            propertySelect.appendChild(opt);
+    function useCachedProperties() {
+        const cached = localStorage.getItem('cached_properties');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    populatePropertyDropdown(parsed);
+                    return;
+                }
+            } catch(e) {}
+        }
+        propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+    }
+
+    function populatePropertyDropdown(properties) {
+        propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+        properties.forEach(p => {
+            const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+            if (propName) {
+                const opt = document.createElement('option');
+                opt.value = propName;
+                opt.innerText = propName;
+                propertySelect.appendChild(opt);
+            }
         });
     }
 
     async function initCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                audio: false
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
             });
-            videoElem.srcObject = stream;
-            videoTrack = stream.getVideoTracks()[0];
-        } catch(e) {}
+
+            videoElem.srcObject = videoStream;
+            videoTrack = videoStream.getVideoTracks()[0];
+            
+            if (videoTrack) {
+                trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+                if (!trackCapabilities.torch) {
+                    torchBtn.style.display = 'none';
+                }
+            }
+        } catch(e) {
+            statusDiv.innerText = "CAMERA ACCESS ERROR";
+        }
+    }
+
+    torchBtn.addEventListener('click', () => {
+        flashOn = !flashOn;
+        torchBtn.innerText = flashOn ? "⚡ FLASH: ON" : "⚡ FLASH: OFF";
+        torchBtn.style.borderColor = flashOn ? "#00e676" : "#ff1744";
+        torchBtn.style.color = flashOn ? "#00e676" : "#ff1744";
+    });
+
+    function setupPinchZoom() {
+        const cameraContainer = document.querySelector('.camera-box');
+
+        cameraContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                if (videoTrack && videoTrack.getSettings) {
+                    const settings = videoTrack.getSettings();
+                    initialZoom = settings.zoom || 1;
+                }
+            }
+        }, { passive: true });
+
+        cameraContainer.addEventListener('touchmove', async (e) => {
+            if (e.touches.length === 2 && initialPinchDistance && videoTrack && trackCapabilities.zoom) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+
+                const zoomFactor = currentDistance / initialPinchDistance;
+                let targetZoom = initialZoom * zoomFactor;
+
+                const minZoom = trackCapabilities.zoom.min || 1;
+                const maxZoom = trackCapabilities.zoom.max || 5;
+                targetZoom = Math.min(Math.max(targetZoom, minZoom), maxZoom);
+
+                try {
+                    await videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] });
+                    statusDiv.innerText = `🔍 ZOOM: ${targetZoom.toFixed(1)}x`;
+                } catch(err) {}
+            }
+        }, { passive: true });
+
+        cameraContainer.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                initialPinchDistance = null;
+                setTimeout(() => {
+                    if (statusDiv.innerText.includes("ZOOM")) {
+                        statusDiv.innerText = "READY";
+                    }
+                }, 800);
+            }
+        });
+    }
+
+    snapBtn.addEventListener('click', async () => {
+        const property = propertySelect.value;
+        if (!property) {
+            statusDiv.innerText = "⚠️ SELECT A PROPERTY FIRST";
+            triggerRedOverlay();
+            return;
+        }
+
+        if (flashOn && videoTrack && trackCapabilities.torch) {
+            try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
+        }
+
+        // FAST OPTIMIZED CANVAS SNAPSHOT (PRESERVES 16:9 ASPECT RATIO & LIGHTWEIGHT PAYLOAD)
+        const canvas = document.createElement('canvas');
+        const aspect = (videoElem.videoHeight && videoElem.videoWidth) ? (videoElem.videoHeight / videoElem.videoWidth) : 0.5625;
+        canvas.width = 800;
+        canvas.height = Math.round(800 * aspect);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        const b64 = canvas.toDataURL('image/jpeg', 0.60);
+
+        if (videoTrack && trackCapabilities.torch) {
+            setTimeout(async () => {
+                try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
+            }, 150);
+        }
+
+        let currentRego = regoInput.value.trim().toUpperCase();
+
+        if (!currentRego && navigator.onLine) {
+            statusDiv.innerText = "🔍 SCANNING...";
+            try {
+                const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'scan_npr',
+                        photoBytes: b64
+                    })
+                });
+                
+                const nprText = await nprRes.text();
+                const nprResult = JSON.parse(nprText);
+
+                if (nprResult && nprResult.rego) {
+                    currentRego = nprResult.rego.toUpperCase();
+                    regoInput.value = currentRego;
+                }
+            } catch(e) {}
+        }
+
+        let isOfflineCache = false;
+        if (!currentRego) {
+            if (!navigator.onLine) {
+                isOfflineCache = true;
+                currentRego = "PENDING_OCR";
+            } else {
+                triggerRedOverlay();
+                statusDiv.innerText = "⚠️ TYPE REGO OR ALIGN PLATE CLEARLY";
+                return;
+            }
+        }
+
+        triggerGreenOverlay();
+        statusDiv.innerText = isOfflineCache ? "✔ LOGGED OFFLINE" : `✔ MARKED ${currentRego}`;
+        regoInput.value = "";
+
+        const payload = {
+            action: 'log_mark',
+            property: property,
+            rego: currentRego,
+            photoBytes: b64,
+            isOfflinePending: isOfflineCache,
+            timestamp: new Date().toISOString()
+        };
+
+        if (navigator.onLine && !isOfflineCache) {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).catch(() => queueOfflineMark(payload));
+        } else {
+            queueOfflineMark(payload);
+        }
+    });
+
+    function triggerGreenOverlay() {
+        greenOverlay.classList.add('show');
+        headerBox.classList.remove('error-bg');
+        headerBox.classList.add('success-bg');
+        
+        document.body.style.background = "#00e676";
+        themeMeta.setAttribute('content', '#00e676');
+
+        setTimeout(() => {
+            greenOverlay.classList.remove('show');
+            document.body.style.background = "#121212";
+            themeMeta.setAttribute('content', '#121212');
+        }, 600);
+    }
+
+    function triggerRedOverlay() {
+        redOverlay.classList.add('show');
+        headerBox.classList.remove('success-bg');
+        headerBox.classList.add('error-bg');
+        
+        document.body.style.background = "#ff1744";
+        themeMeta.setAttribute('content', '#ff1744');
+
+        setTimeout(() => {
+            redOverlay.classList.remove('show');
+            document.body.style.background = "#121212";
+            themeMeta.setAttribute('content', '#121212');
+        }, 600);
+    }
+
+    function queueOfflineMark(payload) {
+        let queue = JSON.parse(localStorage.getItem('offline_marks_queue') || '[]');
+        queue.push(payload);
+        localStorage.setItem('offline_marks_queue', JSON.stringify(queue));
+    }
+
+    async function syncOfflineQueue() {
+        if (!navigator.onLine) return;
+        let queue = JSON.parse(localStorage.getItem('offline_marks_queue') || '[]');
+        if (queue.length === 0) return;
+
+        statusDiv.innerText = `🔄 SYNCING ${queue.length} OFFLINE MARKS...`;
+        syncList.innerHTML = "";
+
+        for (let i = 0; i < queue.length; i++) {
+            let item = queue[i];
+
+            if (item.isOfflinePending || item.rego === "PENDING_OCR" || item.rego.startsWith("OFFLINE_")) {
+                try {
+                    const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'scan_npr',
+                            photoBytes: item.photoBytes
+                        })
+                    });
+                    const nprText = await nprRes.text();
+                    const nprResult = JSON.parse(nprText);
+
+                    if (nprResult && nprResult.rego) {
+                        item.rego = nprResult.rego.toUpperCase();
+                    } else {
+                        item.rego = "UNREADABLE_PLATE";
+                    }
+                } catch(e) {
+                    item.rego = "UNREADABLE_PLATE";
+                }
+            }
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
+                
+                syncList.innerHTML += `<div class="sync-item ok"><span>✔ ${item.rego} (${item.property})</span><span>LOGGED</span></div>`;
+            } catch(e) {
+                syncList.innerHTML += `<div class="sync-item fail"><span>✖ ${item.rego} (${item.property})</span><span>FAILED</span></div>`;
+            }
+        }
+
+        localStorage.removeItem('offline_marks_queue');
+        syncModal.classList.add('show');
+        statusDiv.innerText = "✔ OFFLINE SYNC COMPLETE";
+    }
+</script>
+</body>
+</html>
