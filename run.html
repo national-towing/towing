@@ -427,37 +427,38 @@
         matchBtn.disabled = true;
         matchBtn.innerText = "SAVING PROOF...";
 
+        // Fast low-res canvas for instant transfer
         const liveCanvas = document.createElement('canvas');
-        const aspect = (overlayVideo.videoHeight && overlayVideo.videoWidth) ? (overlayVideo.videoHeight / overlayVideo.videoWidth) : 0.5625;
-        liveCanvas.width = 800;
-        liveCanvas.height = Math.round(800 * aspect);
+        liveCanvas.width = 600;
+        liveCanvas.height = 450;
         const liveCtx = liveCanvas.getContext('2d');
-        liveCtx.drawImage(overlayVideo, 0, 0, liveCanvas.width, liveCanvas.height);
+        liveCtx.drawImage(overlayVideo, 0, 0, 600, 450);
 
         const compositeCanvas = document.createElement('canvas');
-        compositeCanvas.width = 1600;
-        compositeCanvas.height = liveCanvas.height;
+        compositeCanvas.width = 1200;
+        compositeCanvas.height = 450;
         const compCtx = compositeCanvas.getContext('2d');
 
-        compCtx.drawImage(liveCanvas, 800, 0);
+        compCtx.drawImage(liveCanvas, 600, 0);
 
         const markImg = new Image();
         markImg.crossOrigin = "anonymous";
 
         const executeUpload = async (canvasToUpload) => {
-            const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.65);
+            // Highly compressed JPEG (0.5 quality = ~35KB) for 1-second transmission
+            const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.5);
             await uploadEvidenceAndRedirect(compositeB64);
         };
 
         markImg.onload = async () => {
             try {
-                compCtx.drawImage(markImg, 0, 0, 800, liveCanvas.height);
+                compCtx.drawImage(markImg, 0, 0, 600, 450);
             } catch(e) {}
 
             compCtx.fillStyle = "#ff1744";
-            compCtx.font = "bold 24px sans-serif";
-            compCtx.fillText("ORIGINAL MARK PHOTO", 20, 35);
-            compCtx.fillText("TOW VERIFICATION PHOTO", 820, 35);
+            compCtx.font = "bold 18px sans-serif";
+            compCtx.fillText("ORIGINAL MARK", 15, 25);
+            compCtx.fillText("TOW VERIFICATION", 615, 25);
 
             await executeUpload(compositeCanvas);
         };
