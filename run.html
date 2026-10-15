@@ -563,7 +563,7 @@
         };
 
         try {
-            fetch(GOOGLE_SCRIPT_URL, {
+            await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -573,7 +573,10 @@
 
         stopOverlayCamera();
 
-        window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
+        // Short delay to allow Apps Script execution before redirecting
+        setTimeout(() => {
+            window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
+        }, 800);
     }
 </script>
 </body>
