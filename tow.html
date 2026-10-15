@@ -369,7 +369,7 @@
         statusDiv.innerText = `✔ PHOTO ${conditionPhotos.length} CAPTURED`;
     });
 
-    submitBtn.addEventListener('click', (e) => {
+submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -400,6 +400,13 @@
             timestamp: new Date().toISOString()
         };
 
+        // Optimistically remove vehicle from local cached run data so it instantly disappears from UI
+        try {
+            let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
+            cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
+            localStorage.setItem('cached_run_data', JSON.stringify(cachedRun));
+        } catch(err) {}
+
         if (!navigator.onLine) {
             saveToOfflineQueue(payload);
             statusDiv.innerText = "⚡ SAVED OFFLINE!";
@@ -409,21 +416,29 @@
 
         statusDiv.innerText = "SAVING IN BACKGROUND...";
 
-        // Fire request in background without await
+        // Use Form-UrlEncoded payload for reliable asynchronous background delivery to Apps Script
+        const formData = new URLSearchParams();
+        formData.append('postData', JSON.stringify(payload));
+
         fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
-        }).catch(() => {
-            saveToOfflineQueue(payload);
-        });
+            body: formData
+        }).then(res => res.json())
+          .then(data => {
+              if (data.status === "ERROR") {
+                  saveToOfflineQueue(payload);
+              }
+          })
+          .catch(() => {
+              saveToOfflineQueue(payload);
+          });
 
-        // Instant redirect back to Run Log in under 300ms
+        // Instant sub-second redirect back to RUN app
         setTimeout(() => {
             window.location.href = "run.html?v=10000";
         }, 300);
     });
+    
     function saveToOfflineQueue(payload) {
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
         if (!queue.some(item => item.id === payload.id)) {
