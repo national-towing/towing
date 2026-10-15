@@ -439,19 +439,13 @@
             runContainer.appendChild(tile);
         });
     }
-
     async function openOverlayModal(car) {
         activeCar = car;
         modalRegoTitle.innerText = `${car.rego} (${car.property})`;
         
         if (car.imageUrl) {
-            // Extract File ID and use Google Direct Content CDN
-            const idMatch = car.imageUrl.match(/[-\w]{25,}/);
-            if (idMatch) {
-                ghostImage.src = "https://lh3.googleusercontent.com/d/" + idMatch[0];
-            } else {
-                ghostImage.src = car.imageUrl;
-            }
+            ghostImage.crossOrigin = "anonymous";
+            ghostImage.src = car.imageUrl;
         } else {
             ghostImage.src = "";
             alert("No original mark photo found for this vehicle.");
