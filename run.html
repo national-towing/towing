@@ -445,10 +445,11 @@
         modalRegoTitle.innerText = `${car.rego} (${car.property})`;
         
         if (car.imageUrl) {
-            ghostImage.crossOrigin = "anonymous";
+            ghostImage.removeAttribute("crossOrigin"); // Remove restriction so Drive images display
             ghostImage.src = car.imageUrl;
         } else {
             ghostImage.src = "";
+            alert("No original mark photo found for this vehicle.");
         }
 
         overlayModal.classList.add('show');
