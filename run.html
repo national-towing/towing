@@ -78,9 +78,7 @@
         .tile-wait { border-color: #ffab00; background: #2a2212; }
         .tile-pass { border-color: #29b6f6; background: #0d212d; }
 
-        .rego-header-line {
-            display: flex; align-items: baseline; gap: 12px;
-        }
+        .rego-header-line { display: flex; align-items: baseline; gap: 12px; }
         .car-rego { font-size: 32px; font-weight: 900; letter-spacing: 1px; line-height: 1; }
         .tile-ready .car-rego { color: #ff1744; }
         .tile-wait .car-rego { color: #ffab00; }
@@ -89,26 +87,30 @@
         .car-time-mkd { font-size: 13px; color: #aaa; font-weight: 700; line-height: 1; }
         .car-time-exp { font-size: 22px; color: #fff; font-weight: 900; margin-top: 6px; letter-spacing: 0.5px; }
 
-        .badge {
-            padding: 10px 14px; border-radius: 8px; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
-        }
+        .badge { padding: 10px 14px; border-radius: 8px; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .badge-ready { background: #ff1744; color: #fff; }
         .badge-wait { background: #ffab00; color: #000; }
         .badge-pass { background: #29b6f6; color: #000; }
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
 
-        /* Camera Modal Overlay */
+        /* Camera Overlay Modal */
         .overlay-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column; }
         .overlay-modal.show { display: flex; }
         .modal-header { height: 50px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
         .modal-title { font-weight: bold; font-size: 15px; color: #fff; }
-        .close-btn { color: #ff1744; font-weight: bold; font-size: 20px; cursor: pointer; }
+        .close-btn { color: #ff1744; font-weight: bold; font-size: 22px; cursor: pointer; }
+        
+        .opacity-bar { background: #2a2a2a; padding: 8px 16px; display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: bold; color: #ffab00; border-bottom: 1px solid #333; }
+        .opacity-bar input { flex: 1; accent-color: #ff1744; }
+
         .viewfinder-container { flex: 1; position: relative; overflow: hidden; background: #000; }
         #overlayVideo { width: 100%; height: 100%; object-fit: cover; }
         #ghostImage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; pointer-events: none; }
-        .modal-footer { height: 75px; background: #1e1e1e; display: flex; justify-content: center; align-items: center; border-top: 1px solid #333; }
-        .match-btn { background: #ff1744; color: #fff; border: none; padding: 14px 28px; border-radius: 30px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        
+        .modal-footer { height: 75px; background: #1e1e1e; display: flex; justify-content: space-evenly; align-items: center; border-top: 1px solid #333; padding: 0 10px; gap: 10px; }
+        .match-btn { flex: 1; background: #ff1744; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+        .skip-btn { flex: 1; background: #444; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -135,12 +137,21 @@
         <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
         <span class="close-btn" onclick="closeOverlayModal()">✕</span>
     </div>
+    
+    <!-- Opacity Control Slider -->
+    <div class="opacity-bar">
+        <span>GHOST OPACITY:</span>
+        <input type="range" id="opacitySlider" min="0" max="100" value="45">
+    </div>
+
     <div class="viewfinder-container">
         <video id="overlayVideo" autoplay playsinline muted></video>
         <img id="ghostImage" alt="Ghost Overlay">
     </div>
+    
     <div class="modal-footer">
-        <button id="matchBtn" class="match-btn">MATCH & TOW VEHICLE</button>
+        <button id="matchBtn" class="match-btn">MATCH & TOW</button>
+        <button id="skipBtn" class="skip-btn">SKIP & TOW</button>
     </div>
 </div>
 
@@ -157,7 +168,9 @@
     const overlayVideo = document.getElementById('overlayVideo');
     const ghostImage = document.getElementById('ghostImage');
     const modalRegoTitle = document.getElementById('modalRegoTitle');
+    const opacitySlider = document.getElementById('opacitySlider');
     const matchBtn = document.getElementById('matchBtn');
+    const skipBtn = document.getElementById('skipBtn');
 
     let rawData = [];
     let propertyGroups = {};
@@ -169,6 +182,10 @@
     refreshBtn.addEventListener('click', () => {
         runContainer.innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
         loadTowRun();
+    });
+
+    opacitySlider.addEventListener('input', (e) => {
+        ghostImage.style.opacity = e.target.value / 100;
     });
 
     async function loadTowRun() {
@@ -231,6 +248,7 @@
             propertyGroups[prop].push({
                 rego: item.rego,
                 markedTimeStr: cleanMkd,
+                rawMarkedStr: item.markedTime,
                 expiryTimeStr: cleanExp,
                 status: status,
                 property: prop,
@@ -421,13 +439,19 @@
         }
     }
 
+    // Direct Bypass Button ("SKIP & TOW")
+    skipBtn.addEventListener('click', () => {
+        if (!activeCar) return;
+        stopOverlayCamera();
+        window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
+    });
+
     matchBtn.addEventListener('click', async () => {
         if (!activeCar) return;
 
         matchBtn.disabled = true;
-        matchBtn.innerText = "SAVING PROOF...";
+        matchBtn.innerText = "MATCHING...";
 
-        // Calculate exact stream aspect ratio to prevent stretching
         const videoRatio = (overlayVideo.videoHeight && overlayVideo.videoWidth) 
             ? (overlayVideo.videoHeight / overlayVideo.videoWidth) 
             : 0.75;
@@ -446,33 +470,53 @@
         compositeCanvas.height = frameH;
         const compCtx = compositeCanvas.getContext('2d');
 
-        // Right side: Tow verification photo
         compCtx.drawImage(liveCanvas, frameW, 0);
 
         const markImg = new Image();
         markImg.crossOrigin = "anonymous";
 
-        const executeUpload = async (canvasToUpload) => {
-            const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.55);
-            await uploadEvidenceAndRedirect(compositeB64);
+        // Format Date/Time for Image Watermarks
+        const now = new Date();
+        const towTimeTag = formatDateTag(now);
+        const markTimeTag = activeCar.rawMarkedStr ? formatDateTag(new Date(activeCar.rawMarkedStr)) : towTimeTag;
+
+        const processUploadAndRedirect = (canvasToUpload) => {
+            const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.50);
+
+            // Asynchronous Background Upload
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'log_tow_confirmation',
+                    rego: activeCar.rego,
+                    property: activeCar.property,
+                    photoBytes: compositeB64,
+                    timestamp: now.toISOString()
+                })
+            }).catch(()=>{});
+
+            // Instant Sub-Second Handoff to Tow App
+            stopOverlayCamera();
+            window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
         };
 
-        markImg.onload = async () => {
+        markImg.onload = () => {
             try {
-                // Left side: Original mark photo drawn in natural aspect ratio
                 compCtx.drawImage(markImg, 0, 0, frameW, frameH);
             } catch(e) {}
 
             compCtx.fillStyle = "#ff1744";
-            compCtx.font = "bold 18px sans-serif";
-            compCtx.fillText("ORIGINAL MARK", 15, 25);
-            compCtx.fillText("TOW VERIFICATION", frameW + 15, 25);
+            compCtx.font = "bold 16px sans-serif";
+            compCtx.fillText(`ORIGINAL MARK ${markTimeTag}`, 15, 25);
+            compCtx.fillText(`TOW VERIFICATION ${towTimeTag}`, frameW + 15, 25);
 
-            await executeUpload(compositeCanvas);
+            processUploadAndRedirect(compositeCanvas);
         };
 
-        markImg.onerror = async () => {
-            await executeUpload(liveCanvas);
+        markImg.onerror = () => {
+            processUploadAndRedirect(liveCanvas);
         };
 
         if (ghostImage.src && ghostImage.src !== "") {
@@ -482,26 +526,16 @@
         }
     });
 
-    async function uploadEvidenceAndRedirect(b64Data) {
-        const payload = {
-            action: 'log_tow_confirmation',
-            rego: activeCar.rego,
-            property: activeCar.property,
-            photoBytes: b64Data,
-            timestamp: new Date().toISOString()
-        };
-
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-        } catch(e) {}
-
-        stopOverlayCamera();
-        window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
+    function formatDateTag(d) {
+        if (isNaN(d.getTime())) return "";
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        let hh = d.getHours();
+        const min = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hh >= 12 ? 'PM' : 'AM';
+        hh = hh % 12;
+        hh = hh ? hh : 12; // convert 0 to 12
+        return `${dd}/${mm} ${String(hh).padStart(2, '0')}:${min} ${ampm}`;
     }
 </script>
 </body>
