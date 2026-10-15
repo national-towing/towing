@@ -3,31 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tow Run - Comparison Mode</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
+    <title>RUN</title>
+    
+    <link rel="apple-touch-icon" href="icon-run.png?v=700">
+    <link rel="icon" type="image/png" href="icon-run.png?v=700">
+    <link rel="manifest" href="manifest-run.json?v=700">
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #121212; color: #fff; padding: 12px; }
-        h1 { text-align: center; font-size: 20px; color: #ff1744; margin-bottom: 12px; font-weight: 800; }
-        .summary-card { background: #1e1e1e; border-radius: 10px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 5px solid #ff1744; }
-        .summary-card.wait { border-left-color: #ff9100; }
-        .summary-card.pass { border-left-color: #00e676; }
-        .prop-name { font-size: 16px; font-weight: bold; }
-        .badge-count { background: #2a2a2a; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; }
-        .car-tile { background: #1e1e1e; border-radius: 10px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ff1744; cursor: pointer; }
-        .tile-wait { border-left-color: #ff9100; }
-        .tile-pass { border-left-color: #00e676; }
-        .car-rego { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
-        .car-time-mkd { font-size: 11px; color: #aaa; margin-left: 8px; }
-        .car-time-exp { font-size: 12px; color: #ff5252; margin-top: 4px; }
-        .badge { padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; }
-        .badge-ready { background: #ff1744; color: #fff; }
-        .badge-wait { background: #ff9100; color: #000; }
-        .badge-pass { background: #00e676; color: #000; }
-        .back-btn { background: #2a2a2a; color: #fff; text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 12px; cursor: pointer; }
-        .detail-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #ff1744; text-transform: uppercase; }
-        .empty-msg { text-align: center; color: #777; padding: 30px; font-size: 14px; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+        }
         
-        /* Modal Overlay Viewfinder */
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.9); }
+
+        .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
+        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
+        .nav-run { background: #ffab00; }
+        .nav-tow { background: #ff1744; color: #fff; }
+        .nav-rel { background: #00e676; }
+        .nav-pass { background: #ab47bc; color: #fff; }
+
+        .container { width: 100%; max-width: 440px; }
+
+        .prop-summary-card {
+            background: #1e1e1e; border-radius: 16px; padding: 14px; margin-bottom: 12px;
+            border: 1px solid #333; display: flex; align-items: center; justify-content: space-between;
+        }
+        .prop-name {
+            font-size: 19px; font-weight: 900; color: #ffab00; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; flex: 1; padding-right: 8px;
+        }
+
+        .count-btns { display: flex; gap: 8px; }
+        
+        .cnt-btn {
+            width: 58px; height: 58px; border-radius: 10px; border: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; text-decoration: none; padding: 0;
+        }
+        .cnt-btn:active { transform: scale(0.92); }
+
+        .cnt-num { font-size: 22px; font-weight: 900; line-height: 1; margin-bottom: 2px; }
+        .cnt-lbl { font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
+
+        .btn-red { background: #ff1744; color: #fff; }
+        .btn-orange { background: #ffab00; color: #000; }
+        .btn-blue { background: #29b6f6; color: #000; }
+
+        .back-btn {
+            background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px;
+            border-radius: 10px; font-weight: 900; margin-bottom: 14px; cursor: pointer; display: inline-block;
+        }
+        .detail-title { font-size: 24px; font-weight: 900; color: #ffab00; margin-bottom: 12px; text-transform: uppercase; }
+
+        .car-tile {
+            background: #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between; border: 2px solid #333;
+            text-decoration: none; color: #fff; transition: transform 0.1s ease; cursor: pointer;
+        }
+        .car-tile:active { transform: scale(0.98); }
+
+        .tile-ready { border-color: #ff1744; background: #2a1215; }
+        .tile-wait { border-color: #ffab00; background: #2a2212; }
+        .tile-pass { border-color: #29b6f6; background: #0d212d; }
+
+        .rego-header-line {
+            display: flex; align-items: baseline; gap: 12px;
+        }
+        .car-rego { font-size: 32px; font-weight: 900; letter-spacing: 1px; line-height: 1; }
+        .tile-ready .car-rego { color: #ff1744; }
+        .tile-wait .car-rego { color: #ffab00; }
+        .tile-pass .car-rego { color: #29b6f6; }
+
+        .car-time-mkd { font-size: 13px; color: #aaa; font-weight: 700; line-height: 1; }
+        .car-time-exp { font-size: 22px; color: #fff; font-weight: 900; margin-top: 6px; letter-spacing: 0.5px; }
+
+        .badge {
+            padding: 10px 14px; border-radius: 8px; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .badge-ready { background: #ff1744; color: #fff; }
+        .badge-wait { background: #ffab00; color: #000; }
+        .badge-pass { background: #29b6f6; color: #000; }
+
+        .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
+
+        /* Camera Modal Overlay */
         .overlay-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column; }
         .overlay-modal.show { display: flex; }
         .modal-header { height: 50px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
@@ -42,282 +113,387 @@
 </head>
 <body>
 
-    <h1>READY TO TOW RUN</h1>
-    <div id="runContainer">Loading active runs...</div>
+<div class="header-box">
+    <h1>RUN</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
+</div>
 
-    <!-- Overlay Comparison Modal -->
-    <div id="overlayModal" class="overlay-modal">
-        <div class="modal-header">
-            <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
-            <span class="close-btn" onclick="closeOverlayModal()">✕</span>
-        </div>
-        <div class="viewfinder-container">
-            <video id="overlayVideo" autoplay playsinline muted></video>
-            <img id="ghostImage" alt="Ghost Overlay">
-        </div>
-        <div class="modal-footer">
-            <button id="matchBtn" class="match-btn">MATCH & TOW VEHICLE</button>
-        </div>
+<div class="nav-bar">
+    <a href="run.html" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
+</div>
+
+<div class="container" id="runContainer">
+    <div class="empty-msg">LOADING RUN...</div>
+</div>
+
+<!-- Overlay Comparison Viewfinder -->
+<div id="overlayModal" class="overlay-modal">
+    <div class="modal-header">
+        <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
+        <span class="close-btn" onclick="closeOverlayModal()">✕</span>
     </div>
+    <div class="viewfinder-container">
+        <video id="overlayVideo" autoplay playsinline muted></video>
+        <img id="ghostImage" alt="Ghost Overlay">
+    </div>
+    <div class="modal-footer">
+        <button id="matchBtn" class="match-btn">MATCH & TOW VEHICLE</button>
+    </div>
+</div>
 
-    <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5Ew_VpC0aD4iG6B5Q2p93tL8yL5Y0Y-X7J5m6L8/exec";
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
-        let activeCar = null;
-        let propertyGroups = {};
-        let videoStream = null;
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    }
 
-        const runContainer = document.getElementById('runContainer');
-        const overlayModal = document.getElementById('overlayModal');
-        const overlayVideo = document.getElementById('overlayVideo');
-        const ghostImage = document.getElementById('ghostImage');
-        const modalRegoTitle = document.getElementById('modalRegoTitle');
-        const matchBtn = document.getElementById('matchBtn');
+    const runContainer = document.getElementById('runContainer');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const overlayModal = document.getElementById('overlayModal');
+    const overlayVideo = document.getElementById('overlayVideo');
+    const ghostImage = document.getElementById('ghostImage');
+    const modalRegoTitle = document.getElementById('modalRegoTitle');
+    const matchBtn = document.getElementById('matchBtn');
 
-        async function fetchRunData() {
-            try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_run`);
-                const data = await response.json();
-                processRunData(data);
-            } catch(err) {
-                runContainer.innerHTML = `<div class="empty-msg">Error loading run data: ${err.message}</div>`;
+    let rawData = [];
+    let propertyGroups = {};
+    let activeCar = null;
+    let videoStream = null;
+
+    window.addEventListener('load', loadTowRun);
+
+    refreshBtn.addEventListener('click', () => {
+        runContainer.innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
+        loadTowRun();
+    });
+
+    async function loadTowRun() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_run");
+            rawData = await res.json();
+            localStorage.setItem('cached_run_data', JSON.stringify(rawData));
+            parseAndRenderRun(rawData);
+        } catch(e) {
+            const cached = localStorage.getItem('cached_run_data');
+            if (cached) {
+                rawData = JSON.parse(cached);
+                parseAndRenderRun(rawData);
+            } else {
+                runContainer.innerHTML = "<div class='empty-msg'>NO OFFLINE DATA STORED</div>";
             }
         }
+    }
 
-        function processRunData(data) {
-            propertyGroups = {};
-            const nowMs = new Date().getTime();
+    function parseAndRenderRun(data) {
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            runContainer.innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
+            return;
+        }
 
-            data.forEach(item => {
-                const prop = item.property || "GENERAL";
-                if (!propertyGroups[prop]) propertyGroups[prop] = [];
+        const nowMs = Date.now();
+        propertyGroups = {};
 
-                let status = "WAIT";
-                if (item.pass === "YES") {
-                    status = "PASS";
-                } else if (item.rawExpiryMs && nowMs >= item.rawExpiryMs) {
+        data.forEach(item => {
+            const prop = item.property || "GENERAL";
+            if (!propertyGroups[prop]) propertyGroups[prop] = [];
+
+            let status = "WAIT";
+            if (item.pass === "YES") {
+                status = "PASS";
+            } else if (item.rawExpiryMs > 0 && nowMs >= item.rawExpiryMs) {
+                status = "READY";
+            } else {
+                let expMs = item.rawExpiryMs || 0;
+                if (!expMs && item.expiryTime) {
+                    const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
+                    const parts = cleanExp.split(/[\s-:]+/);
+                    if (parts.length >= 4) {
+                        const day = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10) - 1;
+                        const year = new Date().getFullYear();
+                        const hours = parseInt(parts[2], 10);
+                        const mins = parseInt(parts[3], 10);
+                        expMs = new Date(year, month, day, hours, mins).getTime();
+                    }
+                }
+                if (expMs > 0 && nowMs >= expMs) {
                     status = "READY";
                 }
+            }
 
-                propertyGroups[prop].push({
-                    rego: item.rego,
-                    property: prop,
-                    markedTimeStr: item.markedTime,
-                    expiryTimeStr: item.expiryTime,
-                    status: status,
-                    imageUrl: item.imageUrl || item.image || ""
-                });
+            const cleanMkd = formatCleanDisplayTime(item.markedTime);
+            const cleanExp = formatCleanDisplayTime(item.expiryTime);
+
+            propertyGroups[prop].push({
+                rego: item.rego,
+                markedTimeStr: cleanMkd,
+                expiryTimeStr: cleanExp,
+                status: status,
+                property: prop,
+                imageUrl: item.imageUrl || item.image || ""
             });
-
-            renderSummaryView();
-        }
-
-        function renderSummaryView() {
-            runContainer.innerHTML = "";
-            const properties = Object.keys(propertyGroups);
-
-            if (properties.length === 0) {
-                runContainer.innerHTML = `<div class="empty-msg">NO VEHICLES CURRENTLY MARKED</div>`;
-                return;
-            }
-
-            properties.forEach(prop => {
-                const cars = propertyGroups[prop];
-                const readyCount = cars.filter(c => c.status === "READY").length;
-                const waitCount = cars.filter(c => c.status === "WAIT").length;
-                const passCount = cars.filter(c => c.status === "PASS").length;
-
-                const card = document.createElement('div');
-                card.className = `summary-card ${readyCount > 0 ? '' : (waitCount > 0 ? 'wait' : 'pass')}`;
-                card.onclick = () => renderDetailView(prop, readyCount > 0 ? 'READY' : 'ALL');
-
-                card.innerHTML = `
-                    <div>
-                        <div class="prop-name">${prop}</div>
-                        <div style="font-size:12px; color:#aaa; margin-top:4px;">
-                            ${readyCount} Ready to Tow · ${waitCount} Waiting · ${passCount} Passes
-                        </div>
-                    </div>
-                    <div class="badge-count">${cars.length} REGO${cars.length > 1 ? 'S' : ''}</div>
-                `;
-                runContainer.appendChild(card);
-            });
-        }
-
-        function renderDetailView(prop, filterStatus) {
-            runContainer.innerHTML = "";
-
-            const backBtn = document.createElement('div');
-            backBtn.className = 'back-btn';
-            backBtn.innerText = "← BACK TO ALL PROPERTIES";
-            backBtn.onclick = renderSummaryView;
-            runContainer.appendChild(backBtn);
-
-            const title = document.createElement('div');
-            title.className = 'detail-title';
-            title.innerText = `${prop} ${filterStatus !== 'ALL' ? '(' + filterStatus + ')' : ''}`;
-            runContainer.appendChild(title);
-
-            let cars = propertyGroups[prop] || [];
-            if (filterStatus !== 'ALL') {
-                cars = cars.filter(c => c.status === filterStatus);
-            }
-
-            cars.forEach(car => {
-                const tile = document.createElement('div');
-                tile.className = `car-tile ${car.status === 'READY' ? '' : (car.status === 'WAIT' ? 'tile-wait' : 'tile-pass')}`;
-
-                if (car.status === "READY") {
-                    tile.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        openOverlayModal(car);
-                    });
-                } else if (car.status === "WAIT") {
-                    tile.addEventListener('click', () => {
-                        window.location.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`;
-                    });
-                } else {
-                    tile.addEventListener('click', () => { window.location.href = `passes.html`; });
-                }
-
-                tile.innerHTML = `
-                    <div>
-                        <div>
-                            <span class="car-rego">${car.rego}</span>
-                            <span class="car-time-mkd">MKD: ${car.markedTimeStr}</span>
-                        </div>
-                        <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
-                    </div>
-                    <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
-                `;
-                runContainer.appendChild(tile);
-            });
-        }
-
-        async function openOverlayModal(car) {
-            try {
-                activeCar = car;
-                modalRegoTitle.innerText = `${car.rego} (${car.property})`;
-                
-                if (car.imageUrl) {
-                    ghostImage.crossOrigin = "anonymous";
-                    let fastUrl = car.imageUrl;
-                    const idMatch = car.imageUrl.match(/[-\w]{25,}/);
-                    if (idMatch) {
-                        fastUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0] + "=s800";
-                    }
-                    ghostImage.src = fastUrl;
-                } else {
-                    ghostImage.removeAttribute("crossOrigin");
-                    ghostImage.src = "";
-                }
-
-                overlayModal.classList.add('show');
-                await startOverlayCamera();
-            } catch(err) {
-                alert("Error opening comparison: " + err.message);
-            }
-        }
-
-        async function startOverlayCamera() {
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                    audio: false
-                });
-                overlayVideo.srcObject = videoStream;
-            } catch(err) {
-                alert("Unable to access camera: " + err.message);
-            }
-        }
-
-        function closeOverlayModal() {
-            stopOverlayCamera();
-            overlayModal.classList.remove('show');
-        }
-
-        function stopOverlayCamera() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-        }
-
-        matchBtn.addEventListener('click', async () => {
-            if (!activeCar) return;
-
-            matchBtn.disabled = true;
-            matchBtn.innerText = "SAVING PROOF...";
-
-            const liveCanvas = document.createElement('canvas');
-            const aspect = (overlayVideo.videoHeight && overlayVideo.videoWidth) ? (overlayVideo.videoHeight / overlayVideo.videoWidth) : 0.5625;
-            liveCanvas.width = 800;
-            liveCanvas.height = Math.round(800 * aspect);
-            const liveCtx = liveCanvas.getContext('2d');
-            liveCtx.drawImage(overlayVideo, 0, 0, liveCanvas.width, liveCanvas.height);
-
-            const compositeCanvas = document.createElement('canvas');
-            compositeCanvas.width = 1600;
-            compositeCanvas.height = liveCanvas.height;
-            const compCtx = compositeCanvas.getContext('2d');
-
-            compCtx.drawImage(liveCanvas, 800, 0);
-
-            const markImg = new Image();
-            markImg.crossOrigin = "anonymous";
-
-            const executeUpload = async (canvasToUpload) => {
-                const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.65);
-                await uploadEvidenceAndRedirect(compositeB64);
-            };
-
-            markImg.onload = async () => {
-                try {
-                    compCtx.drawImage(markImg, 0, 0, 800, liveCanvas.height);
-                } catch(e) {}
-
-                compCtx.fillStyle = "#ff1744";
-                compCtx.font = "bold 24px sans-serif";
-                compCtx.fillText("ORIGINAL MARK PHOTO", 20, 35);
-                compCtx.fillText("TOW VERIFICATION PHOTO", 820, 35);
-
-                await executeUpload(compositeCanvas);
-            };
-
-            markImg.onerror = async () => {
-                await executeUpload(liveCanvas);
-            };
-
-            if (ghostImage.src && ghostImage.src !== "") {
-                markImg.src = ghostImage.src;
-            } else {
-                markImg.onerror();
-            }
         });
 
-        async function uploadEvidenceAndRedirect(b64Data) {
-            const payload = {
-                action: 'log_tow_confirmation',
-                rego: activeCar.rego,
-                property: activeCar.property,
-                photoBytes: b64Data,
-                timestamp: new Date().toISOString()
-            };
+        renderSummaryView();
+    }
 
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-            } catch(e) {}
+    function formatCleanDisplayTime(rawStr) {
+        if (!rawStr) return "N/A";
+        if (String(rawStr).includes("T")) {
+            const d = new Date(rawStr);
+            if (!isNaN(d.getTime())) {
+                const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                const dayName = days[d.getDay()];
+                const hh = String(d.getHours()).padStart(2, '0');
+                const mm = String(d.getMinutes()).padStart(2, '0');
+                return `${dayName} ${hh}:${mm}`;
+            }
+        }
+        const parts = String(rawStr).trim().split(/\s+/);
+        if (parts.length >= 3) {
+            return `${parts[0]} ${parts[2]}`;
+        }
+        return String(rawStr);
+    }
 
-            stopOverlayCamera();
-            window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
+    function renderSummaryView() {
+        const sortedProps = Object.keys(propertyGroups).sort((a, b) => {
+            let redA = propertyGroups[a].filter(c => c.status === "READY").length;
+            let redB = propertyGroups[b].filter(c => c.status === "READY").length;
+            if (redB !== redA) return redB - redA;
+
+            let orangeA = propertyGroups[a].filter(c => c.status === "WAIT").length;
+            let orangeB = propertyGroups[b].filter(c => c.status === "WAIT").length;
+            if (orangeB !== orangeA) return orangeB - orangeA;
+
+            let blueA = propertyGroups[a].filter(c => c.status === "PASS").length;
+            let blueB = propertyGroups[b].filter(c => c.status === "PASS").length;
+            if (blueB !== blueA) return blueB - blueA;
+
+            return a.localeCompare(b);
+        });
+
+        runContainer.innerHTML = "";
+
+        sortedProps.forEach(prop => {
+            const redCount = propertyGroups[prop].filter(c => c.status === "READY").length;
+            const orangeCount = propertyGroups[prop].filter(c => c.status === "WAIT").length;
+            const blueCount = propertyGroups[prop].filter(c => c.status === "PASS").length;
+
+            const card = document.createElement('div');
+            card.className = 'prop-summary-card';
+
+            card.innerHTML = `
+                <div class="prop-name" onclick="renderDetailView('${prop}', 'ALL')">${prop}</div>
+                <div class="count-btns">
+                    <button class="cnt-btn btn-red" onclick="renderDetailView('${prop}', 'READY')">
+                        <span class="cnt-num">${redCount}</span>
+                        <span class="cnt-lbl">TOW</span>
+                    </button>
+                    <button class="cnt-btn btn-orange" onclick="renderDetailView('${prop}', 'WAIT')">
+                        <span class="cnt-num">${orangeCount}</span>
+                        <span class="cnt-lbl">WAIT</span>
+                    </button>
+                    <button class="cnt-btn btn-blue" onclick="renderDetailView('${prop}', 'PASS')">
+                        <span class="cnt-num">${blueCount}</span>
+                        <span class="cnt-lbl">PASS</span>
+                    </button>
+                </div>
+            `;
+
+            runContainer.appendChild(card);
+        });
+    }
+
+    function renderDetailView(prop, filterStatus) {
+        runContainer.innerHTML = "";
+
+        const backBtn = document.createElement('div');
+        backBtn.className = 'back-btn';
+        backBtn.innerText = "← BACK TO ALL PROPERTIES";
+        backBtn.onclick = renderSummaryView;
+        runContainer.appendChild(backBtn);
+
+        const title = document.createElement('div');
+        title.className = 'detail-title';
+        title.innerText = `${prop} ${filterStatus !== 'ALL' ? '(' + filterStatus + ')' : ''}`;
+        runContainer.appendChild(title);
+
+        let cars = propertyGroups[prop] || [];
+        if (filterStatus !== 'ALL') {
+            cars = cars.filter(c => c.status === filterStatus);
         }
 
-        fetchRunData();
-    </script>
+        const statusOrder = { "READY": 1, "WAIT": 2, "PASS": 3 };
+        cars.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+
+        if (cars.length === 0) {
+            runContainer.innerHTML += `<div class="empty-msg">NO ${filterStatus} VEHICLES</div>`;
+            return;
+        }
+
+        cars.forEach(car => {
+            const tile = document.createElement('div');
+            
+            if (car.status === "READY") {
+                tile.className = 'car-tile tile-ready';
+                tile.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openOverlayModal(car);
+                });
+            } else if (car.status === "WAIT") {
+                tile.className = 'car-tile tile-wait';
+                tile.addEventListener('click', () => {
+                    window.location.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`;
+                });
+            } else {
+                tile.className = 'car-tile tile-pass';
+                tile.addEventListener('click', () => {
+                    window.location.href = `passes.html`;
+                });
+            }
+
+            tile.innerHTML = `
+                <div>
+                    <div class="rego-header-line">
+                        <span class="car-rego">${car.rego}</span>
+                        <span class="car-time-mkd">MKD: ${car.markedTimeStr}</span>
+                    </div>
+                    <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
+                </div>
+                <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
+            `;
+
+            runContainer.appendChild(tile);
+        });
+    }
+
+    async function openOverlayModal(car) {
+        try {
+            activeCar = car;
+            modalRegoTitle.innerText = `${car.rego} (${car.property})`;
+            
+            if (car.imageUrl) {
+                ghostImage.crossOrigin = "anonymous";
+                let fastUrl = car.imageUrl;
+                const idMatch = car.imageUrl.match(/[-\w]{25,}/);
+                if (idMatch) {
+                    fastUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0] + "=s800";
+                }
+                ghostImage.src = fastUrl;
+            } else {
+                ghostImage.removeAttribute("crossOrigin");
+                ghostImage.src = "";
+            }
+
+            overlayModal.classList.add('show');
+            await startOverlayCamera();
+        } catch(err) {
+            alert("Error opening comparison: " + err.message);
+        }
+    }
+
+    async function startOverlayCamera() {
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                audio: false
+            });
+            overlayVideo.srcObject = videoStream;
+        } catch(err) {
+            alert("Unable to access camera: " + err.message);
+        }
+    }
+
+    function closeOverlayModal() {
+        stopOverlayCamera();
+        overlayModal.classList.remove('show');
+    }
+
+    function stopOverlayCamera() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+    }
+
+    matchBtn.addEventListener('click', async () => {
+        if (!activeCar) return;
+
+        matchBtn.disabled = true;
+        matchBtn.innerText = "SAVING PROOF...";
+
+        const liveCanvas = document.createElement('canvas');
+        const aspect = (overlayVideo.videoHeight && overlayVideo.videoWidth) ? (overlayVideo.videoHeight / overlayVideo.videoWidth) : 0.5625;
+        liveCanvas.width = 800;
+        liveCanvas.height = Math.round(800 * aspect);
+        const liveCtx = liveCanvas.getContext('2d');
+        liveCtx.drawImage(overlayVideo, 0, 0, liveCanvas.width, liveCanvas.height);
+
+        const compositeCanvas = document.createElement('canvas');
+        compositeCanvas.width = 1600;
+        compositeCanvas.height = liveCanvas.height;
+        const compCtx = compositeCanvas.getContext('2d');
+
+        compCtx.drawImage(liveCanvas, 800, 0);
+
+        const markImg = new Image();
+        markImg.crossOrigin = "anonymous";
+
+        const executeUpload = async (canvasToUpload) => {
+            const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.65);
+            await uploadEvidenceAndRedirect(compositeB64);
+        };
+
+        markImg.onload = async () => {
+            try {
+                compCtx.drawImage(markImg, 0, 0, 800, liveCanvas.height);
+            } catch(e) {}
+
+            compCtx.fillStyle = "#ff1744";
+            compCtx.font = "bold 24px sans-serif";
+            compCtx.fillText("ORIGINAL MARK PHOTO", 20, 35);
+            compCtx.fillText("TOW VERIFICATION PHOTO", 820, 35);
+
+            await executeUpload(compositeCanvas);
+        };
+
+        markImg.onerror = async () => {
+            await executeUpload(liveCanvas);
+        };
+
+        if (ghostImage.src && ghostImage.src !== "") {
+            markImg.src = ghostImage.src;
+        } else {
+            markImg.onerror();
+        }
+    });
+
+    async function uploadEvidenceAndRedirect(b64Data) {
+        const payload = {
+            action: 'log_tow_confirmation',
+            rego: activeCar.rego,
+            property: activeCar.property,
+            photoBytes: b64Data,
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+        } catch(e) {}
+
+        stopOverlayCamera();
+        window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
+    }
+</script>
 </body>
 </html>
