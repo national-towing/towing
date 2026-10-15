@@ -447,15 +447,20 @@
             runContainer.appendChild(tile);
         });
     }
-    async function openOverlayModal(car) {
+   async function openOverlayModal(car) {
         try {
             activeCar = car;
             modalRegoTitle.innerText = `${car.rego} (${car.property})`;
             
-            // Set image with crossOrigin before setting source
             if (car.imageUrl) {
                 ghostImage.crossOrigin = "anonymous";
-                ghostImage.src = car.imageUrl;
+                // Append =s800 to resize thumbnail for instant web view
+                let fastUrl = car.imageUrl;
+                const idMatch = car.imageUrl.match(/[-\w]{25,}/);
+                if (idMatch) {
+                    fastUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0] + "=s800";
+                }
+                ghostImage.src = fastUrl;
             } else {
                 ghostImage.removeAttribute("crossOrigin");
                 ghostImage.src = "";
@@ -559,7 +564,7 @@ matchBtn.addEventListener('click', async () => {
     });
 
     async function uploadEvidenceAndRedirect(b64Data) {
-        matchBtn.innerText = "SAVING COMPARISON...";
+        matchBtn.innerText = "SAVING...";
 
         const payload = {
             action: 'log_tow_confirmation',
@@ -569,21 +574,11 @@ matchBtn.addEventListener('click', async () => {
             timestamp: new Date().toISOString()
         };
 
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-        } catch(e) {}
+        // Fire-and-forget background upload so the user isn't kept waiting
+        navigator.sendBeacon(GOOGLE_SCRIPT_URL, JSON.stringify(payload));
 
         stopOverlayCamera();
-
-        // Redirect to Tow app after short pause for transmission
-        setTimeout(() => {
-            window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
-        }, 1200);
+        window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
     }
 </script>
 </body>
