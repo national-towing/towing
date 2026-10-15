@@ -416,7 +416,7 @@
             
             if (car.status === "READY") {
                 tile.className = 'car-tile tile-ready';
-                tile.onclick = () => openOverlayModal(car);
+                tile.onclick = () => (car);
             } else if (car.status === "WAIT") {
                 tile.className = 'car-tile tile-wait';
                 tile.onclick = () => { window.location.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`; };
@@ -445,8 +445,13 @@
         modalRegoTitle.innerText = `${car.rego} (${car.property})`;
         
         if (car.imageUrl) {
-            ghostImage.removeAttribute("crossOrigin"); // Remove restriction so Drive images display
-            ghostImage.src = car.imageUrl;
+            // Extract File ID and use Google Direct Content CDN
+            const idMatch = car.imageUrl.match(/[-\w]{25,}/);
+            if (idMatch) {
+                ghostImage.src = "https://lh3.googleusercontent.com/d/" + idMatch[0];
+            } else {
+                ghostImage.src = car.imageUrl;
+            }
         } else {
             ghostImage.src = "";
             alert("No original mark photo found for this vehicle.");
@@ -455,7 +460,6 @@
         overlayModal.classList.add('show');
         await startOverlayCamera();
     }
-
     async function startOverlayCamera() {
         try {
             videoStream = await navigator.mediaDevices.getUserMedia({
