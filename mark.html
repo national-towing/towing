@@ -396,7 +396,7 @@ snapBtn.addEventListener('click', async () => {
             return;
         }
 
-        // 1. Draw frame to canvas
+        // 1. Capture current video frame to canvas
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1280;
         canvas.height = videoElem.videoHeight || 720;
@@ -434,7 +434,7 @@ snapBtn.addEventListener('click', async () => {
         regoInput.value = detectedRego;
         statusDiv.innerText = `PLATE: ${detectedRego} - LOGGING MARK...`;
 
-        // 3. Post directly to log_mark in Code.gs
+        // 3. Save mark directly via log_mark
         const markPayload = {
             action: 'log_mark',
             property: propertySelect.value || 'GENERAL',
