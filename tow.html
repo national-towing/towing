@@ -10,9 +10,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10001">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10001">
-    <link rel="manifest" href="manifest-tow.json?v=10001">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10002">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10002">
+    <link rel="manifest" href="manifest-tow.json?v=10002">
 
     <style>
         * { box-sizing: border-box; }
@@ -28,7 +28,7 @@
 
         .sync-badge {
             background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
-            padding: 6px 12px; border-radius: 20px; margin-bottom: 10px; display: none;
+            padding: 6px 14px; border-radius: 20px; margin-bottom: 10px; display: none;
             cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
         }
 
@@ -55,36 +55,71 @@
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
 
-        .camera-box {
-            width: 100%; height: 380px; background: #000; border-radius: 12px; border: 2px solid #333;
-            margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+        .open-cam-btn {
+            background: #2a1215; border: 2px dashed #ff1744; color: #ff1744;
+            font-size: 16px; font-weight: 900; border-radius: 12px; padding: 16px;
+            width: 100%; margin-top: 14px; cursor: pointer; text-align: center;
+            letter-spacing: 1px; text-transform: uppercase;
         }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        .open-cam-btn:active { background: #3d1b20; transform: scale(0.98); }
 
-        .torch-btn {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
-            border: 1px solid #ff1744; color: #ff1744; padding: 6px 12px; border-radius: 20px;
-            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
+        .photo-count-banner {
+            font-size: 13px; font-weight: 900; color: #00e676; margin-top: 10px;
+            text-align: center; text-transform: uppercase; letter-spacing: 1px;
         }
 
-        .thumb-gallery { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
-        .thumb-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #ff1744; cursor: pointer; flex-shrink: 0; }
-
-        .circle-cam-btn {
-            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-            width: 94px; height: 94px; background: #ff1744; border: 5px solid #fff; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 22px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
+        .thumb-gallery { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding-bottom: 6px; }
+        .thumb-container { position: relative; flex-shrink: 0; }
+        .thumb-img { width: 78px; height: 78px; border-radius: 10px; object-fit: cover; border: 2px solid #ff1744; cursor: pointer; }
+        .thumb-del {
+            position: absolute; top: -6px; right: -6px; background: #ff1744; color: #fff;
+            border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center;
+            justify-content: center; font-size: 12px; font-weight: 900; border: 2px solid #1e1e1e;
         }
-        .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
-        .circle-cam-inner { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #000; }
 
         .submit-btn {
             background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+            height: 62px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
         }
+        .submit-btn:active { transform: scale(0.98); }
 
         #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
+
+        /* FULLSCREEN CAMERA MODAL */
+        .cam-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 99999; flex-direction: column;
+        }
+        .cam-modal.show { display: flex; }
+        
+        .cam-header {
+            height: 55px; background: rgba(0,0,0,0.8); display: flex;
+            align-items: center; justify-content: space-between; padding: 0 16px;
+            position: absolute; top: 0; left: 0; width: 100%; z-index: 10;
+        }
+        .cam-done-btn {
+            background: #00e676; color: #000; font-size: 14px; font-weight: 900;
+            padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+        }
+        .cam-counter { font-size: 15px; font-weight: 900; color: #ffab00; }
+
+        .cam-viewfinder { flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .cam-torch-btn {
+            position: absolute; top: 70px; right: 16px; background: rgba(0,0,0,0.6);
+            border: 1px solid #ff1744; color: #ff1744; padding: 8px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 900; cursor: pointer; z-index: 10;
+        }
+
+        .cam-snap-btn {
+            position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+            width: 88px; height: 88px; background: #ff1744; border: 5px solid #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.8); cursor: pointer; z-index: 10;
+        }
+        .cam-snap-btn:active { transform: translateX(-50%) scale(0.90); }
+        .cam-snap-inner { width: 64px; height: 64px; border-radius: 50%; border: 3px solid #000; }
     </style>
 </head>
 <body>
@@ -94,7 +129,7 @@
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
-<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ BASEMENT QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-bar">
     <a href="run.html" class="nav-tile nav-run">RUN</a>
@@ -200,16 +235,26 @@
     </select>
     <input type="text" id="officerOtherInput" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px; font-size:18px;">
 
-    <label>CONDITION PHOTOS (SNAP 4 SIDES & DAMAGE)</label>
-    <div class="camera-box">
-        <button class="torch-btn" id="torchBtn">⚡ FLASH OFF</button>
-        <video id="videoElem" autoplay playsinline></video>
-        <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
-    </div>
+    <!-- CAMERA LAUNCHER -->
+    <button type="button" class="open-cam-btn" id="openCamBtn">📷 CAPTURE CONDITION PHOTOS</button>
+    <div class="photo-count-banner" id="photoCountBanner">0 PHOTOS TAKEN</div>
     <div class="thumb-gallery" id="thumbGallery"></div>
 
     <button class="submit-btn" id="submitBtn">LOG TOW</button>
     <div id="status"></div>
+</div>
+
+<!-- FULLSCREEN VIEW FINDER -->
+<div class="cam-modal" id="camModal">
+    <div class="cam-header">
+        <span class="cam-counter" id="modalCounter">0 PHOTOS</span>
+        <button class="cam-done-btn" id="camDoneBtn">DONE ✓</button>
+    </div>
+    <div class="cam-viewfinder">
+        <video id="videoElem" autoplay playsinline></video>
+        <button class="cam-torch-btn" id="torchBtn">⚡ FLASH OFF</button>
+        <div class="cam-snap-btn" id="snapBtn"><div class="cam-snap-inner"></div></div>
+    </div>
 </div>
 
 <script>
@@ -227,6 +272,11 @@
     const officerSelect = document.getElementById('officerSelect');
     const officerOtherInput = document.getElementById('officerOtherInput');
 
+    const openCamBtn = document.getElementById('openCamBtn');
+    const camModal = document.getElementById('camModal');
+    const camDoneBtn = document.getElementById('camDoneBtn');
+    const modalCounter = document.getElementById('modalCounter');
+    const photoCountBanner = document.getElementById('photoCountBanner');
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
@@ -239,54 +289,34 @@
 
     let conditionPhotos = [];
     let isSubmitting = false;
+    let videoStream = null;
     let videoTrack = null;
     let torchOn = false;
     let targetProperty = "";
 
-    // Parse URL params immediately without waiting for network
     (function readUrlParamsNow() {
         const params = new URLSearchParams(window.location.search);
         const urlRego = params.get('rego');
         const urlProp = params.get('prop');
-        
         if (urlRego) regoInput.value = urlRego.trim().toUpperCase();
         if (urlProp) targetProperty = decodeURIComponent(urlProp).trim().toUpperCase();
     })();
 
     window.addEventListener('DOMContentLoaded', () => {
-        initCamera();
         loadProperties();
         updateQueueUI();
         window.addEventListener('online', processOfflineQueue);
     });
 
-    refreshBtn.addEventListener('click', () => {
-        window.location.reload(true);
-    });
+    refreshBtn.addEventListener('click', () => { window.location.reload(true); });
 
-    function checkMakeOther(selectElem) {
-        if (selectElem.value === "Other") {
-            makeOtherInput.style.display = 'block'; makeOtherInput.focus();
-        } else { makeOtherInput.style.display = 'none'; }
-    }
-
-    function checkColourOther(selectElem) {
-        if (selectElem.value === "Other") {
-            colourOtherInput.style.display = 'block'; colourOtherInput.focus();
-        } else { colourOtherInput.style.display = 'none'; }
-    }
-
-    function checkOfficerOther(selectElem) {
-        if (selectElem.value === "Other") {
-            officerOtherInput.style.display = 'block'; officerOtherInput.focus();
-        } else { officerOtherInput.style.display = 'none'; }
-    }
+    function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; }
+    function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; }
+    function checkOfficerOther(s) { officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; }
 
     async function loadProperties() {
         const cached = localStorage.getItem('cached_properties');
-        if (cached) {
-            try { populatePropertiesUI(JSON.parse(cached)); } catch(e) {}
-        }
+        if (cached) { try { populatePropertiesUI(JSON.parse(cached)); } catch(e) {} }
 
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
@@ -299,36 +329,49 @@
     function populatePropertiesUI(data) {
         if (!Array.isArray(data) || data.length === 0) return;
         propertySelect.innerHTML = "";
-        
         data.forEach(p => {
             const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
             if (propName) {
                 const opt = document.createElement('option');
-                opt.value = propName;
-                opt.innerText = propName;
-                if (targetProperty && propName.toUpperCase() === targetProperty) {
-                    opt.selected = true;
-                }
+                opt.value = propName; opt.innerText = propName;
+                if (targetProperty && propName.toUpperCase() === targetProperty) opt.selected = true;
                 propertySelect.appendChild(opt);
             }
         });
     }
 
-    async function initCamera() {
+    // --- FULLSCREEN CAMERA CONTROLS ---
+    openCamBtn.addEventListener('click', async () => {
+        camModal.classList.add('show');
+        await startCamera();
+    });
+
+    camDoneBtn.addEventListener('click', () => {
+        stopCamera();
+        camModal.classList.remove('show');
+    });
+
+    async function startCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
+            videoStream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
                 audio: false
             });
-            videoElem.srcObject = stream;
-            videoTrack = stream.getVideoTracks()[0];
-        } catch(e) {
-            statusDiv.innerText = "CAMERA ACCESS ERROR";
+            videoElem.srcObject = videoStream;
+            videoTrack = videoStream.getVideoTracks()[0];
+        } catch(err) {
+            alert("Camera error: " + err.message);
         }
     }
-    
-    torchBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
+
+    function stopCamera() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(t => t.stop());
+            videoStream = null;
+        }
+    }
+
+    torchBtn.addEventListener('click', async () => {
         if (!videoTrack) return;
         try {
             torchOn = !torchOn;
@@ -338,9 +381,7 @@
         } catch(e) {}
     });
 
-    snapBtn.addEventListener('click', (e) => {
-        e.preventDefault(); e.stopPropagation();
-
+    snapBtn.addEventListener('click', () => {
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
         const aspect = vH / vW;
@@ -354,13 +395,42 @@
         const b64 = canvas.toDataURL('image/jpeg', 0.45);
         conditionPhotos.push(b64);
 
-        const img = document.createElement('img');
-        img.src = b64; img.className = 'thumb-img';
-        thumbGallery.appendChild(img);
-
-        statusDiv.innerText = `✔ PHOTO ${conditionPhotos.length} CAPTURED`;
+        renderThumbs();
+        modalCounter.innerText = `${conditionPhotos.length} PHOTOS TAKEN`;
+        
+        // Haptic feedback
+        if (navigator.vibrate) navigator.vibrate(40);
     });
 
+    function renderThumbs() {
+        thumbGallery.innerHTML = "";
+        conditionPhotos.forEach((src, idx) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'thumb-container';
+
+            const img = document.createElement('img');
+            img.src = src; img.className = 'thumb-img';
+
+            const del = document.createElement('div');
+            del.className = 'thumb-del';
+            del.innerText = '✕';
+            del.onclick = (e) => {
+                e.stopPropagation();
+                conditionPhotos.splice(idx, 1);
+                renderThumbs();
+            };
+
+            wrap.appendChild(img);
+            wrap.appendChild(del);
+            thumbGallery.appendChild(wrap);
+        });
+
+        const countText = `${conditionPhotos.length} CONDITION PHOTOS CAPTURED`;
+        photoCountBanner.innerText = countText;
+        modalCounter.innerText = countText;
+    }
+
+    // --- SUBMISSION & BASEMENT CACHING ---
     submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
@@ -392,6 +462,7 @@
             timestamp: new Date().toISOString()
         };
 
+        // Instantly hide car from run list local cache
         try {
             let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
             cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
@@ -400,8 +471,8 @@
 
         if (!navigator.onLine) {
             saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ SAVED OFFLINE!";
-            setTimeout(() => { window.location.href = "run.html"; }, 500);
+            statusDiv.innerText = "⚡ BASEMENT MODE: SAVED OFFLINE!";
+            setTimeout(() => { window.location.href = "run.html"; }, 600);
             return;
         }
 
@@ -415,10 +486,10 @@
             });
 
             statusDiv.innerText = "✔ TOW LOGGED SUCCESS!";
-            setTimeout(() => { window.location.href = "run.html"; }, 500);
+            setTimeout(() => { window.location.href = "run.html"; }, 400);
         } catch(err) {
             saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL SYNC ON SIGNAL";
+            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL AUTO-SYNC";
             setTimeout(() => { window.location.href = "run.html"; }, 600);
         }
     });
@@ -458,7 +529,6 @@
                 remaining.push(item);
             }
         }
-
         localStorage.setItem('tow_offline_queue', JSON.stringify(remaining));
         updateQueueUI();
     }
