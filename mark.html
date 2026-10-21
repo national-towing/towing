@@ -396,7 +396,7 @@ snapBtn.addEventListener('click', async () => {
             return;
         }
 
-        // 1. Capture current video frame to canvas
+        // 1. Capture full camera frame to canvas
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1280;
         canvas.height = videoElem.videoHeight || 720;
@@ -408,7 +408,7 @@ snapBtn.addEventListener('click', async () => {
         statusDiv.innerText = "READING PLATE...";
         snapBtn.disabled = true;
 
-        // 2. Scan plate via npr_scan
+        // 2. Perform ANPR scan via npr_scan route
         const scanRes = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -420,31 +420,35 @@ snapBtn.addEventListener('click', async () => {
 
         const scanText = await scanRes.text();
         let scanData = {};
-        try { scanData = JSON.parse(scanText); } catch(e) {}
+        try { 
+            scanData = JSON.parse(scanText); 
+        } catch(e) {
+            console.error("Non-JSON Response from OCR:", scanText);
+        }
 
         let detectedRego = (scanData && scanData.rego) ? scanData.rego.toUpperCase() : regoInput.value.trim().toUpperCase();
 
         if (!detectedRego) {
             snapBtn.disabled = false;
             statusDiv.innerText = "TYPE REGO OR ALIGN PLATE CLEARLY";
-            alert("Could not read plate. Please type REGO manually into the box.");
+            alert("Could not read plate automatically. Please type the REGO manually into the box below.");
             return;
         }
 
         regoInput.value = detectedRego;
         statusDiv.innerText = `PLATE: ${detectedRego} - LOGGING MARK...`;
 
-        // 3. Save mark directly via log_mark
+        // 3. Post full vehicle mark payload to log_mark in Code.gs
         const markPayload = {
             action: 'log_mark',
-            property: propertySelect.value || 'GENERAL',
+            property: propertySelect ? propertySelect.value : 'GENERAL',
             rego: detectedRego,
             state: stateSelect ? stateSelect.value : 'QLD',
             make: makeSelect ? makeSelect.value : '',
             model: modelInput ? modelInput.value : '',
             colour: colourSelect ? colourSelect.value : '',
             bodyType: bodyTypeSelect ? bodyTypeSelect.value : '',
-            confidence: scanData.rego ? 'HIGH' : 'MANUAL',
+            confidence: (scanData && scanData.rego) ? 'HIGH' : 'MANUAL',
             photoBytes: base64Photo,
             isManagerRequest: false
         };
@@ -457,7 +461,11 @@ snapBtn.addEventListener('click', async () => {
 
         const markText = await markRes.text();
         let markData = {};
-        try { markData = JSON.parse(markText); } catch(e) {}
+        try { 
+            markData = JSON.parse(markText); 
+        } catch(e) {
+            console.error("Non-JSON Response from Log Mark:", markText);
+        }
 
         snapBtn.disabled = false;
 
@@ -466,12 +474,12 @@ snapBtn.addEventListener('click', async () => {
             regoInput.value = "";
         } else {
             statusDiv.innerText = "LOGGING FAIL: " + (markData.message || "Error");
-            alert("Logging Failed: " + (markData.message || "Unknown error"));
+            alert("Logging Failed: " + (markData.message || "Unknown server response"));
         }
     } catch (err) {
         snapBtn.disabled = false;
         statusDiv.innerText = "NETWORK / CAMERA ERROR";
-        alert("Scan Error: " + err.message);
+        alert("Scan Exception: " + err.message);
     }
 });
 
