@@ -206,7 +206,7 @@
         </div>
         <div>
             <label>AH RELEASE FEE ($)</label>
-            <input type="number" step="0.01" id="storageFeeInput" value="140.00">
+            <input type="number" step="0.01" id="storageFeeInput" value="140.95">
         </div>
     </div>
 
@@ -268,7 +268,6 @@
     let idPhotos = [];
     let ownerSigConfirmed = false;
     let officerSigConfirmed = false;
-    let ocrWorker = null;
 
     window.addEventListener('load', () => {
         loadYardVehicles();
@@ -276,34 +275,17 @@
         initSignatureCanvas('ownerSigCanvas');
         initSignatureCanvas('officerSigCanvas');
         setupLiveValidation();
-        initOCRWorker();
     });
 
-    refreshBtn.addEventListener('click', () => {
-        window.location.reload(true);
-    });
-
-    async function initOCRWorker() {
-        if (window.Tesseract) {
-            try {
-                ocrWorker = await Tesseract.createWorker('eng');
-            } catch(e) {}
-        }
-    }
+    refreshBtn.addEventListener('click', () => { window.location.reload(true); });
 
     function checkOfficerOther(selectElem) {
-        if (selectElem.value === "OTHER") {
-            officerOtherInput.style.display = 'block';
-            officerOtherInput.focus();
-        } else {
-            officerOtherInput.style.display = 'none';
-        }
+        officerOtherInput.style.display = selectElem.value === "OTHER" ? 'block' : 'none';
         validateForm();
     }
 
     vehicleSelect.addEventListener('change', () => {
-        const selectedRego = vehicleSelect.value;
-        const veh = yardVehicles.find(v => v.rego === selectedRego);
+        const veh = yardVehicles.find(v => v.rego === vehicleSelect.value);
         if (veh) {
             propertyInput.value = veh.property || '';
             regoInput.value = veh.rego || '';
@@ -311,11 +293,7 @@
             modelInput.value = veh.model || '';
             colourInput.value = veh.colour || '';
         } else {
-            propertyInput.value = '';
-            regoInput.value = '';
-            makeInput.value = '';
-            modelInput.value = '';
-            colourInput.value = '';
+            propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = '';
         }
         validateForm();
     });
@@ -344,51 +322,35 @@
 
     async function initCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 } },
+                audio: false
+            });
             videoElem.srcObject = stream;
         } catch(e) {}
     }
 
-    // HIGH CONTRAST CANVAS BINARIZATION FOR OCR READABILITY
-    function processCanvasForOCR(sourceVideo) {
-        const canvas = document.createElement('canvas');
-        canvas.width = sourceVideo.videoWidth || 640;
-        canvas.height = sourceVideo.videoHeight || 480;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(sourceVideo, 0, 0);
-
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            const threshold = avg > 110 ? 255 : 0;
-            data[i] = threshold;
-            data[i + 1] = threshold;
-            data[i + 2] = threshold;
-        }
-        ctx.putImageData(imgData, 0, 0);
-        return canvas;
-    }
-
     snapBtn.addEventListener('click', async () => {
+        const vW = videoElem.videoWidth || 1280;
+        const vH = videoElem.videoHeight || 720;
+        
         const rawCanvas = document.createElement('canvas');
-        rawCanvas.width = videoElem.videoWidth || 640;
-        rawCanvas.height = videoElem.videoHeight || 480;
+        rawCanvas.width = vW;
+        rawCanvas.height = vH;
         const rawCtx = rawCanvas.getContext('2d');
-        rawCtx.drawImage(videoElem, 0, 0);
+        rawCtx.drawImage(videoElem, 0, 0, vW, vH);
 
-        const b64 = rawCanvas.toDataURL('image/jpeg', 0.85);
+        const b64 = rawCanvas.toDataURL('image/jpeg', 0.65);
         idPhotos.push(b64);
 
         const photoIndex = idPhotos.length;
-        const labelText = photoIndex === 1 ? "FRONT" : (photoIndex === 2 ? "BACK" : `SNAP ${photoIndex}`);
+        const labelText = photoIndex === 1 ? "FRONT / DIGITAL" : (photoIndex === 2 ? "BACK" : `SNAP ${photoIndex}`);
 
         const thumbWrap = document.createElement('div');
         thumbWrap.className = 'thumb-container';
 
         const img = document.createElement('img');
-        img.src = b64; 
-        img.className = 'thumb-img';
+        img.src = b64; img.className = 'thumb-img';
 
         const lbl = document.createElement('span');
         lbl.className = 'thumb-label';
@@ -397,51 +359,44 @@
         thumbWrap.appendChild(img);
         thumbWrap.appendChild(lbl);
         thumbGallery.appendChild(thumbWrap);
-        
-        statusDiv.innerText = `🔍 SCANNING ID CARD (#${photoIndex} ${labelText})...`;
 
-        // EXECUTE FAST HIGH-CONTRAST OCR
+        statusDiv.innerText = `🔍 SCANNING ID TEXT (#${photoIndex})...`;
+
+        // HIGH-RESOLUTION CLEAN OCR EXTRACTION
         try {
-            const processedCanvas = processCanvasForOCR(videoElem);
-            let text = "";
+            if (window.Tesseract) {
+                const ret = await Tesseract.recognize(rawCanvas, 'eng');
+                const text = ret.data.text || "";
 
-            if (ocrWorker) {
-                const ret = await ocrWorker.recognize(processedCanvas);
-                text = ret.data.text || "";
-            } else if (window.Tesseract) {
-                const ret = await Tesseract.recognize(processedCanvas, 'eng');
-                text = ret.data.text || "";
-            }
+                if (text) {
+                    // 1. LICENCE NUMBER (Matches 7 to 9 digit Australian Licence Numbers)
+                    const idMatch = text.match(/(?:LIC|LICENCE|CARD|NO|NUMBER)[\s#:]*([A-Z0-9]{7,10})/i) ||
+                                    text.match(/\b\d{7,9}\b/);
+                    if (idMatch && (!idNumInput.value || idNumInput.value.length < 5)) {
+                        idNumInput.value = idMatch[1] || idMatch[0];
+                    }
 
-            if (text) {
-                // LICENCE NUMBER REGEX
-                const idMatch = text.match(/(?:LIC|NO|ID|CARD|NUMBER|LICENCE)[\s#:]*([A-Z0-9]{7,10})/i) || 
-                                text.match(/\b[0-9]{7,9}\b/);
-                if (idMatch && (!idNumInput.value || idNumInput.value.length < 5)) {
-                    idNumInput.value = idMatch[1] || idMatch[0];
-                }
+                    // 2. NAME EXTRACTION
+                    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+                    for (let line of lines) {
+                        if (/^[A-Z\s]{4,30}$/.test(line) && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA|NEW\s+SOUTH\s+WALES|VICTORIA|DATE|BIRTH|EXPIRY/i.test(line)) {
+                            if (!ownerNameInput.value) {
+                                ownerNameInput.value = line;
+                                break;
+                            }
+                        }
+                    }
 
-                // NAME REGEX
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
-                for (let line of lines) {
-                    if (/^[A-Z\s]{4,30}$/.test(line) && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA|NEW\s+SOUTH\s+WALES|VICTORIA|DATE|BIRTH|EXP/i.test(line)) {
-                        if (!ownerNameInput.value) ownerNameInput.value = line;
-                        break;
+                    // 3. ADDRESS EXTRACTION
+                    const addrLine = lines.find(l => /\d+\s+[A-Z0-9\s]+(?:ST|RD|AVE|DR|WAY|QLD|NSW|VIC|STREET|ROAD)/i.test(l));
+                    if (addrLine && !ownerAddressInput.value) {
+                        ownerAddressInput.value = addrLine;
                     }
                 }
-
-                // ADDRESS REGEX
-                const addressMatch = lines.find(l => /\d+\s+[A-Z0-9\s]+(?:ST|RD|AVE|DR|WAY|QLD|NSW|VIC|STREET|ROAD)/i.test(l));
-                if (addressMatch && !ownerAddressInput.value) {
-                    ownerAddressInput.value = addressMatch;
-                }
             }
+        } catch(e) {}
 
-            statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
-        } catch(e) {
-            statusDiv.innerText = `✔ ID SNAP #${photoIndex} (${labelText}) CAPTURED`;
-        }
-
+        statusDiv.innerText = `✔ ID SNAP #${photoIndex} CAPTURED`;
         validateForm();
     });
 
@@ -481,25 +436,18 @@
 
     function clearSig(canvasId) {
         const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
         canvas.classList.remove('sig-locked');
-        
         if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
         if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
-        
         statusDiv.innerText = "";
         validateForm();
     }
 
     function confirmSig(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        canvas.classList.add('sig-locked');
-        
+        document.getElementById(canvasId).classList.add('sig-locked');
         if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
         if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
-        
         statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
         validateForm();
     }
@@ -515,14 +463,11 @@
 
     function validateForm() {
         let isValid = true;
-
-        function mark(elem, condition) {
-            if (condition) {
-                elem.classList.remove('field-missing');
-                elem.classList.add('field-valid');
+        function mark(elem, cond) {
+            if (cond) {
+                elem.classList.remove('field-missing'); elem.classList.add('field-valid');
             } else {
-                elem.classList.remove('field-valid');
-                elem.classList.add('field-missing');
+                elem.classList.remove('field-valid'); elem.classList.add('field-missing');
                 isValid = false;
             }
         }
@@ -547,7 +492,6 @@
         }
 
         if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
-
         return isValid;
     }
 
@@ -556,6 +500,10 @@
             statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM BOTH SIGS";
             return;
         }
+
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        statusDiv.innerText = "GENERATING TAX INVOICE & RELEASING...";
 
         const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
         const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
@@ -582,22 +530,27 @@
             officerSigBytes: officerSig
         };
 
-        statusDiv.innerText = "GENERATING INVOICE & RELEASING...";
         try {
-            await fetch(GOOGLE_SCRIPT_URL, { 
+            const res = await fetch(GOOGLE_SCRIPT_URL, { 
                 method: 'POST', 
-                mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload) 
             });
-            statusDiv.innerText = "✔ PAID - VEHICLE RELEASED & INVOICE SENT!";
+            const resData = await res.json();
+            
+            if (resData && resData.status === "SUCCESS") {
+                statusDiv.innerText = "✔ PAID - VEHICLE RELEASED & INVOICE EMAILED!";
+                setTimeout(() => { window.location.reload(true); }, 2000);
+            } else {
+                statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release");
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+            }
         } catch(err) {
-            statusDiv.innerText = "ERROR PROCESSING RELEASE";
+            statusDiv.innerText = "SERVER ERROR PROCESSING RELEASE";
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = "1";
         }
-
-        setTimeout(() => {
-            window.location.reload(true);
-        }, 1500);
     });
 </script>
 </body>
