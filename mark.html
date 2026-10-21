@@ -389,92 +389,60 @@
         });
     }
 
-    snapBtn.addEventListener('click', async () => {
-        const property = propertySelect.value;
-        if (!property) {
-            statusDiv.innerText = "⚠️ SELECT A PROPERTY FIRST";
-            triggerRedOverlay();
+snapBtn.addEventListener('click', async () => {
+    try {
+        if (!videoElem || videoElem.paused || videoElem.ended) {
+            alert("Camera not ready. Please refresh.");
             return;
         }
 
-        if (flashOn && videoTrack && trackCapabilities.torch) {
-            try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
-        }
-
-        // FAST OPTIMIZED CANVAS SNAPSHOT (PRESERVES 16:9 ASPECT RATIO & LIGHTWEIGHT PAYLOAD)
+        // Draw camera frame to temporary canvas
         const canvas = document.createElement('canvas');
-        const aspect = (videoElem.videoHeight && videoElem.videoWidth) ? (videoElem.videoHeight / videoElem.videoWidth) : 0.5625;
-        canvas.width = 800;
-        canvas.height = Math.round(800 * aspect);
+        canvas.width = videoElem.videoWidth || 1280;
+        canvas.height = videoElem.videoHeight || 720;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-        const b64 = canvas.toDataURL('image/jpeg', 0.60);
 
-        if (videoTrack && trackCapabilities.torch) {
-            setTimeout(async () => {
-                try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
-            }, 150);
+        // Compress frame to JPEG base64 string
+        const base64Photo = canvas.toDataURL('image/jpeg', 0.60);
+
+        statusDiv.innerText = "READING PLATE...";
+        snapBtn.disabled = true;
+
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'npr_scan',
+                photoBytes: base64Photo
+            })
+        });
+
+        const resText = await response.text();
+        let resData = {};
+        try {
+            resData = JSON.parse(resText);
+        } catch(e) {
+            console.error("Non-JSON Response:", resText);
         }
 
-        let currentRego = regoInput.value.trim().toUpperCase();
+        snapBtn.disabled = false;
 
-        if (!currentRego && navigator.onLine) {
-            statusDiv.innerText = "🔍 SCANNING...";
-            try {
-                const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'scan_npr',
-                        photoBytes: b64
-                    })
-                });
-                
-                const nprText = await nprRes.text();
-                const nprResult = JSON.parse(nprText);
-
-                if (nprResult && nprResult.rego) {
-                    currentRego = nprResult.rego.toUpperCase();
-                    regoInput.value = currentRego;
-                }
-            } catch(e) {}
-        }
-
-        let isOfflineCache = false;
-        if (!currentRego) {
-            if (!navigator.onLine) {
-                isOfflineCache = true;
-                currentRego = "PENDING_OCR";
-            } else {
-                triggerRedOverlay();
-                statusDiv.innerText = "⚠️ TYPE REGO OR ALIGN PLATE CLEARLY";
-                return;
-            }
-        }
-
-        triggerGreenOverlay();
-        statusDiv.innerText = isOfflineCache ? "✔ LOGGED OFFLINE" : `✔ MARKED ${currentRego}`;
-        regoInput.value = "";
-
-        const payload = {
-            action: 'log_mark',
-            property: property,
-            rego: currentRego,
-            photoBytes: b64,
-            isOfflinePending: isOfflineCache,
-            timestamp: new Date().toISOString()
-        };
-
-        if (navigator.onLine && !isOfflineCache) {
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            }).catch(() => queueOfflineMark(payload));
+        if (resData && resData.rego) {
+            regoInput.value = resData.rego.toUpperCase();
+            statusDiv.innerText = "PLATE DETECTED: " + resData.rego.toUpperCase();
+        } else if (resData && resData.error) {
+            statusDiv.innerText = "SCAN FAIL: " + resData.error;
+            alert("NPR Error: " + resData.error);
         } else {
-            queueOfflineMark(payload);
+            statusDiv.innerText = "TYPE REGO OR ALIGN PLATE CLEARLY";
         }
-    });
+    } catch (err) {
+        snapBtn.disabled = false;
+        statusDiv.innerText = "NETWORK / CAMERA ERROR";
+        alert("Scan Error: " + err.message);
+    }
+});
 
     function triggerGreenOverlay() {
         greenOverlay.classList.add('show');
