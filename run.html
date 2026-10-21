@@ -613,6 +613,40 @@
         hh = hh % 12;
         hh = hh ? hh : 12;
         return `${dd}/${mm} ${String(hh).padStart(2, '0')}:${min} ${ampm}`;
+       
+        // AUTOMATIC BACKGROUND TOW UPLOADER
+    window.addEventListener('load', () => {
+        syncPendingTowsInBackground();
+        setInterval(syncPendingTowsInBackground, 8000);
+    });
+
+    async function syncPendingTowsInBackground() {
+        if (!navigator.onLine) return;
+        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        if (queue.length === 0) return;
+
+        console.log(`[Background Sync] Uploading ${queue.length} pending tow(s)...`);
+
+        for (let i = 0; i < queue.length; i++) {
+            const item = queue[i];
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item),
+                    keepalive: true
+                });
+
+                // Remove uploaded item from queue
+                let updatedQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+                updatedQueue = updatedQueue.filter(q => q.id !== item.id);
+                localStorage.setItem('tow_offline_queue', JSON.stringify(updatedQueue));
+            } catch(err) {
+                console.warn("[Background Sync] Postponed due to network:", err);
+                break;
+            }
+        }
+    } 
     }
 </script>
 </body>
