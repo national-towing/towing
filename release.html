@@ -31,4 +31,632 @@
         .icon-btn:active { transform: scale(0.9); }
 
         .nav-bar { display: flex; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 16px; }
-        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size
+        .nav-tile { flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; text-decoration: none; color: #000; }
+        .nav-run { background: #ffab00; }
+        .nav-tow { background: #ff1744; color: #fff; }
+        .nav-rel { background: #00e676; }
+        .nav-pass { background: #ab47bc; color: #fff; }
+
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
+        
+        .section-title { font-size: 16px; font-weight: 900; color: #00e676; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 6px; margin-top: 14px; margin-bottom: 6px; }
+
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
+        input, select {
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+        }
+
+        .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
+        .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
+
+        .legal-stmt { font-size: 13.5px; color: #ddd; margin-top: 14px; line-height: 1.4; font-style: italic; background: #141414; padding: 10px; border-radius: 8px; border: 1px solid #333; font-weight: 600; }
+
+        /* CAMERA VIEWFINDER WITH CARD ALIGNMENT GUIDE */
+        .camera-box {
+            width: 100%; height: 240px; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-guide-frame {
+            position: absolute; width: 88%; height: 78%;
+            border: 2px dashed #00e676; border-radius: 12px;
+            pointer-events: none; z-index: 5;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.40);
+            display: flex; align-items: flex-start; justify-content: center;
+        }
+        .card-guide-label {
+            background: rgba(0,0,0,0.7); color: #00e676; font-size: 11px;
+            font-weight: 900; padding: 4px 10px; border-radius: 0 0 8px 8px; letter-spacing: 1px;
+        }
+
+        .thumb-gallery { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; }
+        .thumb-container { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .thumb-img { width: 74px; height: 74px; border-radius: 10px; object-fit: cover; border: 2px solid #00e676; cursor: pointer; }
+        .thumb-label { font-size: 10px; font-weight: 900; color: #00e676; margin-top: 2px; text-transform: uppercase; }
+
+        .circle-cam-btn {
+            width: 80px; height: 80px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
+            margin: 12px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 18px rgba(0, 230, 118, 0.4); cursor: pointer; user-select: none;
+        }
+        .circle-cam-btn:active { transform: scale(0.90); }
+        .circle-cam-inner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000; }
+
+        .sig-container { width: 100%; margin-top: 6px; position: relative; }
+        canvas.sig-box {
+            width: 100%; height: 190px; background: #fff; border: 2px solid #444; border-radius: 12px;
+            touch-action: none; cursor: crosshair; transition: opacity 0.3s ease;
+        }
+        .sig-locked { opacity: 0.45; pointer-events: none; border-color: #00e676 !important; }
+
+        .sig-btn-row { display: flex; gap: 8px; margin-top: 6px; }
+        .sig-btn { flex: 1; height: 42px; border-radius: 8px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; letter-spacing: 1px; }
+        .btn-clear { background: #ff1744; color: #fff; }
+        .btn-confirm { background: #00e676; color: #000; }
+
+        .submit-btn {
+            background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+        }
+        .submit-btn:active { transform: scale(0.97); }
+
+        .row-2 { display: flex; gap: 10px; }
+        .row-2 > div { flex: 1; }
+        #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; min-height: 24px; color: #ffab00; }
+    </style>
+</head>
+<body>
+
+<div class="header-box">
+    <h1>RELEASE</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
+</div>
+
+<div class="nav-bar">
+    <a href="run.html" class="nav-tile nav-run">RUN</a>
+    <a href="tow.html" class="nav-tile nav-tow">TOW</a>
+    <a href="release.html" class="nav-tile nav-rel">REL</a>
+    <a href="passes.html" class="nav-tile nav-pass">PASS</a>
+</div>
+
+<div class="card">
+    <label>SELECT FROM YARD</label>
+    <select id="vehicleSelect"><option value="">LOADING YARD VEHICLES...</option></select>
+
+    <!-- SECTION 1: VEHICLE DETAILS -->
+    <div class="section-title">OFFENDING VEHICLE DETAILS</div>
+    
+    <div class="row-2">
+        <div>
+            <label>PROPERTY</label>
+            <input type="text" id="propertyInput" placeholder="PROPERTY" readonly style="background:#1a1a1a; color:#aaa;">
+        </div>
+        <div>
+            <label>SVN # (POLICELINK)</label>
+            <input type="text" id="svnInput" placeholder="SVN NUMBER">
+        </div>
+    </div>
+
+    <div class="row-2">
+        <div>
+            <label>REGO</label>
+            <input type="text" id="regoInput" placeholder="REGO" style="color:#00e676; text-transform:uppercase;">
+        </div>
+        <div>
+            <label>COLOUR</label>
+            <input type="text" id="colourInput" placeholder="COLOUR">
+        </div>
+    </div>
+
+    <div class="row-2">
+        <div>
+            <label>MAKE</label>
+            <input type="text" id="makeInput" placeholder="MAKE">
+        </div>
+        <div>
+            <label>MODEL</label>
+            <input type="text" id="modelInput" placeholder="MODEL">
+        </div>
+    </div>
+
+    <!-- SECTION 2: OWNER DETAILS -->
+    <div class="section-title">OWNER DETAILS</div>
+    
+    <label>ALIGN LICENCE IN FRAME & TAP TO SCAN</label>
+    <div class="camera-box">
+        <video id="videoElem" autoplay playsinline></video>
+        <div class="card-guide-frame">
+            <span class="card-guide-label">ALIGN LICENCE HERE</span>
+        </div>
+    </div>
+    
+    <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
+    <div class="thumb-gallery" id="thumbGallery"></div>
+
+    <div class="row-2">
+        <div>
+            <label>NAME</label>
+            <input type="text" id="ownerNameInput" placeholder="FULL NAME">
+        </div>
+        <div>
+            <label>ID / LICENCE #</label>
+            <input type="text" id="idNumInput" placeholder="CRN / LICENCE #">
+        </div>
+    </div>
+
+    <label>ADDRESS</label>
+    <input type="text" id="ownerAddressInput" placeholder="STREET ADDRESS, SUBURB, STATE">
+
+    <div class="row-2">
+        <div>
+            <label>PHONE (OPTIONAL)</label>
+            <input type="tel" id="ownerPhoneInput" placeholder="PHONE NUMBER">
+        </div>
+        <div>
+            <label>EMAIL</label>
+            <input type="email" id="ownerEmailInput" placeholder="EMAIL FOR TAX INVOICE">
+        </div>
+    </div>
+
+    <div class="legal-stmt">
+        "I am the owner, owners agent, driver or authorised person in charge of the above vehicle. I take full responsibility for payment, release and acceptance of the vehicle as inspected."
+    </div>
+
+    <label>OWNER SIGNATURE</label>
+    <div class="sig-container">
+        <canvas id="ownerSigCanvas" class="sig-box"></canvas>
+        <div class="sig-btn-row">
+            <button class="sig-btn btn-clear" type="button" onclick="clearSig('ownerSigCanvas')">CLEAR</button>
+            <button class="sig-btn btn-confirm" type="button" onclick="confirmSig('ownerSigCanvas')">CONFIRM</button>
+        </div>
+    </div>
+
+    <!-- SECTION 3: PAYMENT DETAILS -->
+    <div class="section-title">PAYMENT DETAILS</div>
+    <div class="row-2">
+        <div>
+            <label>RELEASE FEE ($)</label>
+            <input type="number" step="0.01" id="releaseFeeInput" value="310.05">
+        </div>
+        <div>
+            <label>AH RELEASE FEE ($)</label>
+            <input type="number" step="0.01" id="storageFeeInput" value="140.95">
+        </div>
+    </div>
+
+    <!-- SECTION 4: OFFICE USE -->
+    <div class="section-title">OFFICE USE</div>
+    
+    <label>RELEASED BY</label>
+    <select id="officerSelect" onchange="checkOfficerOther(this)">
+        <option value="Brian" selected>Brian</option>
+        <option value="Brett">Brett</option>
+        <option value="OTHER">Other...</option>
+    </select>
+    <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;">
+
+    <label>OFFICER SIGNATURE</label>
+    <div class="sig-container">
+        <canvas id="officerSigCanvas" class="sig-box"></canvas>
+        <div class="sig-btn-row">
+            <button class="sig-btn btn-clear" type="button" onclick="clearSig('officerSigCanvas')">CLEAR</button>
+            <button class="sig-btn btn-confirm" type="button" onclick="confirmSig('officerSigCanvas')">CONFIRM</button>
+        </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn">PAID - RELEASE</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+    const vehicleSelect = document.getElementById('vehicleSelect');
+    const propertyInput = document.getElementById('propertyInput');
+    const svnInput = document.getElementById('svnInput');
+    const regoInput = document.getElementById('regoInput');
+    const colourInput = document.getElementById('colourInput');
+    const makeInput = document.getElementById('makeInput');
+    const modelInput = document.getElementById('modelInput');
+
+    const ownerNameInput = document.getElementById('ownerNameInput');
+    const idNumInput = document.getElementById('idNumInput');
+    const ownerAddressInput = document.getElementById('ownerAddressInput');
+    const ownerPhoneInput = document.getElementById('ownerPhoneInput');
+    const ownerEmailInput = document.getElementById('ownerEmailInput');
+
+    const releaseFeeInput = document.getElementById('releaseFeeInput');
+    const storageFeeInput = document.getElementById('storageFeeInput');
+
+    const officerSelect = document.getElementById('officerSelect');
+    const officerOtherInput = document.getElementById('officerOtherInput');
+
+    const videoElem = document.getElementById('videoElem');
+    const snapBtn = document.getElementById('snapBtn');
+    const thumbGallery = document.getElementById('thumbGallery');
+    const submitBtn = document.getElementById('submitBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statusDiv = document.getElementById('status');
+
+    let yardVehicles = [];
+    let idPhotos = [];
+    let ownerSigConfirmed = false;
+    let officerSigConfirmed = false;
+
+    window.addEventListener('load', () => {
+        loadYardVehicles();
+        initCamera();
+        initSignatureCanvas('ownerSigCanvas');
+        initSignatureCanvas('officerSigCanvas');
+        setupLiveValidation();
+    });
+
+    refreshBtn.addEventListener('click', () => { window.location.reload(true); });
+
+    function checkOfficerOther(selectElem) {
+        officerOtherInput.style.display = selectElem.value === "OTHER" ? 'block' : 'none';
+        validateForm();
+    }
+
+    vehicleSelect.addEventListener('change', () => {
+        const veh = yardVehicles.find(v => v.rego === vehicleSelect.value);
+        if (veh) {
+            propertyInput.value = veh.property || '';
+            regoInput.value = veh.rego || '';
+            makeInput.value = veh.make || '';
+            modelInput.value = veh.model || '';
+            colourInput.value = veh.colour || '';
+        } else {
+            propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = '';
+        }
+        validateForm();
+    });
+
+    async function loadYardVehicles() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
+            yardVehicles = await res.json();
+            vehicleSelect.innerHTML = "<option value=''>-- SELECT FROM YARD --</option>";
+
+            if (!Array.isArray(yardVehicles) || yardVehicles.length === 0) {
+                vehicleSelect.innerHTML = "<option value=''>NO VEHICLES IN YARD</option>";
+                return;
+            }
+
+            yardVehicles.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.rego;
+                opt.innerText = `${v.rego} (${v.property || ''} - ${v.make || ''} ${v.model || ''})`;
+                vehicleSelect.appendChild(opt);
+            });
+        } catch(e) {
+            vehicleSelect.innerHTML = "<option value=''>ERROR LOADING YARD</option>";
+        }
+    }
+
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                audio: false
+            });
+            videoElem.srcObject = stream;
+        } catch(e) {
+            statusDiv.innerText = "CAMERA ACCESS ERROR";
+        }
+    }
+
+    // SNAP CAMERA STILL & TARGETED CROP
+    snapBtn.addEventListener('click', async () => {
+        const vW = videoElem.videoWidth || 1920;
+        const vH = videoElem.videoHeight || 1080;
+        
+        // 1. Crop center 85% width and 75% height to eliminate surrounding clutter
+        const cropW = Math.round(vW * 0.85);
+        const cropH = Math.round(vH * 0.75);
+        const startX = Math.round((vW - cropW) / 2);
+        const startY = Math.round((vH - cropH) / 2);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = cropW;
+        canvas.height = cropH;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, startX, startY, cropW, cropH, 0, 0, cropW, cropH);
+
+        const b64 = canvas.toDataURL('image/jpeg', 0.70);
+        idPhotos.push(b64);
+
+        const photoIndex = idPhotos.length;
+        const labelText = photoIndex === 1 ? "FRONT / DIGITAL" : (photoIndex === 2 ? "BACK" : `SNAP ${photoIndex}`);
+
+        // 2. Add thumbnail to gallery
+        const thumbWrap = document.createElement('div');
+        thumbWrap.className = 'thumb-container';
+
+        const img = document.createElement('img');
+        img.src = b64; 
+        img.className = 'thumb-img';
+
+        const lbl = document.createElement('span');
+        lbl.className = 'thumb-label';
+        lbl.innerText = labelText;
+
+        thumbWrap.appendChild(img);
+        thumbWrap.appendChild(lbl);
+        thumbGallery.appendChild(thumbWrap);
+
+        statusDiv.innerText = `🔍 SCANNING ID TEXT (#${photoIndex})...`;
+
+        // 3. Process the exact cropped card via OCR
+        try {
+            if (window.Tesseract) {
+                const ret = await Tesseract.recognize(canvas, 'eng');
+                const text = ret.data.text || "";
+                console.log("[OCR Result Raw]:", text);
+
+                if (text) {
+                    parseLicenceDetails(text);
+                }
+            }
+        } catch(err) {
+            console.error("OCR Exception:", err);
+        }
+
+        statusDiv.innerText = `✔ ID PHOTO #${photoIndex} ATTACHED`;
+        validateForm();
+    });
+
+    function parseLicenceDetails(text) {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+
+        // 1. CRN / LICENCE NUMBER (Only update if currently empty)
+        if (!idNumInput.value || idNumInput.value.length < 5) {
+            // Check for "5 " or "5:" (Physical QLD Licence field 5)
+            const crnPhys = text.match(/(?:^|\n)[5S]\s*[:\.]?\s*([0-9\s]{8,11})\b/);
+            if (crnPhys) {
+                const cleanCrn = crnPhys[1].replace(/\s+/g, '');
+                if (cleanCrn.length >= 7 && cleanCrn.length <= 9) {
+                    idNumInput.value = cleanCrn;
+                }
+            }
+
+            // Check for digital licence or labeled format
+            if (!idNumInput.value || idNumInput.value.length < 5) {
+                const crnDig = text.match(/(?:LICENCE\s*(?:NO|NUMBER)?|CRN|CARD\s*NO)[\s:\.]*([A-Z0-9]{7,10})/i);
+                if (crnDig) {
+                    idNumInput.value = crnDig[1].trim();
+                } else {
+                    // Fallback to isolated 8-9 digits (avoiding 19xx or 20xx dates)
+                    const digitMatches = text.match(/\b\d{8,9}\b/g);
+                    if (digitMatches) {
+                        const validNum = digitMatches.find(num => !num.startsWith("19") && !num.startsWith("20"));
+                        if (validNum) idNumInput.value = validNum;
+                    }
+                }
+            }
+        }
+
+        // 2. NAME (Only update if currently empty — NEVER overwrite on snap 2)
+        if (!ownerNameInput.value || ownerNameInput.value.trim().length < 3) {
+            // Check Physical QLD Licence (1 SURNAME, 2 GIVEN)
+            let surname = "";
+            let given = "";
+            for (let line of lines) {
+                const m1 = line.match(/^[1I]\s+([A-Za-z\s\-]+)$/);
+                if (m1 && !/DRIVER|LICENCE|QUEENSLAND|AUSTRALIA/i.test(m1[1])) {
+                    surname = m1[1].trim();
+                }
+                const m2 = line.match(/^2\s+([A-Za-z\s\-]+)$/);
+                if (m2 && !/DRIVER|LICENCE|QUEENSLAND|AUSTRALIA/i.test(m2[1])) {
+                    given = m2[1].trim();
+                }
+            }
+
+            if (surname && given) {
+                ownerNameInput.value = `${given} ${surname}`.toUpperCase();
+            } else if (surname) {
+                ownerNameInput.value = surname.toUpperCase();
+            } else {
+                // Check Digital QLD Licence (Line directly beneath "Digital Licence")
+                for (let i = 0; i < lines.length; i++) {
+                    if (/Digital\s+Licence/i.test(lines[i]) && i + 1 < lines.length) {
+                        const cand = lines[i + 1].trim();
+                        if (/^[A-Za-z\s\-]{4,35}$/.test(cand) && !/Licence|Number|Address/i.test(cand)) {
+                            ownerNameInput.value = cand.toUpperCase();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. RESIDENTIAL ADDRESS (Only update if currently empty)
+        if (!ownerAddressInput.value || ownerAddressInput.value.trim().length < 5) {
+            // Check Field 8 (QLD Physical Licence field 8)
+            for (let i = 0; i < lines.length; i++) {
+                const m8 = lines[i].match(/^[8B]\s+(.*)/);
+                if (m8) {
+                    let addr = m8[1].trim();
+                    if (i + 1 < lines.length && /\b(?:QLD|NSW|VIC|WA|SA|TAS|ACT|NT)\s*\d{4}\b/i.test(lines[i + 1])) {
+                        addr = `${addr}, ${lines[i + 1]}`.trim();
+                    }
+                    ownerAddressInput.value = addr.toUpperCase();
+                    break;
+                }
+            }
+
+            // Check standard address line ending with State + 4 digit postcode
+            if (!ownerAddressInput.value || ownerAddressInput.value.trim().length < 5) {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (/\b(?:QLD|NSW|VIC|WA|SA|TAS|ACT|NT)\s*\d{4}\b/i.test(line)) {
+                        if (i > 0 && /\d+\s+[A-Za-z]+/.test(lines[i - 1]) && !/BIRTH|EXPIRY|DATE|LICENCE|RESIDENTIAL/i.test(lines[i - 1])) {
+                            ownerAddressInput.value = `${lines[i - 1]}, ${line}`.replace(/^[0-9]\s+/, '').trim().toUpperCase();
+                        } else {
+                            ownerAddressInput.value = line.replace(/^[0-9]\s+/, '').trim().toUpperCase();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    function initSignatureCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+        }
+        resizeCanvas();
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDrawing(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+        function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+        function stopDrawing() { drawing = false; }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function clearSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        canvas.classList.remove('sig-locked');
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
+        statusDiv.innerText = "";
+        validateForm();
+    }
+
+    function confirmSig(canvasId) {
+        document.getElementById(canvasId).classList.add('sig-locked');
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
+        statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
+        validateForm();
+    }
+
+    function setupLiveValidation() {
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        inputs.forEach(elem => {
+            elem.addEventListener('input', validateForm);
+            elem.addEventListener('change', validateForm);
+        });
+        validateForm();
+    }
+
+    function validateForm() {
+        let isValid = true;
+        function mark(elem, cond) {
+            if (cond) {
+                elem.classList.remove('field-missing'); elem.classList.add('field-valid');
+            } else {
+                elem.classList.remove('field-valid'); elem.classList.add('field-missing');
+                isValid = false;
+            }
+        }
+
+        mark(vehicleSelect, vehicleSelect.value !== "");
+        mark(svnInput, svnInput.value.trim() !== "");
+        mark(regoInput, regoInput.value.trim() !== "");
+        mark(colourInput, colourInput.value.trim() !== "");
+        mark(makeInput, makeInput.value.trim() !== "");
+        mark(modelInput, modelInput.value.trim() !== "");
+
+        mark(ownerNameInput, ownerNameInput.value.trim() !== "");
+        mark(idNumInput, idNumInput.value.trim() !== "");
+        mark(ownerAddressInput, ownerAddressInput.value.trim() !== "");
+        mark(ownerEmailInput, ownerEmailInput.value.trim() !== "");
+
+        mark(releaseFeeInput, releaseFeeInput.value !== "");
+        mark(storageFeeInput, storageFeeInput.value !== "");
+
+        if (officerSelect.value === "OTHER") {
+            mark(officerOtherInput, officerOtherInput.value.trim() !== "");
+        }
+
+        if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
+        return isValid;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        if (!validateForm()) {
+            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM BOTH SIGS";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        statusDiv.innerText = "GENERATING TAX INVOICE & RELEASING...";
+
+        const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
+        const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
+        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
+
+        const payload = {
+            action: 'process_release',
+            rego: regoInput.value.trim().toUpperCase(),
+            svnNumber: svnInput.value.trim(),
+            make: makeInput.value.trim(),
+            model: modelInput.value.trim(),
+            colour: colourInput.value.trim(),
+            property: propertyInput.value.trim(),
+            ownerName: ownerNameInput.value.trim(),
+            idNumber: idNumInput.value.trim(),
+            ownerAddress: ownerAddressInput.value.trim(),
+            ownerPhone: ownerPhoneInput.value.trim(),
+            ownerEmail: ownerEmailInput.value.trim(),
+            releaseFee: releaseFeeInput.value,
+            storageFee: storageFeeInput.value,
+            officer: finalOfficer,
+            idPhotos: idPhotos,
+            ownerSigBytes: ownerSig,
+            officerSigBytes: officerSig
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
+            });
+            const resData = await res.json();
+            
+            if (resData && resData.status === "SUCCESS") {
+                statusDiv.innerText = "✔ PAID - VEHICLE RELEASED & INVOICE EMAILED!";
+                setTimeout(() => { window.location.reload(true); }, 2000);
+            } else {
+                statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release");
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+            }
+        } catch(err) {
+            statusDiv.innerText = "SERVER ERROR PROCESSING RELEASE";
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = "1";
+        }
+    });
+</script>
+</body>
+</html>
