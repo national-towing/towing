@@ -431,7 +431,7 @@
     }
 
     // --- SUBMISSION & BASEMENT CACHING ---
-    submitBtn.addEventListener('click', async (e) => {
+    submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -462,36 +462,38 @@
             timestamp: new Date().toISOString()
         };
 
-        // Instantly hide car from run list local cache
+        // 1. Immediately remove car from local cache so it vanishes from RUN
         try {
             let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
             cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
             localStorage.setItem('cached_run_data', JSON.stringify(cachedRun));
         } catch(err) {}
 
-        if (!navigator.onLine) {
-            saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ BASEMENT MODE: SAVED OFFLINE!";
-            setTimeout(() => { window.location.href = "run.html"; }, 600);
-            return;
-        }
+        // 2. Save payload into local persistent queue
+        saveToOfflineQueue(payload);
 
-        statusDiv.innerText = "LOGGING TOW TO YARD...";
-
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
+        // 3. Fire-and-forget background upload attempt
+        if (navigator.onLine) {
+            fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-
-            statusDiv.innerText = "✔ TOW LOGGED SUCCESS!";
-            setTimeout(() => { window.location.href = "run.html"; }, 400);
-        } catch(err) {
-            saveToOfflineQueue(payload);
-            statusDiv.innerText = "⚡ SAVED OFFLINE! WILL AUTO-SYNC";
-            setTimeout(() => { window.location.href = "run.html"; }, 600);
+                body: JSON.stringify(payload),
+                keepalive: true
+            }).then(() => {
+                // Remove successfully uploaded item from queue
+                let q = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+                q = q.filter(item => item.id !== payload.id);
+                localStorage.setItem('tow_offline_queue', JSON.stringify(q));
+            }).catch(() => {});
         }
+
+        // 4. Instant UI response and immediate return to RUN
+        statusDiv.style.color = "#00e676";
+        statusDiv.innerText = "✔ TOW QUEUED! RETURNING TO RUN...";
+        
+        setTimeout(() => {
+            window.location.href = "run.html";
+        }, 250);
     });
 
     function saveToOfflineQueue(payload) {
