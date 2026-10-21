@@ -188,12 +188,12 @@
     <div class="sync-card">
         <h2>OFFLINE SYNC SUMMARY</h2>
         <div class="sync-list" id="syncList"></div>
-        <button class="sync-clear-btn" id="clearSyncBtn">RETURN TO MARKING</button>
+        <button class="sync-clear-btn" id="clearSyncBtn">RETURN TO ING</button>
     </div>
 </div>
 
 <div class="header-box" id="headerBox">
-    <h1>MARK</h1>
+    <h1></h1>
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
@@ -396,20 +396,20 @@ snapBtn.addEventListener('click', async () => {
             return;
         }
 
-        // Draw camera frame to temporary canvas
+        // 1. Draw frame to canvas
         const canvas = document.createElement('canvas');
         canvas.width = videoElem.videoWidth || 1280;
         canvas.height = videoElem.videoHeight || 720;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
-        // Compress frame to JPEG base64 string
-        const base64Photo = canvas.toDataURL('image/jpeg', 0.60);
+        const base64Photo = canvas.toDataURL('image/jpeg', 0.50);
 
         statusDiv.innerText = "READING PLATE...";
         snapBtn.disabled = true;
 
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
+        // 2. Scan plate via npr_scan
+        const scanRes = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
@@ -418,24 +418,55 @@ snapBtn.addEventListener('click', async () => {
             })
         });
 
-        const resText = await response.text();
-        let resData = {};
-        try {
-            resData = JSON.parse(resText);
-        } catch(e) {
-            console.error("Non-JSON Response:", resText);
+        const scanText = await scanRes.text();
+        let scanData = {};
+        try { scanData = JSON.parse(scanText); } catch(e) {}
+
+        let detectedRego = (scanData && scanData.rego) ? scanData.rego.toUpperCase() : regoInput.value.trim().toUpperCase();
+
+        if (!detectedRego) {
+            snapBtn.disabled = false;
+            statusDiv.innerText = "TYPE REGO OR ALIGN PLATE CLEARLY";
+            alert("Could not read plate. Please type REGO manually into the box.");
+            return;
         }
+
+        regoInput.value = detectedRego;
+        statusDiv.innerText = `PLATE: ${detectedRego} - LOGGING MARK...`;
+
+        // 3. Post directly to log_mark in Code.gs
+        const markPayload = {
+            action: 'log_mark',
+            property: propertySelect.value || 'GENERAL',
+            rego: detectedRego,
+            state: stateSelect ? stateSelect.value : 'QLD',
+            make: makeSelect ? makeSelect.value : '',
+            model: modelInput ? modelInput.value : '',
+            colour: colourSelect ? colourSelect.value : '',
+            bodyType: bodyTypeSelect ? bodyTypeSelect.value : '',
+            confidence: scanData.rego ? 'HIGH' : 'MANUAL',
+            photoBytes: base64Photo,
+            isManagerRequest: false
+        };
+
+        const markRes = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(markPayload)
+        });
+
+        const markText = await markRes.text();
+        let markData = {};
+        try { markData = JSON.parse(markText); } catch(e) {}
 
         snapBtn.disabled = false;
 
-        if (resData && resData.rego) {
-            regoInput.value = resData.rego.toUpperCase();
-            statusDiv.innerText = "PLATE DETECTED: " + resData.rego.toUpperCase();
-        } else if (resData && resData.error) {
-            statusDiv.innerText = "SCAN FAIL: " + resData.error;
-            alert("NPR Error: " + resData.error);
+        if (markData && markData.status === "SUCCESS") {
+            statusDiv.innerText = "✔ MARK LOGGED SUCCESSFULLY!";
+            regoInput.value = "";
         } else {
-            statusDiv.innerText = "TYPE REGO OR ALIGN PLATE CLEARLY";
+            statusDiv.innerText = "LOGGING FAIL: " + (markData.message || "Error");
+            alert("Logging Failed: " + (markData.message || "Unknown error"));
         }
     } catch (err) {
         snapBtn.disabled = false;
