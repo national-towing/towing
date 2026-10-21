@@ -10,9 +10,9 @@
 
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=700">
-    <link rel="icon" type="image/png" href="icon-run.png?v=700">
-    <link rel="manifest" href="manifest-run.json?v=700">
+    <link rel="apple-touch-icon" href="icon-run.png?v=701">
+    <link rel="icon" type="image/png" href="icon-run.png?v=701">
+    <link rel="manifest" href="manifest-run.json?v=701">
 
     <style>
         * { box-sizing: border-box; }
@@ -87,6 +87,15 @@
         .car-time-mkd { font-size: 13px; color: #aaa; font-weight: 700; line-height: 1; }
         .car-time-exp { font-size: 22px; color: #fff; font-weight: 900; margin-top: 6px; letter-spacing: 0.5px; }
 
+        .tile-right-box { display: flex; align-items: center; gap: 8px; }
+
+        .pic-preview-btn {
+            width: 44px; height: 44px; border-radius: 10px; background: #2a2a2a;
+            border: 1px solid #555; font-size: 20px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; color: #fff; flex-shrink: 0;
+        }
+        .pic-preview-btn:active { transform: scale(0.90); background: #333; }
+
         .badge { padding: 10px 14px; border-radius: 8px; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .badge-ready { background: #ff1744; color: #fff; }
         .badge-wait { background: #ffab00; color: #000; }
@@ -111,6 +120,18 @@
         .modal-footer { height: 75px; background: #1e1e1e; display: flex; justify-content: space-evenly; align-items: center; border-top: 1px solid #333; padding: 0 10px; gap: 10px; }
         .match-btn { flex: 1; background: #ff1744; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
         .skip-btn { flex: 1; background: #444; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+
+        /* Fullscreen Mark Image Preview Modal */
+        .preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #121212; z-index: 10000; flex-direction: column; }
+        .preview-modal.show { display: flex; }
+        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 14px; gap: 12px; flex-shrink: 0; }
+        .preview-back-btn { background: #2a2a2a; border: 1px solid #555; color: #ffab00; font-size: 14px; font-weight: 900; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+        .preview-back-btn:active { transform: scale(0.95); }
+        .preview-titles { display: flex; flex-direction: column; min-width: 0; }
+        .preview-rego { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 1px; line-height: 1.2; }
+        .preview-meta { font-size: 11px; color: #aaa; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; padding: 10px; }
+        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -138,7 +159,6 @@
         <span class="close-btn" onclick="closeOverlayModal()">✕</span>
     </div>
     
-    <!-- Opacity Control Slider -->
     <div class="opacity-bar">
         <span>GHOST OPACITY:</span>
         <input type="range" id="opacitySlider" min="0" max="100" value="45">
@@ -152,6 +172,21 @@
     <div class="modal-footer">
         <button id="matchBtn" class="match-btn">MATCH & TOW</button>
         <button id="skipBtn" class="skip-btn">SKIP & TOW</button>
+    </div>
+</div>
+
+<!-- Fullscreen Mark Image Preview Modal -->
+<div id="previewModal" class="preview-modal">
+    <div class="preview-header">
+        <button class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
+        <div class="preview-titles">
+            <span class="preview-rego" id="previewTitle"></span>
+            <span class="preview-meta" id="previewMeta"></span>
+        </div>
+    </div>
+    <div class="preview-body">
+        <img id="previewImg" alt="Mark Photo">
+        <div id="previewEmpty" class="empty-msg" style="display:none;">NO MARK PHOTO ATTACHED</div>
     </div>
 </div>
 
@@ -382,13 +417,60 @@
                     </div>
                     <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
                 </div>
-                <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
+                <div class="tile-right-box">
+                    <button class="pic-preview-btn" title="View Mark Photo">📷</button>
+                    <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</div>
+                </div>
             `;
+
+            // Wire up Preview button without triggering tile navigation
+            const previewBtn = tile.querySelector('.pic-preview-btn');
+            previewBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openPhotoPreview(car);
+            });
 
             runContainer.appendChild(tile);
         });
     }
 
+    // --- MARK PHOTO PREVIEW LOGIC ---
+    function openPhotoPreview(car) {
+        const previewModal = document.getElementById('previewModal');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewMeta = document.getElementById('previewMeta');
+        const previewImg = document.getElementById('previewImg');
+        const previewEmpty = document.getElementById('previewEmpty');
+
+        previewTitle.innerText = `${car.rego} (${car.property})`;
+        previewMeta.innerText = `MARKED: ${car.markedTimeStr} | EXP: ${car.expiryTimeStr}`;
+
+        if (car.imageUrl) {
+            let displayUrl = car.imageUrl;
+            const idMatch = car.imageUrl.match(/[-\w]{25,}/);
+            if (idMatch) {
+                displayUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0];
+            }
+            previewImg.src = displayUrl;
+            previewImg.style.display = "block";
+            previewEmpty.style.display = "none";
+        } else {
+            previewImg.style.display = "none";
+            previewEmpty.style.display = "block";
+        }
+
+        previewModal.classList.add('show');
+    }
+
+    function closePhotoPreview() {
+        const previewModal = document.getElementById('previewModal');
+        previewModal.classList.remove('show');
+        const previewImg = document.getElementById('previewImg');
+        if (previewImg) previewImg.src = "";
+    }
+
+    // --- OVERLAY CAMERA & VERIFICATION LOGIC ---
     async function openOverlayModal(car) {
         try {
             activeCar = car;
@@ -398,7 +480,6 @@
                 let fastUrl = car.imageUrl;
                 const idMatch = car.imageUrl.match(/[-\w]{25,}/);
                 if (idMatch) {
-                    // Use Google Drive proxy URL to prevent CORS canvas blocks
                     fastUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0];
                 }
                 ghostImage.crossOrigin = "anonymous";
@@ -471,21 +552,22 @@
 
         compCtx.drawImage(liveCanvas, frameW, 0);
 
-        const markImg = new Image();
-        markImg.crossOrigin = "anonymous";
-
         const now = new Date();
         const towTimeTag = formatDateTag(now);
         const markTimeTag = activeCar.markedTimeStr ? activeCar.markedTimeStr : towTimeTag;
 
         const processUploadAndRedirect = async (canvasToUpload) => {
-            const compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.50);
+            let compositeB64 = "";
+            try {
+                compositeB64 = canvasToUpload.toDataURL('image/jpeg', 0.50);
+            } catch(e) {
+                // Fallback to live camera capture if composite canvas was tainted
+                compositeB64 = liveCanvas.toDataURL('image/jpeg', 0.50);
+            }
 
             try {
-                // Synchronous fetch guarantees upload finishes before redirect
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
                         action: 'log_tow_confirmation',
@@ -500,6 +582,9 @@
             stopOverlayCamera();
             window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
         };
+
+        const markImg = new Image();
+        markImg.crossOrigin = "anonymous";
 
         markImg.onload = async () => {
             try {
