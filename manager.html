@@ -448,6 +448,7 @@
         const endDate = document.getElementById('endDateInput').value;
         const notes = document.getElementById('passNotesInput').value.trim();
         const statusDiv = document.getElementById('status');
+        const submitBtn = document.getElementById('submitPassBtn');
 
         if (!rego) {
             statusDiv.style.color = "#ff1744";
@@ -461,7 +462,7 @@
             return;
         }
 
-        document.getElementById('submitPassBtn').disabled = true;
+        submitBtn.disabled = true;
         statusDiv.style.color = "#ffab00";
         statusDiv.innerText = "ISSUING PERMIT...";
 
@@ -476,15 +477,27 @@
         };
 
         try {
-            await fetch(GOOGLE_SCRIPT_URL, {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             });
 
+            const resText = await res.text();
+            let resData = {};
+            try { 
+                resData = JSON.parse(resText); 
+            } catch(jsonErr) {
+                console.error("Non-JSON Server Response:", resText);
+            }
+
             statusDiv.style.color = "#00e676";
-            statusDiv.innerText = `✔ PERMIT ISSUED FOR ${rego}!`;
+            if (resData && resData.message) {
+                statusDiv.innerText = `✔ ${resData.message.toUpperCase()}`;
+            } else {
+                statusDiv.innerText = `✔ PERMIT ISSUED FOR ${rego}!`;
+            }
+
             document.getElementById('passRegoInput').value = "";
             document.getElementById('passNotesInput').value = "";
         } catch(e) {
@@ -492,12 +505,12 @@
             statusDiv.innerText = "ERROR ISSUING PERMIT";
         }
 
+        submitBtn.disabled = false;
         setTimeout(() => {
-            document.getElementById('submitPassBtn').disabled = false;
             statusDiv.innerText = "";
-        }, 2500);
+        }, 6000);
     });
-
+    
     document.getElementById('submitTowBtn').addEventListener('click', async () => {
         const rego = document.getElementById('towRegoInput').value.trim().toUpperCase();
         const reason = document.getElementById('towReasonSelect').value;
