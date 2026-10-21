@@ -188,12 +188,12 @@
     <div class="sync-card">
         <h2>OFFLINE SYNC SUMMARY</h2>
         <div class="sync-list" id="syncList"></div>
-        <button class="sync-clear-btn" id="clearSyncBtn">RETURN TO ING</button>
+        <button class="sync-clear-btn" id="clearSyncBtn">RETURN TO MARKING</button>
     </div>
 </div>
 
 <div class="header-box" id="headerBox">
-    <h1></h1>
+    <h1>MARK</h1>
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
@@ -389,99 +389,92 @@
         });
     }
 
-snapBtn.addEventListener('click', async () => {
-    try {
-        if (!videoElem || videoElem.paused || videoElem.ended) {
-            alert("Camera not ready. Please refresh.");
+    snapBtn.addEventListener('click', async () => {
+        const property = propertySelect.value;
+        if (!property) {
+            statusDiv.innerText = "⚠️ SELECT A PROPERTY FIRST";
+            triggerRedOverlay();
             return;
         }
 
-        // 1. Capture full camera frame to canvas
+        if (flashOn && videoTrack && trackCapabilities.torch) {
+            try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
+        }
+
+        // FAST OPTIMIZED CANVAS SNAPSHOT (PRESERVES 16:9 ASPECT RATIO & LIGHTWEIGHT PAYLOAD)
         const canvas = document.createElement('canvas');
-        canvas.width = videoElem.videoWidth || 1280;
-        canvas.height = videoElem.videoHeight || 720;
+        const aspect = (videoElem.videoHeight && videoElem.videoWidth) ? (videoElem.videoHeight / videoElem.videoWidth) : 0.5625;
+        canvas.width = 800;
+        canvas.height = Math.round(800 * aspect);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        const b64 = canvas.toDataURL('image/jpeg', 0.60);
 
-        const base64Photo = canvas.toDataURL('image/jpeg', 0.50);
-
-        statusDiv.innerText = "READING PLATE...";
-        snapBtn.disabled = true;
-
-        // 2. Perform ANPR scan via npr_scan route
-        const scanRes = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-                action: 'npr_scan',
-                photoBytes: base64Photo
-            })
-        });
-
-        const scanText = await scanRes.text();
-        let scanData = {};
-        try { 
-            scanData = JSON.parse(scanText); 
-        } catch(e) {
-            console.error("Non-JSON Response from OCR:", scanText);
+        if (videoTrack && trackCapabilities.torch) {
+            setTimeout(async () => {
+                try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
+            }, 150);
         }
 
-        let detectedRego = (scanData && scanData.rego) ? scanData.rego.toUpperCase() : regoInput.value.trim().toUpperCase();
+        let currentRego = regoInput.value.trim().toUpperCase();
 
-        if (!detectedRego) {
-            snapBtn.disabled = false;
-            statusDiv.innerText = "TYPE REGO OR ALIGN PLATE CLEARLY";
-            alert("Could not read plate automatically. Please type the REGO manually into the box below.");
-            return;
+        if (!currentRego && navigator.onLine) {
+            statusDiv.innerText = "🔍 SCANNING...";
+            try {
+                const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'scan_npr',
+                        photoBytes: b64
+                    })
+                });
+                
+                const nprText = await nprRes.text();
+                const nprResult = JSON.parse(nprText);
+
+                if (nprResult && nprResult.rego) {
+                    currentRego = nprResult.rego.toUpperCase();
+                    regoInput.value = currentRego;
+                }
+            } catch(e) {}
         }
 
-        regoInput.value = detectedRego;
-        statusDiv.innerText = `PLATE: ${detectedRego} - LOGGING MARK...`;
+        let isOfflineCache = false;
+        if (!currentRego) {
+            if (!navigator.onLine) {
+                isOfflineCache = true;
+                currentRego = "PENDING_OCR";
+            } else {
+                triggerRedOverlay();
+                statusDiv.innerText = "⚠️ TYPE REGO OR ALIGN PLATE CLEARLY";
+                return;
+            }
+        }
 
-        // 3. Post full vehicle mark payload to log_mark in Code.gs
-        const markPayload = {
+        triggerGreenOverlay();
+        statusDiv.innerText = isOfflineCache ? "✔ LOGGED OFFLINE" : `✔ MARKED ${currentRego}`;
+        regoInput.value = "";
+
+        const payload = {
             action: 'log_mark',
-            property: propertySelect ? propertySelect.value : 'GENERAL',
-            rego: detectedRego,
-            state: stateSelect ? stateSelect.value : 'QLD',
-            make: makeSelect ? makeSelect.value : '',
-            model: modelInput ? modelInput.value : '',
-            colour: colourSelect ? colourSelect.value : '',
-            bodyType: bodyTypeSelect ? bodyTypeSelect.value : '',
-            confidence: (scanData && scanData.rego) ? 'HIGH' : 'MANUAL',
-            photoBytes: base64Photo,
-            isManagerRequest: false
+            property: property,
+            rego: currentRego,
+            photoBytes: b64,
+            isOfflinePending: isOfflineCache,
+            timestamp: new Date().toISOString()
         };
 
-        const markRes = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(markPayload)
-        });
-
-        const markText = await markRes.text();
-        let markData = {};
-        try { 
-            markData = JSON.parse(markText); 
-        } catch(e) {
-            console.error("Non-JSON Response from Log Mark:", markText);
-        }
-
-        snapBtn.disabled = false;
-
-        if (markData && markData.status === "SUCCESS") {
-            statusDiv.innerText = "✔ MARK LOGGED SUCCESSFULLY!";
-            regoInput.value = "";
+        if (navigator.onLine && !isOfflineCache) {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).catch(() => queueOfflineMark(payload));
         } else {
-            statusDiv.innerText = "LOGGING FAIL: " + (markData.message || "Error");
-            alert("Logging Failed: " + (markData.message || "Unknown server response"));
+            queueOfflineMark(payload);
         }
-    } catch (err) {
-        snapBtn.disabled = false;
-        statusDiv.innerText = "NETWORK / CAMERA ERROR";
-        alert("Scan Exception: " + err.message);
-    }
-});
+    });
 
     function triggerGreenOverlay() {
         greenOverlay.classList.add('show');
