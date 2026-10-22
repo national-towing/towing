@@ -436,13 +436,14 @@
             const resData = await response.json();
 
             if (resData && resData.status === "SUCCESS") {
-                if (resData.name) {
+                // Non-destructive merge: Snap 2 (back) only fills empty fields
+                if (resData.name && !ownerNameInput.value.trim()) {
                     ownerNameInput.value = resData.name.toUpperCase();
                 }
-                if (resData.idNumber) {
+                if (resData.idNumber && !idNumInput.value.trim()) {
                     idNumInput.value = String(resData.idNumber).replace(/\D/g, '');
                 }
-                if (resData.address) {
+                if (resData.address && !ownerAddressInput.value.trim()) {
                     ownerAddressInput.value = resData.address.toUpperCase();
                 }
                 updateStatusBanner();
