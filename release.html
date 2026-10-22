@@ -66,13 +66,6 @@
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #000; }
 
-        .native-cam-btn {
-            background: #2a2a2a; border: 1px solid #00e676; border-radius: 12px; height: 48px;
-            padding: 0 14px; color: #00e676; font-weight: 900; font-size: 13px; display: flex;
-            align-items: center; justify-content: center; gap: 6px; cursor: pointer;
-        }
-        .native-cam-btn:active { transform: scale(0.95); }
-
         .ocr-live-status {
             text-align: center; font-weight: 900; font-size: 13px; margin: 8px 0 4px 0;
             min-height: 20px; color: #ffab00; letter-spacing: 0.5px;
@@ -100,10 +93,14 @@
             height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
         }
         .submit-btn:active { transform: scale(0.97); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
         .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
         #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; min-height: 24px; color: #ffab00; }
+
+        /* Greyed out section class */
+        .section-disabled { opacity: 0.3; pointer-events: none; filter: grayscale(100%); transition: opacity 0.3s ease, filter 0.3s ease; }
     </style>
 </head>
 <body>
@@ -161,44 +158,42 @@
 
     <div class="section-title">OWNER DETAILS</div>
     
-    <label>ATTACH &amp; SCAN ID (PHYSICAL OR DIGITAL)</label>
-    <div class="camera-box">
-        <video id="videoElem" autoplay playsinline muted></video>
-    </div>
-    
-    <div class="cam-controls">
-        <div class="circle-cam-btn" id="snapBtn" title="Fast Snap Screen"><div class="circle-cam-inner"></div></div>
-        <button type="button" class="native-cam-btn" onclick="document.getElementById('nativeFileInput').click()">
-            📸 HD AUTOFOCUS
-        </button>
-        <input type="file" id="nativeFileInput" accept="image/*" capture="environment" style="display:none;">
-    </div>
-
-    <div class="ocr-live-status" id="ocrStatus"></div>
-    <div class="thumb-gallery" id="thumbGallery"></div>
-
-    <div class="row-2">
-        <div>
-            <label>NAME</label>
-            <input type="text" id="ownerNameInput" placeholder="FULL NAME" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div id="idSectionWrapper" class="section-disabled">
+        <label>ID SCAN</label>
+        <div class="camera-box">
+            <video id="videoElem" autoplay playsinline muted></video>
         </div>
-        <div>
-            <label>ID / LICENCE #</label>
-            <input type="text" id="idNumInput" placeholder="CRN / LICENCE #" autocomplete="off" autocorrect="off" spellcheck="false">
+        
+        <div class="cam-controls">
+            <div class="circle-cam-btn" id="snapBtn" title="Fast Snap Screen"><div class="circle-cam-inner"></div></div>
         </div>
-    </div>
 
-    <label>ADDRESS</label>
-    <input type="text" id="ownerAddressInput" placeholder="STREET ADDRESS, SUBURB, STATE" autocomplete="off" autocorrect="off" spellcheck="false">
+        <div class="ocr-live-status" id="ocrStatus"></div>
+        <div class="thumb-gallery" id="thumbGallery"></div>
 
-    <div class="row-2">
-        <div>
-            <label>PHONE (OPTIONAL)</label>
-            <input type="tel" id="ownerPhoneInput" placeholder="PHONE NUMBER" autocomplete="off">
+        <div class="row-2">
+            <div>
+                <label>NAME</label>
+                <input type="text" id="ownerNameInput" placeholder="Name" autocomplete="new-password" autocorrect="off" spellcheck="false">
+            </div>
+            <div>
+                <label>ID / LICENCE #</label>
+                <input type="text" id="idNumInput" placeholder="ID" autocomplete="new-password" autocorrect="off" spellcheck="false">
+            </div>
         </div>
-        <div>
-            <label>EMAIL</label>
-            <input type="email" id="ownerEmailInput" placeholder="EMAIL FOR TAX INVOICE" autocomplete="off" autocorrect="off">
+
+        <label>ADDRESS</label>
+        <input type="text" id="ownerAddressInput" placeholder="Address" autocomplete="new-password" autocorrect="off" spellcheck="false">
+
+        <div class="row-2">
+            <div>
+                <label>PHONE (OPTIONAL)</label>
+                <input type="tel" id="ownerPhoneInput" placeholder="Phone" autocomplete="off">
+            </div>
+            <div>
+                <label>EMAIL</label>
+                <input type="email" id="ownerEmailInput" placeholder="Email" autocomplete="off" autocorrect="off">
+            </div>
         </div>
     </div>
 
@@ -246,7 +241,7 @@
         </div>
     </div>
 
-    <button class="submit-btn" id="submitBtn">PAID - RELEASE</button>
+    <button class="submit-btn" id="submitBtn" disabled>PAID - RELEASE</button>
     <div id="status"></div>
 </div>
 
@@ -261,6 +256,7 @@
     const makeInput = document.getElementById('makeInput');
     const modelInput = document.getElementById('modelInput');
 
+    const idSectionWrapper = document.getElementById('idSectionWrapper');
     const ownerNameInput = document.getElementById('ownerNameInput');
     const idNumInput = document.getElementById('idNumInput');
     const ownerAddressInput = document.getElementById('ownerAddressInput');
@@ -275,7 +271,6 @@
 
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
-    const nativeFileInput = document.getElementById('nativeFileInput');
     const ocrStatus = document.getElementById('ocrStatus');
     const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
@@ -310,8 +305,10 @@
             makeInput.value = veh.make || '';
             modelInput.value = veh.model || '';
             colourInput.value = veh.colour || '';
+            idSectionWrapper.classList.remove('section-disabled');
         } else {
             propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = '';
+            idSectionWrapper.classList.add('section-disabled');
         }
         validateForm();
     });
@@ -365,35 +362,6 @@
 
         const b64 = canvas.toDataURL('image/jpeg', 0.65);
         processCapturedImage(b64);
-    });
-
-    // METHOD B: NATIVE IPHONE CAMERA (OPTIMIZED 800PX / 50KB PAYLOAD)
-    nativeFileInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => {
-                const maxDim = 800;
-                let w = img.width;
-                let h = img.height;
-                if (w > maxDim || h > maxDim) {
-                    if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
-                    else { w = Math.round((w * maxDim) / h); h = maxDim; }
-                }
-                const canvas = document.createElement('canvas');
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-                const b64 = canvas.toDataURL('image/jpeg', 0.65);
-                processCapturedImage(b64);
-            };
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
     });
 
     // SERVER-SIDE AI SCANNER (FAST 50KB PAYLOAD — ZERO SECRETS IN CODE)
@@ -471,7 +439,7 @@
 
         ocrStatus.style.color = "#00e676";
         if (nameDone && idDone && addrDone) {
-            ocrStatus.innerText = `✔ ALL DETAILS CAPTURED: ${ownerNameInput.value}`;
+            ocrStatus.innerText = `✔ ALL DETAILS CAPTURED`;
         } else if (nameDone && idDone && !addrDone) {
             ocrStatus.innerText = `✔ ${ownerNameInput.value} (${idNumInput.value}) SET — SNAP ADDRESS NEXT`;
         } else if (idDone && !nameDone) {
@@ -583,6 +551,16 @@
         }
 
         if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
+        
+        // Dynamically toggle the submit button
+        if (isValid) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = "1";
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.5";
+        }
+        
         return isValid;
     }
 
