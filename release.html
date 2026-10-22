@@ -252,7 +252,7 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-
+    
     const vehicleSelect = document.getElementById('vehicleSelect');
     const propertyInput = document.getElementById('propertyInput');
     const svnInput = document.getElementById('svnInput');
@@ -351,24 +351,23 @@
         }
     }
 
-    // METHOD A: FAST LIVE SNAP BUTTON
+    // METHOD A: FAST LIVE SNAP (OPTIMIZED 800PX / 50KB PAYLOAD)
     snapBtn.addEventListener('click', () => {
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
 
-        // Keep 1400px wide for sharp AI text recognition
-        const scale = Math.min(1, 1400 / vW);
+        const scale = Math.min(1, 800 / vW);
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(vW * scale);
         canvas.height = Math.round(vH * scale);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
-        const b64 = canvas.toDataURL('image/jpeg', 0.82);
+        const b64 = canvas.toDataURL('image/jpeg', 0.65);
         processCapturedImage(b64);
     });
 
-    // METHOD B: NATIVE IPHONE CAMERA WITH LASER MACRO-FOCUS
+    // METHOD B: NATIVE IPHONE CAMERA (OPTIMIZED 800PX / 50KB PAYLOAD)
     nativeFileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
@@ -377,7 +376,7 @@
         reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
-                const maxDim = 1600;
+                const maxDim = 800;
                 let w = img.width;
                 let h = img.height;
                 if (w > maxDim || h > maxDim) {
@@ -389,7 +388,7 @@
                 canvas.height = h;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, w, h);
-                const b64 = canvas.toDataURL('image/jpeg', 0.85);
+                const b64 = canvas.toDataURL('image/jpeg', 0.65);
                 processCapturedImage(b64);
             };
             img.src = event.target.result;
@@ -397,6 +396,7 @@
         reader.readAsDataURL(file);
     });
 
+    // SERVER-SIDE AI SCANNER (FAST 50KB UPLOAD — NO SECRETS IN CODE)
     async function processCapturedImage(b64) {
         idPhotos.push(b64);
         const photoIndex = idPhotos.length;
@@ -415,7 +415,7 @@
         thumbGallery.appendChild(thumbWrap);
 
         ocrStatus.style.color = "#ffab00";
-        ocrStatus.innerText = `🔍 SCANNING ID VIA VISION AI...`;
+        ocrStatus.innerText = `⚡ FAST SCANNING...`;
 
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -434,25 +434,23 @@
                     ownerNameInput.value = resData.name.toUpperCase();
                 }
                 if (resData.idNumber && !idNumInput.value) {
-                    idNumInput.value = resData.idNumber;
+                    idNumInput.value = String(resData.idNumber).replace(/\D/g, '');
                 }
                 if (resData.address && !ownerAddressInput.value) {
                     ownerAddressInput.value = resData.address.toUpperCase();
                 }
-
                 updateStatusBanner();
             } else {
                 ocrStatus.style.color = "#ffab00";
-                ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED (${resData.message || "Manual edit if needed"})`;
+                ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED`;
             }
         } catch(err) {
             ocrStatus.style.color = "#ffab00";
-            ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED (OFFLINE)`;
+            ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED`;
         }
 
         validateForm();
     }
-
     function updateStatusBanner() {
         const nameDone = Boolean(ownerNameInput.value && ownerNameInput.value.trim().length > 2);
         const idDone = Boolean(idNumInput.value && idNumInput.value.trim().length >= 5);
