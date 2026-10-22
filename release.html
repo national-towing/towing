@@ -417,6 +417,10 @@
         ocrStatus.style.color = "#ffab00";
         ocrStatus.innerText = `🔍 SCANNING ID CARD...`;
 
+        // Hard 8-second client-side timeout: Never hangs indefinitely
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -424,8 +428,10 @@
                 body: JSON.stringify({
                     action: 'scan_id_card',
                     photoBytes: b64
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
 
             const resData = await response.json();
 
@@ -445,8 +451,13 @@
                 ocrStatus.innerText = `⚠️ SCAN NOTE: ${resData.message || "Manual entry required"}`;
             }
         } catch(err) {
+            clearTimeout(timeoutId);
             ocrStatus.style.color = "#ff1744";
-            ocrStatus.innerText = `⚠️ NETWORK ERROR CONTACTING SERVER`;
+            if (err.name === 'AbortError') {
+                ocrStatus.innerText = `⚠️ SCAN TIMEOUT (Server took >8s) — Enter manually`;
+            } else {
+                ocrStatus.innerText = `⚠️ NETWORK ERROR CONTACTING SERVER`;
+            }
         }
 
         validateForm();
