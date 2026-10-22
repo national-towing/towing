@@ -10,12 +10,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=1004">
-    <link rel="icon" type="image/png" href="icon-release.png?v=1004">
-    <link rel="manifest" href="manifest-release.json?v=1004">
-
-    <!-- BROWSER OCR ENGINE -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="apple-touch-icon" href="icon-release.png?v=1005">
+    <link rel="icon" type="image/png" href="icon-release.png?v=1005">
+    <link rel="manifest" href="manifest-release.json?v=1005">
 
     <style>
         * { box-sizing: border-box; }
@@ -53,9 +50,8 @@
 
         .legal-stmt { font-size: 13.5px; color: #ddd; margin-top: 14px; line-height: 1.4; font-style: italic; background: #141414; padding: 10px; border-radius: 8px; border: 1px solid #333; font-weight: 600; }
 
-        /* VIEWFINDER WITH SMART INSTRUCTION OVERLAY */
         .camera-box {
-            width: 100%; height: 240px; background: #000; border-radius: 12px; border: 2px solid #333;
+            width: 100%; height: 230px; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
@@ -127,7 +123,6 @@
     <label>SELECT FROM YARD</label>
     <select id="vehicleSelect"><option value="">LOADING YARD VEHICLES...</option></select>
 
-    <!-- SECTION 1: OFFENDING VEHICLE DETAILS -->
     <div class="section-title">OFFENDING VEHICLE DETAILS</div>
     
     <div class="row-2">
@@ -163,12 +158,11 @@
         </div>
     </div>
 
-    <!-- SECTION 2: OWNER DETAILS -->
     <div class="section-title">OWNER DETAILS</div>
     
     <label>SCAN DRIVER LICENCE (PHYSICAL OR DIGITAL)</label>
     <div class="camera-box">
-        <video id="videoElem" autoplay playsinline></video>
+        <video id="videoElem" autoplay playsinline muted></video>
         <div class="scan-guide">
             <span class="scan-guide-text" id="guideText">SNAP 1: FRONT (OR DIGITAL SCREEN)</span>
         </div>
@@ -215,7 +209,6 @@
         </div>
     </div>
 
-    <!-- SECTION 3: PAYMENT DETAILS -->
     <div class="section-title">PAYMENT DETAILS</div>
     <div class="row-2">
         <div>
@@ -228,7 +221,6 @@
         </div>
     </div>
 
-    <!-- SECTION 4: OFFICE USE -->
     <div class="section-title">OFFICE USE</div>
     
     <label>RELEASED BY</label>
@@ -289,16 +281,36 @@
     let officerSigConfirmed = false;
     let ocrWorker = null;
 
-    window.addEventListener('load', () => {
+    // IMMEDIATE ROBUST INITIALIZATION (Never blocked by external CDNs)
+    function initPage() {
         loadYardVehicles();
         initCamera();
         initSignatureCanvas('ownerSigCanvas');
         initSignatureCanvas('officerSigCanvas');
         setupLiveValidation();
-        initOCRWorker();
-    });
+        loadOCRBackground();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+        initPage();
+    }
 
     refreshBtn.addEventListener('click', () => { window.location.reload(true); });
+
+    // NON-BLOCKING ASYNC TESSERACT LOADER
+    function loadOCRBackground() {
+        if (window.Tesseract) {
+            initOCRWorker();
+            return;
+        }
+        const s = document.createElement('script');
+        s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+        s.async = true;
+        s.onload = () => { initOCRWorker(); };
+        document.head.appendChild(s);
+    }
 
     async function initOCRWorker() {
         if (!window.Tesseract) return;
@@ -351,10 +363,11 @@
     async function initCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                video: { facingMode: 'environment' },
                 audio: false
             });
             videoElem.srcObject = stream;
+            await videoElem.play().catch(() => {});
         } catch(e) {
             statusDiv.innerText = "CAMERA ACCESS ERROR";
         }
@@ -440,7 +453,7 @@
                     let addrParts = [];
                     for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
                         if (/Card\s+Number|Conditions|Expiry|Donor/i.test(lines[j])) break;
-                        addrParts.append ? addrParts.append(lines[j]) : addrParts.push(lines[j]);
+                        addrParts.push(lines[j]);
                     }
                     if (addrParts.length > 0 && !ownerAddressInput.value) {
                         ownerAddressInput.value = addrParts.join(", ").toUpperCase();
@@ -464,3 +477,245 @@
                 ownerNameInput.value = `${given} ${surname}`.toUpperCase();
             } else if (surname) {
                 ownerNameInput.value = surname.toUpperCase();
+            } else {
+                const badWords = ["QUEENSLAND", "DRIVER", "LICENCE", "AUSTRALIA", "CARD", "NUMBER", "DATE", "BIRTH", "EXPIRY", "ORGAN", "DONOR", "CONDITIONS"];
+                for (let line of lines) {
+                    const clean = line.replace(/[^A-Za-z\s]/g, '').trim();
+                    const words = clean.split(/\s+/);
+                    if (words.length >= 2 && words.length <= 4 && clean.length >= 6 && clean.length <= 32) {
+                        if (!words.some(w => badWords.includes(w.toUpperCase())) && !words.some(w => ["QLD", "NSW", "VIC", "ST", "RD"].includes(w.toUpperCase()))) {
+                            ownerNameInput.value = clean.toUpperCase();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 3. PHYSICAL FRONT: LICENCE / CRN (Field 5) ---
+        if (!idNumInput.value) {
+            const m5 = text.match(/(?:^|\n)\s*[5S§]\s*[\.:-]?\s*([0-9 \t]{7,10})\b/);
+            if (m5) {
+                const cleanNum = m5[1].replace(/\s+/g, '');
+                if (cleanNum.length >= 7 && cleanNum.length <= 9) idNumInput.value = cleanNum;
+            }
+            if (!idNumInput.value) {
+                const m_lbl = text.match(/(?:LICENCE|LIC|CRN|CARD)[\s#:\.]*([0-9]{7,9})/i);
+                if (m_lbl) idNumInput.value = m_lbl[1].trim();
+            }
+            if (!idNumInput.value) {
+                const nums = text.match(/\b\d{8,9}\b/g);
+                if (nums) {
+                    const validNum = nums.find(d => !d.startsWith("19") && !d.startsWith("20"));
+                    if (validNum) idNumInput.value = validNum;
+                }
+            }
+        }
+
+        // --- 4. PHYSICAL BACK: RESIDENTIAL ADDRESS ---
+        if (!ownerAddressInput.value) {
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (/\b(?:QLD|QUEENSLAND|NSW|VIC|WA|SA|TAS|ACT|NT)\s*(\d{4})\b/i.test(line)) {
+                    if (/\d+\s+[A-Za-z]+/.test(line)) {
+                        ownerAddressInput.value = line.toUpperCase();
+                    } else if (i > 0) {
+                        const prevLine = lines[i - 1];
+                        if (!/CARD|NUMBER|DONOR|CONDITIONS|ORGAN|REGISTER/i.test(prevLine)) {
+                            ownerAddressInput.value = `${prevLine}, ${line}`.toUpperCase();
+                        } else {
+                            ownerAddressInput.value = line.toUpperCase();
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    function updateScanGuidance() {
+        const nameDone = ownerNameInput.value.trim().length > 2;
+        const idDone = idNumInput.value.trim().length >= 5;
+        const addrDone = ownerAddressInput.value.trim().length > 4;
+
+        if (nameDone && idDone && addrDone) {
+            guideText.innerText = "ALL DETAILS CAPTURED";
+            guideText.style.color = "#00e676";
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = "✔ ALL ID DETAILS CAPTURED!";
+        } else if (nameDone && idDone && !addrDone) {
+            guideText.innerText = "SNAP 2: CARD BACK (FOR ADDRESS)";
+            guideText.style.color = "#ffab00";
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = "✔ FRONT CAPTURED: FLIP CARD & SNAP BACK.";
+        } else if (!nameDone && !idDone && addrDone) {
+            guideText.innerText = "SNAP CARD FRONT (NAME & LIC #)";
+            guideText.style.color = "#ffab00";
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = "✔ ADDRESS CAPTURED. SNAP FRONT FOR NAME.";
+        }
+    }
+
+    function initSignatureCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 350;
+            canvas.height = rect.height || 190;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+        }
+        resizeCanvas();
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDrawing(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+        function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+        function stopDrawing() { drawing = false; }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function clearSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        canvas.classList.remove('sig-locked');
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
+        statusDiv.innerText = "";
+        validateForm();
+    }
+
+    function confirmSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        canvas.classList.add('sig-locked');
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
+        if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
+        statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
+        validateForm();
+    }
+
+    function setupLiveValidation() {
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        inputs.forEach(elem => {
+            if (elem) {
+                elem.addEventListener('input', validateForm);
+                elem.addEventListener('change', validateForm);
+            }
+        });
+        validateForm();
+    }
+
+    function validateForm() {
+        let isValid = true;
+        function mark(elem, cond) {
+            if (!elem) return;
+            if (cond) {
+                elem.classList.remove('field-missing'); elem.classList.add('field-valid');
+            } else {
+                elem.classList.remove('field-valid'); elem.classList.add('field-missing');
+                isValid = false;
+            }
+        }
+
+        mark(vehicleSelect, vehicleSelect && vehicleSelect.value !== "");
+        mark(svnInput, svnInput && svnInput.value.trim() !== "");
+        mark(regoInput, regoInput && regoInput.value.trim() !== "");
+        mark(colourInput, colourInput && colourInput.value.trim() !== "");
+        mark(makeInput, makeInput && makeInput.value.trim() !== "");
+        mark(modelInput, modelInput && modelInput.value.trim() !== "");
+
+        mark(ownerNameInput, ownerNameInput && ownerNameInput.value.trim() !== "");
+        mark(idNumInput, idNumInput && idNumInput.value.trim() !== "");
+        mark(ownerAddressInput, ownerAddressInput && ownerAddressInput.value.trim() !== "");
+        mark(ownerEmailInput, ownerEmailInput && ownerEmailInput.value.trim() !== "");
+
+        mark(releaseFeeInput, releaseFeeInput && releaseFeeInput.value !== "");
+        mark(storageFeeInput, storageFeeInput && storageFeeInput.value !== "");
+
+        if (officerSelect && officerSelect.value === "OTHER") {
+            mark(officerOtherInput, officerOtherInput && officerOtherInput.value.trim() !== "");
+        }
+
+        if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
+        return isValid;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        if (!validateForm()) {
+            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM BOTH SIGS";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        statusDiv.innerText = "GENERATING TAX INVOICE & RELEASING...";
+
+        const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
+        const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
+        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
+
+        const payload = {
+            action: 'process_release',
+            rego: regoInput.value.trim().toUpperCase(),
+            svnNumber: svnInput.value.trim(),
+            make: makeInput.value.trim(),
+            model: modelInput.value.trim(),
+            colour: colourInput.value.trim(),
+            property: propertyInput.value.trim(),
+            ownerName: ownerNameInput.value.trim(),
+            idNumber: idNumInput.value.trim(),
+            ownerAddress: ownerAddressInput.value.trim(),
+            ownerPhone: ownerPhoneInput.value.trim(),
+            ownerEmail: ownerEmailInput.value.trim(),
+            releaseFee: releaseFeeInput.value,
+            storageFee: storageFeeInput.value,
+            officer: finalOfficer,
+            idPhotos: idPhotos,
+            ownerSigBytes: ownerSig,
+            officerSigBytes: officerSig
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
+            });
+            const resData = await res.json();
+            
+            if (resData && resData.status === "SUCCESS") {
+                statusDiv.innerText = "✔ PAID - VEHICLE RELEASED & INVOICE EMAILED!";
+                setTimeout(() => { window.location.reload(true); }, 2000);
+            } else {
+                statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release");
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+            }
+        } catch(err) {
+            statusDiv.innerText = "SERVER ERROR PROCESSING RELEASE";
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = "1";
+        }
+    });
+</script>
+</body>
+</html>
