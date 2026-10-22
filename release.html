@@ -396,7 +396,7 @@
         reader.readAsDataURL(file);
     });
 
-    // SERVER-SIDE AI SCANNER (FAST 50KB UPLOAD — NO SECRETS IN CODE)
+    // SERVER-SIDE AI SCANNER (FAST 50KB PAYLOAD — ZERO SECRETS IN CODE)
     async function processCapturedImage(b64) {
         idPhotos.push(b64);
         const photoIndex = idPhotos.length;
@@ -415,7 +415,7 @@
         thumbGallery.appendChild(thumbWrap);
 
         ocrStatus.style.color = "#ffab00";
-        ocrStatus.innerText = `⚡ FAST SCANNING...`;
+        ocrStatus.innerText = `🔍 SCANNING ID CARD...`;
 
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -430,27 +430,28 @@
             const resData = await response.json();
 
             if (resData && resData.status === "SUCCESS") {
-                if (resData.name && !ownerNameInput.value) {
+                if (resData.name) {
                     ownerNameInput.value = resData.name.toUpperCase();
                 }
-                if (resData.idNumber && !idNumInput.value) {
+                if (resData.idNumber) {
                     idNumInput.value = String(resData.idNumber).replace(/\D/g, '');
                 }
-                if (resData.address && !ownerAddressInput.value) {
+                if (resData.address) {
                     ownerAddressInput.value = resData.address.toUpperCase();
                 }
                 updateStatusBanner();
             } else {
                 ocrStatus.style.color = "#ffab00";
-                ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED`;
+                ocrStatus.innerText = `⚠️ SCAN NOTE: ${resData.message || "Manual entry required"}`;
             }
         } catch(err) {
-            ocrStatus.style.color = "#ffab00";
-            ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED`;
+            ocrStatus.style.color = "#ff1744";
+            ocrStatus.innerText = `⚠️ NETWORK ERROR CONTACTING SERVER`;
         }
 
         validateForm();
     }
+    
     function updateStatusBanner() {
         const nameDone = Boolean(ownerNameInput.value && ownerNameInput.value.trim().length > 2);
         const idDone = Boolean(idNumInput.value && idNumInput.value.trim().length >= 5);
