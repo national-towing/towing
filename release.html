@@ -10,9 +10,9 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=1011">
-    <link rel="icon" type="image/png" href="icon-release.png?v=1011">
-    <link rel="manifest" href="manifest-release.json?v=1011">
+    <link rel="apple-touch-icon" href="icon-release.png?v=1012">
+    <link rel="icon" type="image/png" href="icon-release.png?v=1012">
+    <link rel="manifest" href="manifest-release.json?v=1012">
 
     <style>
         * { box-sizing: border-box; }
@@ -56,18 +56,32 @@
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        .thumb-gallery { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; min-height: 80px; align-items: center; }
-        .thumb-container { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-        .thumb-img { width: 74px; height: 74px; border-radius: 10px; object-fit: cover; border: 2px solid #00e676; }
-        .thumb-label { font-size: 10px; font-weight: 900; color: #00e676; margin-top: 2px; text-transform: uppercase; }
-
+        .cam-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 10px; }
+        
         .circle-cam-btn {
             width: 76px; height: 76px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
-            margin: 10px auto 0 auto; display: flex; align-items: center; justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 18px rgba(0, 230, 118, 0.4); cursor: pointer; user-select: none;
         }
         .circle-cam-btn:active { transform: scale(0.90); }
         .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #000; }
+
+        .native-cam-btn {
+            background: #2a2a2a; border: 1px solid #00e676; border-radius: 12px; height: 48px;
+            padding: 0 14px; color: #00e676; font-weight: 900; font-size: 13px; display: flex;
+            align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+        }
+        .native-cam-btn:active { transform: scale(0.95); }
+
+        .ocr-live-status {
+            text-align: center; font-weight: 900; font-size: 13px; margin: 8px 0 4px 0;
+            min-height: 20px; color: #ffab00; letter-spacing: 0.5px;
+        }
+
+        .thumb-gallery { display: flex; gap: 8px; margin-top: 6px; overflow-x: auto; padding-bottom: 4px; min-height: 80px; align-items: center; }
+        .thumb-container { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .thumb-img { width: 74px; height: 74px; border-radius: 10px; object-fit: cover; border: 2px solid #00e676; }
+        .thumb-label { font-size: 10px; font-weight: 900; color: #00e676; margin-top: 2px; text-transform: uppercase; }
 
         .sig-container { width: 100%; margin-top: 6px; position: relative; }
         canvas.sig-box {
@@ -119,64 +133,72 @@
         </div>
         <div>
             <label>SVN # (POLICELINK)</label>
-            <input type="text" id="svnInput" placeholder="SVN NUMBER">
+            <input type="text" id="svnInput" placeholder="SVN NUMBER" autocomplete="off" autocorrect="off">
         </div>
     </div>
 
     <div class="row-2">
         <div>
             <label>REGO</label>
-            <input type="text" id="regoInput" placeholder="REGO" style="color:#00e676; text-transform:uppercase;">
+            <input type="text" id="regoInput" placeholder="REGO" style="color:#00e676; text-transform:uppercase;" autocomplete="off" autocorrect="off">
         </div>
         <div>
             <label>COLOUR</label>
-            <input type="text" id="colourInput" placeholder="COLOUR">
+            <input type="text" id="colourInput" placeholder="COLOUR" autocomplete="off" autocorrect="off">
         </div>
     </div>
 
     <div class="row-2">
         <div>
             <label>MAKE</label>
-            <input type="text" id="makeInput" placeholder="MAKE">
+            <input type="text" id="makeInput" placeholder="MAKE" autocomplete="off" autocorrect="off">
         </div>
         <div>
             <label>MODEL</label>
-            <input type="text" id="modelInput" placeholder="MODEL">
+            <input type="text" id="modelInput" placeholder="MODEL" autocomplete="off" autocorrect="off">
         </div>
     </div>
 
     <div class="section-title">OWNER DETAILS</div>
     
-    <label>ATTACH ID PHOTOS (FRONT &amp; BACK)</label>
+    <label>ATTACH &amp; SCAN ID (PHYSICAL OR DIGITAL)</label>
     <div class="camera-box">
         <video id="videoElem" autoplay playsinline muted></video>
     </div>
     
-    <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
+    <div class="cam-controls">
+        <div class="circle-cam-btn" id="snapBtn" title="Fast Snap Screen"><div class="circle-cam-inner"></div></div>
+        <button type="button" class="native-cam-btn" onclick="document.getElementById('nativeFileInput').click()">
+            📸 HD AUTOFOCUS
+        </button>
+        <input type="file" id="nativeFileInput" accept="image/*" capture="environment" style="display:none;">
+    </div>
+
+    <div class="ocr-live-status" id="ocrStatus"></div>
     <div class="thumb-gallery" id="thumbGallery"></div>
 
     <div class="row-2">
         <div>
             <label>NAME</label>
-            <input type="text" id="ownerNameInput" placeholder="FULL NAME" autocomplete="name" autocapitalize="words">
+            <input type="text" id="ownerNameInput" placeholder="FULL NAME" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
         <div>
             <label>ID / LICENCE #</label>
-            <input type="text" id="idNumInput" placeholder="CRN / LICENCE #">
+            <input type="text" id="idNumInput" placeholder="CRN / LICENCE #" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
     </div>
 
     <label>ADDRESS</label>
-    <input type="text" id="ownerAddressInput" placeholder="STREET ADDRESS, SUBURB, STATE" autocomplete="street-address" autocapitalize="words">
+    <input type="text" id="ownerAddressInput" placeholder="STREET ADDRESS, SUBURB, STATE" autocomplete="off" autocorrect="off" spellcheck="false">
 
     <div class="row-2">
         <div>
             <label>PHONE (OPTIONAL)</label>
-            <input type="tel" id="ownerPhoneInput" placeholder="PHONE NUMBER">
+            <input type="tel" id="ownerPhoneInput" placeholder="PHONE NUMBER" autocomplete="off">
         </div>
         <div>
             <label>EMAIL</label>
-            <input type="email" id="ownerEmailInput" placeholder="EMAIL FOR TAX INVOICE">
+            <input type="email" id="ownerEmailInput" placeholder="EMAIL FOR TAX INVOICE" autocomplete="off" autocorrect="off">
         </div>
     </div>
 
@@ -213,7 +235,7 @@
         <option value="Brett">Brett</option>
         <option value="OTHER">Other...</option>
     </select>
-    <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;">
+    <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;" autocomplete="off">
 
     <label>OFFICER SIGNATURE</label>
     <div class="sig-container">
@@ -253,6 +275,8 @@
 
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
+    const nativeFileInput = document.getElementById('nativeFileInput');
+    const ocrStatus = document.getElementById('ocrStatus');
     const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -323,47 +347,130 @@
             videoElem.srcObject = stream;
             await videoElem.play().catch(() => {});
         } catch(e) {
-            statusDiv.innerText = "CAMERA ACCESS ERROR";
+            ocrStatus.innerText = "CAMERA ACCESS ERROR";
         }
     }
 
-    // SUB-SECOND PHOTO CAPTURE FOR DRIVE STORAGE
+    // METHOD A: FAST LIVE SNAP BUTTON
     snapBtn.addEventListener('click', () => {
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
 
-        const scale = Math.min(1, 1200 / vW);
+        // Keep 1400px wide for sharp AI text recognition
+        const scale = Math.min(1, 1400 / vW);
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(vW * scale);
         canvas.height = Math.round(vH * scale);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
-        const b64 = canvas.toDataURL('image/jpeg', 0.70);
-        idPhotos.push(b64);
+        const b64 = canvas.toDataURL('image/jpeg', 0.82);
+        processCapturedImage(b64);
+    });
 
+    // METHOD B: NATIVE IPHONE CAMERA WITH LASER MACRO-FOCUS
+    nativeFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const maxDim = 1600;
+                let w = img.width;
+                let h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                    else { w = Math.round((w * maxDim) / h); h = maxDim; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                const b64 = canvas.toDataURL('image/jpeg', 0.85);
+                processCapturedImage(b64);
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    async function processCapturedImage(b64) {
+        idPhotos.push(b64);
         const photoIndex = idPhotos.length;
-        const labelText = photoIndex === 1 ? "FRONT" : (photoIndex === 2 ? "BACK" : `PHOTO ${photoIndex}`);
+        const labelText = photoIndex === 1 ? "SNAP 1" : `SNAP ${photoIndex}`;
 
         const thumbWrap = document.createElement('div');
         thumbWrap.className = 'thumb-container';
-
         const img = document.createElement('img');
         img.src = b64; 
         img.className = 'thumb-img';
-
         const lbl = document.createElement('span');
         lbl.className = 'thumb-label';
         lbl.innerText = labelText;
-
         thumbWrap.appendChild(img);
         thumbWrap.appendChild(lbl);
         thumbGallery.appendChild(thumbWrap);
 
-        statusDiv.style.color = "#00e676";
-        statusDiv.innerText = `✔ ID ${labelText} ATTACHED (${photoIndex} SAVED)`;
+        ocrStatus.style.color = "#ffab00";
+        ocrStatus.innerText = `🔍 SCANNING ID VIA VISION AI...`;
+
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'scan_id_card',
+                    photoBytes: b64
+                })
+            });
+
+            const resData = await response.json();
+
+            if (resData && resData.status === "SUCCESS") {
+                if (resData.name && !ownerNameInput.value) {
+                    ownerNameInput.value = resData.name.toUpperCase();
+                }
+                if (resData.idNumber && !idNumInput.value) {
+                    idNumInput.value = resData.idNumber;
+                }
+                if (resData.address && !ownerAddressInput.value) {
+                    ownerAddressInput.value = resData.address.toUpperCase();
+                }
+
+                updateStatusBanner();
+            } else {
+                ocrStatus.style.color = "#ffab00";
+                ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED (${resData.message || "Manual edit if needed"})`;
+            }
+        } catch(err) {
+            ocrStatus.style.color = "#ffab00";
+            ocrStatus.innerText = `✔ PHOTO #${photoIndex} ATTACHED (OFFLINE)`;
+        }
+
         validateForm();
-    });
+    }
+
+    function updateStatusBanner() {
+        const nameDone = Boolean(ownerNameInput.value && ownerNameInput.value.trim().length > 2);
+        const idDone = Boolean(idNumInput.value && idNumInput.value.trim().length >= 5);
+        const addrDone = Boolean(ownerAddressInput.value && ownerAddressInput.value.trim().length > 4);
+
+        ocrStatus.style.color = "#00e676";
+        if (nameDone && idDone && addrDone) {
+            ocrStatus.innerText = `✔ ALL DETAILS CAPTURED: ${ownerNameInput.value}`;
+        } else if (nameDone && idDone && !addrDone) {
+            ocrStatus.innerText = `✔ ${ownerNameInput.value} (${idNumInput.value}) SET — SNAP ADDRESS NEXT`;
+        } else if (idDone && !nameDone) {
+            ocrStatus.innerText = `✔ LICENCE #${idNumInput.value} CAPTURED`;
+        } else if (addrDone) {
+            ocrStatus.innerText = `✔ ADDRESS CAPTURED`;
+        } else {
+            ocrStatus.innerText = `✔ PHOTO ATTACHED`;
+        }
+    }
 
     function initSignatureCanvas(canvasId) {
         const canvas = document.getElementById(canvasId);
