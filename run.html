@@ -246,7 +246,25 @@
             return;
         }
 
+        // 1. Instantly filter out recently towed vehicles or pending queue items
+        const blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
+        const offlineQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        const offlineRegos = new Set(offlineQueue.map(item => String(item.rego || '').trim().toUpperCase()));
         const nowMs = Date.now();
+
+        data = data.filter(item => {
+            const r = String(item.rego || '').trim().toUpperCase();
+            if (!r) return false;
+            if (offlineRegos.has(r)) return false;
+            if (blacklisted[r] && (nowMs - blacklisted[r] < 4 * 60 * 60 * 1000)) return false;
+            return true;
+        });
+
+        if (data.length === 0) {
+            runContainer.innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
+            return;
+        }
+
         propertyGroups = {};
 
         data.forEach(item => {
@@ -423,7 +441,6 @@
                 </div>
             `;
 
-            // Wire up Preview button without triggering tile navigation
             const previewBtn = tile.querySelector('.pic-preview-btn');
             previewBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -563,38 +580,42 @@
                 compositeB64 = liveCanvas.toDataURL('image/jpeg', 0.45);
             }
 
-            // Save to pending queue so tow.html can verify or re-try if offline
-            try { localStorage.setItem('pending_comp_' + activeCar.rego, compositeB64); } catch(e) {}
-
-            // Send non-blocking background fetch
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'log_tow_confirmation',
-                    rego: activeCar.rego,
-                    property: activeCar.property,
-                    photoBytes: compositeB64,
-                    timestamp: now.toISOString()
-                })
-            }).catch(() => {});
+            // Save comparison photo in localStorage so tow.html bundles it with the tow payload
+            try { 
+                localStorage.setItem('pending_comp_' + activeCar.rego, compositeB64); 
+            } catch(e) {}
 
             stopOverlayCamera();
-            // Immediate transition without waiting for Google Drive
             window.location.href = `tow.html?rego=${encodeURIComponent(activeCar.rego)}&prop=${encodeURIComponent(activeCar.property)}`;
         };
 
         const markImg = new Image();
         markImg.crossOrigin = "anonymous";
+        let isTimedOut = false;
+        const markTimer = setTimeout(() => {
+            isTimedOut = true;
+            finalizeAndRedirect(liveCanvas);
+        }, 1200);
+
         markImg.onload = () => {
-            try { compCtx.drawImage(markImg, 0, 0, frameW, frameH); } catch(e) {}
-            compCtx.fillStyle = "#ff1744";
-            compCtx.font = "bold 16px sans-serif";
-            compCtx.fillText(`ORIGINAL MARK ${markTimeTag}`, 15, 25);
-            compCtx.fillText(`TOW VERIFICATION ${towTimeTag}`, frameW + 15, 25);
-            finalizeAndRedirect(compositeCanvas);
+            if (isTimedOut) return;
+            clearTimeout(markTimer);
+            try { 
+                compCtx.drawImage(markImg, 0, 0, frameW, frameH); 
+                compCtx.fillStyle = "#ff1744";
+                compCtx.font = "bold 16px sans-serif";
+                compCtx.fillText(`ORIGINAL MARK ${markTimeTag}`, 15, 25);
+                compCtx.fillText(`TOW VERIFICATION ${towTimeTag}`, frameW + 15, 25);
+                finalizeAndRedirect(compositeCanvas);
+            } catch(e) {
+                finalizeAndRedirect(liveCanvas);
+            }
         };
-        markImg.onerror = () => { finalizeAndRedirect(liveCanvas); };
+        markImg.onerror = () => { 
+            if (isTimedOut) return;
+            clearTimeout(markTimer);
+            finalizeAndRedirect(liveCanvas); 
+        };
 
         if (ghostImage.src && ghostImage.src !== "") {
             markImg.src = ghostImage.src;
@@ -604,7 +625,7 @@
     });
 
     function formatDateTag(d) {
-        if (isNaN(d.getTime())) return "";
+        if (!d || isNaN(d.getTime())) return "";
         const dd = String(d.getDate()).padStart(2, '0');
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         let hh = d.getHours();
@@ -613,40 +634,42 @@
         hh = hh % 12;
         hh = hh ? hh : 12;
         return `${dd}/${mm} ${String(hh).padStart(2, '0')}:${min} ${ampm}`;
-       
-        // AUTOMATIC BACKGROUND TOW UPLOADER
+    }
+
+    // AUTOMATIC BACKGROUND TOW UPLOADER (RUNS SEAMLESSLY ON RUN PAGE)
     window.addEventListener('load', () => {
         syncPendingTowsInBackground();
         setInterval(syncPendingTowsInBackground, 8000);
     });
+    window.addEventListener('online', syncPendingTowsInBackground);
 
+    let isSyncingQueue = false;
     async function syncPendingTowsInBackground() {
-        if (!navigator.onLine) return;
+        if (isSyncingQueue || !navigator.onLine) return;
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
         if (queue.length === 0) return;
 
-        console.log(`[Background Sync] Uploading ${queue.length} pending tow(s)...`);
-
+        isSyncingQueue = true;
         for (let i = 0; i < queue.length; i++) {
             const item = queue[i];
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(item),
-                    keepalive: true
+                    body: JSON.stringify(item)
                 });
-
-                // Remove uploaded item from queue
-                let updatedQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-                updatedQueue = updatedQueue.filter(q => q.id !== item.id);
-                localStorage.setItem('tow_offline_queue', JSON.stringify(updatedQueue));
+                const resJson = await res.json();
+                if (resJson && resJson.status === "SUCCESS") {
+                    let updatedQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+                    updatedQueue = updatedQueue.filter(q => q.id !== item.id);
+                    localStorage.setItem('tow_offline_queue', JSON.stringify(updatedQueue));
+                }
             } catch(err) {
                 console.warn("[Background Sync] Postponed due to network:", err);
                 break;
             }
         }
-    } 
+        isSyncingQueue = false;
     }
 </script>
 </body>
