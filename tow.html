@@ -129,7 +129,7 @@
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
-<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ BASEMENT QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ BASEMENT QUEUE: <span id="queueCount">0</span> (SAVED LOCALLY)</div>
 
 <div class="nav-bar">
     <a href="run.html" class="nav-tile nav-run">RUN</a>
@@ -238,6 +238,7 @@
     <!-- CAMERA LAUNCHER -->
     <button type="button" class="open-cam-btn" id="openCamBtn">📷 CAPTURE CONDITION PHOTOS</button>
     <div class="photo-count-banner" id="photoCountBanner">0 PHOTOS TAKEN</div>
+    <div id="compPhotoBanner" style="display:none; font-size:12px; font-weight:900; color:#00e676; text-align:center; margin-top:8px;">✔ SIDE-BY-SIDE VERIFICATION ATTACHED</div>
     <div class="thumb-gallery" id="thumbGallery"></div>
 
     <button class="submit-btn" id="submitBtn">LOG TOW</button>
@@ -277,6 +278,7 @@
     const camDoneBtn = document.getElementById('camDoneBtn');
     const modalCounter = document.getElementById('modalCounter');
     const photoCountBanner = document.getElementById('photoCountBanner');
+    const compPhotoBanner = document.getElementById('compPhotoBanner');
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
     const torchBtn = document.getElementById('torchBtn');
@@ -305,8 +307,25 @@
     window.addEventListener('DOMContentLoaded', () => {
         loadProperties();
         updateQueueUI();
-        window.addEventListener('online', processOfflineQueue);
+        checkCompPhoto();
+        window.addEventListener('online', syncPendingTowsInBackground);
+        syncPendingTowsInBackground();
+        setInterval(syncPendingTowsInBackground, 10000);
     });
+
+    regoInput.addEventListener('input', checkCompPhoto);
+    regoInput.addEventListener('change', checkCompPhoto);
+
+    function checkCompPhoto() {
+        const rego = regoInput.value.trim().toUpperCase();
+        if (compPhotoBanner) {
+            if (rego && localStorage.getItem('pending_comp_' + rego)) {
+                compPhotoBanner.style.display = 'block';
+            } else {
+                compPhotoBanner.style.display = 'none';
+            }
+        }
+    }
 
     refreshBtn.addEventListener('click', () => { window.location.reload(true); });
 
@@ -398,7 +417,6 @@
         renderThumbs();
         modalCounter.innerText = `${conditionPhotos.length} PHOTOS TAKEN`;
         
-        // Haptic feedback
         if (navigator.vibrate) navigator.vibrate(40);
     });
 
@@ -430,8 +448,8 @@
         modalCounter.innerText = countText;
     }
 
-    // --- SUBMISSION & BASEMENT CACHING ---
-    submitBtn.addEventListener('click', (e) => {
+    // --- SUBMISSION & RELIABLE BACKGROUND CACHING ---
+    submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -441,10 +459,15 @@
         isSubmitting = true;
         submitBtn.disabled = true;
         submitBtn.style.opacity = "0.5";
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "SAVING TOW...";
 
         const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
         const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
         const driver = officerSelect.value === "Other" ? officerOtherInput.value.trim() : officerSelect.value;
+
+        // Retrieve comparison photo stored by run.html
+        const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
 
         const payload = {
             id: 'TOW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -459,41 +482,61 @@
             officer: driver,
             photoBytes: conditionPhotos.length > 0 ? conditionPhotos[0] : "",
             photos: conditionPhotos,
+            comparisonPhoto: compB64,
             timestamp: new Date().toISOString()
         };
 
-        // 1. Immediately remove car from local cache so it vanishes from RUN
+        // 1. Blacklist immediately so vehicle vanishes from RUN permanently
         try {
+            let blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
+            blacklisted[rego] = Date.now();
+            localStorage.setItem('towed_blacklist', JSON.stringify(blacklisted));
+
             let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
             cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
             localStorage.setItem('cached_run_data', JSON.stringify(cachedRun));
+            localStorage.removeItem('pending_comp_' + rego);
         } catch(err) {}
 
-        // 2. Save payload into local persistent queue
+        // 2. Put into offline queue as safety
         saveToOfflineQueue(payload);
 
-        // 3. Fire-and-forget background upload attempt
+        // 3. Direct fast-path upload if online
         if (navigator.onLine) {
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
-                keepalive: true
-            }).then(() => {
-                // Remove successfully uploaded item from queue
-                let q = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-                q = q.filter(item => item.id !== payload.id);
-                localStorage.setItem('tow_offline_queue', JSON.stringify(q));
-            }).catch(() => {});
+            statusDiv.innerText = "🚀 UPLOADING TOW...";
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                const resData = await response.json();
+
+                if (resData && resData.status === "SUCCESS") {
+                    removeFromOfflineQueue(payload.id);
+                    statusDiv.style.color = "#00e676";
+                    statusDiv.innerText = "✔ TOW LOGGED TO YARD!";
+                    setTimeout(() => { window.location.href = "run.html"; }, 500);
+                    return;
+                }
+            } catch(uploadErr) {
+                clearTimeout(timeoutId);
+            }
         }
 
-        // 4. Instant UI response and immediate return to RUN
+        // If offline or taking longer than 3.5s, exit directly to RUN.
+        // Background sync uploader will push the queue silently!
         statusDiv.style.color = "#00e676";
-        statusDiv.innerText = "✔ TOW QUEUED! RETURNING TO RUN...";
-        
+        statusDiv.innerText = "✔ SAVED LOCALLY! RETURNING TO RUN...";
         setTimeout(() => {
             window.location.href = "run.html";
-        }, 250);
+        }, 500);
     });
 
     function saveToOfflineQueue(payload) {
@@ -505,9 +548,16 @@
         updateQueueUI();
     }
 
+    function removeFromOfflineQueue(id) {
+        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        queue = queue.filter(item => item.id !== id);
+        localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+        updateQueueUI();
+    }
+
     function updateQueueUI() {
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        if (queue.length > 0) {
+        if (queue.length > 0 && !navigator.onLine) {
             queueCount.innerText = queue.length;
             syncBadge.style.display = 'block';
         } else {
@@ -515,24 +565,39 @@
         }
     }
 
-    async function processOfflineQueue() {
+    let isSyncingQueue = false;
+    async function syncPendingTowsInBackground() {
+        if (isSyncingQueue || !navigator.onLine) return;
         let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        if (queue.length === 0 || !navigator.onLine) return;
+        if (queue.length === 0) {
+            updateQueueUI();
+            return;
+        }
 
-        let remaining = [];
-        for (let item of queue) {
+        isSyncingQueue = true;
+        for (let i = 0; i < queue.length; i++) {
+            const item = queue[i];
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(item)
                 });
-            } catch(e) {
-                remaining.push(item);
+                const resJson = await res.json();
+                if (resJson && resJson.status === "SUCCESS") {
+                    removeFromOfflineQueue(item.id);
+                }
+            } catch(err) {
+                console.warn("[Background Sync] Postponed due to network:", err);
+                break;
             }
         }
-        localStorage.setItem('tow_offline_queue', JSON.stringify(remaining));
+        isSyncingQueue = false;
         updateQueueUI();
+    }
+
+    async function processOfflineQueue() {
+        await syncPendingTowsInBackground();
     }
 </script>
 </body>
