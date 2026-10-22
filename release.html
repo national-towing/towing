@@ -10,9 +10,12 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=1005">
-    <link rel="icon" type="image/png" href="icon-release.png?v=1005">
-    <link rel="manifest" href="manifest-release.json?v=1005">
+    <link rel="apple-touch-icon" href="icon-release.png?v=1006">
+    <link rel="icon" type="image/png" href="icon-release.png?v=1006">
+    <link rel="manifest" href="manifest-release.json?v=1006">
+
+    <!-- FAST RELIABLE TESSERACT V5 SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
         * { box-sizing: border-box; }
@@ -281,36 +284,16 @@
     let officerSigConfirmed = false;
     let ocrWorker = null;
 
-    // IMMEDIATE ROBUST INITIALIZATION (Never blocked by external CDNs)
-    function initPage() {
+    window.addEventListener('DOMContentLoaded', () => {
         loadYardVehicles();
         initCamera();
         initSignatureCanvas('ownerSigCanvas');
         initSignatureCanvas('officerSigCanvas');
         setupLiveValidation();
-        loadOCRBackground();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPage);
-    } else {
-        initPage();
-    }
+        initOCRWorker();
+    });
 
     refreshBtn.addEventListener('click', () => { window.location.reload(true); });
-
-    // NON-BLOCKING ASYNC TESSERACT LOADER
-    function loadOCRBackground() {
-        if (window.Tesseract) {
-            initOCRWorker();
-            return;
-        }
-        const s = document.createElement('script');
-        s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
-        s.async = true;
-        s.onload = () => { initOCRWorker(); };
-        document.head.appendChild(s);
-    }
 
     async function initOCRWorker() {
         if (!window.Tesseract) return;
@@ -405,104 +388,67 @@
         thumbGallery.appendChild(thumbWrap);
 
         statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = `🔍 READING ID...`;
+        statusDiv.innerText = `🔍 SCANNING LICENCE DETAILS...`;
 
         try {
+            if (!ocrWorker && window.Tesseract) {
+                statusDiv.innerText = `⏳ INITIALIZING SCANNER (ONE MOMENT)...`;
+                ocrWorker = await Tesseract.createWorker('eng');
+            }
+
             let extractedText = "";
             if (ocrWorker) {
+                statusDiv.innerText = `🔍 READING LICENCE...`;
                 const ret = await ocrWorker.recognize(canvas);
-                extractedText = (ret && ret.data && ret.data.text) ? ret.data.text : "";
-            } else if (window.Tesseract) {
-                const ret = await Tesseract.recognize(canvas, 'eng');
                 extractedText = (ret && ret.data && ret.data.text) ? ret.data.text : "";
             }
 
             if (extractedText) {
                 parseSmartQLDLicence(extractedText);
+            } else {
+                statusDiv.innerText = `⚠️ SCAN COMPLETE (ATTACHED PHOTO #${photoIndex})`;
             }
         } catch(err) {
             console.error("OCR Error:", err);
+            statusDiv.innerText = `✔ PHOTO #${photoIndex} ATTACHED`;
         }
 
         updateScanGuidance();
         validateForm();
     });
 
+    // ROBUST MODERN QUEENSLAND LICENCE PARSER
     function parseSmartQLDLicence(rawText) {
         const text = rawText.replace(/\r/g, '\n').replace(/[|\\}{~_]/g, ' ');
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-        const isDigital = /Digital\s+Licence/i.test(text);
-
-        // --- 1. DIGITAL ID HANDLING ---
-        if (isDigital) {
-            for (let i = 0; i < lines.length; i++) {
-                if (/Digital\s+Licence/i.test(lines[i]) && i + 1 < lines.length) {
-                    const nameCandidate = lines[i + 1].replace(/[^A-Za-z\s\'-]/g, '').trim();
-                    if (nameCandidate.split(/\s+/).length >= 2 && !/Licence|Number|Address|Gov/i.test(nameCandidate)) {
-                        if (!ownerNameInput.value) ownerNameInput.value = nameCandidate.toUpperCase();
-                    }
-                }
-                if (/Licence\s+Number/i.test(lines[i]) && i + 1 < lines.length) {
-                    const numCandidate = lines[i + 1].replace(/\D/g, '');
-                    if (numCandidate.length >= 7 && numCandidate.length <= 9) {
-                        if (!idNumInput.value) idNumInput.value = numCandidate;
-                    }
-                }
-                if (/Residential\s+Address/i.test(lines[i])) {
-                    let addrParts = [];
-                    for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
-                        if (/Card\s+Number|Conditions|Expiry|Donor/i.test(lines[j])) break;
-                        addrParts.push(lines[j]);
-                    }
-                    if (addrParts.length > 0 && !ownerAddressInput.value) {
-                        ownerAddressInput.value = addrParts.join(", ").toUpperCase();
-                    }
-                }
-            }
-        }
-
-        // --- 2. PHYSICAL FRONT: NAME (Field 1 & 2) ---
-        if (!ownerNameInput.value) {
-            let surname = "";
-            let given = "";
-            for (let line of lines) {
-                const m1 = line.match(/^[1I!|]\s+([A-Za-z\s\'-]{2,30})$/);
-                if (m1 && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA/i.test(m1[1])) surname = m1[1].trim();
-                const m2 = line.match(/^[2]\s+([A-Za-z\s\'-]{2,35})$/);
-                if (m2 && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA/i.test(m2[1])) given = m2[1].trim();
-            }
-
-            if (surname && given) {
-                ownerNameInput.value = `${given} ${surname}`.toUpperCase();
-            } else if (surname) {
-                ownerNameInput.value = surname.toUpperCase();
-            } else {
-                const badWords = ["QUEENSLAND", "DRIVER", "LICENCE", "AUSTRALIA", "CARD", "NUMBER", "DATE", "BIRTH", "EXPIRY", "ORGAN", "DONOR", "CONDITIONS"];
-                for (let line of lines) {
-                    const clean = line.replace(/[^A-Za-z\s]/g, '').trim();
-                    const words = clean.split(/\s+/);
-                    if (words.length >= 2 && words.length <= 4 && clean.length >= 6 && clean.length <= 32) {
-                        if (!words.some(w => badWords.includes(w.toUpperCase())) && !words.some(w => ["QLD", "NSW", "VIC", "ST", "RD"].includes(w.toUpperCase()))) {
-                            ownerNameInput.value = clean.toUpperCase();
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- 3. PHYSICAL FRONT: LICENCE / CRN (Field 5) ---
+        // --- 1. LICENCE NUMBER / CRN (POPULATE ONLY IF EMPTY) ---
         if (!idNumInput.value) {
-            const m5 = text.match(/(?:^|\n)\s*[5S§]\s*[\.:-]?\s*([0-9 \t]{7,10})\b/);
-            if (m5) {
-                const cleanNum = m5[1].replace(/\s+/g, '');
-                if (cleanNum.length >= 7 && cleanNum.length <= 9) idNumInput.value = cleanNum;
+            // Grouped 3-3-3 digits: "012 446 386"
+            const m_spaced = text.match(/\b(\d{3})\s+(\d{3})\s+(\d{3})\b/);
+            if (m_spaced) {
+                idNumInput.value = `${m_spaced[1]}${m_spaced[2]}${m_spaced[3]}`;
             }
+
+            // Labeled CRN or LICENCE NO
             if (!idNumInput.value) {
-                const m_lbl = text.match(/(?:LICENCE|LIC|CRN|CARD)[\s#:\.]*([0-9]{7,9})/i);
-                if (m_lbl) idNumInput.value = m_lbl[1].trim();
+                const m_lbl = text.match(/(?:CRN|LICENCE\s*(?:NO\.?|NUMBER)?|CARD\s*NO)[^\d]*([0-9\s]{7,15})/i);
+                if (m_lbl) {
+                    const clean = m_lbl[1].replace(/\D/g, '');
+                    if (clean.length >= 7 && clean.length <= 10) idNumInput.value = clean;
+                }
             }
+
+            // Field 5 on older cards
+            if (!idNumInput.value) {
+                const m5 = text.match(/(?:^|\n)\s*[5S§]\s*[\.:-]?\s*([0-9 \t]{7,10})\b/);
+                if (m5) {
+                    const cleanNum = m5[1].replace(/\s+/g, '');
+                    if (cleanNum.length >= 7 && cleanNum.length <= 9) idNumInput.value = cleanNum;
+                }
+            }
+
+            // Standalone 8-9 digits fallback
             if (!idNumInput.value) {
                 const nums = text.match(/\b\d{8,9}\b/g);
                 if (nums) {
@@ -512,22 +458,89 @@
             }
         }
 
-        // --- 4. PHYSICAL BACK: RESIDENTIAL ADDRESS ---
-        if (!ownerAddressInput.value) {
+        // --- 2. FULL NAME (POPULATE ONLY IF EMPTY — NEVER OVERWRITE) ---
+        if (!ownerNameInput.value) {
+            // Pattern A: Modern QLD card (Under "Driver Licence", Line 1 = SMITH, Line 2 = BRETT ANDREW)
             for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                if (/\b(?:QLD|QUEENSLAND|NSW|VIC|WA|SA|TAS|ACT|NT)\s*(\d{4})\b/i.test(line)) {
-                    if (/\d+\s+[A-Za-z]+/.test(line)) {
-                        ownerAddressInput.value = line.toUpperCase();
-                    } else if (i > 0) {
-                        const prevLine = lines[i - 1];
-                        if (!/CARD|NUMBER|DONOR|CONDITIONS|ORGAN|REGISTER/i.test(prevLine)) {
-                            ownerAddressInput.value = `${prevLine}, ${line}`.toUpperCase();
-                        } else {
-                            ownerAddressInput.value = line.toUpperCase();
+                if (/Driver\s+Licen[cs]e/i.test(lines[i])) {
+                    if (i + 2 < lines.length) {
+                        let l1 = lines[i + 1].replace(/[\d\.:\/].*/, '').replace(/(?:LICENCE|CRN|DOB|DATE|NO|CARD).*/i, '').trim();
+                        let l2 = lines[i + 2].replace(/[\d\.:\/].*/, '').replace(/(?:LICENCE|CRN|DOB|DATE|NO|CARD).*/i, '').trim();
+                        if (l1.length >= 2 && l1.length <= 25 && l2.length >= 2 && l2.length <= 25) {
+                            if (!/DOB|DATE|BIRTH|CLASS|QUEENSLAND/i.test(l1) && !/DOB|DATE|BIRTH|CLASS|QUEENSLAND/i.test(l2)) {
+                                ownerNameInput.value = `${l2} ${l1}`.toUpperCase();
+                                break;
+                            }
                         }
                     }
-                    break;
+                }
+            }
+
+            // Pattern B: Digital Licence (Line directly beneath "Digital Licence")
+            if (!ownerNameInput.value) {
+                for (let i = 0; i < lines.length; i++) {
+                    if (/Digital\s+Licence/i.test(lines[i]) && i + 1 < lines.length) {
+                        const nameCandidate = lines[i + 1].replace(/[^A-Za-z\s\'-]/g, '').trim();
+                        if (nameCandidate.split(/\s+/).length >= 2 && !/Licence|Number|Address|Gov/i.test(nameCandidate)) {
+                            ownerNameInput.value = nameCandidate.toUpperCase();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Pattern C: Older QLD card with fields 1 and 2
+            if (!ownerNameInput.value) {
+                let surname = "";
+                let given = "";
+                for (let line of lines) {
+                    const m1 = line.match(/^[1I!|]\s+([A-Za-z\s\'-]{2,30})$/);
+                    if (m1 && !/QUEENSLAND|DRIVER|LICENCE/i.test(m1[1])) surname = m1[1].trim();
+                    const m2 = line.match(/^[2]\s+([A-Za-z\s\'-]{2,35})$/);
+                    if (m2 && !/QUEENSLAND|DRIVER|LICENCE/i.test(m2[1])) given = m2[1].trim();
+                }
+                if (surname && given) {
+                    ownerNameInput.value = `${given} ${surname}`.toUpperCase();
+                } else if (surname) {
+                    ownerNameInput.value = surname.toUpperCase();
+                }
+            }
+        }
+
+        // --- 3. RESIDENTIAL ADDRESS (PHYSICAL BACK OR DIGITAL APP) ---
+        if (!ownerAddressInput.value) {
+            // Digital Licence "Residential Address" heading
+            for (let i = 0; i < lines.length; i++) {
+                if (/Residential\s+Address/i.test(lines[i])) {
+                    let addrParts = [];
+                    for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+                        if (/Card\s+Number|Conditions|Expiry|Donor/i.test(lines[j])) break;
+                        addrParts.push(lines[j]);
+                    }
+                    if (addrParts.length > 0) {
+                        ownerAddressInput.value = addrParts.join(", ").toUpperCase();
+                        break;
+                    }
+                }
+            }
+
+            // Physical card back: line containing State + 4 digits
+            if (!ownerAddressInput.value) {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (/\b(?:QLD|QUEENSLAND|NSW|VIC|WA|SA|TAS|ACT|NT)\s*(\d{4})\b/i.test(line)) {
+                        if (/\d+\s+[A-Za-z]+/.test(line)) {
+                            ownerAddressInput.value = line.replace(/^[0-9]\s+/, '').trim().toUpperCase();
+                        } else if (i > 0) {
+                            const prev = lines[i - 1];
+                            if (!/CARD|NUMBER|DONOR|CONDITIONS|ORGAN|REGISTER/i.test(prev)) {
+                                ownerAddressInput.value = `${prev}, ${line}`.replace(/^[0-9]\s+/, '').trim().toUpperCase();
+                            } else {
+                                ownerAddressInput.value = line.replace(/^[0-9]\s+/, '').trim().toUpperCase();
+                            }
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -542,17 +555,17 @@
             guideText.innerText = "ALL DETAILS CAPTURED";
             guideText.style.color = "#00e676";
             statusDiv.style.color = "#00e676";
-            statusDiv.innerText = "✔ ALL ID DETAILS CAPTURED!";
+            statusDiv.innerText = `✔ CAPTURED: ${ownerNameInput.value} (${idNumInput.value})`;
         } else if (nameDone && idDone && !addrDone) {
             guideText.innerText = "SNAP 2: CARD BACK (FOR ADDRESS)";
             guideText.style.color = "#ffab00";
             statusDiv.style.color = "#00e676";
-            statusDiv.innerText = "✔ FRONT CAPTURED: FLIP CARD & SNAP BACK.";
-        } else if (!nameDone && !idDone && addrDone) {
+            statusDiv.innerText = `✔ ${ownerNameInput.value} (${idNumInput.value}) FOUND! FLIP CARD TO SNAP ADDRESS.`;
+        } else if (addrDone && (!nameDone || !idDone)) {
             guideText.innerText = "SNAP CARD FRONT (NAME & LIC #)";
             guideText.style.color = "#ffab00";
             statusDiv.style.color = "#00e676";
-            statusDiv.innerText = "✔ ADDRESS CAPTURED. SNAP FRONT FOR NAME.";
+            statusDiv.innerText = `✔ ADDRESS SAVED! SNAP FRONT FOR NAME & LICENCE #.`;
         }
     }
 
