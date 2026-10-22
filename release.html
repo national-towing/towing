@@ -128,9 +128,10 @@
             <label>PROPERTY</label>
             <input type="text" id="propertyInput" placeholder="PROPERTY" readonly style="background:#1a1a1a; color:#aaa;">
         </div>
+
         <div>
-            <label>SVN # (POLICELINK)</label>
-            <input type="text" id="svnInput" placeholder="SVN NUMBER" autocomplete="off" autocorrect="off">
+            <label>POLICELINK REF #</label>
+            <input type="text" id="svnInput" placeholder="POLICELINK REF #" autocomplete="off" autocorrect="off">
         </div>
     </div>
 
@@ -305,9 +306,10 @@
             makeInput.value = veh.make || '';
             modelInput.value = veh.model || '';
             colourInput.value = veh.colour || '';
+            svnInput.value = veh.policelinkRef || '';
             idSectionWrapper.classList.remove('section-disabled');
         } else {
-            propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = '';
+            propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = ''; svnInput.value = '';
             idSectionWrapper.classList.add('section-disabled');
         }
         validateForm();
