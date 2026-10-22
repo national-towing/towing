@@ -10,11 +10,11 @@
 
     <title>RELEASE</title>
     
-    <link rel="apple-touch-icon" href="icon-release.png?v=1003">
-    <link rel="icon" type="image/png" href="icon-release.png?v=1003">
-    <link rel="manifest" href="manifest-release.json?v=1003">
+    <link rel="apple-touch-icon" href="icon-release.png?v=1004">
+    <link rel="icon" type="image/png" href="icon-release.png?v=1004">
+    <link rel="manifest" href="manifest-release.json?v=1004">
 
-    <!-- FAST PRE-WARMED TESSERACT V5 -->
+    <!-- BROWSER OCR ENGINE -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
@@ -53,11 +53,25 @@
 
         .legal-stmt { font-size: 13.5px; color: #ddd; margin-top: 14px; line-height: 1.4; font-style: italic; background: #141414; padding: 10px; border-radius: 8px; border: 1px solid #333; font-weight: 600; }
 
+        /* VIEWFINDER WITH SMART INSTRUCTION OVERLAY */
         .camera-box {
-            width: 100%; height: 230px; background: #000; border-radius: 12px; border: 2px solid #333;
+            width: 100%; height: 240px; background: #000; border-radius: 12px; border: 2px solid #333;
             margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
+
+        .scan-guide {
+            position: absolute; width: 88%; height: 78%;
+            border: 2px dashed #00e676; border-radius: 12px;
+            pointer-events: none; z-index: 5;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.40);
+            display: flex; align-items: flex-start; justify-content: center;
+        }
+        .scan-guide-text {
+            background: rgba(0,0,0,0.85); color: #00e676; font-size: 11px;
+            font-weight: 900; padding: 5px 12px; border-radius: 0 0 8px 8px; letter-spacing: 1px;
+            text-align: center;
+        }
 
         .thumb-gallery { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; }
         .thumb-container { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
@@ -152,8 +166,13 @@
     <!-- SECTION 2: OWNER DETAILS -->
     <div class="section-title">OWNER DETAILS</div>
     
-    <label>SCAN LICENCE / ID (PHYSICAL OR DIGITAL)</label>
-    <div class="camera-box"><video id="videoElem" autoplay playsinline></video></div>
+    <label>SCAN DRIVER LICENCE (PHYSICAL OR DIGITAL)</label>
+    <div class="camera-box">
+        <video id="videoElem" autoplay playsinline></video>
+        <div class="scan-guide">
+            <span class="scan-guide-text" id="guideText">SNAP 1: FRONT (OR DIGITAL SCREEN)</span>
+        </div>
+    </div>
     
     <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
     <div class="thumb-gallery" id="thumbGallery"></div>
@@ -258,6 +277,7 @@
 
     const videoElem = document.getElementById('videoElem');
     const snapBtn = document.getElementById('snapBtn');
+    const guideText = document.getElementById('guideText');
     const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -275,22 +295,16 @@
         initSignatureCanvas('ownerSigCanvas');
         initSignatureCanvas('officerSigCanvas');
         setupLiveValidation();
-        initPrewarmedOCR();
+        initOCRWorker();
     });
 
     refreshBtn.addEventListener('click', () => { window.location.reload(true); });
 
-    // BACKGROUND OCR PRE-WARMING
-    async function initPrewarmedOCR() {
+    async function initOCRWorker() {
         if (!window.Tesseract) return;
         try {
-            statusDiv.innerText = "INITIALIZING SCANNER...";
             ocrWorker = await Tesseract.createWorker('eng');
-            statusDiv.innerText = "";
-        } catch(e) {
-            console.warn("OCR Background Init Error:", e);
-            statusDiv.innerText = "";
-        }
+        } catch(e) {}
     }
 
     function checkOfficerOther(selectElem) {
@@ -346,21 +360,15 @@
         }
     }
 
-    // HIGH-RES IN-MEMORY SNAP
     snapBtn.addEventListener('click', async () => {
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
-        
-        // Target 1280px width for fast parsing and clear font definition
-        const scale = Math.min(1, 1280 / vW);
-        const canvasW = Math.round(vW * scale);
-        const canvasH = Math.round(vH * scale);
 
         const canvas = document.createElement('canvas');
-        canvas.width = canvasW;
-        canvas.height = canvasH;
+        canvas.width = vW;
+        canvas.height = vH;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, canvasW, canvasH);
+        ctx.drawImage(videoElem, 0, 0, vW, vH);
 
         const b64 = canvas.toDataURL('image/jpeg', 0.70);
         idPhotos.push(b64);
@@ -368,7 +376,6 @@
         const photoIndex = idPhotos.length;
         const labelText = photoIndex === 1 ? "FRONT / DIGITAL" : (photoIndex === 2 ? "BACK" : `SNAP ${photoIndex}`);
 
-        // Add gallery thumbnail
         const thumbWrap = document.createElement('div');
         thumbWrap.className = 'thumb-container';
 
@@ -384,24 +391,11 @@
         thumbWrap.appendChild(lbl);
         thumbGallery.appendChild(thumbWrap);
 
-        // If Name, ID#, and Address are all already filled, skip OCR on snap 2 (Back)
-        const nameFilled = ownerNameInput.value.trim().length > 2;
-        const idFilled = idNumInput.value.trim().length >= 5;
-        const addrFilled = ownerAddressInput.value.trim().length > 4;
-
-        if (nameFilled && idFilled && addrFilled) {
-            statusDiv.style.color = "#00e676";
-            statusDiv.innerText = `✔ BACK OF ID ATTACHED (DETAILS PRESERVED)`;
-            validateForm();
-            return;
-        }
-
         statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = `🔍 SCANNING ID TEXT...`;
+        statusDiv.innerText = `🔍 READING ID...`;
 
         try {
             let extractedText = "";
-
             if (ocrWorker) {
                 const ret = await ocrWorker.recognize(canvas);
                 extractedText = (ret && ret.data && ret.data.text) ? ret.data.text : "";
@@ -411,288 +405,62 @@
             }
 
             if (extractedText) {
-                parseLicenceDetails(extractedText);
-                statusDiv.style.color = "#00e676";
-                statusDiv.innerText = `✔ ID SCANNED & DETAILS POPULATED`;
-            } else {
-                statusDiv.innerText = `✔ ID SNAP #${photoIndex} ATTACHED`;
+                parseSmartQLDLicence(extractedText);
             }
         } catch(err) {
             console.error("OCR Error:", err);
-            statusDiv.innerText = `✔ ID SNAP #${photoIndex} ATTACHED`;
         }
 
+        updateScanGuidance();
         validateForm();
     });
 
-    // ROBUST STATUTORY PARSER
-    function parseLicenceDetails(rawText) {
+    function parseSmartQLDLicence(rawText) {
         const text = rawText.replace(/\r/g, '\n').replace(/[|\\}{~_]/g, ' ');
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-        // 1. CRN / LICENCE NUMBER (Only populate if empty)
-        if (!idNumInput.value || idNumInput.value.length < 5) {
-            // Physical QLD field 5 (e.g., "5 12345678" or "5. 12345678")
-            const m5 = text.match(/(?:^|\n)\s*[5S§]\s*[\.:-]?\s*([0-9 \t]{7,10})\b/);
-            if (m5) {
-                const cleanCrn = m5[1].replace(/[ \t]/g, '');
-                if (cleanCrn.length >= 7 && cleanCrn.length <= 9) {
-                    idNumInput.value = cleanCrn;
+        const isDigital = /Digital\s+Licence/i.test(text);
+
+        // --- 1. DIGITAL ID HANDLING ---
+        if (isDigital) {
+            for (let i = 0; i < lines.length; i++) {
+                if (/Digital\s+Licence/i.test(lines[i]) && i + 1 < lines.length) {
+                    const nameCandidate = lines[i + 1].replace(/[^A-Za-z\s\'-]/g, '').trim();
+                    if (nameCandidate.split(/\s+/).length >= 2 && !/Licence|Number|Address|Gov/i.test(nameCandidate)) {
+                        if (!ownerNameInput.value) ownerNameInput.value = nameCandidate.toUpperCase();
+                    }
                 }
-            }
-
-            // Digital Licence / Standard Labeled Format
-            if (!idNumInput.value || idNumInput.value.length < 5) {
-                const m_lbl = text.match(/(?:LICENCE|LIC|CRN|CARD|NO|NUMBER)[\s#:\.]*([A-Z0-9]{7,10})/i);
-                if (m_lbl && /\d/.test(m_lbl[1])) {
-                    idNumInput.value = m_lbl[1].trim();
-                } else {
-                    // Fallback to standalone 8 or 9 digit number not starting with 19 or 20 (years)
-                    const nums = text.match(/\b\d{8,9}\b/g);
-                    if (nums) {
-                        const validNum = nums.find(n => !n.startsWith("19") && !n.startsWith("20"));
-                        if (validNum) idNumInput.value = validNum;
+                if (/Licence\s+Number/i.test(lines[i]) && i + 1 < lines.length) {
+                    const numCandidate = lines[i + 1].replace(/\D/g, '');
+                    if (numCandidate.length >= 7 && numCandidate.length <= 9) {
+                        if (!idNumInput.value) idNumInput.value = numCandidate;
+                    }
+                }
+                if (/Residential\s+Address/i.test(lines[i])) {
+                    let addrParts = [];
+                    for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+                        if (/Card\s+Number|Conditions|Expiry|Donor/i.test(lines[j])) break;
+                        addrParts.append ? addrParts.append(lines[j]) : addrParts.push(lines[j]);
+                    }
+                    if (addrParts.length > 0 && !ownerAddressInput.value) {
+                        ownerAddressInput.value = addrParts.join(", ").toUpperCase();
                     }
                 }
             }
         }
 
-        // 2. FULL NAME (Only populate if empty — NEVER OVERWRITE)
-        if (!ownerNameInput.value || ownerNameInput.value.trim().length < 3) {
+        // --- 2. PHYSICAL FRONT: NAME (Field 1 & 2) ---
+        if (!ownerNameInput.value) {
             let surname = "";
             let given = "";
-
-            // Physical QLD field 1 (Surname) & field 2 (Given Names)
             for (let line of lines) {
-                const m1 = line.match(/^[1I!]\s+([A-Za-z\s\'-]{2,30})$/);
-                if (m1 && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA|CARD/i.test(m1[1])) {
-                    surname = m1[1].trim();
-                }
+                const m1 = line.match(/^[1I!|]\s+([A-Za-z\s\'-]{2,30})$/);
+                if (m1 && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA/i.test(m1[1])) surname = m1[1].trim();
                 const m2 = line.match(/^[2]\s+([A-Za-z\s\'-]{2,35})$/);
-                if (m2 && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA|CARD/i.test(m2[1])) {
-                    given = m2[1].trim();
-                }
+                if (m2 && !/QUEENSLAND|DRIVER|LICENCE|AUSTRALIA/i.test(m2[1])) given = m2[1].trim();
             }
 
             if (surname && given) {
                 ownerNameInput.value = `${given} ${surname}`.toUpperCase();
             } else if (surname) {
                 ownerNameInput.value = surname.toUpperCase();
-            } else {
-                // Digital QLD Licence (Line directly beneath "Digital Licence")
-                for (let i = 0; i < lines.length; i++) {
-                    if (/Digital\s+Licence/i.test(lines[i]) && i + 1 < lines.length) {
-                        const cand = lines[i + 1].replace(/[^A-Za-z\s\'-]/g, '').trim();
-                        if (cand.split(/\s+/).length >= 2 && !/Licence|Number|Address|Government/i.test(cand)) {
-                            ownerNameInput.value = cand.toUpperCase();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Generic Name Fallback
-            if (!ownerNameInput.value || ownerNameInput.value.trim().length < 3) {
-                const badWords = ["QUEENSLAND", "DRIVER", "LICENCE", "LICENSE", "AUSTRALIA", "GOVERNMENT", "DIGITAL", "CONDITIONS", "CARD", "NUMBER", "DATE", "BIRTH", "EXPIRY", "CUSTOMER", "RESIDENTIAL", "ADDRESS", "TRANSPORT", "CLASS", "DONOR", "REGISTER"];
-                for (let line of lines) {
-                    const clean = line.replace(/[^A-Za-z\s]/g, '').trim();
-                    const words = clean.split(/\s+/);
-                    if (words.length >= 2 && words.length <= 4 && clean.length >= 6 && clean.length <= 32) {
-                        if (!words.some(w => badWords.includes(w.toUpperCase()))) {
-                            if (!words.some(w => ["ST", "STREET", "RD", "ROAD", "AVE", "AVENUE", "DR", "DRIVE", "WAY", "QLD", "NSW", "VIC"].includes(w.toUpperCase()))) {
-                                ownerNameInput.value = clean.toUpperCase();
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // 3. RESIDENTIAL ADDRESS (Only populate if empty)
-        if (!ownerAddressInput.value || ownerAddressInput.value.trim().length < 5) {
-            // Physical QLD field 8 (e.g. "8 14 LAU PL")
-            for (let i = 0; i < lines.length; i++) {
-                const m8 = lines[i].match(/^[8B]\s+(.*)/);
-                if (m8) {
-                    let addr = m8[1].trim();
-                    if (i + 1 < lines.length && /\b(?:QLD|NSW|VIC|WA|SA|TAS|ACT|NT)\s*\d{4}\b/i.test(lines[i + 1])) {
-                        addr = `${addr}, ${lines[i + 1]}`.trim();
-                    }
-                    ownerAddressInput.value = addr.toUpperCase();
-                    break;
-                }
-            }
-
-            // Standard Address with State + 4 Digit Postcode
-            if (!ownerAddressInput.value || ownerAddressInput.value.trim().length < 5) {
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i];
-                    if (/\b(?:QLD|NSW|VIC|WA|SA|TAS|ACT|NT)\s*\d{4}\b/i.test(line)) {
-                        if (i > 0 && /\d+\s+[A-Za-z]+/.test(lines[i - 1]) && !/BIRTH|EXPIRY|DATE|LICENCE|RESIDENTIAL/i.test(lines[i - 1])) {
-                            ownerAddressInput.value = `${lines[i - 1]}, ${line}`.replace(/^[0-9]\s+/, '').trim().toUpperCase();
-                        } else {
-                            ownerAddressInput.value = line.replace(/^[0-9]\s+/, '').trim().toUpperCase();
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    function initSignatureCanvas(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
-
-        function resizeCanvas() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 3;
-            ctx.lineCap = "round";
-        }
-        resizeCanvas();
-
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        }
-
-        function startDrawing(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
-        function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
-        function stopDrawing() { drawing = false; }
-
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
-        canvas.addEventListener('touchend', stopDrawing);
-    }
-
-    function clearSig(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        canvas.classList.remove('sig-locked');
-        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
-        if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
-        statusDiv.innerText = "";
-        validateForm();
-    }
-
-    function confirmSig(canvasId) {
-        document.getElementById(canvasId).classList.add('sig-locked');
-        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
-        if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
-        statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
-        validateForm();
-    }
-
-    function setupLiveValidation() {
-        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
-        inputs.forEach(elem => {
-            elem.addEventListener('input', validateForm);
-            elem.addEventListener('change', validateForm);
-        });
-        validateForm();
-    }
-
-    function validateForm() {
-        let isValid = true;
-        function mark(elem, cond) {
-            if (cond) {
-                elem.classList.remove('field-missing'); elem.classList.add('field-valid');
-            } else {
-                elem.classList.remove('field-valid'); elem.classList.add('field-missing');
-                isValid = false;
-            }
-        }
-
-        mark(vehicleSelect, vehicleSelect.value !== "");
-        mark(svnInput, svnInput.value.trim() !== "");
-        mark(regoInput, regoInput.value.trim() !== "");
-        mark(colourInput, colourInput.value.trim() !== "");
-        mark(makeInput, makeInput.value.trim() !== "");
-        mark(modelInput, modelInput.value.trim() !== "");
-
-        mark(ownerNameInput, ownerNameInput.value.trim() !== "");
-        mark(idNumInput, idNumInput.value.trim() !== "");
-        mark(ownerAddressInput, ownerAddressInput.value.trim() !== "");
-        mark(ownerEmailInput, ownerEmailInput.value.trim() !== "");
-
-        mark(releaseFeeInput, releaseFeeInput.value !== "");
-        mark(storageFeeInput, storageFeeInput.value !== "");
-
-        if (officerSelect.value === "OTHER") {
-            mark(officerOtherInput, officerOtherInput.value.trim() !== "");
-        }
-
-        if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
-        return isValid;
-    }
-
-    submitBtn.addEventListener('click', async () => {
-        if (!validateForm()) {
-            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM BOTH SIGS";
-            return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = "0.5";
-        statusDiv.innerText = "GENERATING TAX INVOICE & RELEASING...";
-
-        const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
-        const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
-        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
-
-        const payload = {
-            action: 'process_release',
-            rego: regoInput.value.trim().toUpperCase(),
-            svnNumber: svnInput.value.trim(),
-            make: makeInput.value.trim(),
-            model: modelInput.value.trim(),
-            colour: colourInput.value.trim(),
-            property: propertyInput.value.trim(),
-            ownerName: ownerNameInput.value.trim(),
-            idNumber: idNumInput.value.trim(),
-            ownerAddress: ownerAddressInput.value.trim(),
-            ownerPhone: ownerPhoneInput.value.trim(),
-            ownerEmail: ownerEmailInput.value.trim(),
-            releaseFee: releaseFeeInput.value,
-            storageFee: storageFeeInput.value,
-            officer: finalOfficer,
-            idPhotos: idPhotos,
-            ownerSigBytes: ownerSig,
-            officerSigBytes: officerSig
-        };
-
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload) 
-            });
-            const resData = await res.json();
-            
-            if (resData && resData.status === "SUCCESS") {
-                statusDiv.innerText = "✔ PAID - VEHICLE RELEASED & INVOICE EMAILED!";
-                setTimeout(() => { window.location.reload(true); }, 2000);
-            } else {
-                statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release");
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = "1";
-            }
-        } catch(err) {
-            statusDiv.innerText = "SERVER ERROR PROCESSING RELEASE";
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = "1";
-        }
-    });
-</script>
-</body>
-</html>
