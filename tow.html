@@ -10,9 +10,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10002">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10002">
-    <link rel="manifest" href="manifest-tow.json?v=10002">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10003">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10003">
+    <link rel="manifest" href="manifest-tow.json?v=10003">
 
     <style>
         * { box-sizing: border-box; }
@@ -107,9 +107,10 @@
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .cam-torch-btn {
-            position: absolute; top: 70px; right: 16px; background: rgba(0,0,0,0.6);
-            border: 1px solid #ff1744; color: #ff1744; padding: 8px 14px; border-radius: 20px;
-            font-size: 12px; font-weight: 900; cursor: pointer; z-index: 10;
+            position: absolute; top: 70px; right: 16px; background: rgba(0,0,0,0.75);
+            border: 1.5px solid #ffab00; color: #ffab00; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 20; letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         }
 
         .cam-snap-btn {
@@ -253,7 +254,7 @@
     </div>
     <div class="cam-viewfinder">
         <video id="videoElem" autoplay playsinline></video>
-        <button class="cam-torch-btn" id="torchBtn">⚡ FLASH OFF</button>
+        <button class="cam-torch-btn" id="torchBtn">⚡ FLASH: AUTO</button>
         <div class="cam-snap-btn" id="snapBtn"><div class="cam-snap-inner"></div></div>
     </div>
 </div>
@@ -293,8 +294,11 @@
     let isSubmitting = false;
     let videoStream = null;
     let videoTrack = null;
-    let torchOn = false;
+    let trackCapabilities = {};
     let targetProperty = "";
+
+    // FLASH STATE: 'auto' | 'torch' | 'off'
+    let flashMode = localStorage.getItem('tow_flash_mode') || 'auto';
 
     (function readUrlParamsNow() {
         const params = new URLSearchParams(window.location.search);
@@ -305,6 +309,7 @@
     })();
 
     window.addEventListener('DOMContentLoaded', () => {
+        updateTorchUI();
         loadProperties();
         updateQueueUI();
         checkCompPhoto();
@@ -370,6 +375,58 @@
         camModal.classList.remove('show');
     });
 
+    function updateTorchUI() {
+        if (flashMode === 'auto') {
+            torchBtn.innerText = "⚡ FLASH: AUTO";
+            torchBtn.style.borderColor = "#ffab00";
+            torchBtn.style.color = "#ffab00";
+        } else if (flashMode === 'torch') {
+            torchBtn.innerText = "🔦 TORCH: ON";
+            torchBtn.style.borderColor = "#00e676";
+            torchBtn.style.color = "#00e676";
+        } else {
+            torchBtn.innerText = "⚡ FLASH: OFF";
+            torchBtn.style.borderColor = "#ff1744";
+            torchBtn.style.color = "#ff1744";
+        }
+    }
+
+    torchBtn.addEventListener('click', async () => {
+        if (flashMode === 'auto') flashMode = 'torch';
+        else if (flashMode === 'torch') flashMode = 'off';
+        else flashMode = 'auto';
+
+        localStorage.setItem('tow_flash_mode', flashMode);
+        updateTorchUI();
+
+        if (videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({
+                    advanced: [{ torch: (flashMode === 'torch') }]
+                });
+            } catch(e) {}
+        }
+    });
+
+    function isLowLight(video) {
+        try {
+            const miniCanvas = document.createElement('canvas');
+            miniCanvas.width = 20;
+            miniCanvas.height = 20;
+            const miniCtx = miniCanvas.getContext('2d', { willReadFrequently: true });
+            miniCtx.drawImage(video, 0, 0, 20, 20);
+            const imgData = miniCtx.getImageData(0, 0, 20, 20).data;
+            let totalLuminance = 0;
+            for (let i = 0; i < imgData.length; i += 4) {
+                totalLuminance += (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
+            }
+            const avgLuminance = totalLuminance / (imgData.length / 4);
+            return avgLuminance < 50;
+        } catch(e) {
+            return false;
+        }
+    }
+
     async function startCamera() {
         try {
             videoStream = await navigator.mediaDevices.getUserMedia({
@@ -378,6 +435,20 @@
             });
             videoElem.srcObject = videoStream;
             videoTrack = videoStream.getVideoTracks()[0];
+
+            if (videoTrack) {
+                trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+                if (!trackCapabilities.torch) {
+                    torchBtn.style.display = 'none';
+                } else {
+                    torchBtn.style.display = 'block';
+                    if (flashMode === 'torch') {
+                        try {
+                            await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
+                        } catch(e) {}
+                    }
+                }
+            }
         } catch(err) {
             alert("Camera error: " + err.message);
         }
@@ -387,20 +458,25 @@
         if (videoStream) {
             videoStream.getTracks().forEach(t => t.stop());
             videoStream = null;
+            videoTrack = null;
         }
     }
 
-    torchBtn.addEventListener('click', async () => {
-        if (!videoTrack) return;
-        try {
-            torchOn = !torchOn;
-            await videoTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
-            torchBtn.innerText = torchOn ? "⚡ FLASH ON" : "⚡ FLASH OFF";
-            torchBtn.style.color = torchOn ? "#00e676" : "#ff1744";
-        } catch(e) {}
-    });
+    snapBtn.addEventListener('click', async () => {
+        let firedFlash = false;
+        const needsFlash = (flashMode === 'torch') || (flashMode === 'auto' && isLowLight(videoElem));
 
-    snapBtn.addEventListener('click', () => {
+        // 1. If low-light or torch mode, engage hardware flash with AE/AF metering delay
+        if (needsFlash && videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
+                firedFlash = true;
+                if (flashMode !== 'torch') {
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            } catch(e) {}
+        }
+
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
         const aspect = vH / vW;
@@ -413,6 +489,13 @@
         
         const b64 = canvas.toDataURL('image/jpeg', 0.45);
         conditionPhotos.push(b64);
+
+        // 2. Turn flash off immediately unless in continuous torch mode
+        if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ torch: false }] });
+            } catch(e) {}
+        }
 
         renderThumbs();
         modalCounter.innerText = `${conditionPhotos.length} PHOTOS TAKEN`;
@@ -531,7 +614,6 @@
         }
 
         // If offline or taking longer than 3.5s, exit directly to RUN.
-        // Background sync uploader will push the queue silently!
         statusDiv.style.color = "#00e676";
         statusDiv.innerText = "✔ SAVED LOCALLY! RETURNING TO RUN...";
         setTimeout(() => {
