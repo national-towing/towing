@@ -10,9 +10,9 @@
 
     <title>RUN</title>
     
-    <link rel="apple-touch-icon" href="icon-run.png?v=701">
-    <link rel="icon" type="image/png" href="icon-run.png?v=701">
-    <link rel="manifest" href="manifest-run.json?v=701">
+    <link rel="apple-touch-icon" href="icon-run.png?v=702">
+    <link rel="icon" type="image/png" href="icon-run.png?v=702">
+    <link rel="manifest" href="manifest-run.json?v=702">
 
     <style>
         * { box-sizing: border-box; }
@@ -117,6 +117,13 @@
         #overlayVideo { width: 100%; height: 100%; object-fit: cover; }
         #ghostImage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; pointer-events: none; }
         
+        .overlay-torch-btn {
+            position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.75);
+            border: 1.5px solid #ffab00; color: #ffab00; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 20; letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
         .modal-footer { height: 75px; background: #1e1e1e; display: flex; justify-content: space-evenly; align-items: center; border-top: 1px solid #333; padding: 0 10px; gap: 10px; }
         .match-btn { flex: 1; background: #ff1744; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
         .skip-btn { flex: 1; background: #444; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
@@ -167,6 +174,7 @@
     <div class="viewfinder-container">
         <video id="overlayVideo" autoplay playsinline muted></video>
         <img id="ghostImage" alt="Ghost Overlay">
+        <button class="overlay-torch-btn" id="overlayTorchBtn">⚡ FLASH: AUTO</button>
     </div>
     
     <div class="modal-footer">
@@ -206,13 +214,22 @@
     const opacitySlider = document.getElementById('opacitySlider');
     const matchBtn = document.getElementById('matchBtn');
     const skipBtn = document.getElementById('skipBtn');
+    const overlayTorchBtn = document.getElementById('overlayTorchBtn');
 
     let rawData = [];
     let propertyGroups = {};
     let activeCar = null;
     let videoStream = null;
+    let overlayVideoTrack = null;
+    let overlayTrackCaps = {};
 
-    window.addEventListener('load', loadTowRun);
+    // FLASH STATE: 'auto' | 'torch' | 'off'
+    let overlayFlashMode = localStorage.getItem('run_flash_mode') || 'auto';
+
+    window.addEventListener('load', () => {
+        updateOverlayTorchUI();
+        loadTowRun();
+    });
 
     refreshBtn.addEventListener('click', () => {
         runContainer.innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
@@ -222,6 +239,59 @@
     opacitySlider.addEventListener('input', (e) => {
         ghostImage.style.opacity = e.target.value / 100;
     });
+
+    function updateOverlayTorchUI() {
+        if (!overlayTorchBtn) return;
+        if (overlayFlashMode === 'auto') {
+            overlayTorchBtn.innerText = "⚡ FLASH: AUTO";
+            overlayTorchBtn.style.borderColor = "#ffab00";
+            overlayTorchBtn.style.color = "#ffab00";
+        } else if (overlayFlashMode === 'torch') {
+            overlayTorchBtn.innerText = "🔦 TORCH: ON";
+            overlayTorchBtn.style.borderColor = "#00e676";
+            overlayTorchBtn.style.color = "#00e676";
+        } else {
+            overlayTorchBtn.innerText = "⚡ FLASH: OFF";
+            overlayTorchBtn.style.borderColor = "#ff1744";
+            overlayTorchBtn.style.color = "#ff1744";
+        }
+    }
+
+    overlayTorchBtn.addEventListener('click', async () => {
+        if (overlayFlashMode === 'auto') overlayFlashMode = 'torch';
+        else if (overlayFlashMode === 'torch') overlayFlashMode = 'off';
+        else overlayFlashMode = 'auto';
+
+        localStorage.setItem('run_flash_mode', overlayFlashMode);
+        updateOverlayTorchUI();
+
+        if (overlayVideoTrack && overlayTrackCaps.torch) {
+            try {
+                await overlayVideoTrack.applyConstraints({
+                    advanced: [{ torch: (overlayFlashMode === 'torch') }]
+                });
+            } catch(e) {}
+        }
+    });
+
+    function isLowLight(video) {
+        try {
+            const miniCanvas = document.createElement('canvas');
+            miniCanvas.width = 20;
+            miniCanvas.height = 20;
+            const miniCtx = miniCanvas.getContext('2d', { willReadFrequently: true });
+            miniCtx.drawImage(video, 0, 0, 20, 20);
+            const imgData = miniCtx.getImageData(0, 0, 20, 20).data;
+            let totalLuminance = 0;
+            for (let i = 0; i < imgData.length; i += 4) {
+                totalLuminance += (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
+            }
+            const avgLuminance = totalLuminance / (imgData.length / 4);
+            return avgLuminance < 50;
+        } catch(e) {
+            return false;
+        }
+    }
 
     async function loadTowRun() {
         try {
@@ -246,7 +316,6 @@
             return;
         }
 
-        // 1. Instantly filter out recently towed vehicles or pending queue items
         const blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
         const offlineQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
         const offlineRegos = new Set(offlineQueue.map(item => String(item.rego || '').trim().toUpperCase()));
@@ -520,6 +589,21 @@
                 audio: false
             });
             overlayVideo.srcObject = videoStream;
+            overlayVideoTrack = videoStream.getVideoTracks()[0];
+
+            if (overlayVideoTrack) {
+                overlayTrackCaps = overlayVideoTrack.getCapabilities ? overlayVideoTrack.getCapabilities() : {};
+                if (!overlayTrackCaps.torch) {
+                    if (overlayTorchBtn) overlayTorchBtn.style.display = 'none';
+                } else {
+                    if (overlayTorchBtn) overlayTorchBtn.style.display = 'block';
+                    if (overlayFlashMode === 'torch') {
+                        try {
+                            await overlayVideoTrack.applyConstraints({ advanced: [{ torch: true }] });
+                        } catch(e) {}
+                    }
+                }
+            }
         } catch(err) {
             alert("Unable to access camera: " + err.message);
         }
@@ -534,6 +618,7 @@
         if (videoStream) {
             videoStream.getTracks().forEach(track => track.stop());
             videoStream = null;
+            overlayVideoTrack = null;
         }
     }
 
@@ -549,6 +634,20 @@
         matchBtn.disabled = true;
         matchBtn.innerText = "CAPTURING...";
 
+        let firedFlash = false;
+        const needsFlash = (overlayFlashMode === 'torch') || (overlayFlashMode === 'auto' && isLowLight(overlayVideo));
+
+        // 1. Trigger torch strobe if low light with 300ms AE/AF lock
+        if (needsFlash && overlayVideoTrack && overlayTrackCaps.torch) {
+            try {
+                await overlayVideoTrack.applyConstraints({ advanced: [{ torch: true }] });
+                firedFlash = true;
+                if (overlayFlashMode !== 'torch') {
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            } catch(e) {}
+        }
+
         const videoRatio = (overlayVideo.videoHeight && overlayVideo.videoWidth) 
             ? (overlayVideo.videoHeight / overlayVideo.videoWidth) 
             : 0.75;
@@ -561,6 +660,13 @@
         liveCanvas.height = frameH;
         const liveCtx = liveCanvas.getContext('2d');
         liveCtx.drawImage(overlayVideo, 0, 0, frameW, frameH);
+
+        // 2. Shut off flash strobe immediately (keep lit if continuous torch mode)
+        if (firedFlash && overlayFlashMode !== 'torch' && overlayVideoTrack && overlayTrackCaps.torch) {
+            try {
+                await overlayVideoTrack.applyConstraints({ advanced: [{ torch: false }] });
+            } catch(e) {}
+        }
 
         const compositeCanvas = document.createElement('canvas');
         compositeCanvas.width = frameW * 2;
@@ -580,7 +686,6 @@
                 compositeB64 = liveCanvas.toDataURL('image/jpeg', 0.45);
             }
 
-            // Save comparison photo in localStorage so tow.html bundles it with the tow payload
             try { 
                 localStorage.setItem('pending_comp_' + activeCar.rego, compositeB64); 
             } catch(e) {}
@@ -636,7 +741,7 @@
         return `${dd}/${mm} ${String(hh).padStart(2, '0')}:${min} ${ampm}`;
     }
 
-    // AUTOMATIC BACKGROUND TOW UPLOADER (RUNS SEAMLESSLY ON RUN PAGE)
+    // AUTOMATIC BACKGROUND TOW UPLOADER
     window.addEventListener('load', () => {
         syncPendingTowsInBackground();
         setInterval(syncPendingTowsInBackground, 8000);
