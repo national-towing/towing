@@ -126,9 +126,10 @@
         }
 
         .torch-btn {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
-            border: 1px solid #ff1744; color: #ff1744; padding: 6px 12px; border-radius: 20px;
-            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 10;
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.75);
+            border: 1.5px solid #ffab00; color: #ffab00; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 20; letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         }
 
         .circle-cam-btn {
@@ -207,7 +208,7 @@
     <label>MARKING CAMERA</label>
     <div class="camera-box">
         <video id="videoElem" autoplay playsinline></video>
-        <button class="torch-btn" id="torchBtn">⚡ FLASH: OFF</button>
+        <button class="torch-btn" id="torchBtn">⚡ FLASH: AUTO</button>
         <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
     </div>
 
@@ -235,12 +236,15 @@
     let videoStream = null;
     let videoTrack = null;
     let trackCapabilities = {};
-    let flashOn = false;
+    
+    // FLASH STATE: 'auto' | 'torch' | 'off'
+    let flashMode = localStorage.getItem('mark_flash_mode') || 'auto';
 
     let initialPinchDistance = null;
     let initialZoom = 1;
 
     window.addEventListener('load', () => {
+        updateTorchUI();
         loadProperties();
         initCamera();
         setupPinchZoom();
@@ -257,6 +261,59 @@
         syncModal.classList.remove('show');
         statusDiv.innerText = "READY";
     });
+
+    function updateTorchUI() {
+        if (flashMode === 'auto') {
+            torchBtn.innerText = "⚡ FLASH: AUTO";
+            torchBtn.style.borderColor = "#ffab00";
+            torchBtn.style.color = "#ffab00";
+        } else if (flashMode === 'torch') {
+            torchBtn.innerText = "🔦 TORCH: ON";
+            torchBtn.style.borderColor = "#00e676";
+            torchBtn.style.color = "#00e676";
+        } else {
+            torchBtn.innerText = "⚡ FLASH: OFF";
+            torchBtn.style.borderColor = "#ff1744";
+            torchBtn.style.color = "#ff1744";
+        }
+    }
+
+    torchBtn.addEventListener('click', async () => {
+        if (flashMode === 'auto') flashMode = 'torch';
+        else if (flashMode === 'torch') flashMode = 'off';
+        else flashMode = 'auto';
+
+        localStorage.setItem('mark_flash_mode', flashMode);
+        updateTorchUI();
+
+        if (videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({
+                    advanced: [{ torch: (flashMode === 'torch') }]
+                });
+            } catch(e) {}
+        }
+    });
+
+    // Fast luminance analysis (<2ms) to detect dark basements or night
+    function isLowLight() {
+        try {
+            const miniCanvas = document.createElement('canvas');
+            miniCanvas.width = 20;
+            miniCanvas.height = 20;
+            const miniCtx = miniCanvas.getContext('2d', { willReadFrequently: true });
+            miniCtx.drawImage(videoElem, 0, 0, 20, 20);
+            const imgData = miniCtx.getImageData(0, 0, 20, 20).data;
+            let totalLuminance = 0;
+            for (let i = 0; i < imgData.length; i += 4) {
+                totalLuminance += (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
+            }
+            const avgLuminance = totalLuminance / (imgData.length / 4);
+            return avgLuminance < 50; // Below 50 out of 255 indicates a dark scene
+        } catch(e) {
+            return false;
+        }
+    }
 
     async function loadProperties() {
         useCachedProperties();
@@ -326,19 +383,16 @@
                 trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
                 if (!trackCapabilities.torch) {
                     torchBtn.style.display = 'none';
+                } else if (flashMode === 'torch') {
+                    try {
+                        await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
+                    } catch(e) {}
                 }
             }
         } catch(e) {
             statusDiv.innerText = "CAMERA ACCESS ERROR";
         }
     }
-
-    torchBtn.addEventListener('click', () => {
-        flashOn = !flashOn;
-        torchBtn.innerText = flashOn ? "⚡ FLASH: ON" : "⚡ FLASH: OFF";
-        torchBtn.style.borderColor = flashOn ? "#00e676" : "#ff1744";
-        torchBtn.style.color = flashOn ? "#00e676" : "#ff1744";
-    });
 
     function setupPinchZoom() {
         const cameraContainer = document.querySelector('.camera-box');
@@ -397,11 +451,22 @@
             return;
         }
 
-        if (flashOn && videoTrack && trackCapabilities.torch) {
-            try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
+        let firedFlash = false;
+        const needsFlash = (flashMode === 'torch') || (flashMode === 'auto' && isLowLight());
+
+        // 1. If low-light or torch mode, engage hardware flash with AE/AF metering delay
+        if (needsFlash && videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
+                firedFlash = true;
+                if (flashMode !== 'torch') {
+                    // Settle auto-exposure and auto-focus under the flash illumination
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            } catch(e) {}
         }
 
-        // FAST OPTIMIZED CANVAS SNAPSHOT (PRESERVES 16:9 ASPECT RATIO & LIGHTWEIGHT PAYLOAD)
+        // 2. High-clarity canvas capture
         const canvas = document.createElement('canvas');
         const aspect = (videoElem.videoHeight && videoElem.videoWidth) ? (videoElem.videoHeight / videoElem.videoWidth) : 0.5625;
         canvas.width = 800;
@@ -410,10 +475,11 @@
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
         const b64 = canvas.toDataURL('image/jpeg', 0.60);
 
-        if (videoTrack && trackCapabilities.torch) {
-            setTimeout(async () => {
-                try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
-            }, 150);
+        // 3. Extinguish flash strobe immediately (keep lit if continuous torch mode)
+        if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ torch: false }] });
+            } catch(e) {}
         }
 
         let currentRego = regoInput.value.trim().toUpperCase();
