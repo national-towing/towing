@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOWING SYSTEM HUB</title>
+    <title>TOWING OPERATIONS HUB</title>
     <style>
         * { box-sizing: border-box; }
         body { 
@@ -15,18 +15,18 @@
         .header h1 { margin: 0; font-size: 26px; font-weight: 900; color: #00e676; letter-spacing: 1px; }
         .header p { margin: 4px 0 0; font-size: 13px; color: #aaa; }
         
-        .grid { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
+        .grid { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; }
         
         .app-card {
             background: #1e1e1e; border: 1px solid #333; border-radius: 14px;
-            padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
             text-decoration: none; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
         .app-card:active { transform: scale(0.98); }
         
         .app-info { display: flex; align-items: center; gap: 14px; }
-        .app-icon { font-size: 28px; }
-        .app-name { font-size: 18px; font-weight: 900; letter-spacing: 1px; }
+        .app-icon { font-size: 26px; }
+        .app-name { font-size: 17px; font-weight: 900; letter-spacing: 1px; }
         .app-desc { font-size: 11px; color: #888; margin-top: 2px; }
         
         .btn-open {
@@ -35,4 +35,99 @@
         }
 
         .c-mark { border-left: 5px solid #2979ff; } .c-mark .btn-open { background: #2979ff; color: #fff; }
-        .c-run  { border-left: 5px solid #ffab00; } .c-run  .btn-open { background: #ffab00;
+        .c-run  { border-left: 5px solid #ffab00; } .c-run  .btn-open { background: #ffab00; color: #000; }
+        .c-tow  { border-left: 5px solid #ff1744; } .c-tow  .btn-open { background: #ff1744; color: #fff; }
+        .c-pass { border-left: 5px solid #ab47bc; } .c-pass .btn-open { background: #ab47bc; color: #fff; }
+        .c-yard { border-left: 5px solid #00b0ff; } .c-yard .btn-open { background: #00b0ff; color: #000; }
+        .c-rel  { border-left: 5px solid #00e676; } .c-rel  .btn-open { background: #00e676; color: #000; }
+
+        .instructions {
+            margin-top: 20px; padding: 14px; background: #1a1a1a; border-radius: 12px;
+            font-size: 12px; color: #ccc; max-width: 400px; border: 1px solid #2a2a2a;
+        }
+        .instructions strong { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>TOWING OPERATIONS HUB</h1>
+    <p>Select an app or install to your Home Screen</p>
+</div>
+
+<div class="grid">
+    <a href="mark.html" class="app-card c-mark">
+        <div class="app-info">
+            <span class="app-icon">📷</span>
+            <div>
+                <div class="app-name">MARK</div>
+                <div class="app-desc">Patrol & OCR Plate Scanner</div>
+            </div>
+        </div>
+        <span class="btn-open">OPEN</span>
+    </a>
+
+    <a href="run.html" class="app-card c-run">
+        <div class="app-info">
+            <span class="app-icon">⏱️</span>
+            <div>
+                <div class="app-name">RUN</div>
+                <div class="app-desc">Queue & Visual Alignment</div>
+            </div>
+        </div>
+        <span class="btn-open">OPEN</span>
+    </a>
+
+    <a href="tow.html" class="app-card c-tow">
+        <div class="app-info">
+            <span class="app-icon">🚛</span>
+            <div>
+                <div class="app-name">TOW</div>
+                <div class="app-desc">Intake, Photos & Background Sync</div>
+            </div>
+        </div>
+        <span class="btn-open">OPEN</span>
+    </a>
+
+    <a href="passes.html" class="app-card c-pass">
+        <div class="app-info">
+            <span class="app-icon">🛡️</span>
+            <div>
+                <div class="app-name">PASSES</div>
+                <div class="app-desc">Exemption Pass Management</div>
+            </div>
+        </div>
+        <span class="btn-open">OPEN</span>
+    </a>
+
+    <a href="yard.html" class="app-card c-yard">
+        <div class="app-info">
+            <span class="app-icon">🏢</span>
+            <div>
+                <div class="app-name">YARD</div>
+                <div class="app-desc">Holding Inventory & 1-Tap SMS</div>
+            </div>
+        </div>
+        <span class="btn-open">OPEN</span>
+    </a>
+
+    <a href="release.html" class="app-card c-rel">
+        <div class="app-info">
+            <span class="app-icon">📝</span>
+            <div>
+                <div class="app-name">RELEASE</div>
+                <div class="app-desc">Gate Signatures & Auto-SMS Invoicing</div>
+            </div>
+        </div>
+        <span class="btn-open">OPEN</span>
+    </a>
+</div>
+
+<div class="instructions">
+    <strong>📱 Quick Install to Phone Home Screen:</strong><br><br>
+    • <strong>iPhone / iPad (Safari):</strong> Tap the <strong>Share icon</strong> (box with up arrow) at bottom $\rightarrow$ Scroll down and tap <strong>Add to Home Screen</strong>.<br><br>
+    • <strong>Samsung / Android (Chrome):</strong> Tap the <strong>Three Dots (...)</strong> at top right $\rightarrow$ Tap <strong>Add to Home screen</strong> or <strong>Install app</strong>.
+</div>
+
+</body>
+</html>
