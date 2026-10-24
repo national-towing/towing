@@ -6,125 +6,135 @@
   <title>YARD | National Towing</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --accent: #00b0ff;
+      --accent-active: #0091ea;
+      --success: #00e676;
+      --warning: #ffab00;
+      --danger: #ff1744;
+      --text: #ffffff;
+      --text-muted: #888888;
+      --border: #333333;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding: 12px; padding-bottom: 80px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; padding-bottom: 75px; }
 
-    /* Top Header Bar */
-    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
-    h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; color: #fff; }
-    .badge-count { background: var(--accent); color: #000; font-size: 0.8rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+    /* Top Sub-Nav Bar */
+    .top-nav { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+    .nav-btn {
+      flex: 1; min-width: 60px; text-align: center; padding: 8px 4px; border-radius: 8px;
+      font-size: 11px; font-weight: 900; text-decoration: none; color: #fff; background: #222;
+      border: 1px solid var(--border); text-transform: uppercase;
+    }
+    .nav-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-    /* Search & Filter */
-    .search-box { position: relative; margin-bottom: 14px; }
-    .search-input { width: 100%; padding: 12px 14px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; outline: none; }
+    /* Header */
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .header-title { font-size: 1.25rem; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+    .count-pill { background: var(--accent); color: #000; font-size: 0.75rem; font-weight: 900; padding: 2px 8px; border-radius: 12px; }
+    .btn-sync { background: none; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
+
+    /* Search */
+    .search-box { width: 100%; margin-bottom: 12px; }
+    .search-input { width: 100%; padding: 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; }
     .search-input:focus { border-color: var(--accent); }
 
-    /* Yard Cards */
-    .card-list { display: flex; flex-direction: column; gap: 12px; }
-    .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .plate { font-size: 1.4rem; font-weight: 900; letter-spacing: 1.5px; color: #facc15; }
-    .property { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-align: right; }
-    .vehicle-desc { font-size: 0.95rem; color: #e2e8f0; font-weight: 500; }
-    .meta-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); border-top: 1px dashed var(--border); pt: 8px; padding-top: 8px; }
+    /* Card List */
+    .card-list { display: flex; flex-direction: column; gap: 10px; }
+    .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .card-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .rego-badge { font-size: 1.4rem; font-weight: 900; letter-spacing: 1.5px; color: #facc15; }
+    .prop-name { font-size: 0.85rem; color: #aaa; font-weight: 700; text-align: right; }
+    .veh-desc { font-size: 0.95rem; font-weight: 600; color: #e0e0e0; }
+    .meta-line { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); border-top: 1px dashed var(--border); padding-top: 6px; }
 
     /* Action Buttons */
-    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
-    .btn { padding: 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 700; border: none; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .card-actions { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-top: 4px; }
+    .btn { padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 900; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; text-transform: uppercase; }
     .btn-sms { background: #0284c7; color: #fff; }
     .btn-sms:active { background: #0369a1; }
-    .btn-rel { background: #16a34a; color: #fff; }
-    .btn-rel:active { background: #15803d; }
+    .btn-rel { background: var(--success); color: #000; }
+    .btn-rel:active { background: #00c853; }
 
-    /* Bottom Nav Bar */
-    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #0b1120; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 50; }
-    .nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .nav-link.active { color: var(--accent); }
-
-    /* Modal */
+    /* SMS Modal */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
-    .modal-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 400px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-    .modal-title { font-size: 1.1rem; font-weight: 800; color: #fff; }
-    .phone-input { width: 100%; padding: 12px; font-size: 1.2rem; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: #fff; text-align: center; letter-spacing: 1px; }
-    .phone-input:focus { border-color: var(--accent); outline: none; }
-    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .btn-cancel { background: #475569; color: #fff; }
+    .modal-box { background: #1e1e1e; border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 380px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .modal-title { font-size: 1.1rem; font-weight: 900; color: #fff; }
+    .phone-field { width: 100%; padding: 12px; font-size: 1.25rem; font-weight: 700; background: #121212; border: 1px solid var(--border); border-radius: 8px; color: #fff; text-align: center; letter-spacing: 1.5px; outline: none; }
+    .phone-field:focus { border-color: var(--accent); }
+    .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+    .btn-close { background: #424242; color: #fff; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🚗 YARD INVENTORY <span id="yardCount" class="badge-count">0</span></h1>
-    <button onclick="fetchYardData()" style="background:none; border:none; color:var(--accent); font-size:1.2rem; cursor:pointer;">🔄</button>
-  </header>
-
-  <div class="search-box">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search Rego or Property..." oninput="filterYard()">
+  <!-- Top Quick-Switch App Navigation -->
+  <div class="top-nav">
+    <a href="index.html" class="nav-btn">HUB</a>
+    <a href="run.html" class="nav-btn">RUN</a>
+    <a href="tow.html" class="nav-btn">TOW</a>
+    <a href="yard.html" class="nav-btn active">YARD</a>
+    <a href="release.html" class="nav-btn">REL</a>
+    <a href="passes.html" class="nav-btn">PASS</a>
   </div>
 
-  <div id="loading" style="text-align:center; padding: 30px; color:var(--text-muted);">Loading yard vehicles...</div>
-  <div id="cardList" class="card-list"></div>
+  <div class="header-row">
+    <div class="header-title">
+      <span>HOLDING YARD</span>
+      <span id="yardCount" class="count-pill">0</span>
+    </div>
+    <button class="btn-sync" onclick="loadYardVehicles()">🔄 Sync</button>
+  </div>
 
-  <!-- SMS Dispatch Modal -->
+  <div class="search-box">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search Rego, Property or Make..." oninput="filterYardCards()">
+  </div>
+
+  <div id="loading" style="text-align:center; padding: 40px 10px; color:var(--text-muted);">Syncing yard vehicles from Google Sheets...</div>
+  <div id="yardList" class="card-list"></div>
+
+  <!-- Advise Owner SMS Modal -->
   <div id="smsModal" class="modal-overlay">
     <div class="modal-box">
-      <div class="modal-title">📱 Send Advice to Owner</div>
-      <div id="modalVehicleInfo" style="font-size:0.9rem; color:var(--text-muted);"></div>
-      <input type="tel" id="ownerPhoneInput" class="phone-input" placeholder="04xx xxx xxx" inputmode="numeric">
-      <div class="modal-actions">
-        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-sms" onclick="dispatchNativeSms()">Open SMS 💬</button>
+      <div class="modal-title">📱 Advise Vehicle Owner</div>
+      <div id="modalVehDetails" style="font-size:0.85rem; color:#aaa;"></div>
+      <input type="tel" id="ownerPhone" class="phone-field" placeholder="04xx xxx xxx" inputmode="numeric">
+      <div class="modal-btns">
+        <button class="btn btn-close" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-sms" onclick="sendNativeSms()">Open SMS 💬</button>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
-  <nav class="nav-bar">
-    <a href="run.html" class="nav-link"><span>📋</span>RUN</a>
-    <a href="tow.html" class="nav-link"><span>🚨</span>TOW</a>
-    <a href="yard.html" class="nav-link active"><span>🏢</span>YARD</a>
-    <a href="release.html" class="nav-link"><span>✅</span>REL</a>
-    <a href="passes.html" class="nav-link"><span>🎫</span>PASS</a>
-  </nav>
-
   <script>
-    // Point this to your active deployed WebApp URL
+    // Config: Pointing to your deployed Google Apps Script Engine
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPz26Xo8_7n-r51U8yA7RknrR-gZ58gGzB1yN9/exec";
 
-    let yardVehicles = [];
-    let selectedVehicle = null;
+    let yardInventory = [];
+    let activeVehicle = null;
 
-    async function fetchYardData() {
+    async function loadYardVehicles() {
       document.getElementById('loading').style.display = 'block';
-      document.getElementById('cardList').innerHTML = '';
+      document.getElementById('yardList').innerHTML = '';
       try {
         const resp = await fetch(SCRIPT_URL + "?action=get_yard_vehicles");
-        yardVehicles = await resp.json();
-        document.getElementById('yardCount').textContent = yardVehicles.length;
-        renderCards(yardVehicles);
-      } catch(e) {
-        document.getElementById('cardList').innerHTML = '<div style="color:var(--danger); text-align:center;">Failed to load yard inventory. Tap 🔄 to retry.</div>';
+        yardInventory = await resp.json();
+        document.getElementById('yardCount').textContent = yardInventory.length;
+        renderYardList(yardInventory);
+      } catch(err) {
+        document.getElementById('yardList').innerHTML = '<div style="color:var(--danger); text-align:center; padding:20px;">Could not connect to Yard Log. Tap 🔄 Sync to retry.</div>';
       } finally {
         document.getElementById('loading').style.display = 'none';
       }
     }
 
-    function renderCards(vehicles) {
-      const list = document.getElementById('cardList');
-      list.innerHTML = '';
+    function renderYardList(vehicles) {
+      const container = document.getElementById('yardList');
+      container.innerHTML = '';
+
       if (!vehicles || vehicles.length === 0) {
-        list.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:30px;">Holding yard is currently empty.</div>';
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:40px;">No vehicles currently recorded in yard.</div>';
         return;
       }
 
@@ -133,84 +143,82 @@
         card.className = 'yard-card';
         card.innerHTML = `
           <div class="card-top">
-            <div class="plate">${v.rego}</div>
-            <div class="property">${v.property}</div>
+            <div class="rego-badge">${v.rego}</div>
+            <div class="prop-name">${v.property || 'GENERAL'}</div>
           </div>
-          <div class="vehicle-desc">${v.colour || ''} ${v.make || ''} ${v.model || ''} (${v.bodyType || 'Sedan'})</div>
-          <div class="meta-row">
+          <div class="veh-desc">${v.colour || ''} ${v.make || ''} ${v.model || ''} (${v.bodyType || 'Sedan'})</div>
+          <div class="meta-line">
             <span>Towed: ${v.dateTowed || 'Today'}</span>
-            <span>Ref: ${v.policelinkRef || 'Pending SVN'}</span>
+            <span>SVN: ${v.policelinkRef ? v.policelinkRef : '<span style="color:#f59e0b;">Pending</span>'}</span>
           </div>
-          <div class="actions">
-            <button class="btn btn-sms" onclick='openSmsModal(${JSON.stringify(v)})'>💬 Advise Owner</button>
+          <div class="card-actions">
+            <button class="btn btn-sms" onclick='openModal(${JSON.stringify(v)})'>💬 Advise Owner</button>
             <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn btn-rel">Release ➡️</a>
           </div>
         `;
-        list.appendChild(card);
+        container.appendChild(card);
       });
     }
 
-    function filterYard() {
+    function filterYardCards() {
       const q = document.getElementById('searchInput').value.trim().toUpperCase();
-      const filtered = yardVehicles.filter(v => 
-        (v.rego && v.rego.toUpperCase().includes(q)) || 
+      const filtered = yardInventory.filter(v => 
+        (v.rego && v.rego.toUpperCase().includes(q)) ||
         (v.property && v.property.toUpperCase().includes(q)) ||
-        (v.make && v.make.toUpperCase().includes(q))
+        (v.make && v.make.toUpperCase().includes(q)) ||
+        (v.model && v.model.toUpperCase().includes(q))
       );
-      renderCards(filtered);
+      renderYardList(filtered);
     }
 
-    function openSmsModal(vehicle) {
-      selectedVehicle = vehicle;
-      document.getElementById('modalVehicleInfo').textContent = `${vehicle.rego} — ${vehicle.colour || ''} ${vehicle.make || ''} ${vehicle.model || ''}`;
-      document.getElementById('ownerPhoneInput').value = '';
+    function openModal(vehicle) {
+      activeVehicle = vehicle;
+      document.getElementById('modalVehDetails').textContent = 
+        `${vehicle.rego} — ${vehicle.colour || ''} ${vehicle.make || ''} ${vehicle.model || ''}`;
+      document.getElementById('ownerPhone').value = '';
       document.getElementById('smsModal').style.display = 'flex';
-      setTimeout(() => document.getElementById('ownerPhoneInput').focus(), 100);
+      setTimeout(() => document.getElementById('ownerPhone').focus(), 150);
     }
 
     function closeModal() {
       document.getElementById('smsModal').style.display = 'none';
-      selectedVehicle = null;
+      activeVehicle = null;
     }
 
-    function dispatchNativeSms() {
-      if (!selectedVehicle) return;
-      const rawPhone = document.getElementById('ownerPhoneInput').value.trim();
-      const cleanPhone = rawPhone.replace(/[^\d+]/g, '');
+    function sendNativeSms() {
+      if (!activeVehicle) return;
+      const phoneInput = document.getElementById('ownerPhone').value.trim();
+      const cleanPhone = phoneInput.replace(/[^\d+]/g, '');
 
-      if (!cleanPhone) {
+      if (!cleanPhone || cleanPhone.length < 8) {
         alert('Please enter a valid mobile number.');
         return;
       }
 
-      const vehicleDesc = `${selectedVehicle.colour || ''} ${selectedVehicle.make || ''} ${selectedVehicle.model || ''}`.trim();
+      const vehInfo = `${activeVehicle.colour || ''} ${activeVehicle.make || ''} ${activeVehicle.model || ''}`.trim();
       
-      const messageBody = 
+      const textMessage = 
 `National Towing & Impound Notice
 
-Vehicle: ${vehicleDesc} (${selectedVehicle.rego})
-Location: 4 Lau Place, Ashmore QLD 4214
-Status: Held in Secure Yard
+Vehicle: ${vehInfo} (${activeVehicle.rego})
+Holding Yard: 4 Lau Place, Ashmore QLD 4214
 Standard Release Fee: $450.05 (Tow & Holding)
 
 Release Requirements:
 1. Physical Driver Licence / Photo ID
-2. Proof of ownership or written authorization from registered owner
-3. Payment on collection (Card / EFTPOS)
+2. Proof of ownership or written letter of authorization from registered owner
+3. Payment upon collection (Card / EFTPOS)
 
-Enquiries & Release Access: 0450 605 370
+Holding Yard Enquiries: 0450 605 370
 (Please notify staff 20 minutes prior to arrival)`;
 
-      // Standard mobile sms URI encoding
-      const smsUri = `sms:${cleanPhone}?body=${encodeURIComponent(messageBody)}`;
-
-      // Trigger the native messaging app on Samsung / Android / iOS
-      window.location.href = smsUri;
+      // Standard mobile SMS protocol link (uses phone's native SIM plan)
+      window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(textMessage)}`;
       closeModal();
     }
 
-    // Initial Load
-    fetchYardData();
+    // Auto-fetch yard records on launch
+    loadYardVehicles();
   </script>
 </body>
 </html>
