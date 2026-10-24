@@ -22,9 +22,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; padding-bottom: 40px; }
 
-    /* Header & 3x2 Navigation Grid */
+    /* Header (38px standard) & 3x2 Navigation Grid */
     .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
-    .header-box h1 { margin: 0; font-size: 34px; font-weight: 900; color: var(--c-yard); letter-spacing: 2px; }
+    .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-yard); letter-spacing: 2px; }
     .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
 
     .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 14px auto; }
@@ -37,7 +37,7 @@
     .t-yard { background: var(--c-yard); color: #000; box-shadow: 0 0 0 2px #fff; }
     .t-rel  { background: var(--c-rel); color: #000; }
 
-    /* Search & Stats */
+    /* Search Filter */
     .controls-wrap { width: 100%; max-width: 440px; margin: 0 auto 12px auto; display: flex; gap: 8px; }
     .search-input { flex: 1; height: 46px; background: #1e1e1e; border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; color: #fff; font-size: 16px; font-weight: 700; outline: none; }
     .search-input:focus { border-color: var(--c-yard); }
@@ -55,26 +55,32 @@
     .thumb-img { width: 100%; height: 100%; object-fit: cover; }
     .no-img { font-size: 10px; font-weight: 800; color: #555; text-align: center; }
 
-    .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
-    .veh-line { font-weight: 800; color: #fff; }
-    .towed-line { color: var(--text-muted); font-size: 12px; font-weight: 600; }
-    .notes-pill { display: inline-block; background: #262626; border-left: 3px solid #ffab00; padding: 3px 6px; border-radius: 4px; font-size: 11px; color: #ffab00; font-weight: 700; margin-top: 2px; }
+    .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 13px; min-width: 0; }
+    .veh-line { font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .towed-line { color: var(--text-muted); font-size: 12px; font-weight: 700; }
+    .phone-tag { color: var(--c-rel); font-size: 11px; font-weight: 800; }
 
-    /* The Large Action Button (Mirrors Run App TOW button) */
-    .action-row { display: flex; gap: 8px; margin-top: 4px; }
-    .btn-sms {
-      flex: 1; height: 50px; background: #0284c7; color: #fff; border: none; border-radius: 10px;
-      font-size: 18px; font-weight: 900; cursor: pointer; letter-spacing: 1px; display: flex;
-      align-items: center; justify-content: center; gap: 8px; text-transform: uppercase;
+    /* Interactive Notes Banner on Tile */
+    .notes-box {
+      background: #141414; border: 1px dashed #444; border-left: 3px solid #ffab00;
+      padding: 6px 10px; border-radius: 6px; font-size: 12px; color: #ffab00; font-weight: 600;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
     }
-    .btn-sms:active { transform: scale(0.98); background: #0369a1; }
-    .btn-rel-jump {
-      width: 80px; height: 50px; background: #222; border: 1px solid var(--border); border-radius: 10px;
-      color: var(--c-rel); font-size: 14px; font-weight: 900; display: flex; align-items: center;
-      justify-content: center; text-decoration: none; text-transform: uppercase;
-    }
+    .notes-box:active { background: #222; }
 
-    /* Modal Overlay (SMS & Notes) */
+    /* 50/50 Split Action Buttons */
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .btn-action {
+      height: 48px; border: none; border-radius: 10px; font-size: 16px; font-weight: 900;
+      cursor: pointer; letter-spacing: 1px; display: flex; align-items: center; justify-content: center;
+      gap: 6px; text-decoration: none; text-transform: uppercase;
+    }
+    .btn-sms { background: #0284c7; color: #fff; }
+    .btn-sms:active { background: #0369a1; }
+    .btn-rel { background: var(--c-rel); color: #000; }
+    .btn-rel:active { background: #00c853; }
+
+    /* Modal Overlays (SMS & Notes) */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 14px; }
     .modal-box { background: #1c1c1c; border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
     .modal-title { font-size: 18px; font-weight: 900; color: #fff; display: flex; justify-content: space-between; align-items: center; }
@@ -82,13 +88,16 @@
     .phone-input-wrap { display: flex; gap: 6px; }
     .phone-input { flex: 1; height: 48px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 18px; font-weight: 900; padding: 0 12px; text-align: center; outline: none; }
     .btn-paste { background: #ffab00; color: #000; border: none; border-radius: 10px; padding: 0 14px; font-size: 13px; font-weight: 900; cursor: pointer; }
-    .btn-paste:active { transform: scale(0.95); }
 
-    .notes-input { width: 100%; height: 44px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; padding: 0 12px; outline: none; }
+    .textarea-notes { width: 100%; height: 80px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; padding: 10px; outline: none; resize: none; }
+    .quick-tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .quick-tag { background: #2a2a2a; border: 1px solid #444; color: #aaa; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .quick-tag:active { background: #ffab00; color: #000; }
 
-    .modal-actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; margin-top: 6px; }
-    .btn-m-cancel { height: 48px; background: #333; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; }
-    .btn-m-send { height: 48px; background: #0284c7; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+    .btn-m-cancel { height: 46px; background: #333; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; }
+    .btn-m-save { height: 46px; background: var(--c-yard); color: #000; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; }
+    .btn-m-send { height: 46px; background: #0284c7; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; }
 
     /* Photo Lightbox */
     #photoLightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 16px; }
@@ -103,7 +112,7 @@
     <div class="icon-btn" onclick="fetchYardInventory()">🔄</div>
   </div>
 
-  <!-- Reconfigured 3x2 Grid Navigation -->
+  <!-- 3x2 Grid Navigation -->
   <div class="nav-grid-3x2">
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
     <a href="run.html" class="nav-tile t-run">RUN</a>
@@ -118,16 +127,16 @@
     <input type="text" id="searchInput" class="search-input" placeholder="Search Rego, Property..." oninput="filterYardCards()">
   </div>
 
-  <!-- Yard Vehicle Cards Stack -->
+  <!-- Yard Stack -->
   <div id="loading" style="text-align:center; padding: 40px; color:var(--text-muted); font-weight:700;">Loading Holding Yard...</div>
   <div id="cardList" class="card-list"></div>
 
-  <!-- 1-Click Clipboard SMS & Note Modal -->
+  <!-- 1-Click Clipboard SMS Modal -->
   <div id="smsModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-title">
-        <span id="modalPlate" style="color:#facc15;">790WSY</span>
-        <span style="font-size:12px; color:#aaa;" id="modalProp">Waterpoint</span>
+        <span id="smsModalPlate" style="color:#facc15;">790WSY</span>
+        <span style="font-size:12px; color:#aaa;" id="smsModalProp">Waterpoint</span>
       </div>
 
       <label style="font-size:11px; text-transform:uppercase; color:#aaa; font-weight:800;">Customer Mobile</label>
@@ -136,12 +145,33 @@
         <button type="button" class="btn-paste" onclick="pasteFromClipboard()">📋 PASTE</button>
       </div>
 
-      <label style="font-size:11px; text-transform:uppercase; color:#aaa; font-weight:800;">Quick Note (Optional)</label>
-      <input type="text" id="noteInput" class="notes-input" placeholder="e.g. Collecting Monday 9am, Disputed">
+      <div class="modal-actions">
+        <button type="button" class="btn-m-cancel" onclick="closeSmsModal()">CANCEL</button>
+        <button type="button" class="btn-m-send" onclick="submitYardContactAndSms()">SEND SMS 💬</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Notes Modal -->
+  <div id="notesModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span id="notesModalPlate" style="color:#facc15;">790WSY</span>
+        <span style="font-size:12px; color:#aaa;">YARD NOTE</span>
+      </div>
+
+      <div class="quick-tags-row">
+        <span class="quick-tag" onclick="appendTag('Collecting Today')">+ Collecting Today</span>
+        <span class="quick-tag" onclick="appendTag('Collecting Tomorrow')">+ Collecting Tomorrow</span>
+        <span class="quick-tag" onclick="appendTag('Customer Called')">+ Customer Called</span>
+        <span class="quick-tag" onclick="appendTag('Dispute / Hold')">+ Dispute / Hold</span>
+      </div>
+
+      <textarea id="notesModalText" class="textarea-notes" placeholder="Enter notes or updates here..."></textarea>
 
       <div class="modal-actions">
-        <button type="button" class="btn-m-cancel" onclick="closeModal()">CANCEL</button>
-        <button type="button" class="btn-m-send" onclick="submitYardContactAndSms()">SEND SMS 💬</button>
+        <button type="button" class="btn-m-cancel" onclick="closeNotesModal()">CANCEL</button>
+        <button type="button" class="btn-m-save" onclick="saveVehicleNotes()">SAVE NOTE</button>
       </div>
     </div>
   </div>
@@ -191,8 +221,8 @@
           ? `<img src="${v.imageUrl}" class="thumb-img" onclick="showLightbox('${v.imageUrl}')">`
           : `<div class="no-img">NO PHOTO</div>`;
 
-        const noteBadge = v.notes ? `<div class="notes-pill">📝 ${v.notes}</div>` : '';
-        const phoneBadge = v.callerPhone ? `<span style="color:#00e676; font-size:11px; font-weight:800;">📞 ${v.callerPhone}</span>` : '';
+        const phoneDisplay = v.callerPhone ? `<span class="phone-tag">📞 ${v.callerPhone}</span>` : '';
+        const noteDisplay = v.notes ? `📝 ${v.notes}` : `+ Add Note...`;
 
         card.innerHTML = `
           <div class="card-row-top">
@@ -205,14 +235,18 @@
             <div class="details-wrap">
               <div class="veh-line">${v.colour || ''} ${v.make || ''} ${v.model || ''}</div>
               <div class="towed-line">Towed: ${v.towedTime || 'Today'}</div>
-              <div>${phoneBadge}</div>
-              ${noteBadge}
+              <div>${phoneDisplay}</div>
             </div>
           </div>
 
+          <div class="notes-box" onclick='openNotesModal(${JSON.stringify(v)})'>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${noteDisplay}</span>
+            <span style="font-size:10px; color:#888;">EDIT ✎</span>
+          </div>
+
           <div class="action-row">
-            <button class="btn-sms" onclick='openModal(${JSON.stringify(v)})'>💬 SMS</button>
-            <a href="release.html" class="btn-rel-jump">REL ➔</a>
+            <button class="btn-action btn-sms" onclick='openSmsModal(${JSON.stringify(v)})'>💬 SMS</button>
+            <a href="release.html" class="btn-action btn-rel">RELEASE ➔</a>
           </div>
         `;
         list.appendChild(card);
@@ -230,39 +264,34 @@
       renderCards(filtered);
     }
 
-    function openModal(veh) {
+    // --- SMS MODAL LOGIC ---
+    function openSmsModal(veh) {
       selectedVehicle = veh;
-      document.getElementById('modalPlate').innerText = veh.rego;
-      document.getElementById('modalProp').innerText = veh.property || 'GENERAL';
+      document.getElementById('smsModalPlate').innerText = veh.rego;
+      document.getElementById('smsModalProp').innerText = veh.property || 'GENERAL';
       document.getElementById('callerPhoneInput').value = veh.callerPhone || '';
-      document.getElementById('noteInput').value = veh.notes || '';
       document.getElementById('smsModal').style.display = 'flex';
       setTimeout(() => document.getElementById('callerPhoneInput').focus(), 150);
     }
 
-    function closeModal() {
+    function closeSmsModal() {
       document.getElementById('smsModal').style.display = 'none';
       selectedVehicle = null;
     }
 
-    // 1-Click Clipboard Paste (Cross-Platform iOS / Samsung)
     async function pasteFromClipboard() {
       try {
         const text = await navigator.clipboard.readText();
         const clean = text.replace(/[^\d+]/g, '');
-        if (clean) {
-          document.getElementById('callerPhoneInput').value = clean;
-        }
+        if (clean) document.getElementById('callerPhoneInput').value = clean;
       } catch(err) {
-        // Fallback for browsers with strict clipboard permissions
         document.getElementById('callerPhoneInput').focus();
       }
     }
 
-    async function submitYardContactAndSms() {
+    function submitYardContactAndSms() {
       if (!selectedVehicle) return;
       const phone = document.getElementById('callerPhoneInput').value.trim();
-      const notes = document.getElementById('noteInput').value.trim();
       const cleanPhone = phone.replace(/[^\d+]/g, '');
 
       if (!cleanPhone || cleanPhone.length < 8) {
@@ -270,7 +299,6 @@
         return;
       }
 
-      // 1. Asynchronously save contact & note to Yard_Log in Google Sheets
       fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -278,11 +306,10 @@
           action: 'save_yard_details',
           rego: selectedVehicle.rego,
           phone: cleanPhone,
-          notes: notes
+          notes: selectedVehicle.notes || ''
         })
-      }).catch(e => console.warn("Background sheet sync failed:", e));
+      }).catch(e => console.warn(e));
 
-      // 2. Prepare pre-filled message text
       const vehDesc = `${selectedVehicle.colour || ''} ${selectedVehicle.make || ''} ${selectedVehicle.model || ''}`.trim();
       const msgBody = 
 `National Towing & Impound Notice
@@ -302,18 +329,54 @@ Mandatory Release Requirements:
 Holding Yard Enquiries: 0450 605 370
 (Please notify staff 20 minutes prior to arrival)`;
 
-      // 3. Cross-Platform Delimiter (& for iOS, ? for Android)
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const delim = isIOS ? '&' : '?';
       const smsUri = `sms:${cleanPhone}${delim}body=${encodeURIComponent(msgBody)}`;
 
-      // 4. Update cached local state and fire native Messages app
       selectedVehicle.callerPhone = cleanPhone;
-      selectedVehicle.notes = notes;
       renderCards(yardInventory);
-      closeModal();
+      closeSmsModal();
 
       window.location.href = smsUri;
+    }
+
+    // --- NOTES MODAL LOGIC ---
+    function openNotesModal(veh) {
+      selectedVehicle = veh;
+      document.getElementById('notesModalPlate').innerText = veh.rego;
+      document.getElementById('notesModalText').value = veh.notes || '';
+      document.getElementById('notesModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('notesModalText').focus(), 150);
+    }
+
+    function closeNotesModal() {
+      document.getElementById('notesModal').style.display = 'none';
+      selectedVehicle = null;
+    }
+
+    function appendTag(tagText) {
+      const cur = document.getElementById('notesModalText').value.trim();
+      document.getElementById('notesModalText').value = cur ? `${cur}; ${tagText}` : tagText;
+    }
+
+    function saveVehicleNotes() {
+      if (!selectedVehicle) return;
+      const updatedNote = document.getElementById('notesModalText').value.trim();
+
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'save_yard_details',
+          rego: selectedVehicle.rego,
+          phone: selectedVehicle.callerPhone || '',
+          notes: updatedNote
+        })
+      }).catch(e => console.warn(e));
+
+      selectedVehicle.notes = updatedNote;
+      renderCards(yardInventory);
+      closeNotesModal();
     }
 
     function showLightbox(url) {
