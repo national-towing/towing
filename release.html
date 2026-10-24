@@ -111,21 +111,21 @@
         .row-2 > div { flex: 1; }
         #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; min-height: 24px; color: #ffab00; }
 
-        /* Lockout / Disabling Class */
+        /* Lockout Class */
         .section-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); transition: opacity 0.3s ease, filter 0.3s ease; }
 
         /* Full Screen Success Overlay */
         #successOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: rgba(0, 230, 118, 0.95); z-index: 9999; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center;
+            align-items: center; justify-content: center; text-align: center; padding: 20px;
         }
-        #successOverlay h1 { font-size: 48px; font-weight: 900; color: #000; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; }
-        #successOverlay p { font-size: 18px; font-weight: 800; color: #111; margin: 0 0 40px 0; max-width: 80%; }
+        #successOverlay h1 { font-size: 44px; font-weight: 900; color: #000; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; }
+        #successOverlay p { font-size: 18px; font-weight: 800; color: #111; margin: 0 0 30px 0; max-width: 90%; }
         .ok-btn {
-            background: #000; color: #00e676; font-size: 32px; font-weight: 900; border: none;
-            border-radius: 16px; padding: 20px 60px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            letter-spacing: 3px; width: 250px;
+            background: #000; color: #00e676; font-size: 26px; font-weight: 900; border: none;
+            border-radius: 14px; padding: 18px 40px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            letter-spacing: 2px; width: 260px;
         }
         .ok-btn:active { transform: scale(0.95); }
     </style>
@@ -215,11 +215,19 @@
         <label>ADDRESS</label>
         <input type="text" id="ownerAddressInput" placeholder="Address" autocomplete="new-password" autocorrect="off" spellcheck="false">
 
-        <label>MOBILE NUMBER (FOR INVOICE SMS)</label>
-        <input type="tel" id="ownerPhoneInput" placeholder="04xx xxx xxx" autocomplete="off" inputmode="numeric">
+        <div class="row-2">
+            <div>
+                <label>MOBILE NUMBER</label>
+                <input type="tel" id="ownerPhoneInput" placeholder="04xx xxx xxx" autocomplete="off" inputmode="numeric">
+            </div>
+            <div>
+                <label>CUSTOMER EMAIL</label>
+                <input type="email" id="ownerEmailInput" placeholder="name@email.com" autocomplete="off">
+            </div>
+        </div>
     </div>
 
-    <!-- OWNER SIGNATURE (GREYED OUT UNTIL ALL OWNER INPUTS COMPLETE) -->
+    <!-- OWNER SIGNATURE -->
     <div id="ownerSigWrapper" class="section-disabled">
         <div class="legal-stmt">
             "I am the owner, owners agent, driver or authorised person in charge of the above vehicle. I take full responsibility for payment, release and acceptance of the vehicle as inspected."
@@ -264,8 +272,8 @@
 <!-- Full Screen Success Overlay -->
 <div id="successOverlay">
     <h1 id="successRego">VEHICLE RELEASED</h1>
-    <p>Tax Invoice SMS Dispatched & Logged to Drive.</p>
-    <button class="ok-btn" onclick="window.location.reload(true);">OK</button>
+    <p>Tax Invoice Emailed & Logged to Drive.</p>
+    <button type="button" class="ok-btn" onclick="window.location.reload(true);">DONE ✓</button>
 </div>
 
 <script>
@@ -285,6 +293,7 @@
     const idNumInput = document.getElementById('idNumInput');
     const ownerAddressInput = document.getElementById('ownerAddressInput');
     const ownerPhoneInput = document.getElementById('ownerPhoneInput');
+    const ownerEmailInput = document.getElementById('ownerEmailInput');
 
     const releaseFeeInput = document.getElementById('releaseFeeInput');
     const storageFeeInput = document.getElementById('storageFeeInput');
@@ -320,23 +329,29 @@
         validateForm();
     }
 
-    vehicleSelect.addEventListener('change', () => {
-        const veh = yardVehicles.find(v => v.rego === vehicleSelect.value);
+    function populateVehicleFields(rego) {
+        const veh = yardVehicles.find(v => v.rego === rego);
         if (veh) {
+            vehicleSelect.value = veh.rego;
             propertyInput.value = veh.property || '';
             regoInput.value = veh.rego || '';
             makeInput.value = veh.make || '';
             modelInput.value = veh.model || '';
             colourInput.value = veh.colour || '';
             svnInput.value = veh.policelinkRef || '';
-            // Auto-populate phone captured from Yard call if available
-            ownerPhoneInput.value = veh.callerPhone || '';
+            if (veh.callerPhone) {
+                ownerPhoneInput.value = veh.callerPhone;
+            }
             idSectionWrapper.classList.remove('section-disabled');
         } else {
-            propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = ''; svnInput.value = ''; ownerPhoneInput.value = '';
+            propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = ''; svnInput.value = '';
             idSectionWrapper.classList.add('section-disabled');
         }
         validateForm();
+    }
+
+    vehicleSelect.addEventListener('change', () => {
+        populateVehicleFields(vehicleSelect.value);
     });
 
     async function loadYardVehicles() {
@@ -356,6 +371,13 @@
                 opt.innerText = `${v.rego} (${v.property || ''} - ${v.make || ''} ${v.model || ''})`;
                 vehicleSelect.appendChild(opt);
             });
+
+            // Auto-select vehicle when arriving from Yard App (rego in URL)
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetRego = (urlParams.get('rego') || '').trim().toUpperCase();
+            if (targetRego) {
+                populateVehicleFields(targetRego);
+            }
         } catch(e) {
             vehicleSelect.innerHTML = "<option value=''>ERROR LOADING YARD</option>";
         }
@@ -525,7 +547,7 @@
     }
 
     function setupLiveValidation() {
-        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
         inputs.forEach(elem => {
             if (elem) {
                 elem.addEventListener('input', validateForm);
@@ -554,10 +576,13 @@
         mark(makeInput, makeInput && makeInput.value.trim() !== "");
         mark(modelInput, modelInput && modelInput.value.trim() !== "");
 
-        // Owner ID & Phone Validation
         const nameValid = Boolean(ownerNameInput && ownerNameInput.value.trim().length > 1);
         const idValid = Boolean(idNumInput && idNumInput.value.trim().length >= 4);
         const addrValid = Boolean(ownerAddressInput && ownerAddressInput.value.trim().length > 4);
+        
+        // Either valid email or phone is accepted
+        const emailVal = ownerEmailInput ? ownerEmailInput.value.trim() : "";
+        const emailValid = emailVal.length > 3 && emailVal.includes("@");
         const phoneClean = (ownerPhoneInput && ownerPhoneInput.value) ? ownerPhoneInput.value.replace(/[^\d+]/g, '') : "";
         const phoneValid = phoneClean.length >= 8;
 
@@ -565,9 +590,10 @@
         mark(idNumInput, idValid);
         mark(ownerAddressInput, addrValid);
         mark(ownerPhoneInput, phoneValid);
+        mark(ownerEmailInput, emailValid);
 
-        // LOCK / UNLOCK OWNER SIGNATURE WRAPPER
-        const idDetailsComplete = nameValid && idValid && addrValid && phoneValid;
+        // Owner details unlock the signature block
+        const idDetailsComplete = nameValid && idValid && addrValid && (emailValid || phoneValid);
         if (idDetailsComplete) {
             ownerSigWrapper.classList.remove('section-disabled');
         } else {
@@ -597,13 +623,13 @@
 
     submitBtn.addEventListener('click', async () => {
         if (!validateForm()) {
-            statusDiv.innerText = "⚠️ COMPLETE ID & CONFIRM SIGNATURE";
+            statusDiv.innerText = "⚠️ COMPLETE OWNER DETAILS & CONFIRM SIGNATURE";
             return;
         }
 
         submitBtn.disabled = true;
         submitBtn.style.opacity = "0.5";
-        statusDiv.innerText = "GENERATING TAX INVOICE & DISPATCHING...";
+        statusDiv.innerText = "PROCESSING RELEASE & INVOICE...";
 
         const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
         const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
@@ -620,7 +646,7 @@
             idNumber: idNumInput.value.trim(),
             ownerAddress: ownerAddressInput.value.trim(),
             ownerPhone: ownerPhoneInput.value.trim(),
-            ownerEmail: "", 
+            ownerEmail: ownerEmailInput.value.trim(),
             releaseFee: releaseFeeInput.value,
             storageFee: storageFeeInput.value,
             officer: finalOfficer,
