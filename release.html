@@ -99,8 +99,22 @@
         .row-2 > div { flex: 1; }
         #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; min-height: 24px; color: #ffab00; }
 
-        /* Greyed out section class */
         .section-disabled { opacity: 0.3; pointer-events: none; filter: grayscale(100%); transition: opacity 0.3s ease, filter 0.3s ease; }
+
+        /* Full Screen Success Overlay */
+        #successOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 230, 118, 0.95); z-index: 9999; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+        }
+        #successOverlay h1 { font-size: 48px; font-weight: 900; color: #000; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; }
+        #successOverlay p { font-size: 18px; font-weight: 800; color: #111; margin: 0 0 40px 0; max-width: 80%; }
+        .ok-btn {
+            background: #000; color: #00e676; font-size: 32px; font-weight: 900; border: none;
+            border-radius: 16px; padding: 20px 60px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            letter-spacing: 3px; width: 250px;
+        }
+        .ok-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -219,7 +233,7 @@
         </div>
         <div>
             <label>AH RELEASE FEE ($)</label>
-            <input type="number" step="0.01" id="storageFeeInput" value="140.95">
+            <input type="number" step="0.01" id="storageFeeInput" value="140.00">
         </div>
     </div>
 
@@ -233,21 +247,19 @@
     </select>
     <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;" autocomplete="off">
 
-    <label>OFFICER SIGNATURE</label>
-    <div class="sig-container">
-        <canvas id="officerSigCanvas" class="sig-box"></canvas>
-        <div class="sig-btn-row">
-            <button class="sig-btn btn-clear" type="button" onclick="clearSig('officerSigCanvas')">CLEAR</button>
-            <button class="sig-btn btn-confirm" type="button" onclick="confirmSig('officerSigCanvas')">CONFIRM</button>
-        </div>
-    </div>
-
     <button class="submit-btn" id="submitBtn" disabled>PAID - RELEASE</button>
     <div id="status"></div>
 </div>
 
+<!-- Full Screen Success Overlay -->
+<div id="successOverlay">
+    <h1 id="successRego">VEHICLE RELEASED</h1>
+    <p>Tax Invoice Emailed & Synced to Drive Log.</p>
+    <button class="ok-btn" onclick="window.location.reload(true);">OK</button>
+</div>
+
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPz26Xo8_7n-r51U8yA7RknrR-gZ58gGzB1yN9/exec";
     
     const vehicleSelect = document.getElementById('vehicleSelect');
     const propertyInput = document.getElementById('propertyInput');
@@ -277,17 +289,17 @@
     const submitBtn = document.getElementById('submitBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
+    const successOverlay = document.getElementById('successOverlay');
+    const successRego = document.getElementById('successRego');
 
     let yardVehicles = [];
     let idPhotos = [];
     let ownerSigConfirmed = false;
-    let officerSigConfirmed = false;
 
     window.addEventListener('DOMContentLoaded', () => {
         loadYardVehicles();
         initCamera();
         initSignatureCanvas('ownerSigCanvas');
-        initSignatureCanvas('officerSigCanvas');
         setupLiveValidation();
     });
 
@@ -350,7 +362,6 @@
         }
     }
 
-    // METHOD A: FAST LIVE SNAP (OPTIMIZED 800PX / 50KB PAYLOAD)
     snapBtn.addEventListener('click', () => {
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
@@ -366,7 +377,6 @@
         processCapturedImage(b64);
     });
 
-    // SERVER-SIDE AI SCANNER (FAST 50KB PAYLOAD — ZERO SECRETS IN CODE)
     async function processCapturedImage(b64) {
         idPhotos.push(b64);
         const photoIndex = idPhotos.length;
@@ -387,7 +397,6 @@
         ocrStatus.style.color = "#ffab00";
         ocrStatus.innerText = `🔍 SCANNING ID CARD...`;
 
-        // Hard 8-second client-side timeout: Never hangs indefinitely
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -406,7 +415,6 @@
             const resData = await response.json();
 
             if (resData && resData.status === "SUCCESS") {
-                // Non-destructive merge: Snap 2 (back) only fills empty fields
                 if (resData.name && !ownerNameInput.value.trim()) {
                     ownerNameInput.value = resData.name.toUpperCase();
                 }
@@ -495,7 +503,6 @@
         canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
         canvas.classList.remove('sig-locked');
         if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
-        if (canvasId === 'officerSigCanvas') officerSigConfirmed = false;
         statusDiv.innerText = "";
         validateForm();
     }
@@ -505,7 +512,6 @@
         if (!canvas) return;
         canvas.classList.add('sig-locked');
         if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
-        if (canvasId === 'officerSigCanvas') officerSigConfirmed = true;
         statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
         validateForm();
     }
@@ -552,9 +558,8 @@
             mark(officerOtherInput, officerOtherInput && officerOtherInput.value.trim() !== "");
         }
 
-        if (!ownerSigConfirmed || !officerSigConfirmed) isValid = false;
+        if (!ownerSigConfirmed) isValid = false;
         
-        // Dynamically toggle the submit button
         if (isValid) {
             submitBtn.disabled = false;
             submitBtn.style.opacity = "1";
@@ -568,7 +573,7 @@
 
     submitBtn.addEventListener('click', async () => {
         if (!validateForm()) {
-            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM BOTH SIGS";
+            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & CONFIRM SIGNATURE";
             return;
         }
 
@@ -577,7 +582,6 @@
         statusDiv.innerText = "GENERATING TAX INVOICE & RELEASING...";
 
         const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
-        const officerSig = document.getElementById('officerSigCanvas').toDataURL('image/png');
         const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
 
         const payload = {
@@ -598,7 +602,7 @@
             officer: finalOfficer,
             idPhotos: idPhotos,
             ownerSigBytes: ownerSig,
-            officerSigBytes: officerSig
+            officerSigBytes: "" // Passed empty string since it was removed
         };
 
         try {
@@ -610,8 +614,8 @@
             const resData = await res.json();
             
             if (resData && resData.status === "SUCCESS") {
-                statusDiv.innerText = "✔ PAID - VEHICLE RELEASED & INVOICE EMAILED!";
-                setTimeout(() => { window.location.reload(true); }, 2000);
+                successRego.innerText = payload.rego + " RELEASED";
+                successOverlay.style.display = "flex";
             } else {
                 statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release");
                 submitBtn.disabled = false;
