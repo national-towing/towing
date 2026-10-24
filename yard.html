@@ -312,22 +312,23 @@
 
       const vehDesc = `${selectedVehicle.colour || ''} ${selectedVehicle.make || ''} ${selectedVehicle.model || ''}`.trim();
       const msgBody = 
-`National Towing & Impound Notice
+National Towing Impound Notice
 
 Vehicle: ${vehDesc} (${selectedVehicle.rego})
 Towed From: ${selectedVehicle.property || 'Private Property'}
-Holding Yard: 4 Lau Place, Ashmore QLD 4214
 
-Standard Release Fee: $450.05
-(Tow $310.05 + Impound/Storage $140.00)
+Can be collected from the Holding Yard at 
+4 Lau Place, Ashmore QLD 4214 
+Take the first left off Hinde Street into Lau Place
 
 Mandatory Release Requirements:
-1. Physical Driver Licence / Photo ID
-2. Proof of ownership or written letter of authorization from registered owner
-3. Settlement upon collection (Card / EFTPOS)
+1. Drivers Licence / Photo ID
+2. Tow & Release Fee: $450.05 paid in full
 
-Holding Yard Enquiries: 0450 605 370
-(Please notify staff 20 minutes prior to arrival)`;
+Please call ahead to arrange a suitable time for collection
+Phone: 0450 605 370
+
+Thank you;
 
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const delim = isIOS ? '&' : '?';
