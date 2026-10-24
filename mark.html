@@ -18,6 +18,14 @@
     <link rel="manifest" href="manifest-mark.json?v=999">
 
     <style>
+        :root {
+            --c-mark: #2979ff;
+            --c-run: #ffab00;
+            --c-tow: #ff1744;
+            --c-pass: #ab47bc;
+            --c-yard: #00b0ff;
+            --c-rel: #00e676;
+        }
         * { box-sizing: border-box; }
         html, body { 
             height: 100%; 
@@ -45,7 +53,7 @@
             position: relative; 
             width: 100%; 
             max-width: 440px; 
-            margin-bottom: 8px; 
+            margin-bottom: 10px; 
             flex-shrink: 0;
             padding: 6px 10px;
             border-radius: 12px;
@@ -81,6 +89,17 @@
             color: #fff; 
         }
         .icon-btn:active { transform: scale(0.9); }
+
+        /* 3x2 Grid Navigation */
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
+        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-tile:active { transform: scale(0.96); }
+        .t-mark { background: var(--c-mark); color: #fff; box-shadow: 0 0 0 2px #fff; }
+        .t-run  { background: var(--c-run); color: #000; }
+        .t-tow  { background: var(--c-tow); color: #fff; }
+        .t-pass { background: var(--c-pass); color: #fff; }
+        .t-yard { background: var(--c-yard); color: #000; }
+        .t-rel  { background: var(--c-rel); color: #000; }
 
         .card { 
             background: #1e1e1e; 
@@ -198,6 +217,15 @@
     <div class="icon-btn" id="refreshBtn">🔄</div>
 </div>
 
+<div class="nav-grid-3x2">
+    <a href="mark.html" class="nav-tile t-mark">MARK</a>
+    <a href="run.html" class="nav-tile t-run">RUN</a>
+    <a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="yard.html" class="nav-tile t-yard">YARD</a>
+    <a href="release.html" class="nav-tile t-rel">REL</a>
+</div>
+
 <div class="card">
     <label>PROPERTY</label>
     <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
@@ -295,7 +323,6 @@
         }
     });
 
-    // Fast luminance analysis (<2ms) to detect dark basements or night
     function isLowLight() {
         try {
             const miniCanvas = document.createElement('canvas');
@@ -309,7 +336,7 @@
                 totalLuminance += (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
             }
             const avgLuminance = totalLuminance / (imgData.length / 4);
-            return avgLuminance < 50; // Below 50 out of 255 indicates a dark scene
+            return avgLuminance < 50;
         } catch(e) {
             return false;
         }
@@ -454,19 +481,16 @@
         let firedFlash = false;
         const needsFlash = (flashMode === 'torch') || (flashMode === 'auto' && isLowLight());
 
-        // 1. If low-light or torch mode, engage hardware flash with AE/AF metering delay
         if (needsFlash && videoTrack && trackCapabilities.torch) {
             try {
                 await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
                 firedFlash = true;
                 if (flashMode !== 'torch') {
-                    // Settle auto-exposure and auto-focus under the flash illumination
                     await new Promise(r => setTimeout(r, 300));
                 }
             } catch(e) {}
         }
 
-        // 2. High-clarity canvas capture
         const canvas = document.createElement('canvas');
         const aspect = (videoElem.videoHeight && videoElem.videoWidth) ? (videoElem.videoHeight / videoElem.videoWidth) : 0.5625;
         canvas.width = 800;
@@ -475,7 +499,6 @@
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
         const b64 = canvas.toDataURL('image/jpeg', 0.60);
 
-        // 3. Extinguish flash strobe immediately (keep lit if continuous torch mode)
         if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
             try {
                 await videoTrack.applyConstraints({ advanced: [{ torch: false }] });
