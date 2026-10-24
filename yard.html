@@ -248,7 +248,7 @@
 
           <div class="action-row">
             <button class="btn-action btn-sms" onclick="openSmsModalByIndex(${idx})">💬 SMS</button>
-            <a href="release.html" class="btn-action btn-rel">RELEASE ➔</a>
+            <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel">RELEASE ➔</a>
           </div>
         `;
         list.appendChild(card);
