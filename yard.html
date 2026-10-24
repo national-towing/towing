@@ -22,7 +22,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; padding-bottom: 40px; }
 
-    /* Header (38px standard) & 3x2 Navigation Grid */
+    /* Header & 3x2 Navigation Grid */
     .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
     .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-yard); letter-spacing: 2px; }
     .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
@@ -185,6 +185,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     let yardInventory = [];
+    let displayedInventory = [];
     let selectedVehicle = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -197,7 +198,8 @@
       try {
         const resp = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
         yardInventory = await resp.json();
-        renderCards(yardInventory);
+        displayedInventory = [...yardInventory];
+        renderCards(displayedInventory);
       } catch(e) {
         document.getElementById('cardList').innerHTML = '<div style="color:#ff1744; text-align:center; padding:30px; font-weight:800;">Error connecting to Yard Log. Tap 🔄 to retry.</div>';
       } finally {
@@ -213,7 +215,7 @@
         return;
       }
 
-      vehicles.forEach(v => {
+      vehicles.forEach((v, idx) => {
         const card = document.createElement('div');
         card.className = 'yard-card';
 
@@ -239,13 +241,13 @@
             </div>
           </div>
 
-          <div class="notes-box" onclick='openNotesModal(${JSON.stringify(v)})'>
+          <div class="notes-box" onclick="openNotesModalByIndex(${idx})">
             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${noteDisplay}</span>
             <span style="font-size:10px; color:#888;">EDIT ✎</span>
           </div>
 
           <div class="action-row">
-            <button class="btn-action btn-sms" onclick='openSmsModal(${JSON.stringify(v)})'>💬 SMS</button>
+            <button class="btn-action btn-sms" onclick="openSmsModalByIndex(${idx})">💬 SMS</button>
             <a href="release.html" class="btn-action btn-rel">RELEASE ➔</a>
           </div>
         `;
@@ -255,21 +257,22 @@
 
     function filterYardCards() {
       const q = document.getElementById('searchInput').value.trim().toUpperCase();
-      const filtered = yardInventory.filter(v => 
+      displayedInventory = yardInventory.filter(v => 
         (v.rego && v.rego.toUpperCase().includes(q)) || 
         (v.property && v.property.toUpperCase().includes(q)) ||
         (v.make && v.make.toUpperCase().includes(q)) ||
         (v.notes && v.notes.toUpperCase().includes(q))
       );
-      renderCards(filtered);
+      renderCards(displayedInventory);
     }
 
     // --- SMS MODAL LOGIC ---
-    function openSmsModal(veh) {
-      selectedVehicle = veh;
-      document.getElementById('smsModalPlate').innerText = veh.rego;
-      document.getElementById('smsModalProp').innerText = veh.property || 'GENERAL';
-      document.getElementById('callerPhoneInput').value = veh.callerPhone || '';
+    function openSmsModalByIndex(idx) {
+      selectedVehicle = displayedInventory[idx];
+      if (!selectedVehicle) return;
+      document.getElementById('smsModalPlate').innerText = selectedVehicle.rego;
+      document.getElementById('smsModalProp').innerText = selectedVehicle.property || 'GENERAL';
+      document.getElementById('callerPhoneInput').value = selectedVehicle.callerPhone || '';
       document.getElementById('smsModal').style.display = 'flex';
       setTimeout(() => document.getElementById('callerPhoneInput').focus(), 150);
     }
@@ -312,7 +315,7 @@
 
       const vehDesc = `${selectedVehicle.colour || ''} ${selectedVehicle.make || ''} ${selectedVehicle.model || ''}`.trim();
       const msgBody = 
-National Towing Impound Notice
+`National Towing Impound Notice
 
 Vehicle: ${vehDesc} (${selectedVehicle.rego})
 Towed From: ${selectedVehicle.property || 'Private Property'}
@@ -328,24 +331,25 @@ Mandatory Release Requirements:
 Please call ahead to arrange a suitable time for collection
 Phone: 0450 605 370
 
-Thank you;
+Thank you`;
 
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const delim = isIOS ? '&' : '?';
       const smsUri = `sms:${cleanPhone}${delim}body=${encodeURIComponent(msgBody)}`;
 
       selectedVehicle.callerPhone = cleanPhone;
-      renderCards(yardInventory);
+      renderCards(displayedInventory);
       closeSmsModal();
 
       window.location.href = smsUri;
     }
 
     // --- NOTES MODAL LOGIC ---
-    function openNotesModal(veh) {
-      selectedVehicle = veh;
-      document.getElementById('notesModalPlate').innerText = veh.rego;
-      document.getElementById('notesModalText').value = veh.notes || '';
+    function openNotesModalByIndex(idx) {
+      selectedVehicle = displayedInventory[idx];
+      if (!selectedVehicle) return;
+      document.getElementById('notesModalPlate').innerText = selectedVehicle.rego;
+      document.getElementById('notesModalText').value = selectedVehicle.notes || '';
       document.getElementById('notesModal').style.display = 'flex';
       setTimeout(() => document.getElementById('notesModalText').focus(), 150);
     }
@@ -376,7 +380,7 @@ Thank you;
       }).catch(e => console.warn(e));
 
       selectedVehicle.notes = updatedNote;
-      renderCards(yardInventory);
+      renderCards(displayedInventory);
       closeNotesModal();
     }
 
