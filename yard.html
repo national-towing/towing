@@ -3,222 +3,323 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>YARD | National Towing</title>
+  <title>YARD</title>
+  
   <style>
     :root {
       --bg: #121212;
       --card-bg: #1e1e1e;
-      --accent: #00b0ff;
-      --accent-active: #0091ea;
-      --success: #00e676;
-      --warning: #ffab00;
-      --danger: #ff1744;
+      --border: #333333;
       --text: #ffffff;
       --text-muted: #888888;
-      --border: #333333;
+      --c-mark: #2979ff;
+      --c-run: #ffab00;
+      --c-tow: #ff1744;
+      --c-pass: #ab47bc;
+      --c-yard: #00b0ff;
+      --c-rel: #00e676;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; padding-bottom: 75px; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; padding-bottom: 40px; }
 
-    /* Top Sub-Nav Bar */
-    .top-nav { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
-    .nav-btn {
-      flex: 1; min-width: 60px; text-align: center; padding: 8px 4px; border-radius: 8px;
-      font-size: 11px; font-weight: 900; text-decoration: none; color: #fff; background: #222;
-      border: 1px solid var(--border); text-transform: uppercase;
+    /* Header & 3x2 Navigation Grid */
+    .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
+    .header-box h1 { margin: 0; font-size: 34px; font-weight: 900; color: var(--c-yard); letter-spacing: 2px; }
+    .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+
+    .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 14px auto; }
+    .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-tile:active { transform: scale(0.96); }
+    .t-mark { background: var(--c-mark); color: #fff; }
+    .t-run  { background: var(--c-run); color: #000; }
+    .t-tow  { background: var(--c-tow); color: #fff; }
+    .t-pass { background: var(--c-pass); color: #fff; }
+    .t-yard { background: var(--c-yard); color: #000; box-shadow: 0 0 0 2px #fff; }
+    .t-rel  { background: var(--c-rel); color: #000; }
+
+    /* Search & Stats */
+    .controls-wrap { width: 100%; max-width: 440px; margin: 0 auto 12px auto; display: flex; gap: 8px; }
+    .search-input { flex: 1; height: 46px; background: #1e1e1e; border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; color: #fff; font-size: 16px; font-weight: 700; outline: none; }
+    .search-input:focus { border-color: var(--c-yard); }
+
+    /* Yard Cards */
+    .card-list { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 440px; margin: 0 auto; }
+    .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--c-yard); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    
+    .card-row-top { display: flex; justify-content: space-between; align-items: center; }
+    .rego-text { font-size: 26px; font-weight: 900; letter-spacing: 1px; color: #facc15; }
+    .prop-text { font-size: 13px; font-weight: 700; color: #aaa; text-align: right; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .card-body { display: flex; gap: 12px; align-items: center; }
+    .thumb-wrap { width: 72px; height: 72px; border-radius: 10px; overflow: hidden; background: #000; border: 1.5px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
+    .thumb-img { width: 100%; height: 100%; object-fit: cover; }
+    .no-img { font-size: 10px; font-weight: 800; color: #555; text-align: center; }
+
+    .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+    .veh-line { font-weight: 800; color: #fff; }
+    .towed-line { color: var(--text-muted); font-size: 12px; font-weight: 600; }
+    .notes-pill { display: inline-block; background: #262626; border-left: 3px solid #ffab00; padding: 3px 6px; border-radius: 4px; font-size: 11px; color: #ffab00; font-weight: 700; margin-top: 2px; }
+
+    /* The Large Action Button (Mirrors Run App TOW button) */
+    .action-row { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-sms {
+      flex: 1; height: 50px; background: #0284c7; color: #fff; border: none; border-radius: 10px;
+      font-size: 18px; font-weight: 900; cursor: pointer; letter-spacing: 1px; display: flex;
+      align-items: center; justify-content: center; gap: 8px; text-transform: uppercase;
     }
-    .nav-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    .btn-sms:active { transform: scale(0.98); background: #0369a1; }
+    .btn-rel-jump {
+      width: 80px; height: 50px; background: #222; border: 1px solid var(--border); border-radius: 10px;
+      color: var(--c-rel); font-size: 14px; font-weight: 900; display: flex; align-items: center;
+      justify-content: center; text-decoration: none; text-transform: uppercase;
+    }
 
-    /* Header */
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .header-title { font-size: 1.25rem; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
-    .count-pill { background: var(--accent); color: #000; font-size: 0.75rem; font-weight: 900; padding: 2px 8px; border-radius: 12px; }
-    .btn-sync { background: none; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
+    /* Modal Overlay (SMS & Notes) */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 14px; }
+    .modal-box { background: #1c1c1c; border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .modal-title { font-size: 18px; font-weight: 900; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    
+    .phone-input-wrap { display: flex; gap: 6px; }
+    .phone-input { flex: 1; height: 48px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 18px; font-weight: 900; padding: 0 12px; text-align: center; outline: none; }
+    .btn-paste { background: #ffab00; color: #000; border: none; border-radius: 10px; padding: 0 14px; font-size: 13px; font-weight: 900; cursor: pointer; }
+    .btn-paste:active { transform: scale(0.95); }
 
-    /* Search */
-    .search-box { width: 100%; margin-bottom: 12px; }
-    .search-input { width: 100%; padding: 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; }
-    .search-input:focus { border-color: var(--accent); }
+    .notes-input { width: 100%; height: 44px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; padding: 0 12px; outline: none; }
 
-    /* Card List */
-    .card-list { display: flex; flex-direction: column; gap: 10px; }
-    .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
-    .card-top { display: flex; justify-content: space-between; align-items: baseline; }
-    .rego-badge { font-size: 1.4rem; font-weight: 900; letter-spacing: 1.5px; color: #facc15; }
-    .prop-name { font-size: 0.85rem; color: #aaa; font-weight: 700; text-align: right; }
-    .veh-desc { font-size: 0.95rem; font-weight: 600; color: #e0e0e0; }
-    .meta-line { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); border-top: 1px dashed var(--border); padding-top: 6px; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; margin-top: 6px; }
+    .btn-m-cancel { height: 48px; background: #333; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; }
+    .btn-m-send { height: 48px; background: #0284c7; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-    /* Action Buttons */
-    .card-actions { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-top: 4px; }
-    .btn { padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 900; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; text-transform: uppercase; }
-    .btn-sms { background: #0284c7; color: #fff; }
-    .btn-sms:active { background: #0369a1; }
-    .btn-rel { background: var(--success); color: #000; }
-    .btn-rel:active { background: #00c853; }
-
-    /* SMS Modal */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
-    .modal-box { background: #1e1e1e; border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 380px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-    .modal-title { font-size: 1.1rem; font-weight: 900; color: #fff; }
-    .phone-field { width: 100%; padding: 12px; font-size: 1.25rem; font-weight: 700; background: #121212; border: 1px solid var(--border); border-radius: 8px; color: #fff; text-align: center; letter-spacing: 1.5px; outline: none; }
-    .phone-field:focus { border-color: var(--accent); }
-    .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
-    .btn-close { background: #424242; color: #fff; }
+    /* Photo Lightbox */
+    #photoLightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 16px; }
+    #lightboxImg { max-width: 100%; max-height: 85vh; border-radius: 10px; border: 2px solid #555; }
   </style>
 </head>
 <body>
 
-  <!-- Top Quick-Switch App Navigation -->
-  <div class="top-nav">
-    <a href="index.html" class="nav-btn">HUB</a>
-    <a href="run.html" class="nav-btn">RUN</a>
-    <a href="tow.html" class="nav-btn">TOW</a>
-    <a href="yard.html" class="nav-btn active">YARD</a>
-    <a href="release.html" class="nav-btn">REL</a>
-    <a href="passes.html" class="nav-btn">PASS</a>
+  <!-- Top Title Bar -->
+  <div class="header-box">
+    <h1>YARD</h1>
+    <div class="icon-btn" onclick="fetchYardInventory()">🔄</div>
   </div>
 
-  <div class="header-row">
-    <div class="header-title">
-      <span>HOLDING YARD</span>
-      <span id="yardCount" class="count-pill">0</span>
-    </div>
-    <button class="btn-sync" onclick="loadYardVehicles()">🔄 Sync</button>
+  <!-- Reconfigured 3x2 Grid Navigation -->
+  <div class="nav-grid-3x2">
+    <a href="mark.html" class="nav-tile t-mark">MARK</a>
+    <a href="run.html" class="nav-tile t-run">RUN</a>
+    <a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="yard.html" class="nav-tile t-yard">YARD</a>
+    <a href="release.html" class="nav-tile t-rel">REL</a>
   </div>
 
-  <div class="search-box">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search Rego, Property or Make..." oninput="filterYardCards()">
+  <!-- Search Filter -->
+  <div class="controls-wrap">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search Rego, Property..." oninput="filterYardCards()">
   </div>
 
-  <div id="loading" style="text-align:center; padding: 40px 10px; color:var(--text-muted);">Syncing yard vehicles from Google Sheets...</div>
-  <div id="yardList" class="card-list"></div>
+  <!-- Yard Vehicle Cards Stack -->
+  <div id="loading" style="text-align:center; padding: 40px; color:var(--text-muted); font-weight:700;">Loading Holding Yard...</div>
+  <div id="cardList" class="card-list"></div>
 
-  <!-- Advise Owner SMS Modal -->
+  <!-- 1-Click Clipboard SMS & Note Modal -->
   <div id="smsModal" class="modal-overlay">
     <div class="modal-box">
-      <div class="modal-title">📱 Advise Vehicle Owner</div>
-      <div id="modalVehDetails" style="font-size:0.85rem; color:#aaa;"></div>
-      <input type="tel" id="ownerPhone" class="phone-field" placeholder="04xx xxx xxx" inputmode="numeric">
-      <div class="modal-btns">
-        <button class="btn btn-close" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-sms" onclick="sendNativeSms()">Open SMS 💬</button>
+      <div class="modal-title">
+        <span id="modalPlate" style="color:#facc15;">790WSY</span>
+        <span style="font-size:12px; color:#aaa;" id="modalProp">Waterpoint</span>
+      </div>
+
+      <label style="font-size:11px; text-transform:uppercase; color:#aaa; font-weight:800;">Customer Mobile</label>
+      <div class="phone-input-wrap">
+        <input type="tel" id="callerPhoneInput" class="phone-input" placeholder="04xx xxx xxx">
+        <button type="button" class="btn-paste" onclick="pasteFromClipboard()">📋 PASTE</button>
+      </div>
+
+      <label style="font-size:11px; text-transform:uppercase; color:#aaa; font-weight:800;">Quick Note (Optional)</label>
+      <input type="text" id="noteInput" class="notes-input" placeholder="e.g. Collecting Monday 9am, Disputed">
+
+      <div class="modal-actions">
+        <button type="button" class="btn-m-cancel" onclick="closeModal()">CANCEL</button>
+        <button type="button" class="btn-m-send" onclick="submitYardContactAndSms()">SEND SMS 💬</button>
       </div>
     </div>
   </div>
 
+  <!-- Fullscreen Photo Lightbox -->
+  <div id="photoLightbox" onclick="this.style.display='none'">
+    <img id="lightboxImg" src="">
+  </div>
+
   <script>
-    // Config: Pointing to your deployed Google Apps Script Engine
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPz26Xo8_7n-r51U8yA7RknrR-gZ58gGzB1yN9/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     let yardInventory = [];
-    let activeVehicle = null;
+    let selectedVehicle = null;
 
-    async function loadYardVehicles() {
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchYardInventory();
+    });
+
+    async function fetchYardInventory() {
       document.getElementById('loading').style.display = 'block';
-      document.getElementById('yardList').innerHTML = '';
+      document.getElementById('cardList').innerHTML = '';
       try {
-        const resp = await fetch(SCRIPT_URL + "?action=get_yard_vehicles");
+        const resp = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
         yardInventory = await resp.json();
-        document.getElementById('yardCount').textContent = yardInventory.length;
-        renderYardList(yardInventory);
-      } catch(err) {
-        document.getElementById('yardList').innerHTML = '<div style="color:var(--danger); text-align:center; padding:20px;">Could not connect to Yard Log. Tap 🔄 Sync to retry.</div>';
+        renderCards(yardInventory);
+      } catch(e) {
+        document.getElementById('cardList').innerHTML = '<div style="color:#ff1744; text-align:center; padding:30px; font-weight:800;">Error connecting to Yard Log. Tap 🔄 to retry.</div>';
       } finally {
         document.getElementById('loading').style.display = 'none';
       }
     }
 
-    function renderYardList(vehicles) {
-      const container = document.getElementById('yardList');
-      container.innerHTML = '';
-
-      if (!vehicles || vehicles.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:40px;">No vehicles currently recorded in yard.</div>';
+    function renderCards(vehicles) {
+      const list = document.getElementById('cardList');
+      list.innerHTML = '';
+      if (!Array.isArray(vehicles) || vehicles.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:50px 10px; font-weight:800;">HOLDING YARD EMPTY</div>';
         return;
       }
 
       vehicles.forEach(v => {
         const card = document.createElement('div');
         card.className = 'yard-card';
+
+        const thumbContent = v.imageUrl 
+          ? `<img src="${v.imageUrl}" class="thumb-img" onclick="showLightbox('${v.imageUrl}')">`
+          : `<div class="no-img">NO PHOTO</div>`;
+
+        const noteBadge = v.notes ? `<div class="notes-pill">📝 ${v.notes}</div>` : '';
+        const phoneBadge = v.callerPhone ? `<span style="color:#00e676; font-size:11px; font-weight:800;">📞 ${v.callerPhone}</span>` : '';
+
         card.innerHTML = `
-          <div class="card-top">
-            <div class="rego-badge">${v.rego}</div>
-            <div class="prop-name">${v.property || 'GENERAL'}</div>
+          <div class="card-row-top">
+            <span class="rego-text">${v.rego}</span>
+            <span class="prop-text">${v.property || 'GENERAL'}</span>
           </div>
-          <div class="veh-desc">${v.colour || ''} ${v.make || ''} ${v.model || ''} (${v.bodyType || 'Sedan'})</div>
-          <div class="meta-line">
-            <span>Towed: ${v.dateTowed || 'Today'}</span>
-            <span>SVN: ${v.policelinkRef ? v.policelinkRef : '<span style="color:#f59e0b;">Pending</span>'}</span>
+
+          <div class="card-body">
+            <div class="thumb-wrap">${thumbContent}</div>
+            <div class="details-wrap">
+              <div class="veh-line">${v.colour || ''} ${v.make || ''} ${v.model || ''}</div>
+              <div class="towed-line">Towed: ${v.towedTime || 'Today'}</div>
+              <div>${phoneBadge}</div>
+              ${noteBadge}
+            </div>
           </div>
-          <div class="card-actions">
-            <button class="btn btn-sms" onclick='openModal(${JSON.stringify(v)})'>💬 Advise Owner</button>
-            <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn btn-rel">Release ➡️</a>
+
+          <div class="action-row">
+            <button class="btn-sms" onclick='openModal(${JSON.stringify(v)})'>💬 SMS</button>
+            <a href="release.html" class="btn-rel-jump">REL ➔</a>
           </div>
         `;
-        container.appendChild(card);
+        list.appendChild(card);
       });
     }
 
     function filterYardCards() {
       const q = document.getElementById('searchInput').value.trim().toUpperCase();
       const filtered = yardInventory.filter(v => 
-        (v.rego && v.rego.toUpperCase().includes(q)) ||
+        (v.rego && v.rego.toUpperCase().includes(q)) || 
         (v.property && v.property.toUpperCase().includes(q)) ||
         (v.make && v.make.toUpperCase().includes(q)) ||
-        (v.model && v.model.toUpperCase().includes(q))
+        (v.notes && v.notes.toUpperCase().includes(q))
       );
-      renderYardList(filtered);
+      renderCards(filtered);
     }
 
-    function openModal(vehicle) {
-      activeVehicle = vehicle;
-      document.getElementById('modalVehDetails').textContent = 
-        `${vehicle.rego} — ${vehicle.colour || ''} ${vehicle.make || ''} ${vehicle.model || ''}`;
-      document.getElementById('ownerPhone').value = '';
+    function openModal(veh) {
+      selectedVehicle = veh;
+      document.getElementById('modalPlate').innerText = veh.rego;
+      document.getElementById('modalProp').innerText = veh.property || 'GENERAL';
+      document.getElementById('callerPhoneInput').value = veh.callerPhone || '';
+      document.getElementById('noteInput').value = veh.notes || '';
       document.getElementById('smsModal').style.display = 'flex';
-      setTimeout(() => document.getElementById('ownerPhone').focus(), 150);
+      setTimeout(() => document.getElementById('callerPhoneInput').focus(), 150);
     }
 
     function closeModal() {
       document.getElementById('smsModal').style.display = 'none';
-      activeVehicle = null;
+      selectedVehicle = null;
     }
 
-    function sendNativeSms() {
-      if (!activeVehicle) return;
-      const phoneInput = document.getElementById('ownerPhone').value.trim();
-      const cleanPhone = phoneInput.replace(/[^\d+]/g, '');
+    // 1-Click Clipboard Paste (Cross-Platform iOS / Samsung)
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        const clean = text.replace(/[^\d+]/g, '');
+        if (clean) {
+          document.getElementById('callerPhoneInput').value = clean;
+        }
+      } catch(err) {
+        // Fallback for browsers with strict clipboard permissions
+        document.getElementById('callerPhoneInput').focus();
+      }
+    }
+
+    async function submitYardContactAndSms() {
+      if (!selectedVehicle) return;
+      const phone = document.getElementById('callerPhoneInput').value.trim();
+      const notes = document.getElementById('noteInput').value.trim();
+      const cleanPhone = phone.replace(/[^\d+]/g, '');
 
       if (!cleanPhone || cleanPhone.length < 8) {
-        alert('Please enter a valid mobile number.');
+        alert("Please enter or paste a valid mobile number.");
         return;
       }
 
-      const vehInfo = `${activeVehicle.colour || ''} ${activeVehicle.make || ''} ${activeVehicle.model || ''}`.trim();
-      
-      const textMessage = 
+      // 1. Asynchronously save contact & note to Yard_Log in Google Sheets
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'save_yard_details',
+          rego: selectedVehicle.rego,
+          phone: cleanPhone,
+          notes: notes
+        })
+      }).catch(e => console.warn("Background sheet sync failed:", e));
+
+      // 2. Prepare pre-filled message text
+      const vehDesc = `${selectedVehicle.colour || ''} ${selectedVehicle.make || ''} ${selectedVehicle.model || ''}`.trim();
+      const msgBody = 
 `National Towing & Impound Notice
 
-Vehicle: ${vehInfo} (${activeVehicle.rego})
+Vehicle: ${vehDesc} (${selectedVehicle.rego})
+Towed From: ${selectedVehicle.property || 'Private Property'}
 Holding Yard: 4 Lau Place, Ashmore QLD 4214
-Standard Release Fee: $450.05 (Tow & Holding)
 
-Release Requirements:
+Standard Release Fee: $450.05
+(Tow $310.05 + Impound/Storage $140.00)
+
+Mandatory Release Requirements:
 1. Physical Driver Licence / Photo ID
 2. Proof of ownership or written letter of authorization from registered owner
-3. Payment upon collection (Card / EFTPOS)
+3. Settlement upon collection (Card / EFTPOS)
 
 Holding Yard Enquiries: 0450 605 370
 (Please notify staff 20 minutes prior to arrival)`;
 
-      // Standard mobile SMS protocol link (uses phone's native SIM plan)
-      window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(textMessage)}`;
+      // 3. Cross-Platform Delimiter (& for iOS, ? for Android)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const delim = isIOS ? '&' : '?';
+      const smsUri = `sms:${cleanPhone}${delim}body=${encodeURIComponent(msgBody)}`;
+
+      // 4. Update cached local state and fire native Messages app
+      selectedVehicle.callerPhone = cleanPhone;
+      selectedVehicle.notes = notes;
+      renderCards(yardInventory);
       closeModal();
+
+      window.location.href = smsUri;
     }
 
-    // Auto-fetch yard records on launch
-    loadYardVehicles();
+    function showLightbox(url) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('photoLightbox').style.display = 'flex';
+    }
   </script>
 </body>
 </html>
