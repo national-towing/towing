@@ -219,8 +219,13 @@
         const card = document.createElement('div');
         card.className = 'yard-card';
 
-        const thumbContent = v.imageUrl 
-          ? `<img src="${v.imageUrl}" class="thumb-img" onclick="showLightbox('${v.imageUrl}')">`
+        const driveId = (v.imageUrl && v.imageUrl.match(/[-\w]{25,}/)) ? v.imageUrl.match(/[-\w]{25,}/)[0] : '';
+        const thumbContent = driveId 
+          ? `<img src="https://lh3.googleusercontent.com/d/${driveId}" 
+                  class="thumb-img" 
+                  loading="lazy" 
+                  onerror="if (!this.dataset.tried) { this.dataset.tried=1; this.src='https://drive.google.com/thumbnail?id=${driveId}&sz=w300'; } else { this.parentElement.innerHTML='<div class=\\\'no-img\\\'>NO PHOTO</div>'; }" 
+                  onclick="showLightbox('https://lh3.googleusercontent.com/d/${driveId}')">`
           : `<div class="no-img">NO PHOTO</div>`;
 
         const phoneDisplay = v.callerPhone ? `<span class="phone-tag">📞 ${v.callerPhone}</span>` : '';
