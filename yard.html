@@ -207,6 +207,30 @@
       }
     }
 
+    // Helper: Formats time string to strict "Day DD/MM HH:MM" in 24-hour clock
+    function formatTowedDate(raw) {
+      if (!raw) return 'Today';
+      let str = String(raw).replace(/^Towed:\s*/i, '').trim();
+
+      // Convert hyphens between date parts to slashes: "Sat 24-10 05:11" -> "Sat 24/10 05:11"
+      str = str.replace(/([A-Za-z]{3}\s+\d{1,2})-(\d{1,2})/, '$1/$2');
+
+      // Convert "24/10/2026 04:48:00" to "Sat 24/10 04:48"
+      const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})/);
+      if (slashMatch) {
+        const dObj = new Date(parseInt(slashMatch[3], 10), parseInt(slashMatch[2], 10) - 1, parseInt(slashMatch[1], 10));
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const day = !isNaN(dObj.getDay()) ? days[dObj.getDay()] : "";
+        const dd = String(slashMatch[1]).padStart(2, '0');
+        const mm = String(slashMatch[2]).padStart(2, '0');
+        const hh = String(slashMatch[4]).padStart(2, '0');
+        const min = String(slashMatch[5]).padStart(2, '0');
+        return `${day ? day + ' ' : ''}${dd}/${mm} ${hh}:${min}`;
+      }
+
+      return str;
+    }
+
     function renderCards(vehicles) {
       const list = document.getElementById('cardList');
       list.innerHTML = '';
@@ -231,6 +255,14 @@
         const phoneDisplay = v.callerPhone ? `<span class="phone-tag">📞 ${v.callerPhone}</span>` : '';
         const noteDisplay = v.notes ? `📝 ${v.notes}` : `+ Add Note...`;
 
+        // Car format: "Make - Model (Colour)"
+        const makeModel = [v.make, v.model].filter(Boolean).join(' - ');
+        const vehDesc = makeModel 
+          ? (v.colour ? `${makeModel} (${v.colour})` : makeModel) 
+          : (v.colour || 'Vehicle');
+
+        const towedFormatted = formatTowedDate(v.towedTime);
+
         card.innerHTML = `
           <div class="card-row-top">
             <span class="rego-text">${v.rego}</span>
@@ -240,8 +272,8 @@
           <div class="card-body">
             <div class="thumb-wrap">${thumbContent}</div>
             <div class="details-wrap">
-              <div class="veh-line">${v.colour || ''} ${v.make || ''} ${v.model || ''}</div>
-              <div class="towed-line">Towed: ${v.towedTime || 'Today'}</div>
+              <div class="veh-line">${vehDesc}</div>
+              <div class="towed-line">Towed: ${towedFormatted}</div>
               <div>${phoneDisplay}</div>
             </div>
           </div>
@@ -266,6 +298,8 @@
         (v.rego && v.rego.toUpperCase().includes(q)) || 
         (v.property && v.property.toUpperCase().includes(q)) ||
         (v.make && v.make.toUpperCase().includes(q)) ||
+        (v.model && v.model.toUpperCase().includes(q)) ||
+        (v.colour && v.colour.toUpperCase().includes(q)) ||
         (v.notes && v.notes.toUpperCase().includes(q))
       );
       renderCards(displayedInventory);
@@ -318,7 +352,11 @@
         })
       }).catch(e => console.warn(e));
 
-      const vehDesc = `${selectedVehicle.colour || ''} ${selectedVehicle.make || ''} ${selectedVehicle.model || ''}`.trim();
+      const makeModel = [selectedVehicle.make, selectedVehicle.model].filter(Boolean).join(' - ');
+      const vehDesc = makeModel 
+        ? (selectedVehicle.colour ? `${makeModel} (${selectedVehicle.colour})` : makeModel) 
+        : (selectedVehicle.colour || 'Vehicle');
+
       const msgBody = 
 `National Towing Impound Notice
 
@@ -343,7 +381,7 @@ Thank you`;
       const smsUri = `sms:${cleanPhone}${delim}body=${encodeURIComponent(msgBody)}`;
 
       selectedVehicle.callerPhone = cleanPhone;
-      renderCards(displayedInventory);
+      renderCards(yardInventory);
       closeSmsModal();
 
       window.location.href = smsUri;
@@ -385,7 +423,7 @@ Thank you`;
       }).catch(e => console.warn(e));
 
       selectedVehicle.notes = updatedNote;
-      renderCards(displayedInventory);
+      renderCards(yardInventory);
       closeNotesModal();
     }
 
