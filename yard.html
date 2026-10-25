@@ -46,24 +46,24 @@
     .card-list { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 440px; margin: 0 auto; }
     .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--c-yard); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     
-    .card-row-top { display: flex; justify-content: space-between; align-items: center; }
-    .rego-text { font-size: 26px; font-weight: 900; letter-spacing: 1px; color: #facc15; }
-    .prop-text { font-size: 13px; font-weight: 700; color: #aaa; text-align: right; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .rego-text { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #facc15; flex-shrink: 0; }
+    .prop-text { font-size: 24px; font-weight: 900; color: #aaa; text-align: right; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .card-body { display: flex; gap: 12px; align-items: center; }
-    .thumb-wrap { width: 72px; height: 72px; border-radius: 10px; overflow: hidden; background: #000; border: 1.5px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
+    .thumb-wrap { width: 78px; height: 78px; border-radius: 10px; overflow: hidden; background: #000; border: 1.5px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
     .thumb-img { width: 100%; height: 100%; object-fit: cover; }
     .no-img { font-size: 10px; font-weight: 800; color: #555; text-align: center; }
 
-    .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 13px; min-width: 0; }
-    .veh-line { font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .towed-line { color: var(--text-muted); font-size: 12px; font-weight: 700; }
-    .phone-tag { color: var(--c-rel); font-size: 11px; font-weight: 800; }
+    .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .veh-line { font-size: 24px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
+    .towed-line { color: var(--text-muted); font-size: 15px; font-weight: 700; margin-top: 2px; }
+    .phone-tag { color: var(--c-rel); font-size: 12px; font-weight: 800; margin-top: 2px; }
 
     /* Interactive Notes Banner on Tile */
     .notes-box {
       background: #141414; border: 1px dashed #444; border-left: 3px solid #ffab00;
-      padding: 6px 10px; border-radius: 6px; font-size: 12px; color: #ffab00; font-weight: 600;
+      padding: 8px 10px; border-radius: 6px; font-size: 12px; color: #ffab00; font-weight: 600;
       cursor: pointer; display: flex; justify-content: space-between; align-items: center;
     }
     .notes-box:active { background: #222; }
