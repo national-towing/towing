@@ -57,8 +57,15 @@
         input, select {
             width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
             background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
-            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
+
+        /* PLACEHOLDER STYLING */
+        ::placeholder { color: #888888 !important; opacity: 1; }
+        input::placeholder, textarea::placeholder { color: #888888 !important; opacity: 1; }
+
+        select option { background: #2a2a2a; color: #ffffff; }
+        select option[value=""] { color: #888888; }
 
         /* LIVE VALIDATION STYLES */
         .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
@@ -356,12 +363,31 @@
         if (urlProp) targetProperty = decodeURIComponent(urlProp).trim().toUpperCase();
     })();
 
+    // Synchronize select font colors to match grey placeholders until an option is picked
+    function syncDropdownColors() {
+        document.querySelectorAll('select').forEach(sel => {
+            const updateColor = () => {
+                if (!sel.value || sel.value === "") {
+                    sel.style.color = "#888888";
+                } else if (sel.id === 'stateSelect') {
+                    sel.style.color = "#ffab00";
+                } else {
+                    sel.style.color = "#ffffff";
+                }
+            };
+            updateColor();
+            sel.removeEventListener('change', updateColor);
+            sel.addEventListener('change', updateColor);
+        });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         updateTorchUI();
         loadProperties();
         updateQueueUI();
         checkCompPhoto();
         setupLiveValidation();
+        syncDropdownColors();
         window.addEventListener('online', syncPendingTowsInBackground);
         syncPendingTowsInBackground();
         setInterval(syncPendingTowsInBackground, 10000);
@@ -383,9 +409,18 @@
 
     refreshBtn.addEventListener('click', () => { window.location.reload(true); });
 
-    function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; }
-    function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; }
-    function checkOfficerOther(s) { officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; }
+    function checkMakeOther(s) { 
+        makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; 
+        syncDropdownColors();
+    }
+    function checkColourOther(s) { 
+        colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; 
+        syncDropdownColors();
+    }
+    function checkOfficerOther(s) { 
+        officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; 
+        syncDropdownColors();
+    }
 
     async function loadProperties() {
         const cached = localStorage.getItem('cached_properties');
@@ -412,6 +447,7 @@
             }
         });
         validateForm();
+        syncDropdownColors();
     }
 
     // --- LIVE VALIDATION LOGIC ---
@@ -419,8 +455,8 @@
         const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
         inputs.forEach(elem => {
             if (elem) {
-                elem.addEventListener('input', validateForm);
-                elem.addEventListener('change', validateForm);
+                elem.addEventListener('input', () => { validateForm(); syncDropdownColors(); });
+                elem.addEventListener('change', () => { validateForm(); syncDropdownColors(); });
             }
         });
         validateForm();
