@@ -27,577 +27,481 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { 
-            background: var(--bg); color: #fff; min-height: 100vh; padding: 14px;
+            background: var(--bg); color: #fff; min-height: 100vh; padding: 14px; 
             display: flex; flex-direction: column; align-items: center; 
         }
 
-        .header-box { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            position: relative; width: 100%; max-width: 440px; margin: 4px 0 12px 0; text-align: center;
+        /* BRAND LOGO & COMPANY HEADER */
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 440px;
+            margin: 4px auto 14px auto;
+            padding: 10px 14px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
-        .header-box h1 { 
-            font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase; 
+        .brand-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            object-fit: contain;
+            border: 1px solid #444;
+            background: #000;
+            flex-shrink: 0;
         }
-        .header-sub { 
-            font-size: 11px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;
+        .brand-titles {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        .brand-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #ffab00;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin: 0;
+        }
+        .brand-subtitle {
+            font-size: 11px;
+            font-weight: 800;
+            color: #888;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-top: 2px;
         }
 
-        /* VERIFIED AUTHENTICATED BADGE */
-        .auth-badge {
-            width: 100%; max-width: 440px; background: #0f2e1b; border: 1.5px solid var(--success);
-            color: var(--success); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px;
-            display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 900;
+        .auth-banner {
+            width: 100%; max-width: 440px; background: var(--success); color: #000;
+            padding: 10px; border-radius: 10px; text-align: center; font-weight: 900;
+            font-size: 14px; margin-bottom: 12px; display: none; text-transform: uppercase; letter-spacing: 1px;
         }
 
-        /* DYNAMIC MODE TOGGLE (ONLY SHOWN IF PROPERTY MODE IS 'BOTH') */
-        .mode-toggle-wrap {
-            display: none; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 440px; margin-bottom: 12px;
+        .card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px;
+            padding: 18px; width: 100%; max-width: 440px; margin-bottom: 16px; display: none;
         }
-        .tab-btn {
-            height: 44px; border: none; border-radius: 10px; font-size: 14px; font-weight: 900;
-            cursor: pointer; letter-spacing: 1px; text-transform: uppercase; background: #2a2a2a; color: #888;
-            transition: all 0.2s ease;
-        }
-        .tab-btn.active-tow { background: var(--accent-tow); color: #fff; }
-        .tab-btn.active-pass { background: var(--accent-pass); color: #fff; }
 
-        .card { 
-            background: var(--card-bg); border-radius: 18px; padding: 18px; width: 100%; 
-            max-width: 440px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            margin-bottom: 16px;
+        label { font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-top: 12px; }
+        input, select {
+            width: 100%; height: 50px; background: #2a2a2a; border: 1px solid #444;
+            border-radius: 10px; color: #fff; font-size: 18px; font-weight: 900;
+            padding: 0 12px; margin-top: 6px; outline: none; -webkit-appearance: none;
         }
-        
-        label { 
-            font-size: 11px; text-transform: uppercase; color: #aaa; display: block; 
-            margin-top: 12px; font-weight: 900; letter-spacing: 1px; 
+
+        .mode-toggle { display: flex; gap: 8px; margin-top: 14px; margin-bottom: 6px; }
+        .mode-btn {
+            flex: 1; height: 52px; border: 2px solid #444; border-radius: 12px;
+            background: #1a1a1a; color: #aaa; font-size: 14px; font-weight: 900;
+            text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
         }
-        input, select, textarea {
-            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 800; margin-top: 4px; outline: none;
-            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+        .mode-active-tow { border-color: var(--accent-tow); background: rgba(255,23,68,0.15); color: var(--accent-tow); }
+        .mode-active-pass { border-color: var(--accent-pass); background: rgba(171,71,188,0.15); color: var(--accent-pass); }
+
+        .cam-btn {
+            width: 100%; height: 72px; border: 2.5px dashed var(--accent-tow); border-radius: 14px;
+            background: #2a1215; color: var(--accent-tow); font-size: 16px; font-weight: 900;
+            display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; margin-top: 16px;
         }
-        textarea { height: 70px; padding: 10px 12px; font-size: 14px; font-weight: 600; resize: none; }
-        ::placeholder { color: #777 !important; opacity: 1; }
+        .cam-btn:active { transform: scale(0.98); }
 
-        .field-missing { border: 2px solid var(--accent-gold) !important; background: #2a2200 !important; }
-        .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
-
-        .row-2 { display: flex; gap: 10px; }
-        .row-2 > div:first-child { flex: 2; }
-        .row-2 > div:last-child { flex: 1; }
-
-        .scan-box-btn {
-            background: #2a1215; border: 2px dashed var(--accent-tow); color: var(--accent-tow);
-            border-radius: 12px; padding: 14px; margin-top: 14px; text-align: center;
-            cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 4px;
-        }
-        .scan-box-btn:active { background: #3d1b20; transform: scale(0.98); }
-        .scan-title { font-size: 15px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-        .scan-sub { font-size: 11px; font-weight: 700; color: #aaa; }
-
-        .preview-wrap { display: none; align-items: center; gap: 12px; margin-top: 10px; background: #141414; padding: 8px 12px; border-radius: 10px; border: 1px solid #333; }
-        .preview-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent-tow); }
-        .preview-info { flex: 1; }
-        .preview-status { font-size: 12px; font-weight: 800; color: var(--success); }
-        .preview-remove { font-size: 11px; font-weight: 800; color: #ff1744; cursor: pointer; text-decoration: underline; margin-top: 2px; }
+        .thumb-preview { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent-tow); display: none; margin-top: 12px; }
 
         .submit-btn {
-            color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 20px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
-            text-transform: uppercase;
+            width: 100%; height: 62px; border: none; border-radius: 14px;
+            background: var(--accent-tow); color: #fff; font-size: 20px; font-weight: 900;
+            letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 20px;
         }
-        .submit-tow { background: var(--accent-tow); }
-        .submit-pass { background: var(--accent-pass); }
-        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        #statusText { text-align: center; font-weight: 900; font-size: 13px; margin-top: 12px; min-height: 20px; color: var(--accent-gold); }
+        .btn-pass { background: var(--accent-pass); }
 
-        /* PERMANENT ACCESS LOCKOUT SCREEN */
-        #lockOverlay {
-            display: none; position: fixed; inset: 0; background: #121212;
-            z-index: 99999; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 24px;
-        }
-        #lockOverlay h2 { color: var(--accent-tow); font-size: 26px; font-weight: 900; margin-bottom: 12px; }
-        #lockOverlay p { color: #aaa; font-size: 15px; font-weight: 600; line-height: 1.4; max-width: 320px; }
+        .cam-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 9999; flex-direction: column; }
+        .cam-header { height: 60px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: absolute; top: 0; width: 100%; z-index: 10; }
+        .cam-view { flex: 1; width: 100%; height: 100%; object-fit: cover; }
+        .cam-snap { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 80px; height: 80px; background: var(--accent-tow); border: 4px solid #fff; border-radius: 50%; z-index: 20; }
 
-        /* FULLSCREEN SUCCESS SCREEN */
+        #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; color: var(--accent-gold); min-height: 20px; }
+        .loading-screen { text-align: center; color: var(--text-muted); font-weight: 800; margin-top: 40px; font-size: 18px; }
+
+        /* Full Screen Success Overlay */
         #successOverlay {
-            display: none; position: fixed; inset: 0; background: rgba(0, 230, 118, 0.96);
-            z-index: 99999; flex-direction: column; align-items: center; justify-content: center;
+            display: none; position: fixed; inset: 0; z-index: 10000;
+            flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
-        #successOverlay h2 { font-size: 34px; font-weight: 900; color: #000; }
-        #successOverlay p { font-size: 16px; font-weight: 800; color: #111; margin: 10px 0 30px 0; max-width: 85%; }
-        .done-btn {
-            background: #000; color: var(--success); font-size: 20px; font-weight: 900; border: none;
-            border-radius: 12px; padding: 16px 40px; cursor: pointer; letter-spacing: 2px;
-        }
-
-        /* CAMERA MODAL */
-        #camModal { display: none; position: fixed; inset: 0; background: #000; z-index: 10000; flex-direction: column; }
-        .cam-topbar { height: 50px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 2; }
-        .cam-close-btn { background: #333; color: #fff; font-size: 13px; font-weight: 900; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
-        .cam-view { flex: 1; width: 100%; height: 100%; position: relative; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .cam-snap-btn {
-            position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
-            width: 80px; height: 80px; background: var(--accent-tow); border: 4px solid #fff; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-        .cam-snap-inner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000; }
+        .success-tow { background: rgba(255, 23, 68, 0.95); }
+        .success-pass { background: rgba(171, 71, 188, 0.95); }
+        
+        #successOverlay h1 { font-size: 40px; font-weight: 900; color: #fff; margin-bottom: 10px; text-transform: uppercase; line-height: 1.1; }
+        #successOverlay p { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 30px; opacity: 0.9; }
+        .ok-btn { background: #000; color: #fff; font-size: 24px; font-weight: 900; border: none; border-radius: 14px; padding: 16px 40px; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
-    <div class="header-box">
-        <h1 id="portalTitle">Manager Portal</h1>
-        <div class="header-sub" id="portalSubTitle">Authorised On-Call Services</div>
+<!-- COMPANY BRANDING HEADER -->
+<div class="brand-header">
+    <img src="icon-manager.png" alt="National Towing Logo" class="brand-logo">
+    <div class="brand-titles">
+        <h1 class="brand-title">National Towing</h1>
+        <span class="brand-subtitle">Authorised Manager Portal</span>
+    </div>
+</div>
+
+<div class="loading-screen" id="loadingMsg">VERIFYING AUTHORISATION...</div>
+<div class="auth-banner" id="authBanner"></div>
+
+<div class="card" id="mainCard">
+    <label>PROPERTY</label>
+    <select id="propertySelect"></select>
+
+    <div class="mode-toggle" id="modeToggle">
+        <button class="mode-btn mode-active-tow" id="btnModeTow" onclick="setMode('TOW')">🚨 TOW REQUEST</button>
+        <button class="mode-btn" id="btnModePass" onclick="setMode('PASS')">🎫 VISITOR PASS</button>
     </div>
 
-    <!-- LOCKED MANAGER IDENTIFIER -->
-    <div class="auth-badge" id="authBadge">
-        <span id="authBadgeName">Verifying Authorisation...</span>
-        <span style="font-size:10px; background:var(--success); color:#000; padding:2px 6px; border-radius:4px;">VERIFIED</span>
+    <!-- TOW SECTION -->
+    <div id="towSection">
+        <label>VEHICLE REGISTRATION</label>
+        <input type="text" id="towRego" placeholder="REGO" style="color:var(--accent-tow); text-transform:uppercase;">
+        
+        <label>REASON FOR TOWING</label>
+        <select id="towReason">
+            <option value="UNAUTHORISED PARKING">UNAUTHORISED PARKING</option>
+            <option value="PARKED IN VISITOR BAY">PARKED IN VISITOR BAY</option>
+            <option value="NO VISITOR PASS">NO VISITOR PASS</option>
+            <option value="PARKED ON YELLOW LINE">PARKED ON YELLOW LINE</option>
+            <option value="BLOCKING DRIVEWAY">BLOCKING DRIVEWAY</option>
+        </select>
+
+        <label>BAY NUMBER / LOCATION</label>
+        <input type="text" id="towBay" placeholder="e.g. Bay 12 or Yellow Line">
+
+        <button class="cam-btn" id="openCamBtn" onclick="openCamera()">📷 SNAP EVIDENCE PHOTO</button>
+        <img id="photoPreview" class="thumb-preview">
+        
+        <button class="submit-btn" id="submitTowBtn" onclick="submitTowRequest()">SEND TOW REQUEST</button>
     </div>
 
-    <!-- PROPERTY SELECTOR (Only shown if manager has > 1 property) -->
-    <div id="propSelectorCard" class="card" style="display:none; padding:12px 18px; margin-bottom:12px;">
-        <label style="margin-top:0;">SELECT PROPERTY *</label>
-        <select id="propertySelect" onchange="onPropertySelectChange()"></select>
-    </div>
-
-    <!-- MODE TABS (Only shown if property mode is 'Both') -->
-    <div class="mode-toggle-wrap" id="modeToggleWrap">
-        <button type="button" class="tab-btn active-tow" id="tabTowBtn" onclick="switchActiveTab('tow')">🚨 Request Tow</button>
-        <button type="button" class="tab-btn" id="tabPassBtn" onclick="switchActiveTab('pass')">🎫 Issue Pass</button>
-    </div>
-
-    <!-- TOW REQUEST PANEL -->
-    <div class="card" id="towPanel">
-        <div class="scan-box-btn" id="openCamBtn">
-            <span class="scan-title">📷 Tap to Scan Plate / Photo</span>
-            <span class="scan-sub">Auto-reads licence plate into the box below</span>
-        </div>
-
-        <div class="preview-wrap" id="previewWrap">
-            <img id="previewImg" class="preview-img" src="">
-            <div class="preview-info">
-                <div class="preview-status" id="previewStatus">Photo Attached</div>
-                <div class="preview-remove" onclick="removePhoto()">Remove / Retake</div>
+    <!-- PASS SECTION -->
+    <div id="passSection" style="display:none;">
+        <label>VEHICLE REGISTRATION</label>
+        <input type="text" id="passRego" placeholder="REGO" style="color:var(--accent-pass); text-transform:uppercase;">
+        
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label>START DATE</label>
+                <input type="date" id="passDate">
             </div>
-        </div>
-
-        <div class="row-2">
-            <div>
-                <label>REGISTRATION *</label>
-                <input type="text" id="regoInput" placeholder="REGO" autocomplete="off" autocorrect="off" style="color:var(--accent-tow); text-transform:uppercase;">
-            </div>
-            <div>
-                <label>STATE</label>
-                <select id="stateSelect" style="color:var(--accent-gold);">
-                    <option value="QLD" selected>QLD</option>
-                    <option value="NSW">NSW</option>
-                    <option value="VIC">VIC</option>
-                    <option value="NT">NT</option>
-                    <option value="SA">SA</option>
-                    <option value="TAS">TAS</option>
-                    <option value="ACT">ACT</option>
-                    <option value="WA">WA</option>
+            <div style="flex:1;">
+                <label>DURATION (DAYS)</label>
+                <select id="passDuration">
+                    <option value="1">1 Day</option>
+                    <option value="2">2 Days</option>
+                    <option value="3">3 Days</option>
+                    <option value="7">1 Week</option>
+                    <option value="14">2 Weeks</option>
                 </select>
             </div>
         </div>
-
-        <label>BAY # / LOCATION (OPTIONAL)</label>
-        <input type="text" id="bayInput" placeholder="e.g. Visitor Bay 4, Driveway" autocomplete="off">
-
-        <label>REASON FOR TOW (OPTIONAL)</label>
-        <textarea id="reasonInput" placeholder="e.g. Parked in private bay without permission, blocking driveway..."></textarea>
-
-        <button type="button" class="submit-btn submit-tow" id="submitTowBtn" disabled>SUBMIT TOW REQUEST</button>
+        
+        <button class="submit-btn btn-pass" id="submitPassBtn" onclick="submitVisitorPass()">ISSUE VISITOR PASS</button>
     </div>
 
-    <!-- VISITOR PASS PANEL -->
-    <div class="card" id="passPanel" style="display:none;">
-        <label>VEHICLE REGISTRATION *</label>
-        <input type="text" id="passRegoInput" placeholder="REGO" autocomplete="off" autocorrect="off" style="color:var(--accent-pass); text-transform:uppercase;">
+    <div id="status"></div>
+</div>
 
-        <label>DURATION *</label>
-        <select id="passDurationSelect">
-            <option value="1" selected>1 Day (Until 11:59 PM)</option>
-            <option value="2">2 Days</option>
-            <option value="3">3 Days</option>
-            <option value="5">5 Days</option>
-            <option value="7">1 Week</option>
-            <option value="14">2 Weeks</option>
-            <option value="30">1 Month</option>
-        </select>
-
-        <label>UNIT / VISITOR NOTES (OPTIONAL)</label>
-        <input type="text" id="passNotesInput" placeholder="e.g. Unit 402 - Visiting family">
-
-        <button type="button" class="submit-btn submit-pass" id="submitPassBtn" disabled>ISSUE VISITOR PASS</button>
+<!-- CAMERA MODAL -->
+<div class="cam-modal" id="camModal">
+    <div class="cam-header">
+        <span style="color:var(--accent-tow); font-weight:900;">CAPTURE VEHICLE & PLATE</span>
+        <button style="background:none; border:none; color:#fff; font-size:24px; font-weight:900;" onclick="closeCamera()">✕</button>
     </div>
+    <video id="videoElem" class="cam-view" autoplay playsinline></video>
+    <button class="cam-snap" onclick="takeSnapshot()"></button>
+</div>
 
-    <div id="statusText"></div>
+<!-- FULLSCREEN SUCCESS OVERLAY -->
+<div id="successOverlay">
+    <h1 id="successTitle">TOW REQUEST SENT</h1>
+    <p id="successSub">Driver dispatched to property.</p>
+    <button class="ok-btn" onclick="window.location.reload(true);">OK</button>
+</div>
 
-    <!-- LOCK OVERLAY IF UNREGISTERED -->
-    <div id="lockOverlay">
-        <h2>ACCESS RESTRICTED</h2>
-        <p id="lockMsg">This mobile number is not registered as an active authorised manager.</p>
-        <p style="margin-top:20px; font-size:12px; color:#666;">National Towing Operations<br>0450 605 370</p>
-    </div>
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
-    <!-- SUCCESS OVERLAY -->
-    <div id="successOverlay">
-        <h2 id="successHeading">ACTION COMPLETED</h2>
-        <p id="successDesc">Details have been submitted to National Towing operations.</p>
-        <button type="button" class="done-btn" onclick="window.location.reload(true)">DONE ✓</button>
-    </div>
+    let activeAuth = null;
+    let currentMode = "TOW";
+    let capturedPhoto = "";
+    let videoStream = null;
 
-    <!-- FULLSCREEN CAMERA MODAL -->
-    <div id="camModal">
-        <div class="cam-topbar">
-            <span style="font-size:13px; font-weight:800; color:#ffab00;">ALIGN VEHICLE & PLATE</span>
-            <button type="button" class="cam-close-btn" onclick="closeCamera()">CANCEL</button>
-        </div>
-        <div class="cam-view">
-            <video id="videoElem" autoplay playsinline muted></video>
-            <div class="cam-snap-btn" id="snapBtn"><div class="cam-snap-inner"></div></div>
-        </div>
-    </div>
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('passDate').valueAsDate = new Date();
+        authenticateUser();
+    });
 
-    <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-
-        let currentManager = "";
-        let currentPhone = "";
-        let authorizedProperties = [];
-        let selectedPropertyObj = null;
-        let activeTab = "tow"; // 'tow' | 'pass'
-        let capturedPhotoB64 = "";
-        let cameraStream = null;
-
-        // UI References
-        const portalTitle = document.getElementById('portalTitle');
-        const authBadgeName = document.getElementById('authBadgeName');
-        const propSelectorCard = document.getElementById('propSelectorCard');
-        const propertySelect = document.getElementById('propertySelect');
-        const modeToggleWrap = document.getElementById('modeToggleWrap');
-        const tabTowBtn = document.getElementById('tabTowBtn');
-        const tabPassBtn = document.getElementById('tabPassBtn');
-        const towPanel = document.getElementById('towPanel');
-        const passPanel = document.getElementById('passPanel');
-
-        const regoInput = document.getElementById('regoInput');
-        const stateSelect = document.getElementById('stateSelect');
-        const bayInput = document.getElementById('bayInput');
-        const reasonInput = document.getElementById('reasonInput');
-        const submitTowBtn = document.getElementById('submitTowBtn');
-
-        const passRegoInput = document.getElementById('passRegoInput');
-        const passDurationSelect = document.getElementById('passDurationSelect');
-        const passNotesInput = document.getElementById('passNotesInput');
-        const submitPassBtn = document.getElementById('submitPassBtn');
-
-        const statusText = document.getElementById('statusText');
-        const lockOverlay = document.getElementById('lockOverlay');
-        const lockMsg = document.getElementById('lockMsg');
-        const successOverlay = document.getElementById('successOverlay');
-        const successHeading = document.getElementById('successHeading');
-        const successDesc = document.getElementById('successDesc');
-
-        const openCamBtn = document.getElementById('openCamBtn');
-        const camModal = document.getElementById('camModal');
-        const videoElem = document.getElementById('videoElem');
-        const snapBtn = document.getElementById('snapBtn');
-        const previewWrap = document.getElementById('previewWrap');
-        const previewImg = document.getElementById('previewImg');
-        const previewStatus = document.getElementById('previewStatus');
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const phoneParam = urlParams.get('phone') || urlParams.get('auth') || urlParams.get('user') || urlParams.get('prop');
-
-            if (!phoneParam) {
-                showLockScreen("No mobile number or authorization key was detected in this link.");
-                return;
-            }
-
-            try {
-                const resp = await fetch(`${GOOGLE_SCRIPT_URL}?action=check_auth&phone=${encodeURIComponent(phoneParam)}`);
-                const result = await resp.json();
-
-                if (!result.authorized || !result.properties || result.properties.length === 0) {
-                    showLockScreen(result.message || "This mobile number is not registered for active portal access.");
-                    return;
-                }
-
-                currentManager = result.user || "Authorised Manager";
-                currentPhone = result.phone || phoneParam;
-                authorizedProperties = result.properties;
-
-                authBadgeName.innerText = `Authorised: ${currentManager}`;
-
-                setupPropertyInterface();
-                setupValidationListeners();
-
-            } catch (err) {
-                showLockScreen("Unable to verify authorization with server. Check internet connection.");
-            }
-        });
-
-        function setupPropertyInterface() {
-            // Case A: Manager handles exactly ONE property
-            if (authorizedProperties.length === 1) {
-                selectedPropertyObj = authorizedProperties[0];
-                portalTitle.innerText = selectedPropertyObj.name.toUpperCase();
-                propSelectorCard.style.display = 'none';
-                applyPropertyMode(selectedPropertyObj.mode);
-            } 
-            // Case B: Manager handles MULTIPLE properties (e.g. Chris Lane -> La Hacienda & Maximes)
-            else {
-                propSelectorCard.style.display = 'block';
-                propertySelect.innerHTML = '';
-                authorizedProperties.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.name;
-                    opt.textContent = p.name;
-                    propertySelect.appendChild(opt);
-                });
-                selectedPropertyObj = authorizedProperties[0];
-                portalTitle.innerText = "Manager Portal";
-                applyPropertyMode(selectedPropertyObj.mode);
-            }
+    async function authenticateUser() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const authKey = urlParams.get('phone') || urlParams.get('user') || urlParams.get('auth');
+        
+        if (!authKey) {
+            document.getElementById('loadingMsg').innerText = "ACCESS DENIED: NO AUTH LINK.";
+            return;
         }
 
-        function onPropertySelectChange() {
-            const pickedName = propertySelect.value;
-            selectedPropertyObj = authorizedProperties.find(p => p.name === pickedName);
-            if (selectedPropertyObj) {
-                applyPropertyMode(selectedPropertyObj.mode);
-            }
-        }
-
-        // Dynamically adapts UI based on Col S setting ('Tow Request' | 'Pass Submission' | 'Both')
-        function applyPropertyMode(mode) {
-            const cleanMode = String(mode || 'Both').trim();
-
-            if (cleanMode === 'Tow Request') {
-                modeToggleWrap.style.display = 'none';
-                towPanel.style.display = 'block';
-                passPanel.style.display = 'none';
-                activeTab = 'tow';
-            } else if (cleanMode === 'Pass Submission') {
-                modeToggleWrap.style.display = 'none';
-                towPanel.style.display = 'none';
-                passPanel.style.display = 'block';
-                activeTab = 'pass';
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=check_auth&phone=" + encodeURIComponent(authKey));
+            const data = await res.json();
+            
+            if (data && data.authorized) {
+                activeAuth = data;
+                document.getElementById('loadingMsg').style.display = 'none';
+                document.getElementById('authBanner').innerText = "Authorised: " + (data.user || "Manager");
+                document.getElementById('authBanner').style.display = 'block';
+                document.getElementById('mainCard').style.display = 'block';
+                
+                populateProperties(data.properties);
             } else {
-                // Both modes permitted
-                modeToggleWrap.style.display = 'grid';
-                switchActiveTab('tow');
+                document.getElementById('loadingMsg').innerText = "ACCESS DENIED: NOT AUTHORISED.";
             }
+        } catch(e) {
+            document.getElementById('loadingMsg').innerText = "NETWORK ERROR VERIFYING AUTH.";
         }
+    }
 
-        function switchActiveTab(tab) {
-            activeTab = tab;
-            if (tab === 'tow') {
-                tabTowBtn.className = "tab-btn active-tow";
-                tabPassBtn.className = "tab-btn";
-                towPanel.style.display = 'block';
-                passPanel.style.display = 'none';
-            } else {
-                tabTowBtn.className = "tab-btn";
-                tabPassBtn.className = "tab-btn active-pass";
-                towPanel.style.display = 'none';
-                passPanel.style.display = 'block';
-            }
-        }
-
-        function showLockScreen(msg) {
-            lockMsg.innerText = msg;
-            lockOverlay.style.display = 'flex';
-        }
-
-        function setupValidationListeners() {
-            regoInput.addEventListener('input', () => {
-                submitTowBtn.disabled = regoInput.value.trim().length < 2;
-            });
-            passRegoInput.addEventListener('input', () => {
-                submitPassBtn.disabled = passRegoInput.value.trim().length < 2;
-            });
-        }
-
-        // Camera & ANPR Logic
-        openCamBtn.addEventListener('click', async () => {
-            camModal.style.display = 'flex';
-            try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
-                    audio: false
-                });
-                videoElem.srcObject = cameraStream;
-                await videoElem.play().catch(() => {});
-            } catch(err) {
-                alert("Camera permission required.");
-                closeCamera();
-            }
+    function populateProperties(props) {
+        const sel = document.getElementById('propertySelect');
+        sel.innerHTML = "";
+        props.forEach((p, idx) => {
+            const opt = document.createElement('option');
+            opt.value = p.name;
+            opt.innerText = p.name;
+            opt.dataset.mode = p.mode.toUpperCase();
+            sel.appendChild(opt);
         });
+        sel.addEventListener('change', updateUIForPropertyMode);
+        updateUIForPropertyMode();
+    }
 
-        function closeCamera() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(t => t.stop());
-                cameraStream = null;
-            }
-            camModal.style.display = 'none';
+    function updateUIForPropertyMode() {
+        const sel = document.getElementById('propertySelect');
+        const activeOpt = sel.options[sel.selectedIndex];
+        if (!activeOpt) return;
+
+        const mode = activeOpt.dataset.mode;
+        const toggle = document.getElementById('modeToggle');
+        
+        if (mode.includes("BOTH")) {
+            toggle.style.display = 'flex';
+            setMode("TOW");
+        } else if (mode.includes("PASS")) {
+            toggle.style.display = 'none';
+            setMode("PASS");
+        } else {
+            toggle.style.display = 'none';
+            setMode("TOW");
         }
+    }
 
-        snapBtn.addEventListener('click', async () => {
-            const vW = videoElem.videoWidth || 1280;
-            const vH = videoElem.videoHeight || 720;
-            const aspect = vH / vW;
+    function setMode(mode) {
+        currentMode = mode;
+        const btnTow = document.getElementById('btnModeTow');
+        const btnPass = document.getElementById('btnModePass');
+        const secTow = document.getElementById('towSection');
+        const secPass = document.getElementById('passSection');
+        const stat = document.getElementById('status');
+        stat.innerText = "";
 
-            const canvas = document.createElement('canvas');
-            canvas.width = 900;
-            canvas.height = Math.round(900 * aspect);
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        if (mode === 'TOW') {
+            btnTow.classList.add('mode-active-tow');
+            btnPass.classList.remove('mode-active-pass');
+            secTow.style.display = 'block';
+            secPass.style.display = 'none';
+        } else {
+            btnPass.classList.add('mode-active-pass');
+            btnTow.classList.remove('mode-active-tow');
+            secPass.style.display = 'block';
+            secTow.style.display = 'none';
+        }
+    }
 
-            capturedPhotoB64 = canvas.toDataURL('image/jpeg', 0.65);
+    // --- CAMERA ENGINE ---
+    async function openCamera() {
+        document.getElementById('camModal').style.display = 'flex';
+        const video = document.getElementById('videoElem');
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+            video.srcObject = videoStream;
+        } catch(e) {
+            alert("Camera access required for evidence photo.");
             closeCamera();
+        }
+    }
 
-            previewImg.src = capturedPhotoB64;
-            previewWrap.style.display = 'flex';
-            previewStatus.style.color = 'var(--accent-gold)';
-            previewStatus.innerText = '🔍 Scanning plate...';
-            statusText.innerText = 'Scanning plate...';
+    function closeCamera() {
+        if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+        document.getElementById('camModal').style.display = 'none';
+    }
 
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'scan_npr', photoBytes: capturedPhotoB64 })
-                });
-                const resData = await res.json();
-                if (resData && resData.rego) {
-                    regoInput.value = resData.rego.toUpperCase();
-                    previewStatus.style.color = 'var(--success)';
-                    previewStatus.innerText = `✔ Plate detected: ${resData.rego}`;
-                    statusText.innerText = `Plate ${resData.rego} populated.`;
-                } else {
-                    previewStatus.style.color = 'var(--accent-gold)';
-                    previewStatus.innerText = '✔ Photo attached (Enter rego manually)';
-                    statusText.innerText = '';
-                }
-            } catch(e) {
-                previewStatus.style.color = 'var(--accent-gold)';
-                previewStatus.innerText = '✔ Photo attached';
-                statusText.innerText = '';
+    function takeSnapshot() {
+        const video = document.getElementById('videoElem');
+        const canvas = document.createElement('canvas');
+        canvas.width = 800; canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        const vRatio = video.videoWidth / video.videoHeight;
+        
+        if (vRatio > 800/600) {
+            const drawW = 600 * vRatio;
+            ctx.drawImage(video, (800 - drawW) / 2, 0, drawW, 600);
+        } else {
+            const drawH = 800 / vRatio;
+            ctx.drawImage(video, 0, (600 - drawH) / 2, 800, drawH);
+        }
+        
+        capturedPhoto = canvas.toDataURL('image/jpeg', 0.6);
+        const preview = document.getElementById('photoPreview');
+        preview.src = capturedPhoto;
+        preview.style.display = 'block';
+        document.getElementById('openCamBtn').innerText = "🔄 RETAKE PHOTO";
+        document.getElementById('openCamBtn').style.borderStyle = "solid";
+        
+        closeCamera();
+        processANPR(capturedPhoto);
+    }
+
+    async function processANPR(b64) {
+        document.getElementById('status').innerText = "🔍 SCANNING PLATE...";
+        document.getElementById('status').style.color = "var(--accent-gold)";
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 })
+            });
+            const data = await res.json();
+            if (data && data.rego) {
+                document.getElementById('towRego').value = data.rego;
+                document.getElementById('status').innerText = "✔ PLATE DETECTED: " + data.rego;
+                document.getElementById('status').style.color = "var(--success)";
+            } else {
+                document.getElementById('status').innerText = "⚠️ NO PLATE DETECTED. PLEASE ENTER MANUALLY.";
             }
-            submitTowBtn.disabled = regoInput.value.trim().length < 2;
-        });
+        } catch(e) {
+            document.getElementById('status').innerText = "";
+        }
+    }
 
-        function removePhoto() {
-            capturedPhotoB64 = "";
-            previewWrap.style.display = 'none';
-            previewImg.src = "";
-            statusText.innerText = "";
+    // --- SUBMISSIONS ---
+    function showSuccess(mode, plate) {
+        const overlay = document.getElementById('successOverlay');
+        const title = document.getElementById('successTitle');
+        const sub = document.getElementById('successSub');
+
+        if (mode === "TOW") {
+            overlay.className = "success-tow";
+            title.innerText = "TOW REQUEST SENT";
+            sub.innerText = plate + " dispatched to driver.";
+        } else {
+            overlay.className = "success-pass";
+            title.innerText = "PASS ACTIVATED";
+            sub.innerText = plate + " logged in system.";
+        }
+        overlay.style.display = "flex";
+    }
+
+    async function submitTowRequest() {
+        const rego = document.getElementById('towRego').value.trim().toUpperCase();
+        if (!rego || !capturedPhoto) {
+            document.getElementById('status').innerText = "⚠️ PLEASE ENTER REGO AND ATTACH PHOTO";
+            return;
         }
 
-        // Tow Submission
-        submitTowBtn.addEventListener('click', async () => {
-            const cleanRego = regoInput.value.trim().toUpperCase();
-            if (cleanRego.length < 2) return;
+        const btn = document.getElementById('submitTowBtn');
+        btn.disabled = true;
+        btn.innerText = "SENDING...";
 
-            submitTowBtn.disabled = true;
-            statusText.innerText = "Transmitting priority tow request...";
+        const payload = {
+            action: 'log_mark',
+            isManagerRequest: true,
+            authorizer: activeAuth.user,
+            property: document.getElementById('propertySelect').value,
+            rego: rego,
+            reason: document.getElementById('towReason').value,
+            bay: document.getElementById('towBay').value.trim(),
+            photoBytes: capturedPhoto
+        };
 
-            const propertyName = selectedPropertyObj.name;
-            const bay = bayInput.value.trim();
-            const reason = reasonInput.value.trim();
-
-            const reasonParts = [];
-            if (bay) reasonParts.push(`Bay: ${bay}`);
-            if (reason) reasonParts.push(reason);
-            const combinedReason = reasonParts.join(' - ') || 'AUTHORISED TOW REQUEST';
-
-            const payload = {
-                action: 'log_mark',
-                isManagerRequest: true,
-                property: propertyName,
-                rego: cleanRego,
-                state: stateSelect.value || 'QLD',
-                reason: combinedReason,
-                bay: bay,
-                authorizer: currentManager,
-                photoBytes: capturedPhotoB64 || ""
-            };
-
-            try {
-                const resp = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await resp.json();
-
-                if (data && data.status === "SUCCESS") {
-                    successHeading.innerText = `${cleanRego} (${propertyName})`;
-                    successDesc.innerText = "Priority dispatch alert sent to National Towing operations.";
-                    successOverlay.style.display = 'flex';
-                } else {
-                    statusText.innerText = "Error: " + (data.message || "Please retry.");
-                    submitTowBtn.disabled = false;
-                }
-            } catch(err) {
-                statusText.innerText = "Network error. Please check connection.";
-                submitTowBtn.disabled = false;
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.status === "SUCCESS") {
+                showSuccess("TOW", rego);
+            } else {
+                document.getElementById('status').innerText = "ERROR: " + data.message;
+                btn.disabled = false;
+                btn.innerText = "SEND TOW REQUEST";
             }
-        });
+        } catch(e) {
+            document.getElementById('status').innerText = "NETWORK ERROR";
+            btn.disabled = false;
+            btn.innerText = "SEND TOW REQUEST";
+        }
+    }
 
-        // Pass Submission
-        submitPassBtn.addEventListener('click', async () => {
-            const cleanRego = passRegoInput.value.trim().toUpperCase();
-            if (cleanRego.length < 2) return;
+    async function submitVisitorPass() {
+        const rego = document.getElementById('passRego').value.trim().toUpperCase();
+        if (!rego) {
+            document.getElementById('status').innerText = "⚠️ PLEASE ENTER VEHICLE REGO";
+            return;
+        }
 
-            submitPassBtn.disabled = true;
-            statusText.innerText = "Registering digital visitor pass...";
+        const btn = document.getElementById('submitPassBtn');
+        btn.disabled = true;
+        btn.innerText = "ISSUING PASS...";
 
-            const propertyName = selectedPropertyObj.name;
-            const days = parseInt(passDurationSelect.value, 10) || 1;
-            const notes = passNotesInput.value.trim();
+        const payload = {
+            action: 'issue_pass',
+            property: document.getElementById('propertySelect').value,
+            rego: rego,
+            startDate: document.getElementById('passDate').value,
+            duration: document.getElementById('passDuration').value,
+            notes: "Authorised by " + activeAuth.user
+        };
 
-            const payload = {
-                action: 'add_pass',
-                property: propertyName,
-                rego: cleanRego,
-                duration: days,
-                notes: (notes ? notes + ' - ' : '') + `Issued by ${currentManager}`
-            };
-
-            try {
-                const resp = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await resp.json();
-
-                if (data && data.status === "SUCCESS") {
-                    successHeading.innerText = `PASS ISSUED: ${cleanRego}`;
-                    successDesc.innerText = `Active for ${propertyName} until ${data.expiryDate || 'expiry'}.`;
-                    successOverlay.style.display = 'flex';
-                } else {
-                    statusText.innerText = "Error: " + (data.message || "Please retry.");
-                    submitPassBtn.disabled = false;
-                }
-            } catch(err) {
-                statusText.innerText = "Network error. Please check connection.";
-                submitPassBtn.disabled = false;
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.status === "SUCCESS") {
+                showSuccess("PASS", rego);
+            } else {
+                document.getElementById('status').innerText = "ERROR: " + data.message;
+                btn.disabled = false;
+                btn.innerText = "ISSUE VISITOR PASS";
             }
-        });
-    </script>
+        } catch(e) {
+            document.getElementById('status').innerText = "NETWORK ERROR";
+            btn.disabled = false;
+            btn.innerText = "ISSUE VISITOR PASS";
+        }
+    }
+</script>
 </body>
 </html>
