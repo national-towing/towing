@@ -268,8 +268,6 @@
                 <option value="Station Wagon">Station Wagon</option>
                 <option value="Utility">Utility</option>
                 <option value="Van">Van</option>
-                <option value="Coupe">Coupe</option>
-                <option value="Convertible">Convertible</option>
                 <option value="Other">Other</option>
             </select>
         </div>
@@ -388,7 +386,7 @@
     regoInput.addEventListener('input', () => { checkCompPhoto(); autoPopulateFromCache(); });
     regoInput.addEventListener('change', () => { checkCompPhoto(); autoPopulateFromCache(); });
 
-    // READ PARAMS & AUTO-POPULATE FIELDS FROM RUN
+    // PARSES URL PARAMS & AUTO-POPULATES ALL VEHICLE DETAILS
     function readUrlParamsAndPopulate() {
         const params = new URLSearchParams(window.location.search);
         const urlRego = (params.get('rego') || '').trim().toUpperCase();
