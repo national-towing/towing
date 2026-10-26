@@ -745,7 +745,7 @@
         conditionPhotos.push(b64);
         
         // Auto-run AI classification on first condition photo if fields are blank
-        if (conditionPhotos.length === 1 && (!makeSelect.value || !modelInput.value)) {
+        if (conditionPhotos.length === 1 && (!regoInput.value || !makeSelect.value || !modelInput.value)) {
             triggerStandaloneAiClassification(b64);
         }
 
@@ -760,18 +760,36 @@
 
     async function triggerStandaloneAiClassification(b64) {
         statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = "🔍 AI IDENTIFYING MAKE & MODEL...";
+        statusDiv.innerText = "🔍 AI SCANNING REGO & VEHICLE DETAILS...";
+
+        const needsRego = !regoInput.value || regoInput.value.trim() === "";
+        const needsMMCT = !makeSelect.value || !modelInput.value;
+
+        // 1. Kick off ANPR Plate Reader if Rego is blank
+        const anprTask = needsRego ? fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 })
+        }).then(r => r.json()).catch(() => null) : Promise.resolve(null);
+
+        // 2. Kick off OpenAI Vision for MMCT if vehicle details are blank
+        const aiTask = needsMMCT ? fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'ai_classify', photoBytes: b64 })
+        }).then(r => r.json()).catch(() => null) : Promise.resolve(null);
 
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'ai_classify', photoBytes: b64 })
-            });
-            const data = await res.json();
+            const [anprRes, aiRes] = await Promise.all([anprTask, aiTask]);
 
-            if (data && data.status === "SUCCESS" && data.result) {
-                const r = data.result;
+            // Populate Rego
+            if (anprRes && anprRes.rego && (!regoInput.value || regoInput.value.trim() === "")) {
+                regoInput.value = anprRes.rego.trim().toUpperCase();
+            }
+
+            // Populate MMCT
+            if (aiRes && aiRes.status === "SUCCESS" && aiRes.result) {
+                const r = aiRes.result;
 
                 // Match Make
                 if (r.make && (!makeSelect.value || makeSelect.value === "")) {
@@ -823,14 +841,16 @@
                         }
                     }
                 }
-
-                validateForm();
-                syncDropdownColors();
-                statusDiv.style.color = "#00e676";
-                statusDiv.innerText = `✔ AI DETECTED: ${r.make} ${r.model} (${r.colour})`;
-            } else {
-                statusDiv.innerText = "";
             }
+
+            validateForm();
+            syncDropdownColors();
+            checkCompPhoto();
+
+            const detectedPlate = regoInput.value ? `${regoInput.value} • ` : "";
+            const detectedVeh = makeSelect.value ? `${makeSelect.value} ${modelInput.value || ''}` : "DETAILS LOGGED";
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = `✔ AI CAPTURED: ${detectedPlate}${detectedVeh}`;
         } catch(e) {
             statusDiv.innerText = "";
         }
