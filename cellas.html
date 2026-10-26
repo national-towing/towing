@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cellas Tow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
+    <title>Cellas Real Estate - Tow Request</title>
+
+    <style>
+        :root {
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --border: #333333;
+            --accent: #ff1744;
+            --accent-gold: #ffab00;
+            --success: #00e676;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { 
+            background: var(--bg); color: #fff; min-height: 100vh; padding: 14px;
+            display: flex; flex-direction: column; align-items: center; 
+        }
+
+        .header-box { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            position: relative; width: 100%; max-width: 440px; margin: 6px 0 16px 0; text-align: center;
+        }
+        .header-box h1 { 
+            font-size: 28px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase; 
+        }
+        .header-sub { 
+            font-size: 12px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;
+        }
+        .icon-btn { 
+            position: absolute; right: 0; top: 0; background: #2a2a2a; border: 1px solid #444; 
+            border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; 
+            align-items: center; justify-content: center; cursor: pointer; color: #fff; 
+        }
+
+        .card { 
+            background: var(--card-bg); border-radius: 18px; padding: 18px; width: 100%; 
+            max-width: 440px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        label { 
+            font-size: 11px; text-transform: uppercase; color: #aaa; display: block; 
+            margin-top: 12px; font-weight: 900; letter-spacing: 1px; 
+        }
+        input, select, textarea {
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 800; margin-top: 4px; outline: none;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+        }
+        textarea { height: 75px; padding: 10px 12px; font-size: 15px; font-weight: 600; resize: none; }
+        
+        ::placeholder { color: #777 !important; opacity: 1; }
+
+        /* VALIDATION STYLES */
+        .field-missing { border: 2px solid var(--accent-gold) !important; background: #2a2200 !important; }
+        .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
+
+        .row-2 { display: flex; gap: 10px; }
+        .row-2 > div:first-child { flex: 2; }
+        .row-2 > div:last-child { flex: 1; }
+
+        /* TAP TO SCAN BUTTON */
+        .scan-box-btn {
+            background: #2a1215; border: 2px dashed var(--accent); color: var(--accent);
+            border-radius: 12px; padding: 14px; margin-top: 14px; text-align: center;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px; transition: background 0.2s ease, transform 0.1s ease;
+        }
+        .scan-box-btn:active { background: #3d1b20; transform: scale(0.98); }
+        .scan-title { font-size: 15px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .scan-sub { font-size: 11px; font-weight: 700; color: #aaa; }
+
+        /* PREVIEW THUMBNAIL */
+        .preview-wrap { display: none; align-items: center; gap: 12px; margin-top: 10px; background: #141414; padding: 8px 12px; border-radius: 10px; border: 1px solid #333; }
+        .preview-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); }
+        .preview-info { flex: 1; }
+        .preview-status { font-size: 12px; font-weight: 800; color: var(--success); }
+        .preview-remove { font-size: 11px; font-weight: 800; color: #ff1744; cursor: pointer; text-decoration: underline; margin-top: 2px; }
+
+        .submit-btn {
+            background: var(--accent); color: #fff; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 22px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
+            text-transform: uppercase; box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
+        }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; pointer-events: none; }
+
+        #statusText { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; min-height: 20px; color: var(--accent-gold); }
+
+        /* SUCCESS OVERLAY */
+        #successOverlay {
+            display: none; position: fixed; inset: 0; background: rgba(0, 230, 118, 0.96);
+            z-index: 99999; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        #successOverlay h2 { font-size: 36px; font-weight: 900; color: #000; letter-spacing: 1px; }
+        #successOverlay p { font-size: 16px; font-weight: 800; color: #111; margin: 10px 0 30px 0; max-width: 90%; }
+        .done-btn {
+            background: #000; color: var(--success); font-size: 22px; font-weight: 900; border: none;
+            border-radius: 12px; padding: 16px 40px; cursor: pointer; letter-spacing: 2px;
+        }
+
+        /* FULLSCREEN CAMERA MODAL */
+        #camModal {
+            display: none; position: fixed; inset: 0; background: #000; z-index: 10000; flex-direction: column;
+        }
+        .cam-topbar { height: 50px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 2; }
+        .cam-close-btn { background: #333; color: #fff; font-size: 13px; font-weight: 900; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
+        .cam-view { flex: 1; width: 100%; height: 100%; position: relative; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .cam-snap-btn {
+            position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+            width: 80px; height: 80px; background: var(--accent); border: 4px solid #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .cam-snap-btn:active { transform: translateX(-50%) scale(0.92); }
+        .cam-snap-inner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000; }
+    </style>
+</head>
+<body>
+
+    <div class="header-box">
+        <h1>Cellas Real Estate</h1>
+        <div class="header-sub">Authorised Tow Request Portal</div>
+        <div class="icon-btn" onclick="window.location.reload(true)">🔄</div>
+    </div>
+
+    <div class="card">
+        <!-- MANDATORY PROPERTY SELECTOR -->
+        <label>PROPERTY *</label>
+        <select id="propertySelect" onchange="onPropertyChange()">
+            <option value="" disabled selected>-- SELECT PROPERTY --</option>
+            <option value="La Hacienda">La Hacienda</option>
+            <option value="Maximes">Maximes</option>
+        </select>
+
+        <!-- TAP TO SCAN / CAMERA -->
+        <div class="scan-box-btn" id="openCamBtn">
+            <span class="scan-title">📷 Tap to Scan Plate / Photo</span>
+            <span class="scan-sub">Auto-reads licence plate into the box below</span>
+        </div>
+
+        <div class="preview-wrap" id="previewWrap">
+            <img id="previewImg" class="preview-img" src="">
+            <div class="preview-info">
+                <div class="preview-status" id="previewStatus">Photo Attached</div>
+                <div class="preview-remove" onclick="removePhoto()">Remove / Retake</div>
+            </div>
+        </div>
+
+        <!-- REGO & STATE (MANDATORY) -->
+        <div class="row-2">
+            <div>
+                <label>REGISTRATION *</label>
+                <input type="text" id="regoInput" placeholder="REGO" autocomplete="off" autocorrect="off" style="color:var(--accent); text-transform:uppercase;">
+            </div>
+            <div>
+                <label>STATE</label>
+                <select id="stateSelect" style="color:var(--accent-gold);">
+                    <option value="QLD" selected>QLD</option>
+                    <option value="NSW">NSW</option>
+                    <option value="VIC">VIC</option>
+                    <option value="NT">NT</option>
+                    <option value="SA">SA</option>
+                    <option value="TAS">TAS</option>
+                    <option value="ACT">ACT</option>
+                    <option value="WA">WA</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- BAY / LOCATION (OPTIONAL) -->
+        <label>BAY # / LOCATION (OPTIONAL)</label>
+        <input type="text" id="bayInput" placeholder="e.g. Visitor Bay 4, Driveway" autocomplete="off">
+
+        <!-- REASON FOR TOW (OPTIONAL) -->
+        <label>REASON FOR TOW (OPTIONAL)</label>
+        <textarea id="reasonInput" placeholder="e.g. Parked in numbered bay without permission, blocking egress..."></textarea>
+
+        <!-- MANDATORY AUTHORISED PERSON -->
+        <label>REQUESTED BY (must be Authorised Person) *</label>
+        <select id="authorizerSelect" disabled>
+            <option value="" disabled selected>-- SELECT PROPERTY FIRST --</option>
+        </select>
+
+        <button type="button" class="submit-btn" id="submitBtn" disabled>SUBMIT TOW REQUEST</button>
+        <div id="statusText"></div>
+    </div>
+
+    <!-- FULLSCREEN SUCCESS OVERLAY -->
+    <div id="successOverlay">
+        <h2 id="successRego">REQUEST SUBMITTED</h2>
+        <p>National Towing operations has received this request and scheduled priority dispatch.</p>
+        <button type="button" class="done-btn" onclick="window.location.reload(true)">DONE ✓</button>
+    </div>
+
+    <!-- FULLSCREEN CAMERA MODAL -->
+    <div id="camModal">
+        <div class="cam-topbar">
+            <span style="font-size:13px; font-weight:800; color:#ffab00;">ALIGN VEHICLE & PLATE</span>
+            <button type="button" class="cam-close-btn" onclick="closeCamera()">CANCEL</button>
+        </div>
+        <div class="cam-view">
+            <video id="videoElem" autoplay playsinline muted></video>
+            <div class="cam-snap-btn" id="snapBtn"><div class="cam-snap-inner"></div></div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+        // Authorised personnel mapping
+        const AUTHORISED_MAP = {
+            "Maximes": ["Chris Lane"],
+            "La Hacienda": ["Chris Lane", "Brett Judd", "Lewis Stevens"]
+        };
+
+        const propertySelect = document.getElementById('propertySelect');
+        const regoInput = document.getElementById('regoInput');
+        const stateSelect = document.getElementById('stateSelect');
+        const bayInput = document.getElementById('bayInput');
+        const reasonInput = document.getElementById('reasonInput');
+        const authorizerSelect = document.getElementById('authorizerSelect');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusText = document.getElementById('statusText');
+
+        const openCamBtn = document.getElementById('openCamBtn');
+        const camModal = document.getElementById('camModal');
+        const videoElem = document.getElementById('videoElem');
+        const snapBtn = document.getElementById('snapBtn');
+        const previewWrap = document.getElementById('previewWrap');
+        const previewImg = document.getElementById('previewImg');
+        const previewStatus = document.getElementById('previewStatus');
+        const successOverlay = document.getElementById('successOverlay');
+        const successRego = document.getElementById('successRego');
+
+        let capturedPhotoB64 = "";
+        let cameraStream = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupValidationListeners();
+        });
+
+        // Dynamic Authorised Person population based on property
+        function onPropertyChange() {
+            const prop = propertySelect.value;
+            authorizerSelect.innerHTML = '<option value="" disabled selected>-- SELECT AUTHORISED PERSON --</option>';
+
+            if (prop && AUTHORISED_MAP[prop]) {
+                authorizerSelect.disabled = false;
+                AUTHORISED_MAP[prop].forEach(person => {
+                    const opt = document.createElement('option');
+                    opt.value = person;
+                    opt.textContent = person;
+                    authorizerSelect.appendChild(opt);
+                });
+            } else {
+                authorizerSelect.disabled = true;
+            }
+            validateForm();
+        }
+
+        function setupValidationListeners() {
+            [propertySelect, regoInput, authorizerSelect].forEach(el => {
+                el.addEventListener('input', validateForm);
+                el.addEventListener('change', validateForm);
+            });
+            validateForm();
+        }
+
+        function validateForm() {
+            let valid = true;
+
+            function check(el, cond) {
+                if (!el) return;
+                if (cond) {
+                    el.classList.remove('field-missing');
+                    el.classList.add('field-valid');
+                } else {
+                    el.classList.remove('field-valid');
+                    el.classList.add('field-missing');
+                    valid = false;
+                }
+            }
+
+            check(propertySelect, propertySelect.value !== "");
+            check(regoInput, regoInput.value.trim().length >= 2);
+            check(authorizerSelect, authorizerSelect.value !== "" && !authorizerSelect.disabled);
+
+            submitBtn.disabled = !valid;
+            return valid;
+        }
+
+        // Camera & ANPR
+        openCamBtn.addEventListener('click', async () => {
+            camModal.style.display = 'flex';
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    audio: false
+                });
+                videoElem.srcObject = cameraStream;
+                await videoElem.play().catch(() => {});
+            } catch(err) {
+                alert("Camera error: Please ensure camera permissions are allowed.");
+                closeCamera();
+            }
+        });
+
+        function closeCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null;
+            }
+            camModal.style.display = 'none';
+        }
+
+        snapBtn.addEventListener('click', async () => {
+            const vW = videoElem.videoWidth || 1280;
+            const vH = videoElem.videoHeight || 720;
+            const aspect = vH / vW;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 900;
+            canvas.height = Math.round(900 * aspect);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+
+            capturedPhotoB64 = canvas.toDataURL('image/jpeg', 0.65);
+            closeCamera();
+
+            previewImg.src = capturedPhotoB64;
+            previewWrap.style.display = 'flex';
+            previewStatus.style.color = 'var(--accent-gold)';
+            previewStatus.innerText = '🔍 Scanning plate...';
+            statusText.innerText = 'Processing plate recognition...';
+
+            // Automatic Plate Reader (Plate Recognizer API through backend)
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'scan_npr',
+                        photoBytes: capturedPhotoB64
+                    })
+                });
+                const resData = await res.json();
+                if (resData && resData.rego) {
+                    regoInput.value = resData.rego.toUpperCase();
+                    previewStatus.style.color = 'var(--success)';
+                    previewStatus.innerText = `✔ Plate detected: ${resData.rego}`;
+                    statusText.innerText = `Plate ${resData.rego} populated.`;
+                } else {
+                    previewStatus.style.color = 'var(--accent-gold)';
+                    previewStatus.innerText = '✔ Photo attached (Enter rego manually)';
+                    statusText.innerText = '';
+                }
+            } catch(e) {
+                previewStatus.style.color = 'var(--accent-gold)';
+                previewStatus.innerText = '✔ Photo attached';
+                statusText.innerText = '';
+            }
+
+            validateForm();
+        });
+
+        function removePhoto() {
+            capturedPhotoB64 = "";
+            previewWrap.style.display = 'none';
+            previewImg.src = "";
+            statusText.innerText = "";
+        }
+
+        // Submission
+        submitBtn.addEventListener('click', async () => {
+            if (!validateForm()) {
+                statusText.innerText = "Please complete all required fields highlighted in gold.";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            statusText.innerText = "Transmitting priority tow request...";
+
+            const cleanRego = regoInput.value.trim().toUpperCase();
+            const property = propertySelect.value;
+            const bay = bayInput.value.trim();
+            const reason = reasonInput.value.trim();
+            const authorizer = authorizerSelect.value;
+
+            // Combine Bay and Reason cleanly for the Tow Run Log
+            const reasonParts = [];
+            if (bay) reasonParts.push(`Bay: ${bay}`);
+            if (reason) reasonParts.push(reason);
+            const combinedReason = reasonParts.join(' - ') || 'AUTHORISED TOW REQUEST';
+
+            const payload = {
+                action: 'log_mark',
+                isManagerRequest: true,
+                property: property,
+                rego: cleanRego,
+                state: stateSelect.value || 'QLD',
+                reason: combinedReason,
+                bay: bay,
+                authorizer: authorizer,
+                photoBytes: capturedPhotoB64 || ""
+            };
+
+            try {
+                const resp = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+
+                if (data && data.status === "SUCCESS") {
+                    successRego.innerText = `${cleanRego} (${property})`;
+                    successOverlay.style.display = 'flex';
+                } else {
+                    statusText.innerText = "Submission error: " + (data.message || "Please retry.");
+                    submitBtn.disabled = false;
+                }
+            } catch(err) {
+                statusText.innerText = "Network error. Please check connection and retry.";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
