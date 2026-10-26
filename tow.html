@@ -743,6 +743,11 @@
         
         const b64 = canvas.toDataURL('image/jpeg', 0.45);
         conditionPhotos.push(b64);
+        
+        // Auto-run AI classification on first condition photo if fields are blank
+        if (conditionPhotos.length === 1 && (!makeSelect.value || !modelInput.value)) {
+            triggerStandaloneAiClassification(b64);
+        }
 
         if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
             try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
@@ -752,6 +757,84 @@
         modalCounter.innerText = `${conditionPhotos.length} PHOTOS TAKEN`;
         if (navigator.vibrate) navigator.vibrate(40);
     });
+
+    async function triggerStandaloneAiClassification(b64) {
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "🔍 AI IDENTIFYING MAKE & MODEL...";
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'ai_classify', photoBytes: b64 })
+            });
+            const data = await res.json();
+
+            if (data && data.status === "SUCCESS" && data.result) {
+                const r = data.result;
+
+                // Match Make
+                if (r.make && (!makeSelect.value || makeSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < makeSelect.options.length; i++) {
+                        if (makeSelect.options[i].value.toLowerCase() === r.make.toLowerCase()) {
+                            makeSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        makeSelect.value = "Other";
+                        makeOtherInput.style.display = 'block';
+                        makeOtherInput.value = r.make;
+                    }
+                }
+
+                // Match Model
+                if (r.model && !modelInput.value) {
+                    modelInput.value = r.model;
+                }
+
+                // Match Colour
+                if (r.colour && (!colourSelect.value || colourSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < colourSelect.options.length; i++) {
+                        if (colourSelect.options[i].value.toLowerCase() === r.colour.toLowerCase()) {
+                            colourSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        colourSelect.value = "Other";
+                        colourOtherInput.style.display = 'block';
+                        colourOtherInput.value = r.colour;
+                    }
+                }
+
+                // Match Body Type
+                if (r.bodyType && (!bodyTypeSelect.value || bodyTypeSelect.value === "")) {
+                    for (let i = 0; i < bodyTypeSelect.options.length; i++) {
+                        const optVal = bodyTypeSelect.options[i].value.toLowerCase();
+                        const bLower = r.bodyType.toLowerCase();
+                        if (optVal === bLower || (bLower === "ute" && optVal === "utility") || (bLower === "wagon" && optVal === "station wagon")) {
+                            bodyTypeSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                validateForm();
+                syncDropdownColors();
+                statusDiv.style.color = "#00e676";
+                statusDiv.innerText = `✔ AI DETECTED: ${r.make} ${r.model} (${r.colour})`;
+            } else {
+                statusDiv.innerText = "";
+            }
+        } catch(e) {
+            statusDiv.innerText = "";
+        }
+    }
 
     function renderThumbs() {
         thumbGallery.innerHTML = "";
