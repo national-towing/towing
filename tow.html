@@ -10,8 +10,8 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10003">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10003">
+    <link rel="apple-touch-icon" href="icon-manager.png?v=2">
+    <link rel="icon" type="image/png" href="icon-manager.png?v=2">
     <link rel="manifest" href="manifest-tow.json?v=10003">
 
     <style>
@@ -60,14 +60,12 @@
             -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
 
-        /* PLACEHOLDER STYLING */
         ::placeholder { color: #888888 !important; opacity: 1; }
         input::placeholder, textarea::placeholder { color: #888888 !important; opacity: 1; }
 
         select option { background: #2a2a2a; color: #ffffff; }
         select option[value=""] { color: #888888; }
 
-        /* LIVE VALIDATION STYLES */
         .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
         .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
 
@@ -110,7 +108,6 @@
 
         #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
 
-        /* FULLSCREEN SUCCESS OVERLAY */
         #successOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: rgba(0, 230, 118, 0.95); z-index: 999999; flex-direction: column;
@@ -125,7 +122,6 @@
         }
         .ok-btn:active { transform: scale(0.95); }
 
-        /* FULLSCREEN CAMERA MODAL */
         .cam-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 99999; flex-direction: column;
@@ -352,7 +348,6 @@
     let trackCapabilities = {};
     let targetProperty = "";
 
-    // FLASH STATE: 'auto' | 'torch' | 'off'
     let flashMode = localStorage.getItem('tow_flash_mode') || 'auto';
 
     (function readUrlParamsNow() {
@@ -363,7 +358,6 @@
         if (urlProp) targetProperty = decodeURIComponent(urlProp).trim().toUpperCase();
     })();
 
-    // Synchronize select font colors to match grey placeholders until an option is picked
     function syncDropdownColors() {
         document.querySelectorAll('select').forEach(sel => {
             const updateColor = () => {
@@ -388,13 +382,81 @@
         checkCompPhoto();
         setupLiveValidation();
         syncDropdownColors();
+        autoPopulateFromRun();
         window.addEventListener('online', syncPendingTowsInBackground);
         syncPendingTowsInBackground();
         setInterval(syncPendingTowsInBackground, 10000);
     });
 
-    regoInput.addEventListener('input', checkCompPhoto);
-    regoInput.addEventListener('change', checkCompPhoto);
+    regoInput.addEventListener('input', () => { checkCompPhoto(); autoPopulateFromRun(); });
+    regoInput.addEventListener('change', () => { checkCompPhoto(); autoPopulateFromRun(); });
+
+    // Auto-fill Make, Model, Colour, Body Type from memory if previously marked
+    function autoPopulateFromRun() {
+        const currentRego = regoInput.value.trim().toUpperCase();
+        if (!currentRego) return;
+
+        const cached = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
+        const found = cached.find(item => String(item.rego).trim().toUpperCase() === currentRego);
+        if (!found) return;
+
+        if (found.property && (!propertySelect.value || propertySelect.value === "")) {
+            for (let i = 0; i < propertySelect.options.length; i++) {
+                if (propertySelect.options[i].value.toUpperCase() === found.property.toUpperCase()) {
+                    propertySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (found.make && (!makeSelect.value || makeSelect.value === "")) {
+            let matched = false;
+            for (let i = 0; i < makeSelect.options.length; i++) {
+                if (makeSelect.options[i].value.toUpperCase() === found.make.toUpperCase()) {
+                    makeSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                makeSelect.value = "Other";
+                makeOtherInput.style.display = "block";
+                makeOtherInput.value = found.make;
+            }
+        }
+
+        if (found.model && (!modelInput.value || modelInput.value.trim() === "")) {
+            modelInput.value = found.model;
+        }
+
+        if (found.colour && (!colourSelect.value || colourSelect.value === "")) {
+            let matched = false;
+            for (let i = 0; i < colourSelect.options.length; i++) {
+                if (colourSelect.options[i].value.toUpperCase() === found.colour.toUpperCase()) {
+                    colourSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                colourSelect.value = "Other";
+                colourOtherInput.style.display = "block";
+                colourOtherInput.value = found.colour;
+            }
+        }
+
+        if (found.bodyType && (!bodyTypeSelect.value || bodyTypeSelect.value === "")) {
+            for (let i = 0; i < bodyTypeSelect.options.length; i++) {
+                if (bodyTypeSelect.options[i].value.toUpperCase() === found.bodyType.toUpperCase()) {
+                    bodyTypeSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        validateForm();
+        syncDropdownColors();
+    }
 
     function checkCompPhoto() {
         const rego = regoInput.value.trim().toUpperCase();
@@ -446,11 +508,11 @@
                 propertySelect.appendChild(opt);
             }
         });
+        autoPopulateFromRun();
         validateForm();
         syncDropdownColors();
     }
 
-    // --- LIVE VALIDATION LOGIC ---
     function setupLiveValidation() {
         const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
         inputs.forEach(elem => {
@@ -511,7 +573,6 @@
         return isValid;
     }
 
-    // --- FULLSCREEN CAMERA CONTROLS ---
     openCamBtn.addEventListener('click', async () => {
         camModal.classList.add('show');
         await startCamera();
@@ -677,7 +738,6 @@
         validateForm();
     }
 
-    // --- INSTANT BACKGROUND SUBMISSION ---
     submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
         
@@ -717,7 +777,6 @@
             timestamp: new Date().toISOString()
         };
 
-        // 1. Blacklist immediately so vehicle vanishes from RUN permanently
         try {
             let blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
             blacklisted[rego] = Date.now();
@@ -729,10 +788,8 @@
             localStorage.removeItem('pending_comp_' + rego);
         } catch(err) {}
 
-        // 2. Safely put into offline queue
         saveToOfflineQueue(payload);
 
-        // 3. Fire async upload without waiting (Non-blocking)
         if (navigator.onLine) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -746,7 +803,6 @@
               }).catch(e => console.warn("Background upload paused, keeping in queue"));
         }
 
-        // 4. Instantly show Green Success Screen
         successRego.innerText = rego + " LOGGED";
         successOverlay.style.display = "flex";
     });
