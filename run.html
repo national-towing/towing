@@ -379,6 +379,8 @@
     });
 
     document.getElementById('refreshBtn').addEventListener('click', () => {
+        localStorage.removeItem('towed_blacklist');
+        localStorage.removeItem('cached_run_data');
         document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
         loadTowRun();
     });
@@ -404,13 +406,11 @@
             return;
         }
 
-        const blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
         const nowMs = Date.now();
 
         data = data.filter(item => {
             const r = String(item.rego || '').trim().toUpperCase();
-            if (!r || (blacklisted[r] && (nowMs - blacklisted[r] < 4 * 60 * 60 * 1000))) return false;
-            return true;
+            return !!r;
         });
 
         propertyGroups = {};
