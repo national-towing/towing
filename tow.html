@@ -60,14 +60,12 @@
             -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
 
-        /* PLACEHOLDER STYLING */
         ::placeholder { color: #888888 !important; opacity: 1; }
         input::placeholder, textarea::placeholder { color: #888888 !important; opacity: 1; }
 
         select option { background: #2a2a2a; color: #ffffff; }
         select option[value=""] { color: #888888; }
 
-        /* LIVE VALIDATION STYLES */
         .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
         .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
 
@@ -266,9 +264,12 @@
                 <option value="" disabled selected>BODY TYPE</option>
                 <option value="Sedan">Sedan</option>
                 <option value="Hatchback">Hatchback</option>
+                <option value="SUV">SUV</option>
                 <option value="Station Wagon">Station Wagon</option>
                 <option value="Utility">Utility</option>
                 <option value="Van">Van</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Convertible">Convertible</option>
                 <option value="Other">Other</option>
             </select>
         </div>
@@ -352,18 +353,8 @@
     let trackCapabilities = {};
     let targetProperty = "";
 
-    // FLASH STATE: 'auto' | 'torch' | 'off'
     let flashMode = localStorage.getItem('tow_flash_mode') || 'auto';
 
-    (function readUrlParamsNow() {
-        const params = new URLSearchParams(window.location.search);
-        const urlRego = params.get('rego');
-        const urlProp = params.get('prop');
-        if (urlRego) regoInput.value = urlRego.trim().toUpperCase();
-        if (urlProp) targetProperty = decodeURIComponent(urlProp).trim().toUpperCase();
-    })();
-
-    // Synchronize select font colors to match grey placeholders until an option is picked
     function syncDropdownColors() {
         document.querySelectorAll('select').forEach(sel => {
             const updateColor = () => {
@@ -385,6 +376,7 @@
         updateTorchUI();
         loadProperties();
         updateQueueUI();
+        readUrlParamsAndPopulate();
         checkCompPhoto();
         setupLiveValidation();
         syncDropdownColors();
@@ -393,8 +385,137 @@
         setInterval(syncPendingTowsInBackground, 10000);
     });
 
-    regoInput.addEventListener('input', checkCompPhoto);
-    regoInput.addEventListener('change', checkCompPhoto);
+    regoInput.addEventListener('input', () => { checkCompPhoto(); autoPopulateFromCache(); });
+    regoInput.addEventListener('change', () => { checkCompPhoto(); autoPopulateFromCache(); });
+
+    // READ PARAMS & AUTO-POPULATE FIELDS FROM RUN
+    function readUrlParamsAndPopulate() {
+        const params = new URLSearchParams(window.location.search);
+        const urlRego = (params.get('rego') || '').trim().toUpperCase();
+        const urlProp = (params.get('prop') || '').trim();
+        const urlMake = (params.get('make') || '').trim();
+        const urlModel = (params.get('model') || '').trim();
+        const urlColour = (params.get('colour') || '').trim();
+        const urlBody = (params.get('body') || '').trim();
+
+        if (urlRego) regoInput.value = urlRego;
+        if (urlProp) targetProperty = decodeURIComponent(urlProp).toUpperCase();
+
+        let cachedCar = null;
+        try {
+            const cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || '[]');
+            cachedCar = cachedRun.find(c => String(c.rego).trim().toUpperCase() === urlRego) || null;
+        } catch(e) {}
+
+        const makeVal = urlMake || (cachedCar ? cachedCar.make : "");
+        const modelVal = urlModel || (cachedCar ? cachedCar.model : "");
+        const colourVal = urlColour || (cachedCar ? cachedCar.colour : "");
+        const bodyVal = urlBody || (cachedCar ? cachedCar.bodyType : "");
+
+        if (makeVal) {
+            let matched = false;
+            for (let i = 0; i < makeSelect.options.length; i++) {
+                if (makeSelect.options[i].value.toLowerCase() === makeVal.toLowerCase()) {
+                    makeSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                makeSelect.value = "Other";
+                makeOtherInput.style.display = 'block';
+                makeOtherInput.value = makeVal;
+            } else {
+                makeOtherInput.style.display = 'none';
+            }
+        }
+
+        if (modelVal) modelInput.value = modelVal;
+
+        if (colourVal) {
+            let matched = false;
+            for (let i = 0; i < colourSelect.options.length; i++) {
+                if (colourSelect.options[i].value.toLowerCase() === colourVal.toLowerCase()) {
+                    colourSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                colourSelect.value = "Other";
+                colourOtherInput.style.display = 'block';
+                colourOtherInput.value = colourVal;
+            } else {
+                colourOtherInput.style.display = 'none';
+            }
+        }
+
+        if (bodyVal) {
+            for (let i = 0; i < bodyTypeSelect.options.length; i++) {
+                const optVal = bodyTypeSelect.options[i].value.toLowerCase();
+                const bLower = bodyVal.toLowerCase();
+                if (optVal === bLower || (bLower === "ute" && optVal === "utility") || (bLower === "wagon" && optVal === "station wagon")) {
+                    bodyTypeSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        validateForm();
+        syncDropdownColors();
+    }
+
+    function autoPopulateFromCache() {
+        const curRego = regoInput.value.trim().toUpperCase();
+        if (!curRego) return;
+        try {
+            const cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || '[]');
+            const found = cachedRun.find(c => String(c.rego).trim().toUpperCase() === curRego);
+            if (found) {
+                if (found.property && (!propertySelect.value || propertySelect.value === "")) {
+                    for (let i = 0; i < propertySelect.options.length; i++) {
+                        if (propertySelect.options[i].value.toUpperCase() === found.property.toUpperCase()) {
+                            propertySelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (found.make && (!makeSelect.value || makeSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < makeSelect.options.length; i++) {
+                        if (makeSelect.options[i].value.toLowerCase() === found.make.toLowerCase()) {
+                            makeSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        makeSelect.value = "Other";
+                        makeOtherInput.style.display = 'block';
+                        makeOtherInput.value = found.make;
+                    }
+                }
+                if (found.model && !modelInput.value) modelInput.value = found.model;
+                if (found.colour && (!colourSelect.value || colourSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < colourSelect.options.length; i++) {
+                        if (colourSelect.options[i].value.toLowerCase() === found.colour.toLowerCase()) {
+                            colourSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        colourSelect.value = "Other";
+                        colourOtherInput.style.display = 'block';
+                        colourOtherInput.value = found.colour;
+                    }
+                }
+                validateForm();
+                syncDropdownColors();
+            }
+        } catch(e) {}
+    }
 
     function checkCompPhoto() {
         const rego = regoInput.value.trim().toUpperCase();
@@ -450,7 +571,6 @@
         syncDropdownColors();
     }
 
-    // --- LIVE VALIDATION LOGIC ---
     function setupLiveValidation() {
         const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
         inputs.forEach(elem => {
@@ -511,7 +631,6 @@
         return isValid;
     }
 
-    // --- FULLSCREEN CAMERA CONTROLS ---
     openCamBtn.addEventListener('click', async () => {
         camModal.classList.add('show');
         await startCamera();
@@ -548,9 +667,7 @@
 
         if (videoTrack && trackCapabilities.torch) {
             try {
-                await videoTrack.applyConstraints({
-                    advanced: [{ torch: (flashMode === 'torch') }]
-                });
+                await videoTrack.applyConstraints({ advanced: [{ torch: (flashMode === 'torch') }] });
             } catch(e) {}
         }
     });
@@ -567,11 +684,8 @@
             for (let i = 0; i < imgData.length; i += 4) {
                 totalLuminance += (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
             }
-            const avgLuminance = totalLuminance / (imgData.length / 4);
-            return avgLuminance < 50;
-        } catch(e) {
-            return false;
-        }
+            return (totalLuminance / (imgData.length / 4)) < 50;
+        } catch(e) { return false; }
     }
 
     async function startCamera() {
@@ -590,9 +704,7 @@
                 } else {
                     torchBtn.style.display = 'block';
                     if (flashMode === 'torch') {
-                        try {
-                            await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
-                        } catch(e) {}
+                        try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
                     }
                 }
             }
@@ -617,9 +729,7 @@
             try {
                 await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
                 firedFlash = true;
-                if (flashMode !== 'torch') {
-                    await new Promise(r => setTimeout(r, 300));
-                }
+                if (flashMode !== 'torch') await new Promise(r => setTimeout(r, 300));
             } catch(e) {}
         }
 
@@ -637,14 +747,11 @@
         conditionPhotos.push(b64);
 
         if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
-            try {
-                await videoTrack.applyConstraints({ advanced: [{ torch: false }] });
-            } catch(e) {}
+            try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
         }
 
         renderThumbs();
         modalCounter.innerText = `${conditionPhotos.length} PHOTOS TAKEN`;
-        
         if (navigator.vibrate) navigator.vibrate(40);
     });
 
@@ -677,7 +784,6 @@
         validateForm();
     }
 
-    // --- INSTANT BACKGROUND SUBMISSION ---
     submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
         
@@ -697,7 +803,6 @@
         const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
         const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
         const driver = officerSelect.value === "Other" ? officerOtherInput.value.trim() : officerSelect.value;
-
         const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
 
         const payload = {
@@ -717,7 +822,6 @@
             timestamp: new Date().toISOString()
         };
 
-        // 1. Blacklist immediately so vehicle vanishes from RUN permanently
         try {
             let blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
             blacklisted[rego] = Date.now();
@@ -729,10 +833,8 @@
             localStorage.removeItem('pending_comp_' + rego);
         } catch(err) {}
 
-        // 2. Safely put into offline queue
         saveToOfflineQueue(payload);
 
-        // 3. Fire async upload without waiting (Non-blocking)
         if (navigator.onLine) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -746,7 +848,6 @@
               }).catch(e => console.warn("Background upload paused, keeping in queue"));
         }
 
-        // 4. Instantly show Green Success Screen
         successRego.innerText = rego + " LOGGED";
         successOverlay.style.display = "flex";
     });
