@@ -126,56 +126,84 @@
             flex-direction: column;
         }
         .hud-cam-header {
-            height: 52px; background: rgba(0,0,0,0.85); display: flex; align-items: center;
+            height: 54px; background: rgba(0,0,0,0.85); display: flex; align-items: center;
             justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 10;
         }
         .hud-cam-view { flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; }
         #hudVideo { width: 100%; height: 100%; object-fit: cover; }
         
+        /* EXPANDED TARGET RETICLE */
         .hud-target-reticle {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            width: 75%; height: 90px; border: 2.5px dashed #00e676; border-radius: 12px;
+            width: 88%; max-width: 420px; height: 160px; border: 3.5px dashed #00e676; border-radius: 16px;
             pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
         }
         .hud-target-hint {
-            position: absolute; top: -24px; left: 0; width: 100%; text-align: center;
-            color: #00e676; font-weight: 900; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+            position: absolute; top: -28px; left: 0; width: 100%; text-align: center;
+            color: #00e676; font-weight: 900; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         .hud-snap-trigger {
             position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
-            width: 86px; height: 86px; background: #fff; border: 5px solid #000; border-radius: 50%;
+            width: 90px; height: 90px; background: #fff; border: 5px solid #000; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20;
             box-shadow: 0 4px 20px rgba(0,0,0,0.8);
         }
         .hud-snap-trigger:active { transform: translateX(-50%) scale(0.92); }
-        .hud-snap-inner { width: 62px; height: 62px; background: #ff1744; border-radius: 50%; }
+        .hud-snap-inner { width: 66px; height: 66px; background: #ff1744; border-radius: 50%; }
 
-        /* INSTANT 2-SECOND HUD OVERLAY FLASH */
+        /* FULLSCREEN HUD RESULT OVERLAY (PERSISTENT UNTIL TAPPED) */
         #hudFlashOverlay {
             display: none; position: fixed; inset: 0; z-index: 100000;
             flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 24px; transition: opacity 0.2s ease;
+            text-align: center; padding: 24px; cursor: pointer; user-select: none;
         }
-        .hud-flash-tow    { background: rgba(255, 23, 68, 0.96); }   /* RED */
-        .hud-flash-pass   { background: rgba(41, 182, 246, 0.96); }  /* BLUE */
-        .hud-flash-nomark { background: rgba(0, 230, 118, 0.96); }   /* GREEN */
-        .hud-flash-wait   { background: rgba(255, 171, 0, 0.96); }   /* ORANGE */
+        .hud-flash-tow     { background: rgba(255, 23, 68, 0.98); }   /* RED */
+        .hud-flash-pass    { background: rgba(41, 182, 246, 0.98); }  /* BLUE */
+        .hud-flash-nomark  { background: rgba(0, 230, 118, 0.98); }   /* GREEN */
+        .hud-flash-wait    { background: rgba(255, 171, 0, 0.98); }   /* ORANGE */
+        .hud-flash-noplate { background: rgba(20, 20, 20, 0.98); border: 4px solid #ff1744; } /* NO PLATE */
 
+        .hud-main-icon { font-size: 70px; margin-bottom: 4px; line-height: 1; }
         .hud-main-status {
             font-size: 78px; font-weight: 950; color: #000; letter-spacing: 3px;
             text-transform: uppercase; line-height: 0.95; margin: 0; text-shadow: 0 2px 10px rgba(255,255,255,0.3);
         }
+        .hud-flash-noplate .hud-main-status { color: #ff1744; text-shadow: none; font-size: 60px; }
+        
         .hud-sub-plate {
-            font-size: 44px; font-weight: 900; color: #fff; margin-top: 14px;
+            font-size: 46px; font-weight: 900; color: #fff; margin-top: 10px;
             letter-spacing: 2px; text-transform: uppercase; line-height: 1;
         }
         .hud-detail-line {
             font-size: 20px; font-weight: 800; color: #000; margin-top: 10px;
             text-transform: uppercase; letter-spacing: 1px; max-width: 90%;
         }
+        .hud-flash-noplate .hud-detail-line { color: #aaa; }
 
-        /* Fullscreen Comparison & Preview Modals */
+        .hud-reset-hint {
+            margin-top: 28px; background: rgba(0,0,0,0.6); color: #fff; padding: 10px 20px;
+            border-radius: 30px; font-size: 13px; font-weight: 900; letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.4); text-transform: uppercase;
+        }
+
+        /* MANUAL REGO INPUT DRAWER INSIDE HUD */
+        #hudManualWrap {
+            display: none; margin-top: 16px; width: 100%; max-width: 340px;
+        }
+        .hud-manual-row { display: flex; gap: 8px; width: 100%; }
+        #hudManualInput {
+            flex: 1; height: 52px; border-radius: 10px; border: 2px solid #ffab00;
+            background: #111; color: #fff; font-size: 24px; font-weight: 900;
+            text-align: center; text-transform: uppercase; outline: none;
+        }
+        .hud-manual-btn {
+            width: 100px; height: 52px; border-radius: 10px; border: none;
+            background: #ffab00; color: #000; font-weight: 900; font-size: 18px; cursor: pointer;
+        }
+
+        /* Comparison & Preview Modals */
         .overlay-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column; }
         .overlay-modal.show { display: flex; }
         .modal-header { height: 50px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
@@ -214,7 +242,7 @@
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
 
-<!-- TOP DRIVE-BY CHECK BUTTON (ALWAYS AVAILABLE) -->
+<!-- TOP DRIVE-BY CHECK BUTTON -->
 <button type="button" class="hud-check-btn" onclick="openDriveByCam()">
     <span>📷 CHECK VEHICLE</span>
 </button>
@@ -226,13 +254,14 @@
 <!-- DRIVE-BY HUD CAMERA MODAL -->
 <div id="hudCamModal">
     <div class="hud-cam-header">
-        <span style="font-weight:900; color:#ffab00; font-size:14px;">⚡ DRIVE-BY PLATE CHECK</span>
+        <button type="button" style="background:#2a2a2a; color:#ffab00; border:1px solid #ffab00; padding:6px 12px; border-radius:6px; font-weight:900;" onclick="showManualEntryOverlay()">⌨️ TYPE</button>
+        <span style="font-weight:900; color:#ffab00; font-size:14px;">⚡ DRIVE-BY CHECK</span>
         <button type="button" style="background:#333; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:900;" onclick="closeDriveByCam()">CLOSE</button>
     </div>
     <div class="hud-cam-view">
         <video id="hudVideo" autoplay playsinline muted></video>
         <div class="hud-target-reticle">
-            <div class="hud-target-hint">ALIGN PLATE INSIDE BOX</div>
+            <div class="hud-target-hint">ALIGN LICENCE PLATE INSIDE BOX</div>
         </div>
         <div class="hud-snap-trigger" id="hudSnapBtn" onclick="triggerDriveByScan()">
             <div class="hud-snap-inner"></div>
@@ -240,11 +269,22 @@
     </div>
 </div>
 
-<!-- INSTANT 2-SECOND HUD FULLSCREEN RESULT -->
-<div id="hudFlashOverlay" onclick="dismissHudFlash()">
+<!-- PERSISTENT HUD FULLSCREEN RESULT (TAP TO CLEAR) -->
+<div id="hudFlashOverlay" onclick="handleHudOverlayTap(event)">
+    <div class="hud-main-icon" id="hudMainIcon">🚨</div>
     <div class="hud-main-status" id="hudStatusText">TOW</div>
     <div class="hud-sub-plate" id="hudPlateText">790WSY</div>
     <div class="hud-detail-line" id="hudDetailText">EXPIRED - READY TO TOW</div>
+
+    <!-- INLINE MANUAL REGO CHECK BOX -->
+    <div id="hudManualWrap" onclick="event.stopPropagation()">
+        <div class="hud-manual-row">
+            <input type="text" id="hudManualInput" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
+            <button type="button" class="hud-manual-btn" onclick="submitManualHudCheck()">CHECK</button>
+        </div>
+    </div>
+
+    <div class="hud-reset-hint">TAP SCREEN TO SCAN NEXT ↺</div>
 </div>
 
 <!-- Comparison & Preview Modals -->
@@ -287,7 +327,6 @@
     let rawData = [];
     let propertyGroups = {};
     let hudStream = null;
-    let hudTimer = null;
     let isProcessingScan = false;
 
     window.addEventListener('load', () => {
@@ -484,7 +523,6 @@
         const snapBtn = document.getElementById('hudSnapBtn');
         snapBtn.style.opacity = "0.4";
 
-        // 1. Capture snapshot scaled to 600px width for fast network transfer
         const vW = video.videoWidth || 1280;
         const vH = video.videoHeight || 720;
         const aspect = vH / vW;
@@ -495,7 +533,6 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // 2. Direct browser call to Plate Recognizer API (~450ms turnaround)
         canvas.toBlob(async (blob) => {
             try {
                 const formData = new FormData();
@@ -513,10 +550,10 @@
                     const plate = String(json.results[0].plate || "").toUpperCase();
                     evaluatePlateAndFlashHUD(plate);
                 } else {
-                    flashResultOverlay("nomark", "NO PLATE", "NO VEHICLE PLATE DETECTED");
+                    flashResultOverlay("noplate", "NO PLATE", "NO VEHICLE PLATE DETECTED", true);
                 }
             } catch(e) {
-                flashResultOverlay("nomark", "OFFLINE", "CHECK NETWORK CONNECTION");
+                flashResultOverlay("noplate", "OFFLINE", "SCAN FAILED — ENTER MANUALLY", true);
             } finally {
                 isProcessingScan = false;
                 snapBtn.style.opacity = "1";
@@ -536,51 +573,88 @@
 
         // Case 1: Active Pass
         if (matchedItem && matchedItem.status === "PASS") {
-            flashResultOverlay("pass", cleanRego, `PASS ON FILE (${matchedItem.property})`);
-            if (navigator.vibrate) navigator.vibrate(80);
+            flashResultOverlay("pass", cleanRego, `PASS ON FILE (${matchedItem.property})`, false);
+            if (navigator.vibrate) navigator.vibrate(100);
         }
-        // Case 2: Expired / Ready for Tow
+        // Case 2: Expired / Ready for Tow -> Pulsed heavy vibration pattern
         else if (matchedItem && matchedItem.status === "READY") {
-            flashResultOverlay("tow", cleanRego, `TOW READY (${matchedItem.property})`);
-            if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+            flashResultOverlay("tow", cleanRego, `TOW READY (${matchedItem.property})`, false);
+            if (navigator.vibrate) navigator.vibrate([250, 100, 250, 100, 400]);
         }
-        // Case 3: Marked but Still within parking limit
+        // Case 3: Marked but Still waiting
         else if (matchedItem && matchedItem.status === "WAIT") {
-            flashResultOverlay("wait", cleanRego, `MARKED: EXP ${matchedItem.expiryTimeStr}`);
+            flashResultOverlay("wait", cleanRego, `MARKED: EXP ${matchedItem.expiryTimeStr}`, false);
             if (navigator.vibrate) navigator.vibrate(60);
         }
         // Case 4: No record found
         else {
-            flashResultOverlay("nomark", cleanRego, "NO ACTIVE MARK - UNMARKED");
-            if (navigator.vibrate) navigator.vibrate(40);
+            flashResultOverlay("nomark", cleanRego, "NO ACTIVE MARK - UNMARKED", false);
+            if (navigator.vibrate) navigator.vibrate(50);
         }
     }
 
-    function flashResultOverlay(type, plate, detail) {
+    function flashResultOverlay(type, plate, detail, showManualInput) {
         const overlay = document.getElementById('hudFlashOverlay');
+        const iconEl = document.getElementById('hudMainIcon');
         const statusEl = document.getElementById('hudStatusText');
         const plateEl = document.getElementById('hudPlateText');
         const detailEl = document.getElementById('hudDetailText');
+        const manualWrap = document.getElementById('hudManualWrap');
+        const manualInput = document.getElementById('hudManualInput');
 
         overlay.className = `hud-flash-${type}`;
         overlay.style.display = 'flex';
 
-        if (type === 'tow') statusEl.innerText = "🚨 TOW";
-        else if (type === 'pass') statusEl.innerText = "🎫 PASS";
-        else if (type === 'wait') statusEl.innerText = "⏳ WAIT";
-        else statusEl.innerText = "🟢 NO MARK";
+        if (type === 'tow') {
+            iconEl.innerText = "🚨";
+            statusEl.innerText = "TOW";
+        } else if (type === 'pass') {
+            iconEl.innerText = "🎫";
+            statusEl.innerText = "PASS";
+        } else if (type === 'wait') {
+            iconEl.innerText = "⏳";
+            statusEl.innerText = "WAIT";
+        } else if (type === 'nomark') {
+            iconEl.innerText = "🟢";
+            statusEl.innerText = "NO MARK";
+        } else if (type === 'noplate') {
+            iconEl.innerText = "❌";
+            statusEl.innerText = "NO PLATE";
+            if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+        }
 
         plateEl.innerText = plate;
         detailEl.innerText = detail;
 
-        if (hudTimer) clearTimeout(hudTimer);
-        // Automatically dismisses after 2 seconds so the camera is instantly ready for the next vehicle
-        hudTimer = setTimeout(dismissHudFlash, 2000);
+        if (showManualInput) {
+            manualWrap.style.display = 'block';
+            setTimeout(() => { manualInput.focus(); }, 100);
+        } else {
+            manualWrap.style.display = 'none';
+        }
+    }
+
+    function showManualEntryOverlay() {
+        flashResultOverlay("noplate", "MANUAL CHECK", "TYPE LICENCE PLATE TO CHECK", true);
+    }
+
+    function submitManualHudCheck() {
+        const manualInput = document.getElementById('hudManualInput');
+        const val = manualInput.value.trim().toUpperCase();
+        if (val.length < 2) return;
+        manualInput.value = "";
+        evaluatePlateAndFlashHUD(val);
+    }
+
+    // Tap to clear screen and resume scanning
+    function handleHudOverlayTap(e) {
+        dismissHudFlash();
     }
 
     function dismissHudFlash() {
-        if (hudTimer) clearTimeout(hudTimer);
         document.getElementById('hudFlashOverlay').style.display = 'none';
+        document.getElementById('hudManualWrap').style.display = 'none';
+        document.getElementById('hudManualInput').value = "";
     }
 
     // Photo Preview & Comparison
