@@ -31,7 +31,6 @@
             display: flex; flex-direction: column; align-items: center; 
         }
 
-        /* ENLARGED BRAND LOGO & COMPANY HEADER */
         .brand-header {
             display: flex;
             align-items: center;
@@ -150,7 +149,6 @@
 </head>
 <body>
 
-<!-- ENLARGED BRANDING HEADER -->
 <div class="brand-header">
     <img src="LOGO.png" alt="National Towing Logo" class="brand-logo">
     <div class="brand-titles">
@@ -236,7 +234,7 @@
 <!-- FULLSCREEN SUCCESS OVERLAY -->
 <div id="successOverlay">
     <h1 id="successTitle">TOW REQUEST SENT</h1>
-    <button class="ok-btn" onclick="window.location.reload(true);">OK</button>
+    <button class="ok-btn" onclick="dismissSuccessOverlay()">OK</button>
 </div>
 
 <script>
@@ -246,13 +244,13 @@
     let currentMode = "TOW";
     let capturedPhoto = "";
     let videoStream = null;
+    let isSubmitting = false;
 
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('passDate').valueAsDate = new Date();
         authenticateUser();
         window.addEventListener('online', syncManagerOfflineQueue);
         syncManagerOfflineQueue();
-        setInterval(syncManagerOfflineQueue, 15000);
     });
 
     async function authenticateUser() {
@@ -287,7 +285,7 @@
     function populateProperties(props) {
         const sel = document.getElementById('propertySelect');
         sel.innerHTML = "";
-        props.forEach((p, idx) => {
+        props.forEach((p) => {
             const opt = document.createElement('option');
             opt.value = p.name;
             opt.innerText = p.name;
@@ -334,8 +332,7 @@
         const btnPass = document.getElementById('btnModePass');
         const secTow = document.getElementById('towSection');
         const secPass = document.getElementById('passSection');
-        const stat = document.getElementById('status');
-        stat.innerText = "";
+        document.getElementById('status').innerText = "";
 
         if (mode === 'TOW') {
             btnTow.classList.add('mode-active-tow');
@@ -418,7 +415,7 @@
         }
     }
 
-    // --- SUBMISSIONS (INSTANT OPTIMISTIC UI) ---
+    // --- FORM RESET & SUCCESS OVERLAY ---
     function showSuccess(mode) {
         const overlay = document.getElementById('successOverlay');
         const title = document.getElementById('successTitle');
@@ -433,23 +430,52 @@
         overlay.style.display = "flex";
     }
 
-    function saveManagerOfflineQueue(payload) {
-        let queue = JSON.parse(localStorage.getItem('mgr_offline_queue') || '[]');
-        queue.push(payload);
-        localStorage.setItem('mgr_offline_queue', JSON.stringify(queue));
+    function dismissSuccessOverlay() {
+        document.getElementById('successOverlay').style.display = 'none';
+        
+        // Reset inputs cleanly without reloading the page
+        document.getElementById('towRego').value = "";
+        document.getElementById('towBay').value = "";
+        document.getElementById('towReason').selectedIndex = 0;
+        document.getElementById('towReasonOther').value = "";
+        document.getElementById('towReasonOther').style.display = "none";
+        
+        capturedPhoto = "";
+        const preview = document.getElementById('photoPreview');
+        preview.src = "";
+        preview.style.display = "none";
+        
+        document.getElementById('openCamBtn').innerText = "📷 SNAP EVIDENCE PHOTO";
+        document.getElementById('openCamBtn').style.borderStyle = "dashed";
+        
+        document.getElementById('passRego').value = "";
+        document.getElementById('status').innerText = "";
+        isSubmitting = false;
+        document.getElementById('submitTowBtn').disabled = false;
     }
 
-    function removeManagerOfflineQueue(id) {
+    // --- OFFLINE QUEUE (NETWORK-FAILURE BACKUP ONLY) ---
+    function queueManagerOffline(payload) {
+        let queue = JSON.parse(localStorage.getItem('mgr_offline_queue') || '[]');
+        if (!queue.some(item => item.id === payload.id)) {
+            queue.push(payload);
+            localStorage.setItem('mgr_offline_queue', JSON.stringify(queue));
+        }
+    }
+
+    function removeManagerOffline(id) {
         let queue = JSON.parse(localStorage.getItem('mgr_offline_queue') || '[]');
         queue = queue.filter(item => item.id !== id);
         localStorage.setItem('mgr_offline_queue', JSON.stringify(queue));
     }
 
+    let isSyncingQueue = false;
     async function syncManagerOfflineQueue() {
-        if (!navigator.onLine) return;
+        if (isSyncingQueue || !navigator.onLine) return;
         let queue = JSON.parse(localStorage.getItem('mgr_offline_queue') || '[]');
         if (queue.length === 0) return;
 
+        isSyncingQueue = true;
         for (let i = 0; i < queue.length; i++) {
             const item = queue[i];
             try {
@@ -460,20 +486,27 @@
                 });
                 const data = await res.json();
                 if (data && data.status === "SUCCESS") {
-                    removeManagerOfflineQueue(item.id);
+                    removeManagerOffline(item.id);
                 }
             } catch(err) {
                 break;
             }
         }
+        isSyncingQueue = false;
     }
 
+    // --- SUBMISSION DISPATCH ---
     function submitTowRequest() {
+        if (isSubmitting) return;
+
         const rego = document.getElementById('towRego').value.trim().toUpperCase();
         if (!rego || !capturedPhoto) {
             document.getElementById('status').innerText = "⚠️ PLEASE ENTER REGO AND ATTACH PHOTO";
             return;
         }
+
+        isSubmitting = true;
+        document.getElementById('submitTowBtn').disabled = true;
 
         const reasonSelect = document.getElementById('towReason').value;
         const reason = reasonSelect === 'OTHER'
@@ -493,13 +526,10 @@
             timestamp: new Date().toISOString()
         };
 
-        // 1. Immediately cache in offline queue
-        saveManagerOfflineQueue(payload);
-
-        // 2. Instantly display success screen with zero delay
+        // 1. Show success overlay instantly
         showSuccess("TOW");
 
-        // 3. Dispatch upload silently in the background
+        // 2. Direct background upload; only queue if offline or network drops
         if (navigator.onLine) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -507,10 +537,12 @@
                 body: JSON.stringify(payload)
             }).then(res => res.json())
               .then(data => {
-                  if (data && data.status === "SUCCESS") {
-                      removeManagerOfflineQueue(payload.id);
+                  if (data && data.status !== "SUCCESS") {
+                      queueManagerOffline(payload);
                   }
-              }).catch(e => console.warn("Background upload queued"));
+              }).catch(() => queueManagerOffline(payload));
+        } else {
+            queueManagerOffline(payload);
         }
     }
 
@@ -532,7 +564,6 @@
             timestamp: new Date().toISOString()
         };
 
-        saveManagerOfflineQueue(payload);
         showSuccess("PASS");
 
         if (navigator.onLine) {
@@ -540,12 +571,9 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
-            }).then(res => res.json())
-              .then(data => {
-                  if (data && data.status === "SUCCESS") {
-                      removeManagerOfflineQueue(payload.id);
-                  }
-              }).catch(e => console.warn("Background pass queued"));
+            }).catch(() => queueManagerOffline(payload));
+        } else {
+            queueManagerOffline(payload);
         }
     }
 </script>
