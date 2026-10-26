@@ -459,7 +459,23 @@
     }
 
     function renderSummaryView() {
-        const sortedProps = Object.keys(propertyGroups).sort();
+        // Multi-tier sort: RED (highest first) -> ORANGE (highest first) -> BLUE (highest first) -> Alphabetical
+        const sortedProps = Object.keys(propertyGroups).sort((a, b) => {
+            const redA = propertyGroups[a].filter(c => c.status === "READY").length;
+            const redB = propertyGroups[b].filter(c => c.status === "READY").length;
+            if (redB !== redA) return redB - redA;
+
+            const orangeA = propertyGroups[a].filter(c => c.status === "WAIT").length;
+            const orangeB = propertyGroups[b].filter(c => c.status === "WAIT").length;
+            if (orangeB !== orangeA) return orangeB - orangeA;
+
+            const blueA = propertyGroups[a].filter(c => c.status === "PASS").length;
+            const blueB = propertyGroups[b].filter(c => c.status === "PASS").length;
+            if (blueB !== blueA) return blueB - blueA;
+
+            return a.localeCompare(b);
+        });
+
         const container = document.getElementById('runContainer');
         container.innerHTML = "";
 
@@ -526,7 +542,6 @@
                 </div>
             `;
 
-            // Tapping tile or the TOW badge opens ghost comparison for READY cars
             const handleSelect = (e) => {
                 e.stopPropagation();
                 if (car.status === "READY") {
