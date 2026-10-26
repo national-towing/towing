@@ -89,9 +89,9 @@
         .detail-title { font-size: 22px; font-weight: 900; color: #ffab00; margin-bottom: 10px; text-transform: uppercase; }
 
         .car-tile {
-            background: #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 12px;
+            background: #1e1e1e; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px;
             display: flex; align-items: center; justify-content: space-between; border: 2px solid #333;
-            text-decoration: none; color: #fff; transition: transform 0.1s ease; cursor: pointer;
+            color: #fff; transition: transform 0.1s ease;
         }
         .car-tile:active { transform: scale(0.98); }
         .tile-ready { border-color: #ff1744; background: #2a1215; }
@@ -105,7 +105,8 @@
         .tile-pass .car-rego { color: #29b6f6; }
 
         .car-time-mkd { font-size: 13px; color: #aaa; font-weight: 700; line-height: 1; }
-        .car-time-exp { font-size: 22px; color: #fff; font-weight: 900; margin-top: 6px; letter-spacing: 0.5px; }
+        .car-time-exp { font-size: 20px; color: #fff; font-weight: 900; margin-top: 4px; letter-spacing: 0.5px; }
+        .car-desc-line { font-size: 13px; font-weight: 800; color: #00e676; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .tile-right-box { display: flex; align-items: center; gap: 8px; }
         .pic-preview-btn {
@@ -114,8 +115,14 @@
             justify-content: center; cursor: pointer; color: #fff; flex-shrink: 0;
         }
         .pic-preview-btn:active { transform: scale(0.92); }
-        .badge { padding: 10px 14px; border-radius: 8px; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; }
-        .badge-ready { background: #ff1744; color: #fff; }
+        
+        .badge { 
+            padding: 12px 16px; border-radius: 10px; font-size: 16px; font-weight: 900; 
+            text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; 
+            justify-content: center; text-decoration: none; cursor: pointer;
+        }
+        .badge:active { transform: scale(0.94); }
+        .badge-ready { background: #ff1744; color: #fff; box-shadow: 0 2px 10px rgba(255, 23, 68, 0.4); }
         .badge-wait { background: #ffab00; color: #000; }
         .badge-pass { background: #29b6f6; color: #000; }
 
@@ -133,7 +140,6 @@
         .hud-cam-view { flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; }
         #hudVideo { width: 100%; height: 100%; object-fit: cover; }
         
-        /* EXPANDED TARGET RETICLE */
         .hud-target-reticle {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
             width: 88%; max-width: 420px; height: 160px; border: 3.5px dashed #00e676; border-radius: 16px;
@@ -160,10 +166,10 @@
             flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 24px; cursor: pointer; user-select: none;
         }
-        .hud-flash-tow     { background: rgba(255, 23, 68, 0.98); }   /* RED */
-        .hud-flash-pass    { background: rgba(41, 182, 246, 0.98); }  /* BLUE */
-        .hud-flash-nomark  { background: rgba(0, 230, 118, 0.98); }   /* GREEN */
-        .hud-flash-wait    { background: rgba(255, 171, 0, 0.98); }   /* ORANGE */
+        .hud-flash-tow     { background: rgba(255, 23, 68, 0.98); }
+        .hud-flash-pass    { background: rgba(41, 182, 246, 0.98); }
+        .hud-flash-nomark  { background: rgba(0, 230, 118, 0.98); }
+        .hud-flash-wait    { background: rgba(255, 171, 0, 0.98); }
         .hud-flash-noplate { background: rgba(20, 20, 20, 0.98); border: 4px solid #ff1744; }
 
         .hud-main-icon { font-size: 70px; margin-bottom: 4px; line-height: 1; }
@@ -183,7 +189,6 @@
         }
         .hud-flash-noplate .hud-detail-line { color: #aaa; }
 
-        /* DIRECT TOW BUTTON ON HUD OVERLAY */
         .hud-action-tow-btn {
             display: none; margin-top: 20px; background: #000; color: #ff1744; border: 3px solid #fff;
             padding: 16px 30px; border-radius: 14px; font-size: 22px; font-weight: 950;
@@ -197,10 +202,7 @@
             border: 1px solid rgba(255,255,255,0.4); text-transform: uppercase;
         }
 
-        /* MANUAL REGO INPUT DRAWER INSIDE HUD */
-        #hudManualWrap {
-            display: none; margin-top: 16px; width: 100%; max-width: 340px;
-        }
+        #hudManualWrap { display: none; margin-top: 16px; width: 100%; max-width: 340px; }
         .hud-manual-row { display: flex; gap: 8px; width: 100%; }
         #hudManualInput {
             flex: 1; height: 52px; border-radius: 10px; border: 2px solid #ffab00;
@@ -285,10 +287,8 @@
     <div class="hud-sub-plate" id="hudPlateText">790WSY</div>
     <div class="hud-detail-line" id="hudDetailText">EXPIRED - READY TO TOW</div>
 
-    <!-- DIRECT ACTION BUTTON TO LOAD TOW APP FROM HUD -->
     <button type="button" id="hudTowActionBtn" class="hud-action-tow-btn" onclick="openTowFromHud(event)">🚨 LOAD TOW APP ➔</button>
 
-    <!-- INLINE MANUAL REGO CHECK BOX -->
     <div id="hudManualWrap" onclick="event.stopPropagation()">
         <div class="hud-manual-row">
             <input type="text" id="hudManualInput" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
@@ -346,15 +346,10 @@
     let overlayStream = null;
     let currentGhostVehicle = null;
 
-    // Web Audio Context for synthesized alerts
     let audioCtx = null;
     function getAudioContext() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         return audioCtx;
     }
 
@@ -368,7 +363,6 @@
             const gain = ctx.createGain();
             osc.type = 'sawtooth';
             
-            // Dual-tone siren pulse
             osc.frequency.setValueAtTime(880, now);
             osc.frequency.setValueAtTime(587, now + 0.15);
             osc.frequency.setValueAtTime(880, now + 0.30);
@@ -522,31 +516,36 @@
         if (filterStatus !== 'ALL') cars = cars.filter(c => c.status === filterStatus);
 
         cars.forEach(car => {
+            const q = new URLSearchParams({
+                rego: car.rego,
+                prop: car.property,
+                make: car.make || "",
+                model: car.model || "",
+                colour: car.colour || "",
+                body: car.bodyType || ""
+            });
+            const towUrl = `tow.html?${q.toString()}`;
+            const targetUrl = car.status === "PASS" ? "passes.html" : towUrl;
+
+            const carDesc = [car.make, car.model].filter(Boolean).join(' ') + (car.colour ? ` (${car.colour})` : '');
+
             const tile = document.createElement('div');
             tile.className = `car-tile tile-${car.status.toLowerCase()}`;
             tile.innerHTML = `
-                <div>
+                <div style="flex:1; cursor:pointer;" onclick="window.location.href='${targetUrl}'">
                     <div class="rego-header-line">
                         <span class="car-rego">${car.rego}</span>
                         <span class="car-time-mkd">MKD: ${car.markedTimeStr}</span>
                     </div>
                     <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
+                    ${carDesc ? `<div class="car-desc-line">${carDesc}</div>` : ''}
                 </div>
                 <div class="tile-right-box">
-                    <button class="pic-preview-btn" title="View Mark Photo" onclick="event.stopPropagation(); openPhotoPreview('${car.rego}', '${car.property}', '${car.imageUrl}')">📷</button>
-                    ${car.status === "READY" ? `<button class="pic-preview-btn" title="Ghost Align Camera" onclick="event.stopPropagation(); openOverlayModal('${car.rego}', '${car.property}', '${car.imageUrl}')">👻</button>` : ''}
-                    <div class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW ➔" : car.status}</div>
+                    <button type="button" class="pic-preview-btn" title="View Mark Photo" onclick="event.stopPropagation(); openPhotoPreview('${car.rego}', '${car.property}', '${car.imageUrl}')">📷</button>
+                    ${car.status === "READY" ? `<button type="button" class="pic-preview-btn" title="Ghost Align Camera" onclick="event.stopPropagation(); openOverlayModal('${car.rego}', '${car.property}', '${car.imageUrl}', '${car.make}', '${car.model}', '${car.colour}', '${car.bodyType}')">👻</button>` : ''}
+                    <a href="${targetUrl}" class="badge badge-${car.status.toLowerCase()}" onclick="event.stopPropagation();">${car.status === "READY" ? "TOW ➔" : car.status}</a>
                 </div>
             `;
-
-            // Clicking tile or the TOW badge routes directly to tow.html
-            tile.addEventListener('click', () => {
-                if (car.status === "READY" || car.status === "WAIT") {
-                    window.location.href = `tow.html?rego=${encodeURIComponent(car.rego)}&prop=${encodeURIComponent(car.property)}`;
-                } else {
-                    window.location.href = `passes.html`;
-                }
-            });
 
             container.appendChild(tile);
         });
@@ -556,7 +555,7 @@
     // ⚡ DRIVE-BY HUD SCANNER ENGINE
     // ==========================================
     async function openDriveByCam() {
-        getAudioContext(); // Initialize audio context on touch
+        getAudioContext();
         const modal = document.getElementById('hudCamModal');
         const video = document.getElementById('hudVideo');
         modal.style.display = 'flex';
@@ -694,10 +693,16 @@
     function openTowFromHud(e) {
         e.stopPropagation();
         if (!lastMatchedTowVehicle) return;
-        const r = lastMatchedTowVehicle.rego;
-        const p = lastMatchedTowVehicle.property;
+        const q = new URLSearchParams({
+            rego: lastMatchedTowVehicle.rego,
+            prop: lastMatchedTowVehicle.property,
+            make: lastMatchedTowVehicle.make || "",
+            model: lastMatchedTowVehicle.model || "",
+            colour: lastMatchedTowVehicle.colour || "",
+            body: lastMatchedTowVehicle.bodyType || ""
+        });
         closeDriveByCam();
-        window.location.href = `tow.html?rego=${encodeURIComponent(r)}&prop=${encodeURIComponent(p)}`;
+        window.location.href = `tow.html?${q.toString()}`;
     }
 
     function showManualEntryOverlay() {
@@ -725,8 +730,16 @@
     // ==========================================
     // 👻 GHOST COMPARISON VIEWFINDER LOGIC
     // ==========================================
-    async function openOverlayModal(rego, prop, imageUrl) {
-        currentGhostVehicle = { rego: rego, property: prop, imageUrl: imageUrl };
+    async function openOverlayModal(rego, prop, imageUrl, make, model, colour, bodyType) {
+        currentGhostVehicle = { 
+            rego: rego, 
+            property: prop, 
+            imageUrl: imageUrl, 
+            make: make || "", 
+            model: model || "", 
+            colour: colour || "", 
+            bodyType: bodyType || "" 
+        };
         document.getElementById('modalRegoTitle').innerText = `${rego} - ALIGN & VERIFY TOW`;
         
         const ghostImg = document.getElementById('ghostImage');
@@ -764,10 +777,16 @@
         if (skipBtn) {
             skipBtn.addEventListener('click', () => {
                 if (!currentGhostVehicle) return;
-                const r = currentGhostVehicle.rego;
-                const p = currentGhostVehicle.property;
+                const q = new URLSearchParams({
+                    rego: currentGhostVehicle.rego,
+                    prop: currentGhostVehicle.property,
+                    make: currentGhostVehicle.make,
+                    model: currentGhostVehicle.model,
+                    colour: currentGhostVehicle.colour,
+                    body: currentGhostVehicle.bodyType
+                });
                 closeOverlayModal();
-                window.location.href = `tow.html?rego=${encodeURIComponent(r)}&prop=${encodeURIComponent(p)}`;
+                window.location.href = `tow.html?${q.toString()}`;
             });
         }
 
@@ -782,13 +801,18 @@
                 ctx.drawImage(vid, 0, 0, 800, 600);
                 const b64 = canvas.toDataURL('image/jpeg', 0.6);
                 
-                // Store comparison photo in localStorage so tow.html automatically picks it up
                 localStorage.setItem('pending_comp_' + currentGhostVehicle.rego, b64);
                 
-                const r = currentGhostVehicle.rego;
-                const p = currentGhostVehicle.property;
+                const q = new URLSearchParams({
+                    rego: currentGhostVehicle.rego,
+                    prop: currentGhostVehicle.property,
+                    make: currentGhostVehicle.make,
+                    model: currentGhostVehicle.model,
+                    colour: currentGhostVehicle.colour,
+                    body: currentGhostVehicle.bodyType
+                });
                 closeOverlayModal();
-                window.location.href = `tow.html?rego=${encodeURIComponent(r)}&prop=${encodeURIComponent(p)}`;
+                window.location.href = `tow.html?${q.toString()}`;
             });
         }
     }
