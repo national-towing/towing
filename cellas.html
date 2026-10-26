@@ -28,18 +28,20 @@
 
         .header-box { 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            position: relative; width: 100%; max-width: 440px; margin: 6px 0 16px 0; text-align: center;
+            position: relative; width: 100%; max-width: 440px; margin: 6px 0 14px 0; text-align: center;
         }
         .header-box h1 { 
-            font-size: 28px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase; 
+            font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase; 
         }
         .header-sub { 
-            font-size: 12px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;
+            font-size: 11px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;
         }
-        .icon-btn { 
-            position: absolute; right: 0; top: 0; background: #2a2a2a; border: 1px solid #444; 
-            border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; 
-            align-items: center; justify-content: center; cursor: pointer; color: #fff; 
+
+        /* LOCKED AUTH BADGE */
+        .auth-badge {
+            width: 100%; max-width: 440px; background: #0f2e1b; border: 1.5px solid var(--success);
+            color: var(--success); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 900;
         }
 
         .card { 
@@ -56,11 +58,10 @@
             background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 800; margin-top: 4px; outline: none;
             -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
         }
-        textarea { height: 75px; padding: 10px 12px; font-size: 15px; font-weight: 600; resize: none; }
+        textarea { height: 70px; padding: 10px 12px; font-size: 14px; font-weight: 600; resize: none; }
         
         ::placeholder { color: #777 !important; opacity: 1; }
 
-        /* VALIDATION STYLES */
         .field-missing { border: 2px solid var(--accent-gold) !important; background: #2a2200 !important; }
         .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
 
@@ -68,18 +69,16 @@
         .row-2 > div:first-child { flex: 2; }
         .row-2 > div:last-child { flex: 1; }
 
-        /* TAP TO SCAN BUTTON */
         .scan-box-btn {
             background: #2a1215; border: 2px dashed var(--accent); color: var(--accent);
             border-radius: 12px; padding: 14px; margin-top: 14px; text-align: center;
             cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 4px; transition: background 0.2s ease, transform 0.1s ease;
+            gap: 4px;
         }
         .scan-box-btn:active { background: #3d1b20; transform: scale(0.98); }
         .scan-title { font-size: 15px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
         .scan-sub { font-size: 11px; font-weight: 700; color: #aaa; }
 
-        /* PREVIEW THUMBNAIL */
         .preview-wrap { display: none; align-items: center; gap: 12px; margin-top: 10px; background: #141414; padding: 8px 12px; border-radius: 10px; border: 1px solid #333; }
         .preview-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); }
         .preview-info { flex: 1; }
@@ -88,13 +87,21 @@
 
         .submit-btn {
             background: var(--accent); color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 22px; width: 100%; margin-top: 20px; cursor: pointer; letter-spacing: 2px;
-            text-transform: uppercase; box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
+            height: 60px; font-size: 22px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+            text-transform: uppercase;
         }
-        .submit-btn:active { transform: scale(0.98); }
-        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; pointer-events: none; }
+        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
-        #statusText { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; min-height: 20px; color: var(--accent-gold); }
+        #statusText { text-align: center; font-weight: 900; font-size: 13px; margin-top: 12px; min-height: 20px; color: var(--accent-gold); }
+
+        /* REVOKED / LOCKED SCREEN OVERLAY */
+        #lockOverlay {
+            display: none; position: fixed; inset: 0; background: #121212;
+            z-index: 99999; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 24px;
+        }
+        #lockOverlay h2 { color: var(--accent); font-size: 26px; font-weight: 900; margin-bottom: 12px; }
+        #lockOverlay p { color: #aaa; font-size: 15px; font-weight: 600; line-height: 1.4; max-width: 320px; }
 
         /* SUCCESS OVERLAY */
         #successOverlay {
@@ -102,17 +109,15 @@
             z-index: 99999; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
-        #successOverlay h2 { font-size: 36px; font-weight: 900; color: #000; letter-spacing: 1px; }
-        #successOverlay p { font-size: 16px; font-weight: 800; color: #111; margin: 10px 0 30px 0; max-width: 90%; }
+        #successOverlay h2 { font-size: 34px; font-weight: 900; color: #000; }
+        #successOverlay p { font-size: 16px; font-weight: 800; color: #111; margin: 10px 0 30px 0; max-width: 85%; }
         .done-btn {
-            background: #000; color: var(--success); font-size: 22px; font-weight: 900; border: none;
+            background: #000; color: var(--success); font-size: 20px; font-weight: 900; border: none;
             border-radius: 12px; padding: 16px 40px; cursor: pointer; letter-spacing: 2px;
         }
 
-        /* FULLSCREEN CAMERA MODAL */
-        #camModal {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 10000; flex-direction: column;
-        }
+        /* CAMERA MODAL */
+        #camModal { display: none; position: fixed; inset: 0; background: #000; z-index: 10000; flex-direction: column; }
         .cam-topbar { height: 50px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 2; }
         .cam-close-btn { background: #333; color: #fff; font-size: 13px; font-weight: 900; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
         .cam-view { flex: 1; width: 100%; height: 100%; position: relative; }
@@ -122,7 +127,6 @@
             width: 80px; height: 80px; background: var(--accent); border: 4px solid #fff; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        .cam-snap-btn:active { transform: translateX(-50%) scale(0.92); }
         .cam-snap-inner { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000; }
     </style>
 </head>
@@ -131,19 +135,24 @@
     <div class="header-box">
         <h1>Cellas Real Estate</h1>
         <div class="header-sub">Authorised Tow Request Portal</div>
-        <div class="icon-btn" onclick="window.location.reload(true)">🔄</div>
+    </div>
+
+    <!-- LOCKED AUTHENTICATED USER DISPLAY -->
+    <div class="auth-badge" id="authBadge">
+        <span id="authBadgeName">Checking Authorisation...</span>
+        <span style="font-size:10px; background:var(--success); color:#000; padding:2px 6px; border-radius:4px;">VERIFIED</span>
     </div>
 
     <div class="card">
-        <!-- MANDATORY PROPERTY SELECTOR -->
+        <!-- PROPERTY SELECTOR (Only shows sites this person is permitted for) -->
         <label>PROPERTY *</label>
-        <select id="propertySelect" onchange="onPropertyChange()">
+        <select id="propertySelect">
             <option value="" disabled selected>-- SELECT PROPERTY --</option>
             <option value="La Hacienda">La Hacienda</option>
             <option value="Maximes">Maximes</option>
         </select>
 
-        <!-- TAP TO SCAN / CAMERA -->
+        <!-- CAMERA SCAN -->
         <div class="scan-box-btn" id="openCamBtn">
             <span class="scan-title">📷 Tap to Scan Plate / Photo</span>
             <span class="scan-sub">Auto-reads licence plate into the box below</span>
@@ -157,7 +166,7 @@
             </div>
         </div>
 
-        <!-- REGO & STATE (MANDATORY) -->
+        <!-- REGO & STATE -->
         <div class="row-2">
             <div>
                 <label>REGISTRATION *</label>
@@ -178,32 +187,31 @@
             </div>
         </div>
 
-        <!-- BAY / LOCATION (OPTIONAL) -->
         <label>BAY # / LOCATION (OPTIONAL)</label>
         <input type="text" id="bayInput" placeholder="e.g. Visitor Bay 4, Driveway" autocomplete="off">
 
-        <!-- REASON FOR TOW (OPTIONAL) -->
         <label>REASON FOR TOW (OPTIONAL)</label>
-        <textarea id="reasonInput" placeholder="e.g. Parked in numbered bay without permission, blocking egress..."></textarea>
-
-        <!-- MANDATORY AUTHORISED PERSON -->
-        <label>REQUESTED BY (must be Authorised Person) *</label>
-        <select id="authorizerSelect" disabled>
-            <option value="" disabled selected>-- SELECT PROPERTY FIRST --</option>
-        </select>
+        <textarea id="reasonInput" placeholder="e.g. Parked in private bay without permission, blocking egress..."></textarea>
 
         <button type="button" class="submit-btn" id="submitBtn" disabled>SUBMIT TOW REQUEST</button>
         <div id="statusText"></div>
     </div>
 
-    <!-- FULLSCREEN SUCCESS OVERLAY -->
+    <!-- LOCK OVERLAY IF LINK IS UNASSIGNED OR REVOKED -->
+    <div id="lockOverlay">
+        <h2>PORTAL LOCKED</h2>
+        <p id="lockMsg">This portal link is not assigned to an active authorised person.</p>
+        <p style="margin-top:20px; font-size:12px; color:#666;">Contact National Towing Operations<br>0450 605 370</p>
+    </div>
+
+    <!-- SUCCESS OVERLAY -->
     <div id="successOverlay">
-        <h2 id="successRego">REQUEST SUBMITTED</h2>
+        <h2 id="successRego">REQUEST DISPATCHED</h2>
         <p>National Towing operations has received this request and scheduled priority dispatch.</p>
         <button type="button" class="done-btn" onclick="window.location.reload(true)">DONE ✓</button>
     </div>
 
-    <!-- FULLSCREEN CAMERA MODAL -->
+    <!-- CAMERA MODAL -->
     <div id="camModal">
         <div class="cam-topbar">
             <span style="font-size:13px; font-weight:800; color:#ffab00;">ALIGN VEHICLE & PLATE</span>
@@ -218,20 +226,20 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
-        // Authorised personnel mapping
-        const AUTHORISED_MAP = {
-            "Maximes": ["Chris Lane"],
-            "La Hacienda": ["Chris Lane", "Brett Judd", "Lewis Stevens"]
-        };
+        let currentAuthorizer = "";
+        let capturedPhotoB64 = "";
+        let cameraStream = null;
 
         const propertySelect = document.getElementById('propertySelect');
         const regoInput = document.getElementById('regoInput');
         const stateSelect = document.getElementById('stateSelect');
         const bayInput = document.getElementById('bayInput');
         const reasonInput = document.getElementById('reasonInput');
-        const authorizerSelect = document.getElementById('authorizerSelect');
         const submitBtn = document.getElementById('submitBtn');
         const statusText = document.getElementById('statusText');
+        const authBadgeName = document.getElementById('authBadgeName');
+        const lockOverlay = document.getElementById('lockOverlay');
+        const lockMsg = document.getElementById('lockMsg');
 
         const openCamBtn = document.getElementById('openCamBtn');
         const camModal = document.getElementById('camModal');
@@ -243,34 +251,54 @@
         const successOverlay = document.getElementById('successOverlay');
         const successRego = document.getElementById('successRego');
 
-        let capturedPhotoB64 = "";
-        let cameraStream = null;
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userParam = urlParams.get('user') || urlParams.get('auth');
 
-        window.addEventListener('DOMContentLoaded', () => {
+            if (!userParam) {
+                showLockScreen("No authorised person was specified in this link.");
+                return;
+            }
+
+            currentAuthorizer = decodeURIComponent(userParam).trim();
+            authBadgeName.innerText = `Authorised: ${currentAuthorizer}`;
+
+            // Check against Google Sheets Properties database
+            verifyAuthorizationWithSheet(currentAuthorizer);
             setupValidationListeners();
         });
 
-        // Dynamic Authorised Person population based on property
-        function onPropertyChange() {
-            const prop = propertySelect.value;
-            authorizerSelect.innerHTML = '<option value="" disabled selected>-- SELECT AUTHORISED PERSON --</option>';
+        async function verifyAuthorizationWithSheet(userName) {
+            try {
+                const resp = await fetch(`${GOOGLE_SCRIPT_URL}?action=check_auth&user=${encodeURIComponent(userName)}`);
+                const result = await resp.json();
 
-            if (prop && AUTHORISED_MAP[prop]) {
-                authorizerSelect.disabled = false;
-                AUTHORISED_MAP[prop].forEach(person => {
-                    const opt = document.createElement('option');
-                    opt.value = person;
-                    opt.textContent = person;
-                    authorizerSelect.appendChild(opt);
-                });
-            } else {
-                authorizerSelect.disabled = true;
+                if (!result.authorized) {
+                    showLockScreen(`Authorisation for "${userName}" has been revoked or expired.`);
+                    return;
+                }
+
+                // Dynamically populate property dropdown to only sites this person is permitted for
+                if (Array.isArray(result.properties) && result.properties.length > 0) {
+                    propertySelect.innerHTML = '<option value="" disabled selected>-- SELECT PROPERTY --</option>';
+                    result.properties.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p; opt.textContent = p;
+                        propertySelect.appendChild(opt);
+                    });
+                }
+            } catch(e) {
+                console.warn("Offline fallback allowed");
             }
-            validateForm();
+        }
+
+        function showLockScreen(msg) {
+            lockMsg.innerText = msg;
+            lockOverlay.style.display = 'flex';
         }
 
         function setupValidationListeners() {
-            [propertySelect, regoInput, authorizerSelect].forEach(el => {
+            [propertySelect, regoInput].forEach(el => {
                 el.addEventListener('input', validateForm);
                 el.addEventListener('change', validateForm);
             });
@@ -279,22 +307,18 @@
 
         function validateForm() {
             let valid = true;
-
             function check(el, cond) {
                 if (!el) return;
                 if (cond) {
-                    el.classList.remove('field-missing');
-                    el.classList.add('field-valid');
+                    el.classList.remove('field-missing'); el.classList.add('field-valid');
                 } else {
-                    el.classList.remove('field-valid');
-                    el.classList.add('field-missing');
+                    el.classList.remove('field-valid'); el.classList.add('field-missing');
                     valid = false;
                 }
             }
 
             check(propertySelect, propertySelect.value !== "");
             check(regoInput, regoInput.value.trim().length >= 2);
-            check(authorizerSelect, authorizerSelect.value !== "" && !authorizerSelect.disabled);
 
             submitBtn.disabled = !valid;
             return valid;
@@ -311,7 +335,7 @@
                 videoElem.srcObject = cameraStream;
                 await videoElem.play().catch(() => {});
             } catch(err) {
-                alert("Camera error: Please ensure camera permissions are allowed.");
+                alert("Camera permission required.");
                 closeCamera();
             }
         });
@@ -342,9 +366,8 @@
             previewWrap.style.display = 'flex';
             previewStatus.style.color = 'var(--accent-gold)';
             previewStatus.innerText = '🔍 Scanning plate...';
-            statusText.innerText = 'Processing plate recognition...';
+            statusText.innerText = 'Scanning plate...';
 
-            // Automatic Plate Reader (Plate Recognizer API through backend)
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -383,10 +406,7 @@
 
         // Submission
         submitBtn.addEventListener('click', async () => {
-            if (!validateForm()) {
-                statusText.innerText = "Please complete all required fields highlighted in gold.";
-                return;
-            }
+            if (!validateForm()) return;
 
             submitBtn.disabled = true;
             statusText.innerText = "Transmitting priority tow request...";
@@ -395,9 +415,7 @@
             const property = propertySelect.value;
             const bay = bayInput.value.trim();
             const reason = reasonInput.value.trim();
-            const authorizer = authorizerSelect.value;
 
-            // Combine Bay and Reason cleanly for the Tow Run Log
             const reasonParts = [];
             if (bay) reasonParts.push(`Bay: ${bay}`);
             if (reason) reasonParts.push(reason);
@@ -411,7 +429,7 @@
                 state: stateSelect.value || 'QLD',
                 reason: combinedReason,
                 bay: bay,
-                authorizer: authorizer,
+                authorizer: currentAuthorizer,
                 photoBytes: capturedPhotoB64 || ""
             };
 
@@ -427,11 +445,11 @@
                     successRego.innerText = `${cleanRego} (${property})`;
                     successOverlay.style.display = 'flex';
                 } else {
-                    statusText.innerText = "Submission error: " + (data.message || "Please retry.");
+                    statusText.innerText = "Error: " + (data.message || "Please retry.");
                     submitBtn.disabled = false;
                 }
             } catch(err) {
-                statusText.innerText = "Network error. Please check connection and retry.";
+                statusText.innerText = "Network error. Please check connection.";
                 submitBtn.disabled = false;
             }
         });
