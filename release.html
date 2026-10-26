@@ -215,15 +215,10 @@
         <label>ADDRESS</label>
         <input type="text" id="ownerAddressInput" placeholder="Address" autocomplete="new-password" autocorrect="off" spellcheck="false">
 
-        <div class="row-2">
-            <div>
-                <label>MOBILE NUMBER</label>
-                <input type="tel" id="ownerPhoneInput" placeholder="04xx xxx xxx" autocomplete="off" inputmode="numeric">
-            </div>
-            <div>
-                <label>CUSTOMER EMAIL</label>
-                <input type="email" id="ownerEmailInput" placeholder="name@email.com" autocomplete="off">
-            </div>
+        <label>CUSTOMER MOBILE NUMBER (FOR INVOICE SMS) *</label>
+        <div style="display:flex; gap:8px;">
+            <input type="tel" id="ownerPhoneInput" placeholder="04xx xxx xxx" autocomplete="off" inputmode="numeric" style="color:#00e676; flex:1;" oninput="updateReleaseCallBtn()">
+            <button type="button" id="releaseCallBtn" style="background:#00e676; color:#000; border:none; border-radius:10px; font-weight:900; font-size:13px; padding:0 14px; cursor:pointer; display:none;" onclick="callReleaseOwner()">📞 CALL</button>
         </div>
     </div>
 
@@ -265,14 +260,14 @@
     </select>
     <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;" autocomplete="off">
 
-    <button class="submit-btn" id="submitBtn" disabled>RELEASE</button>
+    <button class="submit-btn" id="submitBtn" disabled>PROCESS RELEASE</button>
     <div id="status"></div>
 </div>
 
 <!-- Full Screen Success Overlay -->
 <div id="successOverlay">
     <h1 id="successRego">VEHICLE RELEASED</h1>
-    <p>Tax Invoice Emailed & Logged to Drive.</p>
+    <p>Tax Invoice Sent via SMS & Archived to Google Drive.</p>
     <button type="button" class="ok-btn" onclick="window.location.reload(true);">DONE ✓</button>
 </div>
 
@@ -293,7 +288,6 @@
     const idNumInput = document.getElementById('idNumInput');
     const ownerAddressInput = document.getElementById('ownerAddressInput');
     const ownerPhoneInput = document.getElementById('ownerPhoneInput');
-    const ownerEmailInput = document.getElementById('ownerEmailInput');
 
     const releaseFeeInput = document.getElementById('releaseFeeInput');
     const storageFeeInput = document.getElementById('storageFeeInput');
@@ -314,6 +308,7 @@
     let yardVehicles = [];
     let idPhotos = [];
     let ownerSigConfirmed = false;
+    let isSubmittingRelease = false;
 
     window.addEventListener('DOMContentLoaded', () => {
         loadYardVehicles();
@@ -347,6 +342,7 @@
             propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = ''; svnInput.value = '';
             idSectionWrapper.classList.add('section-disabled');
         }
+        updateReleaseCallBtn();
         validateForm();
     }
 
@@ -546,8 +542,19 @@
         validateForm();
     }
 
+    function updateReleaseCallBtn() {
+        const num = document.getElementById('ownerPhoneInput').value.replace(/[^\d+]/g, '');
+        const btn = document.getElementById('releaseCallBtn');
+        if (btn) btn.style.display = num.length >= 8 ? 'block' : 'none';
+    }
+
+    function callReleaseOwner() {
+        const num = document.getElementById('ownerPhoneInput').value.replace(/[^\d+]/g, '');
+        if (num) window.location.href = `tel:${num}`;
+    }
+
     function setupLiveValidation() {
-        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, ownerEmailInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
         inputs.forEach(elem => {
             if (elem) {
                 elem.addEventListener('input', validateForm);
@@ -579,10 +586,6 @@
         const nameValid = Boolean(ownerNameInput && ownerNameInput.value.trim().length > 1);
         const idValid = Boolean(idNumInput && idNumInput.value.trim().length >= 4);
         const addrValid = Boolean(ownerAddressInput && ownerAddressInput.value.trim().length > 4);
-        
-        // Either valid email or phone is accepted
-        const emailVal = ownerEmailInput ? ownerEmailInput.value.trim() : "";
-        const emailValid = emailVal.length > 3 && emailVal.includes("@");
         const phoneClean = (ownerPhoneInput && ownerPhoneInput.value) ? ownerPhoneInput.value.replace(/[^\d+]/g, '') : "";
         const phoneValid = phoneClean.length >= 8;
 
@@ -590,10 +593,9 @@
         mark(idNumInput, idValid);
         mark(ownerAddressInput, addrValid);
         mark(ownerPhoneInput, phoneValid);
-        mark(ownerEmailInput, emailValid);
 
         // Owner details unlock the signature block
-        const idDetailsComplete = nameValid && idValid && addrValid && (emailValid || phoneValid);
+        const idDetailsComplete = nameValid && idValid && addrValid && phoneValid;
         if (idDetailsComplete) {
             ownerSigWrapper.classList.remove('section-disabled');
         } else {
@@ -610,26 +612,22 @@
 
         if (!ownerSigConfirmed) isValid = false;
         
-        if (isValid) {
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = "1";
-        } else {
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = "0.5";
-        }
+        submitBtn.disabled = !isValid || isSubmittingRelease;
+        submitBtn.style.opacity = (isValid && !isSubmittingRelease) ? "1" : "0.5";
         
         return isValid;
     }
 
     submitBtn.addEventListener('click', async () => {
-        if (!validateForm()) {
-            statusDiv.innerText = "⚠️ COMPLETE OWNER DETAILS & CONFIRM SIGNATURE";
-            return;
-        }
+        if (!validateForm() || isSubmittingRelease) return;
 
+        // HARD DEBOUNCE - LOCK BUTTON
+        isSubmittingRelease = true;
         submitBtn.disabled = true;
-        submitBtn.style.opacity = "0.5";
-        statusDiv.innerText = "PROCESSING RELEASE & INVOICE...";
+        submitBtn.style.opacity = "0.4";
+        submitBtn.innerText = "RELEASING & GENERATING INVOICE...";
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "Transmitting release archive and SMS...";
 
         const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
         const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
@@ -646,7 +644,7 @@
             idNumber: idNumInput.value.trim(),
             ownerAddress: ownerAddressInput.value.trim(),
             ownerPhone: ownerPhoneInput.value.trim(),
-            ownerEmail: ownerEmailInput.value.trim(),
+            ownerEmail: "", // EMAIL REMOVED 
             releaseFee: releaseFeeInput.value,
             storageFee: storageFeeInput.value,
             officer: finalOfficer,
@@ -667,14 +665,18 @@
                 successRego.innerText = payload.rego + " RELEASED";
                 successOverlay.style.display = "flex";
             } else {
-                statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release");
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = "1";
+                statusDiv.style.color = "#ff1744";
+                statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release vehicle.");
+                isSubmittingRelease = false;
+                submitBtn.innerText = "PROCESS RELEASE";
+                validateForm();
             }
         } catch(err) {
-            statusDiv.innerText = "SERVER ERROR PROCESSING RELEASE";
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = "1";
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "Network error. Vehicle release may still be processing on server.";
+            isSubmittingRelease = false;
+            submitBtn.innerText = "PROCESS RELEASE";
+            validateForm();
         }
     });
 </script>
