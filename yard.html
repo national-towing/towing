@@ -51,22 +51,55 @@
     .prop-text { font-size: 24px; font-weight: 900; color: #aaa; text-align: right; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .card-body { display: flex; gap: 12px; align-items: center; }
-    .thumb-wrap { width: 78px; height: 78px; border-radius: 10px; overflow: hidden; background: #000; border: 1.5px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
-    .thumb-img { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* PORTRAIT 3:4 RATIO THUMBNAIL (NO STRETCHING) */
+    .thumb-wrap { 
+      width: 72px; 
+      height: 96px; 
+      border-radius: 10px; 
+      overflow: hidden; 
+      background: #000; 
+      border: 1.5px solid var(--border); 
+      flex-shrink: 0; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      position: relative; 
+    }
+    .thumb-img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      object-position: center; 
+      display: block; 
+    }
     .no-img { font-size: 10px; font-weight: 800; color: #555; text-align: center; }
 
     .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-    .veh-line { font-size: 24px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
-    .towed-line { color: var(--text-muted); font-size: 15px; font-weight: 700; margin-top: 2px; }
+    .veh-line { font-size: 20px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
+    .towed-line { color: var(--text-muted); font-size: 14px; font-weight: 700; margin-top: 2px; }
     
-    /* TAP-TO-CALL BUTTON STYLE */
+    /* TAP-TO-CALL BUTTON ON CARD */
     .phone-tag { 
-      color: var(--c-rel); font-size: 13px; font-weight: 900; margin-top: 5px; 
-      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-      background: #0d2818; border: 1.5px solid var(--c-rel); padding: 4px 10px;
-      border-radius: 8px; width: fit-content;
+      color: var(--c-rel); 
+      font-size: 13px; 
+      font-weight: 900; 
+      margin-top: 4px; 
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #0d2818;
+      border: 1.5px solid var(--c-rel);
+      padding: 4px 10px;
+      border-radius: 8px;
+      width: fit-content;
     }
-    .phone-tag:active { transform: scale(0.96); background: #1b4d2e; }
+    .phone-tag:active { 
+      transform: scale(0.96); 
+      background: #1b4d2e; 
+    }
 
     /* Interactive Notes Banner on Tile */
     .notes-box {
@@ -95,7 +128,26 @@
     
     .phone-input-wrap { display: flex; gap: 6px; }
     .phone-input { flex: 1; height: 48px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 18px; font-weight: 900; padding: 0 12px; text-align: center; outline: none; }
-    .btn-paste { background: #ffab00; color: #000; border: none; border-radius: 10px; padding: 0 14px; font-size: 13px; font-weight: 900; cursor: pointer; }
+    
+    /* MODAL DYNAMIC ACTION BUTTON (SWAPS BETWEEN PASTE & CALL) */
+    .btn-modal-phone-action { 
+      min-width: 90px;
+      height: 48px;
+      border: none; 
+      border-radius: 10px; 
+      padding: 0 14px; 
+      font-size: 13px; 
+      font-weight: 900; 
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .btn-modal-phone-action.mode-paste { background: #ffab00; color: #000; }
+    .btn-modal-phone-action.mode-call  { background: var(--c-rel); color: #000; }
+    .btn-modal-phone-action:active { transform: scale(0.96); }
 
     .textarea-notes { width: 100%; height: 80px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; padding: 10px; outline: none; resize: none; }
     .quick-tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -139,19 +191,18 @@
   <div id="loading" style="text-align:center; padding: 40px; color:var(--text-muted); font-weight:700;">Loading Holding Yard...</div>
   <div id="cardList" class="card-list"></div>
 
-  <!-- 1-Click Clipboard SMS Modal -->
+  <!-- 1-Click Clipboard SMS & Direct Call Modal -->
   <div id="smsModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-title">
-        <span id="smsModalPlate" style="color:#facc15;">790WSY</span>
-        <span style="font-size:12px; color:#aaa;" id="smsModalProp">Waterpoint</span>
+        <span id="smsModalPlate" style="color:#facc15;"></span>
+        <span style="font-size:12px; color:#aaa;" id="smsModalProp"></span>
       </div>
 
       <label style="font-size:11px; text-transform:uppercase; color:#aaa; font-weight:800;">Customer Mobile</label>
       <div class="phone-input-wrap">
-        <input type="tel" id="callerPhoneInput" class="phone-input" placeholder="04xx xxx xxx" oninput="updateModalCallBtn()">
-        <button type="button" class="btn-paste" onclick="pasteFromClipboard()">📋 PASTE</button>
-        <button type="button" id="modalCallBtn" class="btn-paste" style="background:var(--c-rel); color:#000; display:none;" onclick="callModalNumber()">📞 CALL</button>
+        <input type="tel" id="callerPhoneInput" class="phone-input" placeholder="04xx xxx xxx" oninput="updateModalPhoneBtn()">
+        <button type="button" id="modalPhoneActionBtn" class="btn-modal-phone-action mode-paste" onclick="handleModalPhoneAction()">📋 PASTE</button>
       </div>
 
       <div class="modal-actions">
@@ -165,7 +216,7 @@
   <div id="notesModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-title">
-        <span id="notesModalPlate" style="color:#facc15;">790WSY</span>
+        <span id="notesModalPlate" style="color:#facc15;"></span>
         <span style="font-size:12px; color:#aaa;">YARD NOTE</span>
       </div>
 
@@ -216,15 +267,12 @@
       }
     }
 
-    // Helper: Formats time string to strict "Day DD/MM HH:MM" in 24-hour clock
     function formatTowedDate(raw) {
       if (!raw) return 'Today';
       let str = String(raw).replace(/^Towed:\s*/i, '').trim();
 
-      // Convert hyphens between date parts to slashes: "Sat 24-10 05:11" -> "Sat 24/10 05:11"
       str = str.replace(/([A-Za-z]{3}\s+\d{1,2})-(\d{1,2})/, '$1/$2');
 
-      // Convert "24/10/2026 04:48:00" to "Sat 24/10 04:48"
       const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})/);
       if (slashMatch) {
         const dObj = new Date(parseInt(slashMatch[3], 10), parseInt(slashMatch[2], 10) - 1, parseInt(slashMatch[1], 10));
@@ -261,15 +309,14 @@
                   onclick="showLightbox('https://lh3.googleusercontent.com/d/${driveId}')">`
           : `<div class="no-img">NO PHOTO</div>`;
 
-        // Tap-to-Call HTML Link
+        // CLICKABLE CALL BUTTON DIRECTLY ON THE CARD
         const cleanTel = v.callerPhone ? String(v.callerPhone).replace(/[^\d+]/g, '') : '';
         const phoneDisplay = v.callerPhone 
-          ? `<a href="tel:${cleanTel}" class="phone-tag" onclick="event.stopPropagation();">📞 CALL ${v.callerPhone}</a>` 
+          ? `<a href="tel:${cleanTel}" class="phone-tag" onclick="event.stopPropagation();">📞 ${v.callerPhone}</a>` 
           : '';
-          
+
         const noteDisplay = v.notes ? `📝 ${v.notes}` : `+ Add Note...`;
 
-        // Car format: "Make - Model (Colour)"
         const makeModel = [v.make, v.model].filter(Boolean).join(' - ');
         const vehDesc = makeModel 
           ? (v.colour ? `${makeModel} (${v.colour})` : makeModel) 
@@ -288,7 +335,7 @@
             <div class="details-wrap">
               <div class="veh-line">${vehDesc}</div>
               <div class="towed-line">Towed: ${towedFormatted}</div>
-              <div>${phoneDisplay}</div>
+              ${phoneDisplay ? `<div>${phoneDisplay}</div>` : ''}
             </div>
           </div>
 
@@ -319,6 +366,57 @@
       renderCards(displayedInventory);
     }
 
+    // --- DYNAMIC PHONE BUTTON TOGGLE (PASTE <-> CALL) ---
+    function updateModalPhoneBtn() {
+      const val = document.getElementById('callerPhoneInput').value;
+      const clean = val.replace(/[^\d+]/g, '');
+      const btn = document.getElementById('modalPhoneActionBtn');
+
+      if (clean.length >= 8) {
+        btn.className = "btn-modal-phone-action mode-call";
+        btn.innerText = "📞 CALL";
+      } else {
+        btn.className = "btn-modal-phone-action mode-paste";
+        btn.innerText = "📋 PASTE";
+      }
+    }
+
+    async function handleModalPhoneAction() {
+      const val = document.getElementById('callerPhoneInput').value;
+      const clean = val.replace(/[^\d+]/g, '');
+
+      if (clean.length >= 8) {
+        // CALL MODE: Save number immediately and dial
+        if (selectedVehicle) {
+          selectedVehicle.callerPhone = clean;
+          fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'save_yard_details',
+              rego: selectedVehicle.rego,
+              phone: clean,
+              notes: selectedVehicle.notes || ''
+            })
+          }).catch(e => console.warn(e));
+          renderCards(displayedInventory);
+        }
+        window.location.href = `tel:${clean}`;
+      } else {
+        // PASTE MODE: Read clipboard, populate, and switch button
+        try {
+          const text = await navigator.clipboard.readText();
+          const cleanedText = text.replace(/[^\d+]/g, '');
+          if (cleanedText) {
+            document.getElementById('callerPhoneInput').value = cleanedText;
+          }
+        } catch(err) {
+          document.getElementById('callerPhoneInput').focus();
+        }
+        updateModalPhoneBtn();
+      }
+    }
+
     // --- SMS MODAL LOGIC ---
     function openSmsModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
@@ -326,36 +424,14 @@
       document.getElementById('smsModalPlate').innerText = selectedVehicle.rego;
       document.getElementById('smsModalProp').innerText = selectedVehicle.property || 'GENERAL';
       document.getElementById('callerPhoneInput').value = selectedVehicle.callerPhone || '';
+      updateModalPhoneBtn();
       document.getElementById('smsModal').style.display = 'flex';
-      updateModalCallBtn();
       setTimeout(() => document.getElementById('callerPhoneInput').focus(), 150);
     }
 
     function closeSmsModal() {
       document.getElementById('smsModal').style.display = 'none';
       selectedVehicle = null;
-    }
-
-    async function pasteFromClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        const clean = text.replace(/[^\d+]/g, '');
-        if (clean) document.getElementById('callerPhoneInput').value = clean;
-        updateModalCallBtn();
-      } catch(err) {
-        document.getElementById('callerPhoneInput').focus();
-      }
-    }
-
-    function updateModalCallBtn() {
-      const num = document.getElementById('callerPhoneInput').value.replace(/[^\d+]/g, '');
-      const btn = document.getElementById('modalCallBtn');
-      btn.style.display = num.length >= 8 ? 'block' : 'none';
-    }
-
-    function callModalNumber() {
-      const num = document.getElementById('callerPhoneInput').value.replace(/[^\d+]/g, '');
-      if (num) window.location.href = `tel:${num}`;
     }
 
     function submitYardContactAndSms() {
@@ -408,7 +484,7 @@ Thank you`;
       const smsUri = `sms:${cleanPhone}${delim}body=${encodeURIComponent(msgBody)}`;
 
       selectedVehicle.callerPhone = cleanPhone;
-      renderCards(yardInventory);
+      renderCards(displayedInventory);
       closeSmsModal();
 
       window.location.href = smsUri;
@@ -450,7 +526,7 @@ Thank you`;
       }).catch(e => console.warn(e));
 
       selectedVehicle.notes = updatedNote;
-      renderCards(yardInventory);
+      renderCards(displayedInventory);
       closeNotesModal();
     }
 
