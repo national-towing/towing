@@ -46,13 +46,14 @@
     .card-list { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 440px; margin: 0 auto; }
     .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--c-yard); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     
-    .card-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .card-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer; }
     .rego-text { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #facc15; flex-shrink: 0; }
-    .prop-text { font-size: 24px; font-weight: 900; color: #aaa; text-align: right; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .prop-text { font-size: 22px; font-weight: 900; color: #aaa; text-align: right; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .edit-pill { background: #2a2a2a; border: 1px solid var(--c-yard); color: var(--c-yard); font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px; }
 
-    .card-body { display: flex; gap: 12px; align-items: center; }
+    .card-body { display: flex; gap: 12px; align-items: center; cursor: pointer; }
     
-    /* PORTRAIT 3:4 RATIO THUMBNAIL (NO STRETCHING) */
+    /* PORTRAIT 3:4 RATIO THUMBNAIL */
     .thumb-wrap { 
       width: 72px; 
       height: 96px; 
@@ -77,8 +78,9 @@
     .no-img { font-size: 10px; font-weight: 800; color: #555; text-align: center; }
 
     .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-    .veh-line { font-size: 20px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
-    .towed-line { color: var(--text-muted); font-size: 14px; font-weight: 700; margin-top: 2px; }
+    .veh-line { font-size: 19px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+    .towed-line { color: var(--text-muted); font-size: 13px; font-weight: 700; margin-top: 2px; }
+    .meta-sub-line { color: #aaa; font-size: 12px; font-weight: 700; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
     
     /* TAP-TO-CALL BUTTON ON CARD */
     .phone-tag { 
@@ -96,12 +98,9 @@
       border-radius: 8px;
       width: fit-content;
     }
-    .phone-tag:active { 
-      transform: scale(0.96); 
-      background: #1b4d2e; 
-    }
+    .phone-tag:active { transform: scale(0.96); background: #1b4d2e; }
 
-    /* Interactive Notes Banner on Tile */
+    /* Interactive Notes Banner */
     .notes-box {
       background: #141414; border: 1px dashed #444; border-left: 3px solid #ffab00;
       padding: 8px 10px; border-radius: 6px; font-size: 12px; color: #ffab00; font-weight: 600;
@@ -109,7 +108,7 @@
     }
     .notes-box:active { background: #222; }
 
-    /* 50/50 Split Action Buttons */
+    /* Action Buttons */
     .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
     .btn-action {
       height: 48px; border: none; border-radius: 10px; font-size: 16px; font-weight: 900;
@@ -121,45 +120,48 @@
     .btn-rel { background: var(--c-rel); color: #000; }
     .btn-rel:active { background: #00c853; }
 
-    /* Modal Overlays (SMS & Notes) */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 14px; }
-    .modal-box { background: #1c1c1c; border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    /* MODAL OVERLAYS (SMS, NOTES & EDIT SCREEN) */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1000; align-items: center; justify-content: center; padding: 14px; overflow-y: auto; }
+    .modal-box { background: #1c1c1c; border: 1.5px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
     .modal-title { font-size: 18px; font-weight: 900; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+
+    /* FULL EDIT SCREEN FORM STYLING */
+    .edit-grid { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; padding-right: 4px; margin-top: 4px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-label { font-size: 11px; font-weight: 900; text-transform: uppercase; color: #aaa; letter-spacing: 0.5px; }
+    .form-input, .form-select {
+      height: 48px; background: #2a2a2a; border: 1.5px solid #444; border-radius: 10px;
+      color: #fff; font-size: 16px; font-weight: 800; padding: 0 12px; outline: none; width: 100%;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--c-yard); }
+    .row-2 { display: flex; gap: 8px; }
+    .row-2 > div { flex: 1; }
     
+    .truck-indicator {
+      font-size: 11px; font-weight: 800; color: #00e676; margin-top: 2px;
+    }
+
+    /* Modal Phone Action Button */
     .phone-input-wrap { display: flex; gap: 6px; }
     .phone-input { flex: 1; height: 48px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 18px; font-weight: 900; padding: 0 12px; text-align: center; outline: none; }
-    
-    /* MODAL DYNAMIC ACTION BUTTON (SWAPS BETWEEN PASTE & CALL) */
     .btn-modal-phone-action { 
-      min-width: 90px;
-      height: 48px;
-      border: none; 
-      border-radius: 10px; 
-      padding: 0 14px; 
-      font-size: 13px; 
-      font-weight: 900; 
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      min-width: 90px; height: 48px; border: none; border-radius: 10px; padding: 0 14px; 
+      font-size: 13px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      letter-spacing: 0.5px; text-transform: uppercase;
     }
     .btn-modal-phone-action.mode-paste { background: #ffab00; color: #000; }
     .btn-modal-phone-action.mode-call  { background: var(--c-rel); color: #000; }
-    .btn-modal-phone-action:active { transform: scale(0.96); }
 
     .textarea-notes { width: 100%; height: 80px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; padding: 10px; outline: none; resize: none; }
     .quick-tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
     .quick-tag { background: #2a2a2a; border: 1px solid #444; color: #aaa; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; }
     .quick-tag:active { background: #ffab00; color: #000; }
 
-    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
-    .btn-m-cancel { height: 46px; background: #333; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; }
-    .btn-m-save { height: 46px; background: var(--c-yard); color: #000; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; }
-    .btn-m-send { height: 46px; background: #0284c7; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .btn-m-cancel { height: 48px; background: #333; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; }
+    .btn-m-save { height: 48px; background: var(--c-yard); color: #000; border: none; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
+    .btn-m-send { height: 48px; background: #0284c7; color: #fff; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; }
 
-    /* Photo Lightbox */
     #photoLightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 16px; }
     #lightboxImg { max-width: 100%; max-height: 85vh; border-radius: 10px; border: 2px solid #555; }
   </style>
@@ -191,7 +193,133 @@
   <div id="loading" style="text-align:center; padding: 40px; color:var(--text-muted); font-weight:700;">Loading Holding Yard...</div>
   <div id="cardList" class="card-list"></div>
 
-  <!-- 1-Click Clipboard SMS & Direct Call Modal -->
+  <!-- ============================================================ -->
+  <!-- 🚗 MOBILE FULL EDIT SCREEN MODAL                            -->
+  <!-- ============================================================ -->
+  <div id="editVehicleModal" class="modal-overlay">
+    <div class="modal-box" style="max-height: 90vh;">
+      <div class="modal-title">
+        <span id="editModalPlateTitle" style="color:#facc15; font-size:22px;"></span>
+        <span class="edit-pill">EDIT VEHICLE</span>
+      </div>
+
+      <div class="edit-grid">
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">REGISTRATION</label>
+            <input type="text" id="editRego" class="form-input" style="color:#facc15; text-transform:uppercase;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">PROPERTY</label>
+            <select id="editPropertySelect" class="form-select"></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">DATE / TIME TOWED</label>
+          <input type="text" id="editTowedTime" class="form-input">
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">MAKE</label>
+            <select id="editMakeSelect" class="form-select" onchange="checkEditMakeOther(this)">
+              <option value="Toyota">Toyota</option>
+              <option value="Holden">Holden</option>
+              <option value="Ford">Ford</option>
+              <option value="Hyundai">Hyundai</option>
+              <option value="Nissan">Nissan</option>
+              <option value="Mitsubishi">Mitsubishi</option>
+              <option value="Mazda">Mazda</option>
+              <option value="MG">MG</option>
+              <option value="Subaru">Subaru</option>
+              <option value="Honda">Honda</option>
+              <option value="Volkswagen">Volkswagen</option>
+              <option value="Kia">Kia</option>
+              <option value="BMW">BMW</option>
+              <option value="Mercedes-Benz">Mercedes-Benz</option>
+              <option value="Audi">Audi</option>
+              <option value="Jeep">Jeep</option>
+              <option value="Other">Other</option>
+            </select>
+            <input type="text" id="editMakeOther" class="form-input" placeholder="ENTER MAKE" style="display:none; margin-top:4px;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">MODEL</label>
+            <input type="text" id="editModel" class="form-input" placeholder="MODEL">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">COLOUR</label>
+            <select id="editColourSelect" class="form-select" onchange="checkEditColourOther(this)">
+              <option value="White">White</option>
+              <option value="Black">Black</option>
+              <option value="Silver">Silver</option>
+              <option value="Grey">Grey</option>
+              <option value="Blue">Blue</option>
+              <option value="Red">Red</option>
+              <option value="Green">Green</option>
+              <option value="Yellow">Yellow</option>
+              <option value="Gold">Gold</option>
+              <option value="Bronze">Bronze</option>
+              <option value="Orange">Orange</option>
+              <option value="Purple">Purple</option>
+              <option value="Brown">Brown</option>
+              <option value="Other">Other</option>
+            </select>
+            <input type="text" id="editColourOther" class="form-input" placeholder="ENTER COLOUR" style="display:none; margin-top:4px;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">BODY TYPE</label>
+            <select id="editBodyTypeSelect" class="form-select">
+              <option value="Sedan">Sedan</option>
+              <option value="Hatchback">Hatchback</option>
+              <option value="SUV">SUV</option>
+              <option value="Station Wagon">Station Wagon</option>
+              <option value="Utility">Utility</option>
+              <option value="Van">Van</option>
+              <option value="Coupe">Coupe</option>
+              <option value="Convertible">Convertible</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">DRIVER (AUTOMATIC TRUCK ASSIGNMENT)</label>
+          <select id="editDriverSelect" class="form-select" onchange="updateDriverTruckIndicator(this.value)">
+            <option value="Brian">Brian</option>
+            <option value="Brett">Brett</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="editDriverOther" class="form-input" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px;">
+          <div id="truckIndicatorText" class="truck-indicator">Truck #: 3676 (Assigned to Brian)</div>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">CALLER PHONE</label>
+            <input type="tel" id="editCallerPhone" class="form-input" placeholder="04xx xxx xxx">
+          </div>
+          <div class="form-group">
+            <label class="form-label">POLICELINK REF #</label>
+            <input type="text" id="editPolicelinkRef" class="form-input" placeholder="Ref Number">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-m-cancel" onclick="closeEditModal()">CANCEL</button>
+        <button type="button" class="btn-m-save" onclick="saveVehicleDetailsFromModal()">SAVE CHANGES</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMS Modal -->
   <div id="smsModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-title">
@@ -212,7 +340,7 @@
     </div>
   </div>
 
-  <!-- Dedicated Notes Modal -->
+  <!-- Notes Modal -->
   <div id="notesModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-title">
@@ -247,10 +375,22 @@
     let yardInventory = [];
     let displayedInventory = [];
     let selectedVehicle = null;
+    let availableProperties = [];
 
     window.addEventListener('DOMContentLoaded', () => {
       fetchYardInventory();
+      loadPropertyList();
     });
+
+    async function loadPropertyList() {
+      const cached = localStorage.getItem('cached_properties');
+      if (cached) { try { availableProperties = JSON.parse(cached); } catch(e) {} }
+      try {
+        const resp = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
+        availableProperties = await resp.json();
+        localStorage.setItem('cached_properties', JSON.stringify(availableProperties));
+      } catch(e) {}
+    }
 
     async function fetchYardInventory() {
       document.getElementById('loading').style.display = 'block';
@@ -270,7 +410,6 @@
     function formatTowedDate(raw) {
       if (!raw) return 'Today';
       let str = String(raw).replace(/^Towed:\s*/i, '').trim();
-
       str = str.replace(/([A-Za-z]{3}\s+\d{1,2})-(\d{1,2})/, '$1/$2');
 
       const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})/);
@@ -284,7 +423,6 @@
         const min = String(slashMatch[5]).padStart(2, '0');
         return `${day ? day + ' ' : ''}${dd}/${mm} ${hh}:${min}`;
       }
-
       return str;
     }
 
@@ -306,10 +444,9 @@
                   class="thumb-img" 
                   loading="lazy" 
                   onerror="if (!this.dataset.tried) { this.dataset.tried=1; this.src='https://drive.google.com/thumbnail?id=${driveId}&sz=w300'; } else { this.parentElement.innerHTML='<div class=\\\'no-img\\\'>NO PHOTO</div>'; }" 
-                  onclick="showLightbox('https://lh3.googleusercontent.com/d/${driveId}')">`
+                  onclick="event.stopPropagation(); showLightbox('https://lh3.googleusercontent.com/d/${driveId}')">`
           : `<div class="no-img">NO PHOTO</div>`;
 
-        // CLICKABLE CALL BUTTON DIRECTLY ON THE CARD
         const cleanTel = v.callerPhone ? String(v.callerPhone).replace(/[^\d+]/g, '') : '';
         const phoneDisplay = v.callerPhone 
           ? `<a href="tel:${cleanTel}" class="phone-tag" onclick="event.stopPropagation();">📞 ${v.callerPhone}</a>` 
@@ -324,29 +461,38 @@
 
         const towedFormatted = formatTowedDate(v.towedTime);
 
+        // Driver & Policelink tags if present
+        let metaTags = [];
+        if (v.driver) metaTags.push(`Driver: ${v.driver}`);
+        if (v.policelinkRef) metaTags.push(`Ref: ${v.policelinkRef}`);
+
         card.innerHTML = `
-          <div class="card-row-top">
+          <div class="card-row-top" onclick="openEditModalByIndex(${idx})">
             <span class="rego-text">${v.rego}</span>
-            <span class="prop-text">${v.property || 'GENERAL'}</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="prop-text">${v.property || 'GENERAL'}</span>
+              <span class="edit-pill">✎ EDIT</span>
+            </div>
           </div>
 
-          <div class="card-body">
+          <div class="card-body" onclick="openEditModalByIndex(${idx})">
             <div class="thumb-wrap">${thumbContent}</div>
             <div class="details-wrap">
               <div class="veh-line">${vehDesc}</div>
               <div class="towed-line">Towed: ${towedFormatted}</div>
+              ${metaTags.length > 0 ? `<div class="meta-sub-line">${metaTags.map(m => `<span>• ${m}</span>`).join('')}</div>` : ''}
               ${phoneDisplay ? `<div>${phoneDisplay}</div>` : ''}
             </div>
           </div>
 
-          <div class="notes-box" onclick="openNotesModalByIndex(${idx})">
+          <div class="notes-box" onclick="event.stopPropagation(); openNotesModalByIndex(${idx})">
             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${noteDisplay}</span>
-            <span style="font-size:10px; color:#888;">EDIT ✎</span>
+            <span style="font-size:10px; color:#888;">NOTE ✎</span>
           </div>
 
           <div class="action-row">
-            <button class="btn-action btn-sms" onclick="openSmsModalByIndex(${idx})">💬 SMS</button>
-            <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel">RELEASE ➔</a>
+            <button class="btn-action btn-sms" onclick="event.stopPropagation(); openSmsModalByIndex(${idx})">💬 SMS</button>
+            <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel" onclick="event.stopPropagation();">RELEASE ➔</a>
           </div>
         `;
         list.appendChild(card);
@@ -364,6 +510,196 @@
         (v.notes && v.notes.toUpperCase().includes(q))
       );
       renderCards(displayedInventory);
+    }
+
+    // ============================================================
+    // ✎ MOBILE FULL EDIT MODAL LOGIC
+    // ============================================================
+    function openEditModalByIndex(idx) {
+      selectedVehicle = displayedInventory[idx];
+      if (!selectedVehicle) return;
+
+      document.getElementById('editModalPlateTitle').innerText = selectedVehicle.rego;
+      document.getElementById('editRego').value = selectedVehicle.rego;
+      document.getElementById('editTowedTime').value = selectedVehicle.towedTime || '';
+
+      // Populate Property dropdown
+      const propSel = document.getElementById('editPropertySelect');
+      propSel.innerHTML = '<option value="GENERAL">GENERAL</option>';
+      const currentProp = (selectedVehicle.property || 'GENERAL').trim();
+      let propFound = false;
+
+      availableProperties.forEach(p => {
+        const pName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+        if (pName) {
+          const opt = document.createElement('option');
+          opt.value = pName; opt.innerText = pName;
+          if (pName.toUpperCase() === currentProp.toUpperCase()) { opt.selected = true; propFound = true; }
+          propSel.appendChild(opt);
+        }
+      });
+      if (!propFound && currentProp !== 'GENERAL') {
+        const extraOpt = document.createElement('option');
+        extraOpt.value = currentProp; extraOpt.innerText = currentProp; extraOpt.selected = true;
+        propSel.appendChild(extraOpt);
+      }
+
+      // Populate Make
+      const makeSel = document.getElementById('editMakeSelect');
+      const makeOther = document.getElementById('editMakeOther');
+      let makeMatched = false;
+      for (let i = 0; i < makeSel.options.length; i++) {
+        if (makeSel.options[i].value.toLowerCase() === (selectedVehicle.make || '').toLowerCase()) {
+          makeSel.selectedIndex = i; makeMatched = true; break;
+        }
+      }
+      if (!makeMatched && selectedVehicle.make) {
+        makeSel.value = 'Other'; makeOther.style.display = 'block'; makeOther.value = selectedVehicle.make;
+      } else {
+        makeOther.style.display = makeSel.value === 'Other' ? 'block' : 'none';
+      }
+
+      // Populate Model
+      document.getElementById('editModel').value = selectedVehicle.model || '';
+
+      // Populate Colour
+      const colourSel = document.getElementById('editColourSelect');
+      const colourOther = document.getElementById('editColourOther');
+      let colourMatched = false;
+      for (let i = 0; i < colourSel.options.length; i++) {
+        if (colourSel.options[i].value.toLowerCase() === (selectedVehicle.colour || '').toLowerCase()) {
+          colourSel.selectedIndex = i; colourMatched = true; break;
+        }
+      }
+      if (!colourMatched && selectedVehicle.colour) {
+        colourSel.value = 'Other'; colourOther.style.display = 'block'; colourOther.value = selectedVehicle.colour;
+      } else {
+        colourOther.style.display = colourSel.value === 'Other' ? 'block' : 'none';
+      }
+
+      // Populate Body Type
+      const bodySel = document.getElementById('editBodyTypeSelect');
+      for (let i = 0; i < bodySel.options.length; i++) {
+        const bOpt = bodySel.options[i].value.toLowerCase();
+        const curB = (selectedVehicle.bodyType || '').toLowerCase();
+        if (bOpt === curB || (curB === 'ute' && bOpt === 'utility') || (curB === 'wagon' && bOpt === 'station wagon')) {
+          bodySel.selectedIndex = i; break;
+        }
+      }
+
+      // Populate Driver
+      const driverSel = document.getElementById('editDriverSelect');
+      const driverOther = document.getElementById('editDriverOther');
+      const currentDriver = selectedVehicle.driver || 'Brian';
+      if (currentDriver.toUpperCase().includes('BRETT')) {
+        driverSel.value = 'Brett'; driverOther.style.display = 'none';
+      } else if (currentDriver.toUpperCase().includes('BRIAN')) {
+        driverSel.value = 'Brian'; driverOther.style.display = 'none';
+      } else {
+        driverSel.value = 'Other'; driverOther.style.display = 'block'; driverOther.value = currentDriver;
+      }
+      updateDriverTruckIndicator(driverSel.value);
+
+      // Caller Phone & Policelink Ref
+      document.getElementById('editCallerPhone').value = selectedVehicle.callerPhone || '';
+      document.getElementById('editPolicelinkRef').value = selectedVehicle.policelinkRef || '';
+
+      document.getElementById('editVehicleModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editVehicleModal').style.display = 'none';
+      selectedVehicle = null;
+    }
+
+    function checkEditMakeOther(sel) {
+      document.getElementById('editMakeOther').style.display = sel.value === 'Other' ? 'block' : 'none';
+    }
+    function checkEditColourOther(sel) {
+      document.getElementById('editColourOther').style.display = sel.value === 'Other' ? 'block' : 'none';
+    }
+
+    function updateDriverTruckIndicator(driverVal) {
+      const text = document.getElementById('truckIndicatorText');
+      const otherInput = document.getElementById('editDriverOther');
+      if (driverVal === 'Brett') {
+        text.innerText = 'Truck #: 3921 (Assigned to Brett)';
+        text.style.color = '#ffab00';
+        otherInput.style.display = 'none';
+      } else if (driverVal === 'Brian') {
+        text.innerText = 'Truck #: 3676 (Assigned to Brian)';
+        text.style.color = '#00e676';
+        otherInput.style.display = 'none';
+      } else {
+        text.innerText = 'Truck #: Custom assignment';
+        text.style.color = '#00b0ff';
+        otherInput.style.display = 'block';
+      }
+    }
+
+    function saveVehicleDetailsFromModal() {
+      if (!selectedVehicle) return;
+
+      const newRego = document.getElementById('editRego').value.trim().toUpperCase();
+      if (!newRego) { alert("Registration plate cannot be empty."); return; }
+
+      const newProperty = document.getElementById('editPropertySelect').value.trim();
+      const newTowedTime = document.getElementById('editTowedTime').value.trim();
+      
+      const makeSel = document.getElementById('editMakeSelect').value;
+      const newMake = makeSel === 'Other' ? document.getElementById('editMakeOther').value.trim() : makeSel;
+      
+      const newModel = document.getElementById('editModel').value.trim();
+
+      const colourSel = document.getElementById('editColourSelect').value;
+      const newColour = colourSel === 'Other' ? document.getElementById('editColourOther').value.trim() : colourSel;
+
+      const newBodyType = document.getElementById('editBodyTypeSelect').value;
+
+      const driverSel = document.getElementById('editDriverSelect').value;
+      const newDriver = driverSel === 'Other' ? (document.getElementById('editDriverOther').value.trim() || 'Other') : driverSel;
+
+      const newPhone = document.getElementById('editCallerPhone').value.trim().replace(/[^\d+]/g, '');
+      const newRef = document.getElementById('editPolicelinkRef').value.trim();
+
+      const payload = {
+        action: 'save_yard_details',
+        rowIdx: selectedVehicle.rowIdx,
+        origRego: selectedVehicle.rego,
+        rego: newRego,
+        property: newProperty,
+        towedTime: newTowedTime,
+        make: newMake,
+        model: newModel,
+        colour: newColour,
+        bodyType: newBodyType,
+        driver: newDriver,
+        callerPhone: newPhone,
+        policelinkRef: newRef,
+        notes: selectedVehicle.notes || ''
+      };
+
+      // 1. Optimistically update local view immediately
+      selectedVehicle.rego = newRego;
+      selectedVehicle.property = newProperty;
+      selectedVehicle.towedTime = newTowedTime;
+      selectedVehicle.make = newMake;
+      selectedVehicle.model = newModel;
+      selectedVehicle.colour = newColour;
+      selectedVehicle.bodyType = newBodyType;
+      selectedVehicle.driver = newDriver;
+      selectedVehicle.callerPhone = newPhone;
+      selectedVehicle.policelinkRef = newRef;
+
+      renderCards(displayedInventory);
+      closeEditModal();
+
+      // 2. Dispatch save to Google Apps Script
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.warn("Background update sync failed:", err));
     }
 
     // --- DYNAMIC PHONE BUTTON TOGGLE (PASTE <-> CALL) ---
@@ -386,7 +722,6 @@
       const clean = val.replace(/[^\d+]/g, '');
 
       if (clean.length >= 8) {
-        // CALL MODE: Save number immediately and dial
         if (selectedVehicle) {
           selectedVehicle.callerPhone = clean;
           fetch(GOOGLE_SCRIPT_URL, {
@@ -394,6 +729,7 @@
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
               action: 'save_yard_details',
+              rowIdx: selectedVehicle.rowIdx,
               rego: selectedVehicle.rego,
               phone: clean,
               notes: selectedVehicle.notes || ''
@@ -403,7 +739,6 @@
         }
         window.location.href = `tel:${clean}`;
       } else {
-        // PASTE MODE: Read clipboard, populate, and switch button
         try {
           const text = await navigator.clipboard.readText();
           const cleanedText = text.replace(/[^\d+]/g, '');
@@ -449,6 +784,7 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           action: 'save_yard_details',
+          rowIdx: selectedVehicle.rowIdx,
           rego: selectedVehicle.rego,
           phone: cleanPhone,
           notes: selectedVehicle.notes || ''
@@ -519,6 +855,7 @@ Thank you`;
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           action: 'save_yard_details',
+          rowIdx: selectedVehicle.rowIdx,
           rego: selectedVehicle.rego,
           phone: selectedVehicle.callerPhone || '',
           notes: updatedNote
