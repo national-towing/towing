@@ -58,7 +58,15 @@
     .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
     .veh-line { font-size: 24px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
     .towed-line { color: var(--text-muted); font-size: 15px; font-weight: 700; margin-top: 2px; }
-    .phone-tag { color: var(--c-rel); font-size: 12px; font-weight: 800; margin-top: 2px; }
+    
+    /* TAP-TO-CALL BUTTON STYLE */
+    .phone-tag { 
+      color: var(--c-rel); font-size: 13px; font-weight: 900; margin-top: 5px; 
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      background: #0d2818; border: 1.5px solid var(--c-rel); padding: 4px 10px;
+      border-radius: 8px; width: fit-content;
+    }
+    .phone-tag:active { transform: scale(0.96); background: #1b4d2e; }
 
     /* Interactive Notes Banner on Tile */
     .notes-box {
@@ -141,8 +149,9 @@
 
       <label style="font-size:11px; text-transform:uppercase; color:#aaa; font-weight:800;">Customer Mobile</label>
       <div class="phone-input-wrap">
-        <input type="tel" id="callerPhoneInput" class="phone-input" placeholder="04xx xxx xxx">
+        <input type="tel" id="callerPhoneInput" class="phone-input" placeholder="04xx xxx xxx" oninput="updateModalCallBtn()">
         <button type="button" class="btn-paste" onclick="pasteFromClipboard()">📋 PASTE</button>
+        <button type="button" id="modalCallBtn" class="btn-paste" style="background:var(--c-rel); color:#000; display:none;" onclick="callModalNumber()">📞 CALL</button>
       </div>
 
       <div class="modal-actions">
@@ -252,7 +261,12 @@
                   onclick="showLightbox('https://lh3.googleusercontent.com/d/${driveId}')">`
           : `<div class="no-img">NO PHOTO</div>`;
 
-        const phoneDisplay = v.callerPhone ? `<span class="phone-tag">📞 ${v.callerPhone}</span>` : '';
+        // Tap-to-Call HTML Link
+        const cleanTel = v.callerPhone ? String(v.callerPhone).replace(/[^\d+]/g, '') : '';
+        const phoneDisplay = v.callerPhone 
+          ? `<a href="tel:${cleanTel}" class="phone-tag" onclick="event.stopPropagation();">📞 CALL ${v.callerPhone}</a>` 
+          : '';
+          
         const noteDisplay = v.notes ? `📝 ${v.notes}` : `+ Add Note...`;
 
         // Car format: "Make - Model (Colour)"
@@ -313,6 +327,7 @@
       document.getElementById('smsModalProp').innerText = selectedVehicle.property || 'GENERAL';
       document.getElementById('callerPhoneInput').value = selectedVehicle.callerPhone || '';
       document.getElementById('smsModal').style.display = 'flex';
+      updateModalCallBtn();
       setTimeout(() => document.getElementById('callerPhoneInput').focus(), 150);
     }
 
@@ -326,9 +341,21 @@
         const text = await navigator.clipboard.readText();
         const clean = text.replace(/[^\d+]/g, '');
         if (clean) document.getElementById('callerPhoneInput').value = clean;
+        updateModalCallBtn();
       } catch(err) {
         document.getElementById('callerPhoneInput').focus();
       }
+    }
+
+    function updateModalCallBtn() {
+      const num = document.getElementById('callerPhoneInput').value.replace(/[^\d+]/g, '');
+      const btn = document.getElementById('modalCallBtn');
+      btn.style.display = num.length >= 8 ? 'block' : 'none';
+    }
+
+    function callModalNumber() {
+      const num = document.getElementById('callerPhoneInput').value.replace(/[^\d+]/g, '');
+      if (num) window.location.href = `tel:${num}`;
     }
 
     function submitYardContactAndSms() {
