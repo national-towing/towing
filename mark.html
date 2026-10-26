@@ -452,13 +452,21 @@
             } catch(e) {}
         }
 
+        const vW = videoElem.videoWidth || 1280;
+        const vH = videoElem.videoHeight || 720;
+        
         const canvas = document.createElement('canvas');
-        const aspect = (videoElem.videoHeight && videoElem.videoWidth) ? (videoElem.videoHeight / videoElem.videoWidth) : 0.5625;
-        canvas.width = 800;
-        canvas.height = Math.round(800 * aspect);
+        if (vW > vH) {
+            canvas.width = 960;
+            canvas.height = Math.round(960 * (vH / vW));
+        } else {
+            canvas.height = 960;
+            canvas.width = Math.round(960 * (vW / vH));
+        }
+
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-        const b64 = canvas.toDataURL('image/jpeg', 0.60);
+        const b64 = canvas.toDataURL('image/jpeg', 0.65);
 
         if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
             try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
