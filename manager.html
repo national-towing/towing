@@ -134,18 +134,18 @@
         #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; color: var(--accent-gold); min-height: 20px; }
         .loading-screen { text-align: center; color: var(--text-muted); font-weight: 800; margin-top: 40px; font-size: 18px; }
 
-        /* Full Screen Success Overlay */
+        /* FULLSCREEN SUCCESS OVERLAY */
         #successOverlay {
             display: none; position: fixed; inset: 0; z-index: 10000;
             flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
         }
-        .success-tow { background: rgba(255, 23, 68, 0.95); }
-        .success-pass { background: rgba(171, 71, 188, 0.95); }
+        .success-tow { background: rgba(255, 23, 68, 0.96); }
+        .success-pass { background: rgba(171, 71, 188, 0.96); }
         
-        #successOverlay h1 { font-size: 40px; font-weight: 900; color: #fff; margin-bottom: 10px; text-transform: uppercase; line-height: 1.1; }
-        #successOverlay p { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 30px; opacity: 0.9; }
-        .ok-btn { background: #000; color: #fff; font-size: 24px; font-weight: 900; border: none; border-radius: 14px; padding: 16px 40px; letter-spacing: 2px; }
+        #successOverlay h1 { font-size: 38px; font-weight: 900; color: #fff; margin-bottom: 28px; text-transform: uppercase; line-height: 1.15; max-width: 90%; letter-spacing: 1px; }
+        .ok-btn { background: #000; color: #fff; font-size: 24px; font-weight: 900; border: none; border-radius: 14px; padding: 16px 50px; letter-spacing: 2px; cursor: pointer; }
+        .ok-btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
@@ -177,16 +177,17 @@
         <input type="text" id="towRego" placeholder="REGO" style="color:var(--accent-tow); text-transform:uppercase;">
         
         <label>REASON FOR TOWING</label>
-        <select id="towReason">
+        <select id="towReason" onchange="checkReasonOther(this)">
             <option value="UNAUTHORISED PARKING">UNAUTHORISED PARKING</option>
             <option value="PARKED IN VISITOR BAY">PARKED IN VISITOR BAY</option>
             <option value="NO VISITOR PASS">NO VISITOR PASS</option>
-            <option value="PARKED ON YELLOW LINE">PARKED ON YELLOW LINE</option>
             <option value="BLOCKING DRIVEWAY">BLOCKING DRIVEWAY</option>
+            <option value="OTHER">OTHER</option>
         </select>
+        <input type="text" id="towReasonOther" placeholder="ENTER REASON" style="display:none; margin-top:6px; font-size:16px;">
 
         <label>BAY NUMBER / LOCATION</label>
-        <input type="text" id="towBay" placeholder="e.g. Bay 12 or Yellow Line">
+        <input type="text" id="towBay" placeholder="e.g. Bay 12 or Visitor Area">
 
         <button class="cam-btn" id="openCamBtn" onclick="openCamera()">📷 SNAP EVIDENCE PHOTO</button>
         <img id="photoPreview" class="thumb-preview">
@@ -235,7 +236,6 @@
 <!-- FULLSCREEN SUCCESS OVERLAY -->
 <div id="successOverlay">
     <h1 id="successTitle">TOW REQUEST SENT</h1>
-    <p id="successSub">Driver dispatched to property.</p>
     <button class="ok-btn" onclick="window.location.reload(true);">OK</button>
 </div>
 
@@ -250,6 +250,9 @@
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('passDate').valueAsDate = new Date();
         authenticateUser();
+        window.addEventListener('online', syncManagerOfflineQueue);
+        syncManagerOfflineQueue();
+        setInterval(syncManagerOfflineQueue, 15000);
     });
 
     async function authenticateUser() {
@@ -315,6 +318,16 @@
         }
     }
 
+    function checkReasonOther(sel) {
+        const otherInput = document.getElementById('towReasonOther');
+        if (sel.value === 'OTHER') {
+            otherInput.style.display = 'block';
+            otherInput.focus();
+        } else {
+            otherInput.style.display = 'none';
+        }
+    }
+
     function setMode(mode) {
         currentMode = mode;
         const btnTow = document.getElementById('btnModeTow');
@@ -357,20 +370,22 @@
 
     function takeSnapshot() {
         const video = document.getElementById('videoElem');
+        const vW = video.videoWidth || 1280;
+        const vH = video.videoHeight || 720;
+        
         const canvas = document.createElement('canvas');
-        canvas.width = 800; canvas.height = 600;
-        const ctx = canvas.getContext('2d');
-        const vRatio = video.videoWidth / video.videoHeight;
-        
-        if (vRatio > 800/600) {
-            const drawW = 600 * vRatio;
-            ctx.drawImage(video, (800 - drawW) / 2, 0, drawW, 600);
+        if (vW > vH) {
+            canvas.width = 960;
+            canvas.height = Math.round(960 * (vH / vW));
         } else {
-            const drawH = 800 / vRatio;
-            ctx.drawImage(video, 0, (600 - drawH) / 2, 800, drawH);
+            canvas.height = 960;
+            canvas.width = Math.round(960 * (vW / vH));
         }
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        capturedPhoto = canvas.toDataURL('image/jpeg', 0.6);
+        capturedPhoto = canvas.toDataURL('image/jpeg', 0.65);
         const preview = document.getElementById('photoPreview');
         preview.src = capturedPhoto;
         preview.style.display = 'block';
@@ -403,105 +418,134 @@
         }
     }
 
-    // --- SUBMISSIONS ---
-    function showSuccess(mode, plate) {
+    // --- SUBMISSIONS (INSTANT OPTIMISTIC UI) ---
+    function showSuccess(mode) {
         const overlay = document.getElementById('successOverlay');
         const title = document.getElementById('successTitle');
-        const sub = document.getElementById('successSub');
 
         if (mode === "TOW") {
             overlay.className = "success-tow";
             title.innerText = "TOW REQUEST SENT";
-            sub.innerText = plate + " dispatched to driver.";
         } else {
             overlay.className = "success-pass";
             title.innerText = "PASS ACTIVATED";
-            sub.innerText = plate + " logged in system.";
         }
         overlay.style.display = "flex";
     }
 
-    async function submitTowRequest() {
+    function saveManagerOfflineQueue(payload) {
+        let queue = JSON.parse(localStorage.getItem('mgr_offline_queue') || '[]');
+        queue.push(payload);
+        localStorage.setItem('mgr_offline_queue', JSON.stringify(queue));
+    }
+
+    function removeManagerOfflineQueue(id) {
+        let queue = JSON.parse(localStorage.getItem('mgr_offline_queue') || '[]');
+        queue = queue.filter(item => item.id !== id);
+        localStorage.setItem('mgr_offline_queue', JSON.stringify(queue));
+    }
+
+    async function syncManagerOfflineQueue() {
+        if (!navigator.onLine) return;
+        let queue = JSON.parse(localStorage.getItem('mgr_offline_queue') || '[]');
+        if (queue.length === 0) return;
+
+        for (let i = 0; i < queue.length; i++) {
+            const item = queue[i];
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
+                const data = await res.json();
+                if (data && data.status === "SUCCESS") {
+                    removeManagerOfflineQueue(item.id);
+                }
+            } catch(err) {
+                break;
+            }
+        }
+    }
+
+    function submitTowRequest() {
         const rego = document.getElementById('towRego').value.trim().toUpperCase();
         if (!rego || !capturedPhoto) {
             document.getElementById('status').innerText = "⚠️ PLEASE ENTER REGO AND ATTACH PHOTO";
             return;
         }
 
-        const btn = document.getElementById('submitTowBtn');
-        btn.disabled = true;
-        btn.innerText = "SENDING...";
+        const reasonSelect = document.getElementById('towReason').value;
+        const reason = reasonSelect === 'OTHER'
+            ? (document.getElementById('towReasonOther').value.trim() || 'OTHER')
+            : reasonSelect;
 
         const payload = {
+            id: 'MGR_TOW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_mark',
             isManagerRequest: true,
-            authorizer: activeAuth.user,
+            authorizer: activeAuth ? activeAuth.user : "Manager",
             property: document.getElementById('propertySelect').value,
             rego: rego,
-            reason: document.getElementById('towReason').value,
+            reason: reason,
             bay: document.getElementById('towBay').value.trim(),
-            photoBytes: capturedPhoto
+            photoBytes: capturedPhoto,
+            timestamp: new Date().toISOString()
         };
 
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, {
+        // 1. Immediately cache in offline queue
+        saveManagerOfflineQueue(payload);
+
+        // 2. Instantly display success screen with zero delay
+        showSuccess("TOW");
+
+        // 3. Dispatch upload silently in the background
+        if (navigator.onLine) {
+            fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.status === "SUCCESS") {
-                showSuccess("TOW", rego);
-            } else {
-                document.getElementById('status').innerText = "ERROR: " + data.message;
-                btn.disabled = false;
-                btn.innerText = "SEND TOW REQUEST";
-            }
-        } catch(e) {
-            document.getElementById('status').innerText = "NETWORK ERROR";
-            btn.disabled = false;
-            btn.innerText = "SEND TOW REQUEST";
+            }).then(res => res.json())
+              .then(data => {
+                  if (data && data.status === "SUCCESS") {
+                      removeManagerOfflineQueue(payload.id);
+                  }
+              }).catch(e => console.warn("Background upload queued"));
         }
     }
 
-    async function submitVisitorPass() {
+    function submitVisitorPass() {
         const rego = document.getElementById('passRego').value.trim().toUpperCase();
         if (!rego) {
             document.getElementById('status').innerText = "⚠️ PLEASE ENTER VEHICLE REGO";
             return;
         }
 
-        const btn = document.getElementById('submitPassBtn');
-        btn.disabled = true;
-        btn.innerText = "ISSUING PASS...";
-
         const payload = {
+            id: 'MGR_PASS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'issue_pass',
             property: document.getElementById('propertySelect').value,
             rego: rego,
             startDate: document.getElementById('passDate').value,
             duration: document.getElementById('passDuration').value,
-            notes: "Authorised by " + activeAuth.user
+            notes: "Authorised by " + (activeAuth ? activeAuth.user : "Manager"),
+            timestamp: new Date().toISOString()
         };
 
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, {
+        saveManagerOfflineQueue(payload);
+        showSuccess("PASS");
+
+        if (navigator.onLine) {
+            fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.status === "SUCCESS") {
-                showSuccess("PASS", rego);
-            } else {
-                document.getElementById('status').innerText = "ERROR: " + data.message;
-                btn.disabled = false;
-                btn.innerText = "ISSUE VISITOR PASS";
-            }
-        } catch(e) {
-            document.getElementById('status').innerText = "NETWORK ERROR";
-            btn.disabled = false;
-            btn.innerText = "ISSUE VISITOR PASS";
+            }).then(res => res.json())
+              .then(data => {
+                  if (data && data.status === "SUCCESS") {
+                      removeManagerOfflineQueue(payload.id);
+                  }
+              }).catch(e => console.warn("Background pass queued"));
         }
     }
 </script>
