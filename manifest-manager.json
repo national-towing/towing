@@ -1,20 +1,20 @@
 {
-  "short_name": "TOW",
-  "name": "TOW Manager Portal",
-  "icons": [
-    {
-      "src": "icon-manager.png?v=999",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "icon-manager.png?v=999",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
+  "name": "Nat Tow - Manager Portal",
+  "short_name": "Nat Tow",
+  "start_url": "manager.html",
+  "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
-  "display": "standalone",
-  "orientation": "portrait"
+  "icons": [
+    {
+      "src": "icon-tow.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-tow.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
