@@ -518,6 +518,7 @@
             action: 'log_mark',
             isManagerRequest: true,
             authorizer: activeAuth ? activeAuth.user : "Manager",
+            authorizerPhone: activeAuth ? (activeAuth.phone || "") : "",
             property: document.getElementById('propertySelect').value,
             rego: rego,
             reason: reason,
