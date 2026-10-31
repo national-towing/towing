@@ -503,6 +503,11 @@
         });
 
         cars.forEach(car => {
+            const makeModel = [car.make, car.model].filter(Boolean).join(' - ');
+            const vehDesc = makeModel 
+                ? (car.colour ? `${makeModel} (${car.colour})` : makeModel) 
+                : (car.colour || '');
+
             const tile = document.createElement('div');
             tile.className = `car-tile tile-${car.status.toLowerCase()}`;
             tile.innerHTML = `
@@ -511,6 +516,7 @@
                         <span class="car-rego">${car.rego}</span>
                         <span class="car-time-mkd">MKD: ${car.markedTimeStr}</span>
                     </div>
+                    ${vehDesc ? `<div style="font-size:12px; color:#aaa; font-weight:800; margin-top:2px;">${vehDesc}</div>` : ''}
                     <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
                 </div>
                 <div class="tile-right-box">
@@ -518,7 +524,7 @@
                     <button type="button" class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</button>
                 </div>
             `;
-
+            
             const handleSelect = (e) => {
                 e.stopPropagation();
                 if (car.status === "READY") {
