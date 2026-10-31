@@ -6,7 +6,690 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>RELEASE VEHICLE</title>
+  <title>RELEASE VEHICLE</title><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
+    <title>RELEASE</title>
+    
+    <link rel="apple-touch-icon" href="icon-release.png?v=1012">
+    <link rel="icon" type="image/png" href="icon-release.png?v=1012">
+    <link rel="manifest" href="manifest-release.json?v=1012">
+
+    <style>
+        :root {
+            --c-mark: #2979ff;
+            --c-run: #ffab00;
+            --c-tow: #ff1744;
+            --c-pass: #ab47bc;
+            --c-yard: #00b0ff;
+            --c-rel: #00e676;
+        }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+        }
+        
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #00e676; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.9); }
+
+        /* 3x2 Grid Navigation */
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 14px auto; }
+        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-tile:active { transform: scale(0.96); }
+        .t-mark { background: var(--c-mark); color: #fff; }
+        .t-run  { background: var(--c-run); color: #000; }
+        .t-tow  { background: var(--c-tow); color: #fff; }
+        .t-pass { background: var(--c-pass); color: #fff; }
+        .t-yard { background: var(--c-yard); color: #000; }
+        .t-rel  { background: var(--c-rel); color: #000; box-shadow: 0 0 0 2px #fff; }
+
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
+        
+        .section-title { font-size: 16px; font-weight: 900; color: #00e676; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 6px; margin-top: 14px; margin-bottom: 6px; }
+
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
+        input, select {
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+        }
+
+        .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
+        .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
+
+        .legal-stmt { font-size: 13.5px; color: #ddd; margin-top: 14px; line-height: 1.4; font-style: italic; background: #141414; padding: 10px; border-radius: 8px; border: 1px solid #333; font-weight: 600; }
+
+        .camera-box {
+            width: 100%; height: 210px; background: #000; border-radius: 12px; border: 2px solid #333;
+            margin-top: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .cam-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 10px; }
+        
+        .circle-cam-btn {
+            width: 76px; height: 76px; background: #00e676; border: 4px solid #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 18px rgba(0, 230, 118, 0.4); cursor: pointer; user-select: none;
+        }
+        .circle-cam-btn:active { transform: scale(0.90); }
+        .circle-cam-inner { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #000; }
+
+        .ocr-live-status {
+            text-align: center; font-weight: 900; font-size: 13px; margin: 8px 0 4px 0;
+            min-height: 20px; color: #ffab00; letter-spacing: 0.5px;
+        }
+
+        .thumb-gallery { display: flex; gap: 8px; margin-top: 6px; overflow-x: auto; padding-bottom: 4px; min-height: 80px; align-items: center; }
+        .thumb-container { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .thumb-img { width: 74px; height: 74px; border-radius: 10px; object-fit: cover; border: 2px solid #00e676; }
+        .thumb-label { font-size: 10px; font-weight: 900; color: #00e676; margin-top: 2px; text-transform: uppercase; }
+
+        .sig-container { width: 100%; margin-top: 6px; position: relative; }
+        canvas.sig-box {
+            width: 100%; height: 190px; background: #fff; border: 2px solid #444; border-radius: 12px;
+            touch-action: none; cursor: crosshair; transition: opacity 0.3s ease;
+        }
+        .sig-locked { opacity: 0.45; pointer-events: none; border-color: #00e676 !important; }
+
+        .sig-btn-row { display: flex; gap: 8px; margin-top: 6px; }
+        .sig-btn { flex: 1; height: 42px; border-radius: 8px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; letter-spacing: 1px; }
+        .btn-clear { background: #ff1744; color: #fff; }
+        .btn-confirm { background: #00e676; color: #000; }
+
+        .submit-btn {
+            background: #00e676; color: #000; font-weight: 900; border: none; border-radius: 14px;
+            height: 60px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+        }
+        .submit-btn:active { transform: scale(0.97); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+        .row-2 { display: flex; gap: 10px; }
+        .row-2 > div { flex: 1; }
+        #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 12px; min-height: 24px; color: #ffab00; }
+
+        /* Lockout Class */
+        .section-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); transition: opacity 0.3s ease, filter 0.3s ease; }
+
+        /* Full Screen Success Overlay */
+        #successOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 230, 118, 0.95); z-index: 9999; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; padding: 20px;
+        }
+        #successOverlay h1 { font-size: 44px; font-weight: 900; color: #000; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; }
+        #successOverlay p { font-size: 18px; font-weight: 800; color: #111; margin: 0 0 30px 0; max-width: 90%; }
+        .ok-btn {
+            background: #000; color: #00e676; font-size: 26px; font-weight: 900; border: none;
+            border-radius: 14px; padding: 18px 40px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            letter-spacing: 2px; width: 260px;
+        }
+        .ok-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+<div class="header-box">
+    <h1>RELEASE</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
+</div>
+
+<div class="nav-grid-3x2">
+    <a href="mark.html" class="nav-tile t-mark">MARK</a>
+    <a href="run.html" class="nav-tile t-run">RUN</a>
+    <a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="yard.html" class="nav-tile t-yard">YARD</a>
+    <a href="release.html" class="nav-tile t-rel">REL</a>
+</div>
+
+<div class="card">
+    <label>SELECT FROM YARD</label>
+    <select id="vehicleSelect"><option value="">LOADING YARD VEHICLES...</option></select>
+
+    <div class="section-title">OFFENDING VEHICLE DETAILS</div>
+    
+    <div class="row-2">
+        <div>
+            <label>PROPERTY</label>
+            <input type="text" id="propertyInput" placeholder="PROPERTY" readonly style="background:#1a1a1a; color:#aaa;">
+        </div>
+
+        <div>
+            <label>POLICELINK REF #</label>
+            <input type="text" id="svnInput" placeholder="POLICELINK REF #" autocomplete="off" autocorrect="off">
+        </div>
+    </div>
+
+    <div class="row-2">
+        <div>
+            <label>REGO</label>
+            <input type="text" id="regoInput" placeholder="REGO" style="color:#00e676; text-transform:uppercase;" autocomplete="off" autocorrect="off">
+        </div>
+        <div>
+            <label>COLOUR</label>
+            <input type="text" id="colourInput" placeholder="COLOUR" autocomplete="off" autocorrect="off">
+        </div>
+    </div>
+
+    <div class="row-2">
+        <div>
+            <label>MAKE</label>
+            <input type="text" id="makeInput" placeholder="MAKE" autocomplete="off" autocorrect="off">
+        </div>
+        <div>
+            <label>MODEL</label>
+            <input type="text" id="modelInput" placeholder="MODEL" autocomplete="off" autocorrect="off">
+        </div>
+    </div>
+
+    <div class="section-title">OWNER DETAILS</div>
+    
+    <div id="idSectionWrapper" class="section-disabled">
+        <label>ID SCAN</label>
+        <div class="camera-box">
+            <video id="videoElem" autoplay playsinline muted></video>
+        </div>
+        
+        <div class="cam-controls">
+            <div class="circle-cam-btn" id="snapBtn" title="Fast Snap Screen"><div class="circle-cam-inner"></div></div>
+        </div>
+
+        <div class="ocr-live-status" id="ocrStatus"></div>
+        <div class="thumb-gallery" id="thumbGallery"></div>
+
+        <div class="row-2">
+            <div>
+                <label>NAME</label>
+                <input type="text" id="ownerNameInput" placeholder="Name" autocomplete="new-password" autocorrect="off" spellcheck="false">
+            </div>
+            <div>
+                <label>ID / LICENCE #</label>
+                <input type="text" id="idNumInput" placeholder="ID" autocomplete="new-password" autocorrect="off" spellcheck="false">
+            </div>
+        </div>
+
+        <label>ADDRESS</label>
+        <input type="text" id="ownerAddressInput" placeholder="Address" autocomplete="new-password" autocorrect="off" spellcheck="false">
+
+        <label>CUSTOMER MOBILE NUMBER (FOR INVOICE SMS) *</label>
+        <div style="display:flex; gap:8px;">
+            <input type="tel" id="ownerPhoneInput" placeholder="04xx xxx xxx" autocomplete="off" inputmode="numeric" style="color:#00e676; flex:1;" oninput="updateReleaseCallBtn()">
+            <button type="button" id="releaseCallBtn" style="background:#00e676; color:#000; border:none; border-radius:10px; font-weight:900; font-size:13px; padding:0 14px; cursor:pointer; display:none;" onclick="callReleaseOwner()">📞 CALL</button>
+        </div>
+    </div>
+
+    <!-- OWNER SIGNATURE -->
+    <div id="ownerSigWrapper" class="section-disabled">
+        <div class="legal-stmt">
+            "I am the owner, owners agent, driver or authorised person in charge of the above vehicle. I take full responsibility for payment, release and acceptance of the vehicle as inspected."
+        </div>
+
+        <label>OWNER SIGNATURE</label>
+        <div class="sig-container">
+            <canvas id="ownerSigCanvas" class="sig-box"></canvas>
+            <div class="sig-btn-row">
+                <button class="sig-btn btn-clear" type="button" onclick="clearSig('ownerSigCanvas')">CLEAR</button>
+                <button class="sig-btn btn-confirm" type="button" onclick="confirmSig('ownerSigCanvas')">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">PAYMENT DETAILS</div>
+    <div class="row-2">
+        <div>
+            <label>RELEASE FEE ($)</label>
+            <input type="number" step="0.01" id="releaseFeeInput" value="310.05">
+        </div>
+        <div>
+            <label>AH RELEASE FEE ($)</label>
+            <input type="number" step="0.01" id="storageFeeInput" value="140.00">
+        </div>
+    </div>
+
+    <div class="section-title">OFFICE USE</div>
+    
+    <label>RELEASED BY</label>
+    <select id="officerSelect" onchange="checkOfficerOther(this)">
+        <option value="Brian" selected>Brian</option>
+        <option value="Brett">Brett</option>
+        <option value="OTHER">Other...</option>
+    </select>
+    <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;" autocomplete="off">
+
+    <button class="submit-btn" id="submitBtn" disabled>PROCESS RELEASE</button>
+    <div id="status"></div>
+</div>
+
+<!-- Full Screen Success Overlay -->
+<div id="successOverlay">
+    <h1 id="successRego">VEHICLE RELEASED</h1>
+    <p>Tax Invoice Sent via SMS & Archived to Google Drive.</p>
+    <button type="button" class="ok-btn" onclick="window.location.reload(true);">DONE ✓</button>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    
+    const vehicleSelect = document.getElementById('vehicleSelect');
+    const propertyInput = document.getElementById('propertyInput');
+    const svnInput = document.getElementById('svnInput');
+    const regoInput = document.getElementById('regoInput');
+    const colourInput = document.getElementById('colourInput');
+    const makeInput = document.getElementById('makeInput');
+    const modelInput = document.getElementById('modelInput');
+
+    const idSectionWrapper = document.getElementById('idSectionWrapper');
+    const ownerSigWrapper = document.getElementById('ownerSigWrapper');
+    const ownerNameInput = document.getElementById('ownerNameInput');
+    const idNumInput = document.getElementById('idNumInput');
+    const ownerAddressInput = document.getElementById('ownerAddressInput');
+    const ownerPhoneInput = document.getElementById('ownerPhoneInput');
+
+    const releaseFeeInput = document.getElementById('releaseFeeInput');
+    const storageFeeInput = document.getElementById('storageFeeInput');
+
+    const officerSelect = document.getElementById('officerSelect');
+    const officerOtherInput = document.getElementById('officerOtherInput');
+
+    const videoElem = document.getElementById('videoElem');
+    const snapBtn = document.getElementById('snapBtn');
+    const ocrStatus = document.getElementById('ocrStatus');
+    const thumbGallery = document.getElementById('thumbGallery');
+    const submitBtn = document.getElementById('submitBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statusDiv = document.getElementById('status');
+    const successOverlay = document.getElementById('successOverlay');
+    const successRego = document.getElementById('successRego');
+
+    let yardVehicles = [];
+    let idPhotos = [];
+    let ownerSigConfirmed = false;
+    let isSubmittingRelease = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadYardVehicles();
+        initCamera();
+        initSignatureCanvas('ownerSigCanvas');
+        setupLiveValidation();
+    });
+
+    refreshBtn.addEventListener('click', () => { window.location.reload(true); });
+
+    function checkOfficerOther(selectElem) {
+        officerOtherInput.style.display = selectElem.value === "OTHER" ? 'block' : 'none';
+        validateForm();
+    }
+
+    function populateVehicleFields(rego) {
+        const veh = yardVehicles.find(v => v.rego === rego);
+        if (veh) {
+            vehicleSelect.value = veh.rego;
+            propertyInput.value = veh.property || '';
+            regoInput.value = veh.rego || '';
+            makeInput.value = veh.make || '';
+            modelInput.value = veh.model || '';
+            colourInput.value = veh.colour || '';
+            svnInput.value = veh.policelinkRef || '';
+            if (veh.callerPhone) {
+                ownerPhoneInput.value = veh.callerPhone;
+            }
+            idSectionWrapper.classList.remove('section-disabled');
+        } else {
+            propertyInput.value = ''; regoInput.value = ''; makeInput.value = ''; modelInput.value = ''; colourInput.value = ''; svnInput.value = '';
+            idSectionWrapper.classList.add('section-disabled');
+        }
+        updateReleaseCallBtn();
+        validateForm();
+    }
+
+    vehicleSelect.addEventListener('change', () => {
+        populateVehicleFields(vehicleSelect.value);
+    });
+
+    async function loadYardVehicles() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
+            yardVehicles = await res.json();
+            vehicleSelect.innerHTML = "<option value=''>-- SELECT FROM YARD --</option>";
+
+            if (!Array.isArray(yardVehicles) || yardVehicles.length === 0) {
+                vehicleSelect.innerHTML = "<option value=''>NO VEHICLES IN YARD</option>";
+                return;
+            }
+
+            yardVehicles.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.rego;
+                opt.innerText = `${v.rego} (${v.property || ''} - ${v.make || ''} ${v.model || ''})`;
+                vehicleSelect.appendChild(opt);
+            });
+
+            // Auto-select vehicle when arriving from Yard App (rego in URL)
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetRego = (urlParams.get('rego') || '').trim().toUpperCase();
+            if (targetRego) {
+                populateVehicleFields(targetRego);
+            }
+        } catch(e) {
+            vehicleSelect.innerHTML = "<option value=''>ERROR LOADING YARD</option>";
+        }
+    }
+
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                audio: false
+            });
+            videoElem.srcObject = stream;
+            await videoElem.play().catch(() => {});
+        } catch(e) {
+            ocrStatus.innerText = "CAMERA ACCESS ERROR";
+        }
+    }
+
+    snapBtn.addEventListener('click', () => {
+        const vW = videoElem.videoWidth || 1280;
+        const vH = videoElem.videoHeight || 720;
+
+        const scale = Math.min(1, 800 / vW);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(vW * scale);
+        canvas.height = Math.round(vH * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+
+        const b64 = canvas.toDataURL('image/jpeg', 0.65);
+        processCapturedImage(b64);
+    });
+
+    async function processCapturedImage(b64) {
+        idPhotos.push(b64);
+        const photoIndex = idPhotos.length;
+        const labelText = photoIndex === 1 ? "SNAP 1" : `SNAP ${photoIndex}`;
+
+        const thumbWrap = document.createElement('div');
+        thumbWrap.className = 'thumb-container';
+        const img = document.createElement('img');
+        img.src = b64; 
+        img.className = 'thumb-img';
+        const lbl = document.createElement('span');
+        lbl.className = 'thumb-label';
+        lbl.innerText = labelText;
+        thumbWrap.appendChild(img);
+        thumbWrap.appendChild(lbl);
+        thumbGallery.appendChild(thumbWrap);
+
+        ocrStatus.style.color = "#ffab00";
+        ocrStatus.innerText = `🔍 SCANNING ID CARD...`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'scan_id_card',
+                    photoBytes: b64
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            const resData = await response.json();
+
+            if (resData && resData.status === "SUCCESS") {
+                if (resData.name && !ownerNameInput.value.trim()) {
+                    ownerNameInput.value = resData.name.toUpperCase();
+                }
+                if (resData.idNumber && !idNumInput.value.trim()) {
+                    idNumInput.value = String(resData.idNumber).replace(/\D/g, '');
+                }
+                if (resData.address && !ownerAddressInput.value.trim()) {
+                    ownerAddressInput.value = resData.address.toUpperCase();
+                }
+                updateStatusBanner();
+            } else {
+                ocrStatus.style.color = "#ffab00";
+                ocrStatus.innerText = `⚠️ SCAN NOTE: ${resData.message || "Manual entry required"}`;
+            }
+        } catch(err) {
+            clearTimeout(timeoutId);
+            ocrStatus.style.color = "#ff1744";
+            ocrStatus.innerText = `⚠️ ENTER DETAILS MANUALLY`;
+        }
+
+        validateForm();
+    }
+    
+    function updateStatusBanner() {
+        const nameDone = Boolean(ownerNameInput.value && ownerNameInput.value.trim().length > 2);
+        const idDone = Boolean(idNumInput.value && idNumInput.value.trim().length >= 5);
+        const addrDone = Boolean(ownerAddressInput.value && ownerAddressInput.value.trim().length > 4);
+
+        ocrStatus.style.color = "#00e676";
+        if (nameDone && idDone && addrDone) {
+            ocrStatus.innerText = `✔ ALL DETAILS CAPTURED`;
+        } else if (nameDone && idDone && !addrDone) {
+            ocrStatus.innerText = `✔ ${ownerNameInput.value} (${idNumInput.value}) SET — SNAP ADDRESS NEXT`;
+        } else if (idDone && !nameDone) {
+            ocrStatus.innerText = `✔ LICENCE #${idNumInput.value} CAPTURED`;
+        } else if (addrDone) {
+            ocrStatus.innerText = `✔ ADDRESS CAPTURED`;
+        } else {
+            ocrStatus.innerText = `✔ PHOTO ATTACHED`;
+        }
+    }
+
+    function initSignatureCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 350;
+            canvas.height = rect.height || 190;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+        }
+        resizeCanvas();
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDrawing(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+        function draw(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+        function stopDrawing() { drawing = false; }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function clearSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        canvas.classList.remove('sig-locked');
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = false;
+        statusDiv.innerText = "";
+        validateForm();
+    }
+
+    function confirmSig(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        canvas.classList.add('sig-locked');
+        if (canvasId === 'ownerSigCanvas') ownerSigConfirmed = true;
+        statusDiv.innerText = "✔ SIGNATURE CONFIRMED & LOCKED";
+        validateForm();
+    }
+
+    function updateReleaseCallBtn() {
+        const num = document.getElementById('ownerPhoneInput').value.replace(/[^\d+]/g, '');
+        const btn = document.getElementById('releaseCallBtn');
+        if (btn) btn.style.display = num.length >= 8 ? 'block' : 'none';
+    }
+
+    function callReleaseOwner() {
+        const num = document.getElementById('ownerPhoneInput').value.replace(/[^\d+]/g, '');
+        if (num) window.location.href = `tel:${num}`;
+    }
+
+    function setupLiveValidation() {
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        inputs.forEach(elem => {
+            if (elem) {
+                elem.addEventListener('input', validateForm);
+                elem.addEventListener('change', validateForm);
+            }
+        });
+        validateForm();
+    }
+
+    function validateForm() {
+        let isValid = true;
+        function mark(elem, cond) {
+            if (!elem) return;
+            if (cond) {
+                elem.classList.remove('field-missing'); elem.classList.add('field-valid');
+            } else {
+                elem.classList.remove('field-valid'); elem.classList.add('field-missing');
+                isValid = false;
+            }
+        }
+
+        mark(vehicleSelect, vehicleSelect && vehicleSelect.value !== "");
+        mark(svnInput, svnInput && svnInput.value.trim() !== "");
+        mark(regoInput, regoInput && regoInput.value.trim() !== "");
+        mark(colourInput, colourInput && colourInput.value.trim() !== "");
+        mark(makeInput, makeInput && makeInput.value.trim() !== "");
+        mark(modelInput, modelInput && modelInput.value.trim() !== "");
+
+        const nameValid = Boolean(ownerNameInput && ownerNameInput.value.trim().length > 1);
+        const idValid = Boolean(idNumInput && idNumInput.value.trim().length >= 4);
+        const addrValid = Boolean(ownerAddressInput && ownerAddressInput.value.trim().length > 4);
+        const phoneClean = (ownerPhoneInput && ownerPhoneInput.value) ? ownerPhoneInput.value.replace(/[^\d+]/g, '') : "";
+        const phoneValid = phoneClean.length >= 8;
+
+        mark(ownerNameInput, nameValid);
+        mark(idNumInput, idValid);
+        mark(ownerAddressInput, addrValid);
+        mark(ownerPhoneInput, phoneValid);
+
+        // Owner details unlock the signature block
+        const idDetailsComplete = nameValid && idValid && addrValid && phoneValid;
+        if (idDetailsComplete) {
+            ownerSigWrapper.classList.remove('section-disabled');
+        } else {
+            ownerSigWrapper.classList.add('section-disabled');
+            if (ownerSigConfirmed) clearSig('ownerSigCanvas');
+        }
+
+        mark(releaseFeeInput, releaseFeeInput && releaseFeeInput.value !== "");
+        mark(storageFeeInput, storageFeeInput && storageFeeInput.value !== "");
+
+        if (officerSelect && officerSelect.value === "OTHER") {
+            mark(officerOtherInput, officerOtherInput && officerOtherInput.value.trim() !== "");
+        }
+
+        if (!ownerSigConfirmed) isValid = false;
+        
+        submitBtn.disabled = !isValid || isSubmittingRelease;
+        submitBtn.style.opacity = (isValid && !isSubmittingRelease) ? "1" : "0.5";
+        
+        return isValid;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        if (!validateForm() || isSubmittingRelease) return;
+
+        // HARD DEBOUNCE - LOCK BUTTON
+        isSubmittingRelease = true;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.4";
+        submitBtn.innerText = "RELEASING & GENERATING INVOICE...";
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "Transmitting release archive and SMS...";
+
+        const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
+        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
+
+        const payload = {
+            action: 'process_release',
+            rego: regoInput.value.trim().toUpperCase(),
+            svnNumber: svnInput.value.trim(),
+            make: makeInput.value.trim(),
+            model: modelInput.value.trim(),
+            colour: colourInput.value.trim(),
+            property: propertyInput.value.trim(),
+            ownerName: ownerNameInput.value.trim(),
+            idNumber: idNumInput.value.trim(),
+            ownerAddress: ownerAddressInput.value.trim(),
+            ownerPhone: ownerPhoneInput.value.trim(),
+            ownerEmail: "", // EMAIL REMOVED 
+            releaseFee: releaseFeeInput.value,
+            storageFee: storageFeeInput.value,
+            officer: finalOfficer,
+            idPhotos: idPhotos,
+            ownerSigBytes: ownerSig,
+            officerSigBytes: "" 
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
+            });
+            const resData = await res.json();
+            
+            if (resData && resData.status === "SUCCESS") {
+                successRego.innerText = payload.rego + " RELEASED";
+                successOverlay.style.display = "flex";
+            } else {
+                statusDiv.style.color = "#ff1744";
+                statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release vehicle.");
+                isSubmittingRelease = false;
+                submitBtn.innerText = "PROCESS RELEASE";
+                validateForm();
+            }
+        } catch(err) {
+            statusDiv.style.color = "#ff1744";
+            statusDiv.innerText = "Network error. Vehicle release may still be processing on server.";
+            isSubmittingRelease = false;
+            submitBtn.innerText = "PROCESS RELEASE";
+            validateForm();
+        }
+    });
+</script>
+</body>
+</html>
   
   <style>
     :root {
