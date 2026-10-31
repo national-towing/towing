@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="National Towing">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <title>RUN</title>
     
@@ -28,7 +29,9 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(30px, env(safe-area-inset-bottom));
         }
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
@@ -36,7 +39,6 @@
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
         .icon-btn:active { transform: scale(0.9); }
 
-        /* 3x2 Grid Navigation */
         .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
         .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tile:active { transform: scale(0.96); }
@@ -47,7 +49,6 @@
         .t-yard { background: var(--c-yard); color: #000; }
         .t-rel  { background: var(--c-rel); color: #000; }
 
-        /* DRIVE-BY HUD CHECK BUTTON */
         .hud-check-btn {
             width: 100%; max-width: 440px; height: 56px; border-radius: 12px; border: none;
             background: linear-gradient(135deg, #ff1744 0%, #ffab00 100%); color: #000;
@@ -127,28 +128,12 @@
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
 
-        /* DRIVE-BY HUD CAMERA MODAL (ENLARGED HEADER) */
-        #hudCamModal {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 99999;
-            flex-direction: column;
-        }
-        .hud-cam-header {
-            height: 64px; background: rgba(0,0,0,0.88); display: flex; align-items: center;
-            justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 10;
-        }
-        .hud-top-btn {
-            background: #2a2a2a; color: #ffab00; border: 1.5px solid #ffab00; padding: 10px 18px;
-            border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; letter-spacing: 0.5px;
-        }
-        .hud-top-btn:active { transform: scale(0.95); }
-        .hud-top-title {
-            font-weight: 900; color: #ffab00; font-size: 17px; letter-spacing: 1px; text-transform: uppercase;
-        }
-        .hud-close-btn {
-            background: #333; color: #fff; border: 1.5px solid #555; padding: 10px 18px;
-            border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; letter-spacing: 0.5px;
-        }
-        .hud-close-btn:active { transform: scale(0.95); }
+        /* HUD MODALS */
+        #hudCamModal { display: none; position: fixed; inset: 0; background: #000; z-index: 99999; flex-direction: column; }
+        .hud-cam-header { height: 64px; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 10; }
+        .hud-top-btn { background: #2a2a2a; color: #ffab00; border: 1.5px solid #ffab00; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; }
+        .hud-top-title { font-weight: 900; color: #ffab00; font-size: 17px; text-transform: uppercase; }
+        .hud-close-btn { background: #333; color: #fff; border: 1.5px solid #555; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; }
 
         .hud-cam-view { flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; }
         #hudVideo { width: 100%; height: 100%; object-fit: cover; }
@@ -158,80 +143,40 @@
             width: 88%; max-width: 420px; height: 160px; border: 3.5px dashed #00e676; border-radius: 16px;
             pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
         }
-        .hud-target-hint {
-            position: absolute; top: -28px; left: 0; width: 100%; text-align: center;
-            color: #00e676; font-weight: 900; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
+        .hud-target-hint { position: absolute; top: -28px; left: 0; width: 100%; text-align: center; color: #00e676; font-weight: 900; font-size: 12px; text-transform: uppercase; }
 
         .hud-snap-trigger {
             position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
             width: 90px; height: 90px; background: #fff; border: 5px solid #000; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
         }
-        .hud-snap-trigger:active { transform: translateX(-50%) scale(0.92); }
         .hud-snap-inner { width: 66px; height: 66px; background: #ff1744; border-radius: 50%; }
 
-        /* FULLSCREEN HUD RESULT OVERLAY */
-        #hudFlashOverlay {
-            display: none; position: fixed; inset: 0; z-index: 100000;
-            flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 24px; cursor: pointer; user-select: none;
-        }
-        .hud-flash-tow     { background: rgba(255, 23, 68, 0.98); }
-        .hud-flash-pass    { background: rgba(41, 182, 246, 0.98); }
-        .hud-flash-nomark  { background: rgba(0, 230, 118, 0.98); }
-        .hud-flash-wait    { background: rgba(255, 171, 0, 0.98); }
+        #hudFlashOverlay { display: none; position: fixed; inset: 0; z-index: 100000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; cursor: pointer; }
+        .hud-flash-tow { background: rgba(255, 23, 68, 0.98); }
+        .hud-flash-pass { background: rgba(41, 182, 246, 0.98); }
+        .hud-flash-nomark { background: rgba(0, 230, 118, 0.98); }
+        .hud-flash-wait { background: rgba(255, 171, 0, 0.98); }
         .hud-flash-noplate { background: rgba(20, 20, 20, 0.98); border: 4px solid #ff1744; }
 
         .hud-main-icon { font-size: 70px; margin-bottom: 4px; line-height: 1; }
-        .hud-main-status {
-            font-size: 76px; font-weight: 950; color: #000; letter-spacing: 3px;
-            text-transform: uppercase; line-height: 0.95; margin: 0;
-        }
-        .hud-flash-noplate .hud-main-status { color: #ff1744; font-size: 56px; }
-        
-        .hud-sub-plate {
-            font-size: 46px; font-weight: 900; color: #fff; margin-top: 10px;
-            letter-spacing: 2px; text-transform: uppercase; line-height: 1;
-        }
-        .hud-detail-line {
-            font-size: 20px; font-weight: 800; color: #000; margin-top: 10px;
-            text-transform: uppercase; letter-spacing: 1px; max-width: 90%;
-        }
-        .hud-flash-noplate .hud-detail-line { color: #aaa; }
+        .hud-main-status { font-size: 76px; font-weight: 950; color: #000; text-transform: uppercase; line-height: 0.95; }
+        .hud-sub-plate { font-size: 46px; font-weight: 900; color: #fff; margin-top: 10px; text-transform: uppercase; }
+        .hud-detail-line { font-size: 20px; font-weight: 800; color: #000; margin-top: 10px; text-transform: uppercase; }
 
         .hud-action-tow-btn {
             display: none; margin-top: 20px; background: #000; color: #ff1744; border: 3px solid #fff;
-            padding: 16px 30px; border-radius: 14px; font-size: 22px; font-weight: 950;
-            cursor: pointer; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            padding: 16px 30px; border-radius: 14px; font-size: 22px; font-weight: 950; cursor: pointer;
         }
-        .hud-action-tow-btn:active { transform: scale(0.96); }
+        .hud-reset-hint { margin-top: 22px; background: rgba(0,0,0,0.6); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 900; text-transform: uppercase; }
 
-        .hud-reset-hint {
-            margin-top: 22px; background: rgba(0,0,0,0.6); color: #fff; padding: 10px 20px;
-            border-radius: 30px; font-size: 13px; font-weight: 900; letter-spacing: 1px;
-            border: 1px solid rgba(255,255,255,0.4); text-transform: uppercase;
-        }
-
-        /* STACKED FULL-WIDTH MANUAL REGO INPUT & CONFIRM BUTTON */
         #hudManualWrap { display: none; margin-top: 18px; width: 88%; max-width: 320px; }
         .hud-manual-box { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        #hudManualInput {
-            width: 100%; height: 56px; border-radius: 12px; border: 2.5px solid #ffab00;
-            background: #111; color: #fff; font-size: 26px; font-weight: 900;
-            text-align: center; text-transform: uppercase; outline: none;
-        }
-        .hud-manual-btn {
-            width: 100%; height: 52px; border-radius: 12px; border: none;
-            background: #ffab00; color: #000; font-weight: 900; font-size: 20px; cursor: pointer;
-            letter-spacing: 1.5px; text-transform: uppercase;
-        }
-        .hud-manual-btn:active { transform: scale(0.97); }
+        #hudManualInput { width: 100%; height: 56px; border-radius: 12px; border: 2.5px solid #ffab00; background: #111; color: #fff; font-size: 26px; font-weight: 900; text-align: center; text-transform: uppercase; outline: none; }
+        .hud-manual-btn { width: 100%; height: 52px; border-radius: 12px; border: none; background: #ffab00; color: #000; font-weight: 900; font-size: 20px; cursor: pointer; text-transform: uppercase; }
 
-        /* GHOST COMPARISON VIEWFINDER */
-        .overlay-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100005; flex-direction: column; }
+        /* GHOST MODAL */
+        .overlay-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 100005; flex-direction: column; }
         .overlay-modal.show { display: flex; }
         .modal-header { height: 52px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
         .modal-title { font-weight: bold; font-size: 15px; color: #fff; }
@@ -245,12 +190,12 @@
         .match-btn { flex: 1; background: #ff1744; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
         .skip-btn { flex: 1; background: #444; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
 
-        /* PHOTO PREVIEW MODAL */
-        .preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #121212; z-index: 100006; flex-direction: column; }
+        /* PREVIEW MODAL */
+        .preview-modal { display: none; position: fixed; inset: 0; background: #121212; z-index: 100006; flex-direction: column; }
         .preview-modal.show { display: flex; }
-        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 14px; gap: 12px; flex-shrink: 0; }
+        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 14px; gap: 12px; }
         .preview-back-btn { background: #2a2a2a; border: 1px solid #555; color: #ffab00; font-size: 14px; font-weight: 900; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; padding: 10px; }
+        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; padding: 10px; }
         #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
     </style>
 </head>
@@ -287,32 +232,24 @@
     </div>
     <div class="hud-cam-view">
         <video id="hudVideo" autoplay playsinline muted></video>
-        <div class="hud-target-reticle">
-            <div class="hud-target-hint">ALIGN LICENCE PLATE INSIDE BOX</div>
-        </div>
-        <div class="hud-snap-trigger" id="hudSnapBtn" onclick="triggerDriveByScan()">
-            <div class="hud-snap-inner"></div>
-        </div>
+        <div class="hud-target-reticle"><div class="hud-target-hint">ALIGN LICENCE PLATE INSIDE BOX</div></div>
+        <div class="hud-snap-trigger" id="hudSnapBtn" onclick="triggerDriveByScan()"><div class="hud-snap-inner"></div></div>
     </div>
 </div>
 
-<!-- HUD FULLSCREEN RESULT OVERLAY -->
+<!-- HUD FLASH OVERLAY -->
 <div id="hudFlashOverlay" onclick="handleHudOverlayTap(event)">
     <div class="hud-main-icon" id="hudMainIcon">🚨</div>
     <div class="hud-main-status" id="hudStatusText">TOW</div>
     <div class="hud-sub-plate" id="hudPlateText">790WSY</div>
     <div class="hud-detail-line" id="hudDetailText">EXPIRED - READY TO TOW</div>
-
     <button type="button" id="hudTowActionBtn" class="hud-action-tow-btn" onclick="openTowFromHud(event)">🚨 LOAD TOW APP</button>
-
-    <!-- STACKED MANUAL REGO INPUT & CONFIRM BUTTON -->
     <div id="hudManualWrap" onclick="event.stopPropagation()">
         <div class="hud-manual-box">
             <input type="text" id="hudManualInput" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
             <button type="button" class="hud-manual-btn" onclick="submitManualHudCheck()">CHECK VEHICLE</button>
         </div>
     </div>
-
     <div class="hud-reset-hint">TAP OUTSIDE TO SCAN NEXT ↺</div>
 </div>
 
@@ -345,9 +282,7 @@
             <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
         </div>
     </div>
-    <div class="preview-body">
-        <img id="previewImg" alt="Mark Photo">
-    </div>
+    <div class="preview-body"><img id="previewImg" alt="Mark Photo"></div>
 </div>
 
 <script>
@@ -359,7 +294,6 @@
     let hudStream = null;
     let isProcessingScan = false;
     let lastMatchedTowVehicle = null;
-
     let overlayStream = null;
     let currentGhostVehicle = null;
 
@@ -418,13 +352,16 @@
         }
     }
 
+    // STRICT DAY-FIRST (DD-MM) PARSING FOR RELIABLE TIMESTAMPS
     function parseAndRenderRun(data) {
         if (!data || !Array.isArray(data) || data.length === 0) {
             document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
             return;
         }
 
-        const nowMs = Date.now();
+        const now = new Date();
+        const nowMs = now.getTime();
+        const currentYear = now.getFullYear();
 
         data = data.filter(item => {
             const r = String(item.rego || '').trim().toUpperCase();
@@ -437,12 +374,21 @@
             if (!propertyGroups[prop]) propertyGroups[prop] = [];
 
             let status = "WAIT";
-            let expMs = item.rawExpiryMs || 0;
-            if (!expMs && item.expiryTime) {
-                const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
+            let expMs = 0;
+
+            if (item.expiryTime) {
+                const cleanExp = String(item.expiryTime).replace(/^[A-Za-z]+\s+/, "").trim();
                 const parts = cleanExp.split(/[\s-:]+/);
                 if (parts.length >= 4) {
-                    expMs = new Date(new Date().getFullYear(), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10), parseInt(parts[2], 10), parseInt(parts[3], 10)).getTime();
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1;
+                    const hours = parseInt(parts[2], 10);
+                    const mins = parseInt(parts[3], 10);
+                    
+                    let expYear = currentYear;
+                    if (now.getMonth() === 11 && month === 0) expYear++; // Handle year rollover Dec->Jan
+
+                    expMs = new Date(expYear, month, day, hours, mins).getTime();
                 }
             }
 
@@ -524,7 +470,6 @@
         });
     }
 
-    // STRICT VEHICLE DETAIL SORT: RED (TOW) -> ORANGE (WAIT) -> BLUE (PASS)
     function renderDetailView(prop, filterStatus) {
         const container = document.getElementById('runContainer');
         container.innerHTML = "";
@@ -543,7 +488,6 @@
         let cars = (propertyGroups[prop] || []).slice();
         if (filterStatus !== 'ALL') cars = cars.filter(c => c.status === filterStatus);
 
-        // Strict Status Sort: Red (READY/TOW) -> Orange (WAIT) -> Blue (PASS)
         const getRank = (st) => {
             const s = String(st || '').toUpperCase();
             if (s === 'READY') return 1;
@@ -588,7 +532,6 @@
 
             tile.addEventListener('click', handleSelect);
             tile.querySelector('.badge').addEventListener('click', handleSelect);
-
             container.appendChild(tile);
         });
     }
@@ -606,9 +549,6 @@
         window.location.href = `tow.html?${q.toString()}`;
     }
 
-    // ==========================================
-    // ⚡ DRIVE-BY HUD SCANNER ENGINE
-    // ==========================================
     async function openDriveByCam() {
         getAudioContext();
         const modal = document.getElementById('hudCamModal');
@@ -764,29 +704,20 @@
         evaluatePlateAndFlashHUD(val);
     }
 
-    function handleHudOverlayTap(e) {
-        dismissHudFlash();
-    }
-
+    function handleHudOverlayTap(e) { dismissHudFlash(); }
     function dismissHudFlash() {
         document.getElementById('hudFlashOverlay').style.display = 'none';
         document.getElementById('hudManualWrap').style.display = 'none';
         document.getElementById('hudManualInput').value = "";
     }
 
-    // ==========================================
-    // 👻 GHOST COMPARISON VIEWFINDER LOGIC
-    // ==========================================
     async function openOverlayModal(car) {
         currentGhostVehicle = car;
         document.getElementById('modalRegoTitle').innerText = `${car.rego} - ALIGN & VERIFY TOW`;
-        
         const ghostImg = document.getElementById('ghostImage');
         const driveIdMatch = car.imageUrl ? String(car.imageUrl).match(/[-\w]{25,}/) : null;
         ghostImg.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (car.imageUrl || "");
-        
         document.getElementById('overlayModal').classList.add('show');
-        
         try {
             overlayStream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -813,14 +744,12 @@
                 document.getElementById('ghostImage').style.opacity = e.target.value / 100;
             });
         }
-
         const skipBtn = document.getElementById('skipBtn');
         if (skipBtn) {
             skipBtn.addEventListener('click', () => {
                 if (currentGhostVehicle) navigateToTow(currentGhostVehicle);
             });
         }
-
         const matchBtn = document.getElementById('matchBtn');
         if (matchBtn) {
             matchBtn.addEventListener('click', () => {
@@ -831,14 +760,12 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(vid, 0, 0, 800, 600);
                 const b64 = canvas.toDataURL('image/jpeg', 0.6);
-                
                 localStorage.setItem('pending_comp_' + currentGhostVehicle.rego, b64);
                 navigateToTow(currentGhostVehicle);
             });
         }
     }
 
-    // Photo Preview Lightbox
     function openPhotoPreview(rego, prop, url) {
         document.getElementById('previewTitle').innerText = `${rego} (${prop})`;
         const driveIdMatch = url ? String(url).match(/[-\w]{25,}/) : null;
