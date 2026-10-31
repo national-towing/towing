@@ -11,9 +11,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10005">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10005">
-    <link rel="manifest" href="manifest-tow.json?v=10005">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10006">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10006">
+    <link rel="manifest" href="manifest-tow.json?v=10006">
 
     <style>
         :root {
@@ -23,6 +23,7 @@
             --c-pass: #ab47bc;
             --c-yard: #00b0ff;
             --c-rel: #00e676;
+            --text-placeholder: #888888;
         }
         * { box-sizing: border-box; }
         body { 
@@ -57,15 +58,22 @@
         .card { background: #1e1e1e; border-radius: 18px; padding: 16px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
         
         label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
+        
+        /* GREY PLACEHOLDER TEXT STYLING */
         input, select {
             width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1.5px solid #444;
             background: #2a2a2a; color: #fff; font-size: 19px; font-weight: 900; margin-top: 4px; outline: none;
-            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
         input:focus, select:focus { border-color: #ff1744; }
 
-        ::placeholder { color: #777777 !important; opacity: 1; }
-        input::placeholder { color: #777777 !important; opacity: 1; }
+        ::placeholder { color: var(--text-placeholder) !important; font-weight: 700; opacity: 1; }
+        input::placeholder { color: var(--text-placeholder) !important; font-weight: 700; opacity: 1; }
+
+        /* Dynamic grey text for unselected dropdowns */
+        select.unselected { color: var(--text-placeholder) !important; font-weight: 700; }
+        select option { background: #2a2a2a; color: #ffffff; font-weight: 800; }
+        select option[value=""] { color: var(--text-placeholder); }
 
         .field-missing { border-color: #ffab00 !important; background: #2b2207 !important; }
         .field-valid { border-color: #444 !important; background: #2a2a2a !important; }
@@ -77,7 +85,7 @@
         .row-2 { display: flex; gap: 8px; }
         .row-2 > div { flex: 1; }
 
-        /* COMPARISON STITCHED BOX */
+        /* COMPARISON BUTTON & PREVIEW */
         .comp-btn {
             background: #1e1528; border: 2px dashed #ab47bc; color: #ab47bc;
             font-size: 15px; font-weight: 900; border-radius: 12px; padding: 14px;
@@ -89,7 +97,7 @@
         }
         .comp-preview-wrap {
             display: none; margin-top: 8px; border-radius: 12px; overflow: hidden;
-            border: 2px solid #00e676; background: #000; position: relative;
+            border: 2px solid #00e676; background: #000; position: relative; cursor: pointer;
         }
         .comp-preview-img { width: 100%; height: 140px; object-fit: contain; display: block; }
         .comp-preview-badge {
@@ -97,7 +105,7 @@
             color: #00e676; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 4px;
         }
 
-        /* CONDITION PHOTOS SECTION */
+        /* CONDITION PHOTOS BUTTONS */
         .cond-snap-btn {
             background: #2a1215; border: 2.5px dashed #ff1744; color: #ff1744;
             font-size: 16px; font-weight: 900; border-radius: 12px; padding: 16px;
@@ -134,6 +142,30 @@
 
         #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 10px; min-height: 22px; color: #ffab00; }
 
+        /* GHOST ALIGNMENT MODAL */
+        .overlay-modal { 
+            display: none; position: fixed; inset: 0; background: #000; z-index: 100005; flex-direction: column; 
+        }
+        .overlay-modal.show { display: flex; }
+        .modal-header { height: 52px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
+        .modal-title { font-weight: 900; font-size: 15px; color: #ffab00; text-transform: uppercase; }
+        .close-btn { color: #ff1744; font-weight: 900; font-size: 26px; cursor: pointer; }
+        
+        .opacity-bar { 
+            background: #2a2a2a; padding: 8px 16px; display: flex; align-items: center; gap: 12px; 
+            font-size: 12px; font-weight: 900; color: #ffab00; border-bottom: 1px solid #333; text-transform: uppercase; 
+        }
+        .opacity-bar input { flex: 1; accent-color: #ffab00; }
+        
+        .viewfinder-container { flex: 1; position: relative; overflow: hidden; background: #000; }
+        #overlayVideo { width: 100%; height: 100%; object-fit: cover; }
+        #ghostImage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; pointer-events: none; }
+        
+        .modal-footer { height: 78px; background: #1e1e1e; display: flex; gap: 10px; padding: 0 12px; align-items: center; border-top: 1px solid #333; }
+        .btn-modal-action { flex: 1; height: 52px; border: none; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-snap-flash { background: #00e676; color: #000; }
+        .btn-skip { background: #444; color: #fff; }
+
         /* FULLSCREEN SUCCESS OVERLAY */
         #successOverlay {
             display: none; position: fixed; inset: 0;
@@ -169,7 +201,7 @@
 
 <div class="card">
     <label>PROPERTY</label>
-    <select id="propertySelect">
+    <select id="propertySelect" class="unselected">
         <option value="" disabled selected>PROPERTY</option>
     </select>
 
@@ -196,7 +228,7 @@
     <div class="row-2">
         <div>
             <label>MAKE</label>
-            <select id="makeSelect" onchange="checkMakeOther(this)">
+            <select id="makeSelect" class="unselected" onchange="checkMakeOther(this)">
                 <option value="" disabled selected>MAKE</option>
                 <option value="Toyota">Toyota</option>
                 <option value="Holden">Holden</option>
@@ -227,7 +259,7 @@
     <div class="row-2">
         <div>
             <label>COLOUR</label>
-            <select id="colourSelect" onchange="checkColourOther(this)">
+            <select id="colourSelect" class="unselected" onchange="checkColourOther(this)">
                 <option value="" disabled selected>COLOUR</option>
                 <option value="White">White</option>
                 <option value="Black">Black</option>
@@ -248,7 +280,7 @@
         </div>
         <div>
             <label>BODY TYPE</label>
-            <select id="bodyTypeSelect">
+            <select id="bodyTypeSelect" class="unselected">
                 <option value="" disabled selected>BODY TYPE</option>
                 <option value="Sedan">Sedan</option>
                 <option value="Hatchback">Hatchback</option>
@@ -269,12 +301,12 @@
     </select>
     <input type="text" id="officerOtherInput" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px;" onfocus="handleFieldFocus(this)">
 
-    <!-- 1. COMPARISON PHOTO (SIDE-BY-SIDE VERIFICATION) -->
+    <!-- 1. GHOST ALIGNMENT & NATIVE COMPARISON -->
     <label>SIDE-BY-SIDE COMPARISON (VERIFICATION)</label>
-    <button type="button" class="comp-btn" id="compBtn" onclick="triggerNativeCompSnap()">
-        <span id="compBtnText">📷 SNAP COMPARISON PHOTO</span>
+    <button type="button" class="comp-btn" id="compBtn" onclick="openComparisonWorkflow()">
+        <span id="compBtnText">📷 ALIGN & SNAP COMPARISON</span>
     </button>
-    <div class="comp-preview-wrap" id="compPreviewWrap" onclick="triggerNativeCompSnap()">
+    <div class="comp-preview-wrap" id="compPreviewWrap" onclick="openComparisonWorkflow()">
         <img id="compPreviewImg" class="comp-preview-img" alt="Comparison Preview">
         <span class="comp-preview-badge">SIDE-BY-SIDE VERIFIED (TAP TO RETAKE)</span>
     </div>
@@ -296,6 +328,26 @@
 
     <button class="submit-btn" id="submitBtn" disabled>LOG TOW</button>
     <div id="status"></div>
+</div>
+
+<!-- GHOST ALIGNMENT VIEWFINDER MODAL -->
+<div id="overlayModal" class="overlay-modal">
+    <div class="modal-header">
+        <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
+        <span class="close-btn" onclick="closeOverlayModal()">✕</span>
+    </div>
+    <div class="opacity-bar">
+        <span>GHOST OPACITY:</span>
+        <input type="range" id="opacitySlider" min="0" max="100" value="45">
+    </div>
+    <div class="viewfinder-container">
+        <video id="overlayVideo" autoplay playsinline muted></video>
+        <img id="ghostImage" alt="Ghost Overlay">
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn-modal-action btn-snap-flash" onclick="launchNativeFromGhost()">⚡ SNAP WITH FLASH (NATIVE)</button>
+        <button type="button" class="btn-modal-action btn-skip" onclick="closeOverlayModal()">CANCEL</button>
+    </div>
 </div>
 
 <div id="successOverlay">
@@ -325,6 +377,11 @@
     const compPreviewImg = document.getElementById('compPreviewImg');
     const nativeCompInput = document.getElementById('nativeCompInput');
 
+    const overlayModal = document.getElementById('overlayModal');
+    const overlayVideo = document.getElementById('overlayVideo');
+    const ghostImage = document.getElementById('ghostImage');
+    const opacitySlider = document.getElementById('opacitySlider');
+
     const condSnapBtn = document.getElementById('condSnapBtn');
     const nativeCondInput = document.getElementById('nativeCondInput');
     const thumbGallery = document.getElementById('thumbGallery');
@@ -340,17 +397,26 @@
     let targetProperty = "";
     let cachedMarkImageUrl = "";
     let cachedMarkedTimestamp = "";
+    let overlayStream = null;
 
-    // --- INSTANT AUTOFOCUS / OVERWRITE ENGINE ---
+    // --- GREY PLACEHOLDER FOCUS / OVERWRITE LOGIC ---
     function handleFieldFocus(input) {
         const val = input.value.trim().toUpperCase();
-        // If placeholder word, wipe clean immediately
         if (["MODEL", "REGO", "VEHICLE", "UNKNOWN", "ENTER MAKE", "ENTER COLOUR", "ENTER DRIVER NAME"].includes(val)) {
             input.value = "";
         } else if (input.value) {
-            // Pre-filled real data: select all so 1 keystroke overwrites it without letter-by-letter backspacing
             input.select();
         }
+    }
+
+    function syncDropdownColors() {
+        [propertySelect, makeSelect, colourSelect, bodyTypeSelect].forEach(sel => {
+            if (!sel.value || sel.value === "") {
+                sel.classList.add('unselected');
+            } else {
+                sel.classList.remove('unselected');
+            }
+        });
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -359,6 +425,8 @@
         readUrlParamsAndPopulate();
         checkExistingCompPhoto();
         setupLiveValidation();
+        syncDropdownColors();
+        setupGhostSlider();
         window.addEventListener('online', syncPendingTowsInBackground);
         syncPendingTowsInBackground();
         setInterval(syncPendingTowsInBackground, 10000);
@@ -367,8 +435,8 @@
     regoInput.addEventListener('input', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
     regoInput.addEventListener('change', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
 
-    function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; validateForm(); }
-    function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; validateForm(); }
+    function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
+    function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
     function checkOfficerOther(s) { officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; validateForm(); }
 
     function readUrlParamsAndPopulate() {
@@ -436,6 +504,7 @@
             }
         }
 
+        syncDropdownColors();
         validateForm();
     }
 
@@ -478,6 +547,7 @@
                         colourSelect.value = "Other"; colourOtherInput.style.display = 'block'; colourOtherInput.value = found.colour;
                     }
                 }
+                syncDropdownColors();
                 validateForm();
             }
         } catch(e) {}
@@ -506,6 +576,7 @@
                 propertySelect.appendChild(opt);
             }
         });
+        syncDropdownColors();
         validateForm();
     }
 
@@ -513,8 +584,8 @@
         const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
         inputs.forEach(elem => {
             if (elem) {
-                elem.addEventListener('input', validateForm);
-                elem.addEventListener('change', validateForm);
+                elem.addEventListener('input', () => { syncDropdownColors(); validateForm(); });
+                elem.addEventListener('change', () => { syncDropdownColors(); validateForm(); });
             }
         });
         validateForm();
@@ -558,9 +629,53 @@
     }
 
     // ============================================================
-    // 1. FAST NATIVE COMPARISON & SIDE-BY-SIDE STITCHER
+    // 1. GHOST ALIGNMENT VIEWFINDER & NATIVE FLASH COMPARISON
     // ============================================================
-    function triggerNativeCompSnap() {
+    function openComparisonWorkflow() {
+        const rego = regoInput.value.trim().toUpperCase() || "VEHICLE";
+        document.getElementById('modalRegoTitle').innerText = `${rego} - ALIGN & VERIFY`;
+
+        // If mark photo is available, load into ghost overlay
+        if (cachedMarkImageUrl) {
+            const driveIdMatch = cachedMarkImageUrl.match(/[-\w]{25,}/);
+            ghostImage.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : cachedMarkImageUrl;
+            ghostImage.style.display = "block";
+        } else {
+            ghostImage.style.display = "none";
+        }
+
+        overlayModal.classList.add('show');
+        startOverlayCamera();
+    }
+
+    async function startOverlayCamera() {
+        try {
+            overlayStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 } },
+                audio: false
+            });
+            overlayVideo.srcObject = overlayStream;
+        } catch(e) {}
+    }
+
+    function closeOverlayModal() {
+        if (overlayStream) {
+            overlayStream.getTracks().forEach(t => t.stop());
+            overlayStream = null;
+        }
+        overlayModal.classList.remove('show');
+    }
+
+    function setupGhostSlider() {
+        if (opacitySlider) {
+            opacitySlider.addEventListener('input', (e) => {
+                ghostImage.style.opacity = e.target.value / 100;
+            });
+        }
+    }
+
+    function launchNativeFromGhost() {
+        closeOverlayModal();
         nativeCompInput.value = "";
         nativeCompInput.click();
     }
@@ -609,7 +724,6 @@
 
         const towImg = new Image();
         towImg.onload = function() {
-            // If original mark photo exists, attempt true side-by-side
             if (markSrc) {
                 const markImg = new Image();
                 markImg.crossOrigin = "anonymous";
@@ -618,15 +732,12 @@
                     canvas.width = 1200; canvas.height = 800;
                     const ctx = canvas.getContext('2d');
 
-                    // Left = Mark, Right = Tow Hookup
                     ctx.drawImage(markImg, 0, 0, 600, 800);
                     ctx.drawImage(towImg, 600, 0, 600, 800);
 
-                    // Crisp divider seam
                     ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 4;
                     ctx.beginPath(); ctx.moveTo(600, 0); ctx.lineTo(600, 800); ctx.stroke();
 
-                    // Banners
                     ctx.fillStyle = "rgba(0,0,0,0.78)";
                     ctx.fillRect(0, 730, 600, 70);
                     ctx.fillRect(600, 730, 600, 70);
@@ -641,7 +752,6 @@
                     try {
                         callback(canvas.toDataURL('image/jpeg', 0.65));
                     } catch(err) {
-                        // Fallback if cross-origin tainted canvas
                         fallbackTowOnlyCanvas(towImg, towTime, callback);
                     }
                 };
@@ -670,7 +780,7 @@
     }
 
     // ============================================================
-    // 2. FAST NATIVE CONDITION PHOTOS (RAPID IN-APP OR BATCH ROLL)
+    // 2. FAST NATIVE CONDITION PHOTOS
     // ============================================================
     function triggerNativeConditionSnap() {
         nativeCondInput.value = "";
@@ -697,7 +807,6 @@
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
-                // Client-side canvas downscaler: shrinks 15MB file to ~95KB in 20ms
                 const canvas = document.createElement('canvas');
                 const maxDim = 800;
                 let w = img.width, h = img.height;
@@ -716,7 +825,6 @@
                 renderThumbs();
                 if (navigator.vibrate) navigator.vibrate(40);
 
-                // Run AI classifier on 1st photo if details are blank
                 if (conditionPhotos.length === 1 && (!regoInput.value || !makeSelect.value || !modelInput.value)) {
                     triggerStandaloneAiClassification(fastB64);
                 } else {
@@ -824,6 +932,7 @@
                 }
             }
 
+            syncDropdownColors();
             validateForm();
             statusDiv.style.color = "#00e676";
             statusDiv.innerText = "✔ DETAILS AUTO-POPULATED";
@@ -834,7 +943,7 @@
     }
 
     // ============================================================
-    // 3. SECURE SUBMISSION & OFFLINE QUEUE
+    // 3. SUBMISSION & OFFLINE QUEUE
     // ============================================================
     submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
