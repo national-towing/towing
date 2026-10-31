@@ -127,7 +127,7 @@
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
 
-        /* DRIVE-BY HUD CAMERA MODAL (ENLARGED HEADER) */
+        /* DRIVE-BY HUD CAMERA MODAL */
         #hudCamModal {
             display: none; position: fixed; inset: 0; background: #000; z-index: 99999;
             flex-direction: column;
@@ -215,7 +215,6 @@
             border: 1px solid rgba(255,255,255,0.4); text-transform: uppercase;
         }
 
-        /* STACKED FULL-WIDTH MANUAL REGO INPUT & CONFIRM BUTTON */
         #hudManualWrap { display: none; margin-top: 18px; width: 88%; max-width: 320px; }
         .hud-manual-box { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         #hudManualInput {
@@ -305,7 +304,6 @@
 
     <button type="button" id="hudTowActionBtn" class="hud-action-tow-btn" onclick="openTowFromHud(event)">🚨 LOAD TOW APP</button>
 
-    <!-- STACKED MANUAL REGO INPUT & CONFIRM BUTTON -->
     <div id="hudManualWrap" onclick="event.stopPropagation()">
         <div class="hud-manual-box">
             <input type="text" id="hudManualInput" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
@@ -437,26 +435,26 @@
             if (!propertyGroups[prop]) propertyGroups[prop] = [];
 
             let status = "WAIT";
+            let expMs = item.rawExpiryMs || 0;
+            if (!expMs && item.expiryTime) {
+                const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
+                const parts = cleanExp.split(/[\s-:]+/);
+                if (parts.length >= 4) {
+                    expMs = new Date(new Date().getFullYear(), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10), parseInt(parts[2], 10), parseInt(parts[3], 10)).getTime();
+                }
+            }
+
             if (item.pass === "YES") {
                 status = "PASS";
-            } else if (item.rawExpiryMs > 0 && nowMs >= item.rawExpiryMs) {
+            } else if (expMs > 0 && nowMs >= expMs) {
                 status = "READY";
-            } else {
-                let expMs = item.rawExpiryMs || 0;
-                if (!expMs && item.expiryTime) {
-                    const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
-                    const parts = cleanExp.split(/[\s-:]+/);
-                    if (parts.length >= 4) {
-                        expMs = new Date(new Date().getFullYear(), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10), parseInt(parts[2], 10), parseInt(parts[3], 10)).getTime();
-                    }
-                }
-                if (expMs > 0 && nowMs >= expMs) status = "READY";
             }
 
             propertyGroups[prop].push({
                 rego: item.rego,
                 markedTimeStr: formatCleanDisplayTime(item.markedTime),
                 expiryTimeStr: formatCleanDisplayTime(item.expiryTime),
+                rawExpiryMs: expMs,
                 status: status,
                 property: prop,
                 make: item.make || "",
@@ -524,6 +522,7 @@
         });
     }
 
+    // STRICT VEHICLE DETAIL SORT: RED (TOW) -> ORANGE (WAIT) -> BLUE (PASS)
     function renderDetailView(prop, filterStatus) {
         const container = document.getElementById('runContainer');
         container.innerHTML = "";
@@ -541,6 +540,14 @@
 
         let cars = propertyGroups[prop] || [];
         if (filterStatus !== 'ALL') cars = cars.filter(c => c.status === filterStatus);
+
+        // Status rank: READY (1) -> WAIT (2) -> PASS (3)
+        const statusRank = { "READY": 1, "WAIT": 2, "PASS": 3 };
+        cars.sort((a, b) => {
+            const rankDiff = (statusRank[a.status] || 99) - (statusRank[b.status] || 99);
+            if (rankDiff !== 0) return rankDiff;
+            return (a.rawExpiryMs || 0) - (b.rawExpiryMs || 0);
+        });
 
         cars.forEach(car => {
             const tile = document.createElement('div');
