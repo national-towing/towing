@@ -12,9 +12,9 @@
 
     <title>MARK</title>
     
-    <link rel="apple-touch-icon" href="icon-mark.png?v=1001">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=1001">
-    <link rel="manifest" href="manifest-mark.json?v=1001">
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1002">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1002">
+    <link rel="manifest" href="manifest-mark.json?v=1002">
 
     <style>
         :root {
@@ -118,7 +118,7 @@
         }
         select:focus { border-color: var(--c-mark); }
 
-        /* CENTRAL NATIVE CAMERA LAUNCHER AREA */
+        /* CENTRAL NATIVE CAMERA TRIGGER */
         .camera-trigger-box {
             width: 100%;
             flex: 1;
@@ -175,7 +175,6 @@
             text-transform: uppercase;
         }
 
-        /* CAPTURED THUMBNAIL PREVIEW INSIDE BOX */
         .preview-img-display {
             position: absolute;
             inset: 0;
@@ -200,7 +199,7 @@
         .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; text-shadow: 0 6px 24px rgba(0,0,0,0.4); }
         .full-overlay-text { font-size: 30px; font-weight: 950; color: #000; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; }
 
-        /* MANUAL ENTRY MODAL (ONLY POPULATES ON ANPR MISS) */
+        /* MANUAL ENTRY MODAL */
         .manual-rego-modal {
             display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88);
             border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; justify-content: center;
@@ -253,14 +252,12 @@
         <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
     </div>
 
-    <!-- DIRECT NATIVE CAMERA LAUNCHER BOX -->
     <div class="camera-trigger-box" onclick="launchNativeCamera()">
         <img id="lastSnapPreview" class="preview-img-display" alt="Mark Preview">
         <div class="cam-icon-circle">📷</div>
         <div class="cam-launch-title">SNAP VEHICLE</div>
         <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
 
-        <!-- CONDITIONAL POPUP (ONLY ON ANPR FAILURE) -->
         <div class="manual-rego-modal" id="manualRegoModal" onclick="event.stopPropagation()">
             <div class="manual-rego-card">
                 <div class="manual-title">⚠️ UNREADABLE PLATE</div>
@@ -295,6 +292,13 @@
     let isProcessing = false;
     let pendingFailedPhoto = "";
 
+    // IMMEDIATELY SAVE PROPERTY TO LOCALSTORAGE ON EVERY USER CHANGE
+    propertySelect.addEventListener('change', () => {
+        if (propertySelect.value) {
+            localStorage.setItem('last_property', propertySelect.value.trim());
+        }
+    });
+
     window.addEventListener('load', () => {
         loadProperties();
     });
@@ -318,17 +322,27 @@
 
     function populatePropertyDropdown(properties) {
         propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
-        const savedProp = localStorage.getItem('last_property');
+        const savedProp = (localStorage.getItem('last_property') || '').trim().toUpperCase();
+        let matched = false;
+
         properties.forEach(p => {
             const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
             if (propName) {
                 const opt = document.createElement('option');
                 opt.value = propName;
                 opt.innerText = propName;
-                if (savedProp && propName === savedProp) opt.selected = true;
+                if (savedProp && propName.toUpperCase() === savedProp) {
+                    opt.selected = true;
+                    matched = true;
+                }
                 propertySelect.appendChild(opt);
             }
         });
+
+        // Ensure saved property is retained
+        if (matched && propertySelect.value) {
+            localStorage.setItem('last_property', propertySelect.value);
+        }
     }
 
     function launchNativeCamera() {
@@ -355,7 +369,6 @@
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
-                // Client-side instant canvas downscaler: shrinks 15MB file to ~140KB in 30ms
                 const canvas = document.createElement('canvas');
                 const maxDim = 960;
                 let w = img.width;
@@ -380,7 +393,6 @@
 
                 const fastB64 = canvas.toDataURL('image/jpeg', 0.65);
                 
-                // Show captured image preview inside box
                 lastSnapPreview.src = fastB64;
                 lastSnapPreview.style.display = "block";
 
