@@ -127,7 +127,7 @@
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
 
-        /* DRIVE-BY HUD CAMERA MODAL */
+        /* DRIVE-BY HUD CAMERA MODAL (ENLARGED HEADER) */
         #hudCamModal {
             display: none; position: fixed; inset: 0; background: #000; z-index: 99999;
             flex-direction: column;
@@ -215,6 +215,7 @@
             border: 1px solid rgba(255,255,255,0.4); text-transform: uppercase;
         }
 
+        /* STACKED FULL-WIDTH MANUAL REGO INPUT & CONFIRM BUTTON */
         #hudManualWrap { display: none; margin-top: 18px; width: 88%; max-width: 320px; }
         .hud-manual-box { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         #hudManualInput {
@@ -304,6 +305,7 @@
 
     <button type="button" id="hudTowActionBtn" class="hud-action-tow-btn" onclick="openTowFromHud(event)">🚨 LOAD TOW APP</button>
 
+    <!-- STACKED MANUAL REGO INPUT & CONFIRM BUTTON -->
     <div id="hudManualWrap" onclick="event.stopPropagation()">
         <div class="hud-manual-box">
             <input type="text" id="hudManualInput" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
@@ -538,15 +540,22 @@
         title.innerText = `${prop} ${filterStatus !== 'ALL' ? '(' + filterStatus + ')' : ''}`;
         container.appendChild(title);
 
-        let cars = propertyGroups[prop] || [];
+        let cars = (propertyGroups[prop] || []).slice();
         if (filterStatus !== 'ALL') cars = cars.filter(c => c.status === filterStatus);
 
-        // Status rank: READY (1) -> WAIT (2) -> PASS (3)
-        const statusRank = { "READY": 1, "WAIT": 2, "PASS": 3 };
+        // Strict Status Sort: Red (READY/TOW) -> Orange (WAIT) -> Blue (PASS)
+        const getRank = (st) => {
+            const s = String(st || '').toUpperCase();
+            if (s === 'READY') return 1;
+            if (s === 'WAIT') return 2;
+            if (s === 'PASS') return 3;
+            return 4;
+        };
+
         cars.sort((a, b) => {
-            const rankDiff = (statusRank[a.status] || 99) - (statusRank[b.status] || 99);
-            if (rankDiff !== 0) return rankDiff;
-            return (a.rawExpiryMs || 0) - (b.rawExpiryMs || 0);
+            const rDiff = getRank(a.status) - getRank(b.status);
+            if (rDiff !== 0) return rDiff;
+            return (Number(a.rawExpiryMs) || 0) - (Number(b.rawExpiryMs) || 0);
         });
 
         cars.forEach(car => {
