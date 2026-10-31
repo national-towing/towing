@@ -2,44 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="National Towing">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RUN</title>
-    
     <link rel="apple-touch-icon" href="icon-manager.png?v=2">
     <link rel="icon" type="image/png" href="icon-manager.png?v=2">
     <link rel="manifest" href="manifest-run.json?v=2">
-
     <style>
-        :root {
-            --c-mark: #2979ff;
-            --c-run: #ffab00;
-            --c-tow: #ff1744;
-            --c-pass: #ab47bc;
-            --c-yard: #00b0ff;
-            --c-rel: #00e676;
-        }
+        :root { --c-mark: #2979ff; --c-run: #ffab00; --c-tow: #ff1744; --c-pass: #ab47bc; --c-yard: #00b0ff; --c-rel: #00e676; }
         * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
-        }
-        
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
-        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
-        .icon-btn:active { transform: scale(0.9); }
-
-        /* 3x2 Grid Navigation */
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
-        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
-        .nav-tile:active { transform: scale(0.96); }
+        body { font-family: -apple-system, sans-serif; margin: 0; padding: 10px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 8px; }
+        .header-box h1 { margin: 0; font-size: 34px; font-weight: 900; color: #ffab00; letter-spacing: 2px; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .nav-tile { height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; }
         .t-mark { background: var(--c-mark); color: #fff; }
         .t-run  { background: var(--c-run); color: #000; box-shadow: 0 0 0 2px #fff; }
         .t-tow  { background: var(--c-tow); color: #fff; }
@@ -47,306 +23,121 @@
         .t-yard { background: var(--c-yard); color: #000; }
         .t-rel  { background: var(--c-rel); color: #000; }
 
-        /* DRIVE-BY HUD CHECK BUTTON */
-        .hud-check-btn {
-            width: 100%; max-width: 440px; height: 56px; border-radius: 12px; border: none;
-            background: linear-gradient(135deg, #ff1744 0%, #ffab00 100%); color: #000;
-            font-size: 20px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase;
-            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
-        }
-        .hud-check-btn:active { transform: scale(0.97); }
-
+        .hud-check-btn { width: 100%; max-width: 440px; height: 52px; border-radius: 12px; border: none; background: linear-gradient(135deg, #ff1744 0%, #ffab00 100%); color: #000; font-size: 19px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; cursor: pointer; }
         .container { width: 100%; max-width: 440px; }
-
-        .prop-summary-card {
-            background: #1e1e1e; border-radius: 16px; padding: 14px; margin-bottom: 12px;
-            border: 1px solid #333; display: flex; align-items: center; justify-content: space-between;
-        }
-        .prop-name {
-            font-size: 19px; font-weight: 900; color: #ffab00; text-transform: uppercase;
-            letter-spacing: 1px; cursor: pointer; flex: 1; padding-right: 8px;
-        }
-
-        .count-btns { display: flex; gap: 8px; }
-        .cnt-btn {
-            width: 58px; height: 58px; border-radius: 10px; border: none;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; text-decoration: none; padding: 0;
-        }
-        .cnt-btn:active { transform: scale(0.92); }
-        .cnt-num { font-size: 22px; font-weight: 900; line-height: 1; margin-bottom: 2px; }
-        .cnt-lbl { font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
-
+        .prop-summary-card { background: #1e1e1e; border-radius: 14px; padding: 10px 12px; margin-bottom: 10px; border: 1px solid #333; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .prop-name { font-size: 17px; font-weight: 900; color: #ffab00; text-transform: uppercase; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+        .count-btns { display: flex; gap: 5px; flex-shrink: 0; }
+        .cnt-btn { width: 50px; height: 50px; border-radius: 8px; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+        .cnt-num { font-size: 19px; font-weight: 900; line-height: 1; }
+        .cnt-lbl { font-size: 9px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
         .btn-red { background: #ff1744; color: #fff; }
         .btn-orange { background: #ffab00; color: #000; }
         .btn-blue { background: #29b6f6; color: #000; }
 
-        .back-btn {
-            background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px;
-            border-radius: 10px; font-weight: 900; margin-bottom: 10px; cursor: pointer; display: inline-block;
-        }
-        .detail-title { font-size: 22px; font-weight: 900; color: #ffab00; margin-bottom: 10px; text-transform: uppercase; }
-
-        .car-tile {
-            background: #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 12px;
-            display: flex; align-items: center; justify-content: space-between; border: 2px solid #333;
-            color: #fff; transition: transform 0.1s ease; cursor: pointer;
-        }
-        .car-tile:active { transform: scale(0.98); }
+        .back-btn { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 6px 14px; border-radius: 8px; font-weight: 900; font-size: 13px; margin-bottom: 10px; cursor: pointer; display: inline-block; }
+        .detail-title { font-size: 20px; font-weight: 900; color: #ffab00; margin-bottom: 10px; text-transform: uppercase; }
+        .car-tile { background: #1e1e1e; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 2px solid #333; cursor: pointer; }
         .tile-ready { border-color: #ff1744; background: #2a1215; }
         .tile-wait { border-color: #ffab00; background: #2a2212; }
         .tile-pass { border-color: #29b6f6; background: #0d212d; }
-
-        .rego-header-line { display: flex; align-items: baseline; gap: 12px; }
-        .car-rego { font-size: 32px; font-weight: 900; letter-spacing: 1px; line-height: 1; }
+        .car-rego { font-size: 28px; font-weight: 900; letter-spacing: 1px; }
         .tile-ready .car-rego { color: #ff1744; }
         .tile-wait .car-rego { color: #ffab00; }
         .tile-pass .car-rego { color: #29b6f6; }
-
-        .car-time-mkd { font-size: 13px; color: #aaa; font-weight: 700; line-height: 1; }
-        .car-time-exp { font-size: 22px; color: #fff; font-weight: 900; margin-top: 6px; letter-spacing: 0.5px; }
-
-        .tile-right-box { display: flex; align-items: center; gap: 8px; }
-        .pic-preview-btn {
-            width: 44px; height: 44px; border-radius: 10px; background: #2a2a2a;
-            border: 1px solid #555; font-size: 18px; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; color: #fff; flex-shrink: 0;
-        }
-        .pic-preview-btn:active { transform: scale(0.92); }
-
-        .badge {
-            padding: 10px 16px; border-radius: 8px; font-size: 15px; font-weight: 900;
-            text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center;
-            justify-content: center; border: none; cursor: pointer; line-height: 1;
-        }
-        .badge:active { transform: scale(0.94); }
+        .car-time-mkd { font-size: 12px; color: #aaa; font-weight: 700; margin-left: 8px; }
+        .car-time-exp { font-size: 18px; color: #fff; font-weight: 900; margin-top: 4px; }
+        .badge { padding: 8px 14px; border-radius: 6px; font-size: 14px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; }
         .badge-ready { background: #ff1744; color: #fff; }
         .badge-wait { background: #ffab00; color: #000; }
         .badge-pass { background: #29b6f6; color: #000; }
 
-        .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
-
-        /* DRIVE-BY HUD CAMERA MODAL (ENLARGED HEADER) */
-        #hudCamModal {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 99999;
-            flex-direction: column;
-        }
-        .hud-cam-header {
-            height: 64px; background: rgba(0,0,0,0.88); display: flex; align-items: center;
-            justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 10;
-        }
-        .hud-top-btn {
-            background: #2a2a2a; color: #ffab00; border: 1.5px solid #ffab00; padding: 10px 18px;
-            border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; letter-spacing: 0.5px;
-        }
-        .hud-top-btn:active { transform: scale(0.95); }
-        .hud-top-title {
-            font-weight: 900; color: #ffab00; font-size: 17px; letter-spacing: 1px; text-transform: uppercase;
-        }
-        .hud-close-btn {
-            background: #333; color: #fff; border: 1.5px solid #555; padding: 10px 18px;
-            border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; letter-spacing: 0.5px;
-        }
-        .hud-close-btn:active { transform: scale(0.95); }
-
+        /* HUD CAMERA MODAL */
+        #hudCamModal { display: none; position: fixed; inset: 0; background: #000; z-index: 99999; flex-direction: column; }
+        .hud-cam-header { height: 56px; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; position: absolute; top: 0; left: 0; width: 100%; z-index: 10; }
+        .hud-top-btn { background: #2a2a2a; color: #ffab00; border: 1px solid #ffab00; padding: 6px 12px; border-radius: 6px; font-weight: 900; font-size: 13px; cursor: pointer; }
         .hud-cam-view { flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; }
         #hudVideo { width: 100%; height: 100%; object-fit: cover; }
-        
-        .hud-target-reticle {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            width: 88%; max-width: 420px; height: 160px; border: 3.5px dashed #00e676; border-radius: 16px;
-            pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
-        }
-        .hud-target-hint {
-            position: absolute; top: -28px; left: 0; width: 100%; text-align: center;
-            color: #00e676; font-weight: 900; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
+        .hud-target-reticle { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 440px; height: 190px; border: 3px dashed #00e676; border-radius: 14px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45); }
+        .hud-side-controls { position: absolute; top: 70px; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 20; }
+        .hud-snap-trigger { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: 84px; height: 84px; background: #fff; border: 4px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20; }
+        .hud-snap-inner { width: 62px; height: 62px; background: #ff1744; border-radius: 50%; }
 
-        .hud-snap-trigger {
-            position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
-            width: 90px; height: 90px; background: #fff; border: 5px solid #000; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-        }
-        .hud-snap-trigger:active { transform: translateX(-50%) scale(0.92); }
-        .hud-snap-inner { width: 66px; height: 66px; background: #ff1744; border-radius: 50%; }
-
-        /* FULLSCREEN HUD RESULT OVERLAY */
-        #hudFlashOverlay {
-            display: none; position: fixed; inset: 0; z-index: 100000;
-            flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 24px; cursor: pointer; user-select: none;
-        }
-        .hud-flash-tow     { background: rgba(255, 23, 68, 0.98); }
-        .hud-flash-pass    { background: rgba(41, 182, 246, 0.98); }
-        .hud-flash-nomark  { background: rgba(0, 230, 118, 0.98); }
-        .hud-flash-wait    { background: rgba(255, 171, 0, 0.98); }
+        #hudFlashOverlay { display: none; position: fixed; inset: 0; z-index: 100000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .hud-flash-tow { background: rgba(255, 23, 68, 0.98); }
+        .hud-flash-pass { background: rgba(41, 182, 246, 0.98); }
+        .hud-flash-nomark { background: rgba(0, 230, 118, 0.98); }
+        .hud-flash-wait { background: rgba(255, 171, 0, 0.98); }
         .hud-flash-noplate { background: rgba(20, 20, 20, 0.98); border: 4px solid #ff1744; }
+        .hud-main-icon { font-size: 60px; }
+        .hud-main-status { font-size: 68px; font-weight: 950; color: #000; letter-spacing: 2px; }
+        .hud-sub-plate { font-size: 42px; font-weight: 900; color: #fff; }
 
-        .hud-main-icon { font-size: 70px; margin-bottom: 4px; line-height: 1; }
-        .hud-main-status {
-            font-size: 76px; font-weight: 950; color: #000; letter-spacing: 3px;
-            text-transform: uppercase; line-height: 0.95; margin: 0;
-        }
-        .hud-flash-noplate .hud-main-status { color: #ff1744; font-size: 56px; }
-        
-        .hud-sub-plate {
-            font-size: 46px; font-weight: 900; color: #fff; margin-top: 10px;
-            letter-spacing: 2px; text-transform: uppercase; line-height: 1;
-        }
-        .hud-detail-line {
-            font-size: 20px; font-weight: 800; color: #000; margin-top: 10px;
-            text-transform: uppercase; letter-spacing: 1px; max-width: 90%;
-        }
-        .hud-flash-noplate .hud-detail-line { color: #aaa; }
-
-        .hud-action-tow-btn {
-            display: none; margin-top: 20px; background: #000; color: #ff1744; border: 3px solid #fff;
-            padding: 16px 30px; border-radius: 14px; font-size: 22px; font-weight: 950;
-            cursor: pointer; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-        }
-        .hud-action-tow-btn:active { transform: scale(0.96); }
-
-        .hud-reset-hint {
-            margin-top: 22px; background: rgba(0,0,0,0.6); color: #fff; padding: 10px 20px;
-            border-radius: 30px; font-size: 13px; font-weight: 900; letter-spacing: 1px;
-            border: 1px solid rgba(255,255,255,0.4); text-transform: uppercase;
-        }
-
-        /* STACKED FULL-WIDTH MANUAL REGO INPUT & CONFIRM BUTTON */
-        #hudManualWrap { display: none; margin-top: 18px; width: 88%; max-width: 320px; }
-        .hud-manual-box { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        #hudManualInput {
-            width: 100%; height: 56px; border-radius: 12px; border: 2.5px solid #ffab00;
-            background: #111; color: #fff; font-size: 26px; font-weight: 900;
-            text-align: center; text-transform: uppercase; outline: none;
-        }
-        .hud-manual-btn {
-            width: 100%; height: 52px; border-radius: 12px; border: none;
-            background: #ffab00; color: #000; font-weight: 900; font-size: 20px; cursor: pointer;
-            letter-spacing: 1.5px; text-transform: uppercase;
-        }
-        .hud-manual-btn:active { transform: scale(0.97); }
-
-        /* GHOST COMPARISON VIEWFINDER */
-        .overlay-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100005; flex-direction: column; }
+        /* GHOST MODAL */
+        .overlay-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 100005; flex-direction: column; }
         .overlay-modal.show { display: flex; }
-        .modal-header { height: 52px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
-        .modal-title { font-weight: bold; font-size: 15px; color: #fff; }
-        .close-btn { color: #ff1744; font-weight: bold; font-size: 24px; cursor: pointer; }
-        .opacity-bar { background: #2a2a2a; padding: 8px 16px; display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: bold; color: #ffab00; border-bottom: 1px solid #333; }
-        .opacity-bar input { flex: 1; accent-color: #ff1744; }
+        .modal-header { height: 50px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 14px; }
         .viewfinder-container { flex: 1; position: relative; overflow: hidden; background: #000; }
         #overlayVideo { width: 100%; height: 100%; object-fit: cover; }
         #ghostImage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; pointer-events: none; }
-        .modal-footer { height: 75px; background: #1e1e1e; display: flex; justify-content: space-evenly; align-items: center; border-top: 1px solid #333; padding: 0 10px; gap: 10px; }
-        .match-btn { flex: 1; background: #ff1744; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-        .skip-btn { flex: 1; background: #444; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-
-        /* PHOTO PREVIEW MODAL */
-        .preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #121212; z-index: 100006; flex-direction: column; }
-        .preview-modal.show { display: flex; }
-        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 14px; gap: 12px; flex-shrink: 0; }
-        .preview-back-btn { background: #2a2a2a; border: 1px solid #555; color: #ffab00; font-size: 14px; font-weight: 900; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; padding: 10px; }
-        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+        .modal-footer { height: 70px; background: #1e1e1e; display: flex; gap: 8px; padding: 0 10px; align-items: center; }
+        .match-btn, .skip-btn { flex: 1; height: 48px; border: none; border-radius: 8px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+        .match-btn { background: #ff1744; color: #fff; }
+        .skip-btn { background: #444; color: #fff; }
     </style>
 </head>
 <body>
-
-<div class="header-box">
-    <h1>RUN</h1>
-    <div class="icon-btn" id="refreshBtn">🔄</div>
-</div>
-
+<div class="header-box"><h1>RUN</h1><div class="icon-btn" onclick="clearBlacklistAndReload()">🔄</div></div>
 <div class="nav-grid-3x2">
-    <a href="mark.html" class="nav-tile t-mark">MARK</a>
-    <a href="run.html" class="nav-tile t-run">RUN</a>
-    <a href="tow.html" class="nav-tile t-tow">TOW</a>
-    <a href="passes.html" class="nav-tile t-pass">PASS</a>
-    <a href="yard.html" class="nav-tile t-yard">YARD</a>
-    <a href="release.html" class="nav-tile t-rel">REL</a>
+    <a href="mark.html" class="nav-tile t-mark">MARK</a><a href="run.html" class="nav-tile t-run">RUN</a><a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="passes.html" class="nav-tile t-pass">PASS</a><a href="yard.html" class="nav-tile t-yard">YARD</a><a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
+<button type="button" class="hud-check-btn" onclick="openDriveByCam()"><span>📷 CHECK VEHICLE</span></button>
+<div class="container" id="runContainer"><div style="text-align:center; padding:30px; font-weight:800; color:#888;">LOADING RUN...</div></div>
 
-<button type="button" class="hud-check-btn" onclick="openDriveByCam()">
-    <span>📷 CHECK VEHICLE</span>
-</button>
-
-<div class="container" id="runContainer">
-    <div class="empty-msg">LOADING RUN...</div>
-</div>
-
-<!-- DRIVE-BY HUD CAMERA MODAL -->
+<!-- HUD CAMERA -->
 <div id="hudCamModal">
     <div class="hud-cam-header">
         <button type="button" class="hud-top-btn" onclick="showManualEntryOverlay()">⌨️ TYPE</button>
-        <span class="hud-top-title">⚡ DRIVE-BY CHECK</span>
-        <button type="button" class="hud-close-btn" onclick="closeDriveByCam()">CLOSE</button>
+        <span style="font-weight:900; color:#ffab00; font-size:15px;">⚡ DRIVE-BY CHECK</span>
+        <button type="button" class="hud-top-btn" style="background:#333; color:#fff;" onclick="closeDriveByCam()">CLOSE</button>
     </div>
     <div class="hud-cam-view">
         <video id="hudVideo" autoplay playsinline muted></video>
-        <div class="hud-target-reticle">
-            <div class="hud-target-hint">ALIGN LICENCE PLATE INSIDE BOX</div>
+        <div class="hud-target-reticle"></div>
+        <div class="hud-side-controls">
+            <button class="hud-top-btn" id="hudTorchBtn" onclick="toggleHudTorch()">🔦 TORCH</button>
+            <button class="hud-top-btn" id="hudZoomBtn" onclick="cycleHudZoom()">🔍 1.0x</button>
         </div>
-        <div class="hud-snap-trigger" id="hudSnapBtn" onclick="triggerDriveByScan()">
-            <div class="hud-snap-inner"></div>
-        </div>
+        <div class="hud-snap-trigger" id="hudSnapBtn" onclick="triggerDriveByScan()"><div class="hud-snap-inner"></div></div>
     </div>
 </div>
 
-<!-- HUD FULLSCREEN RESULT OVERLAY -->
-<div id="hudFlashOverlay" onclick="handleHudOverlayTap(event)">
+<div id="hudFlashOverlay" onclick="dismissHudFlash()">
     <div class="hud-main-icon" id="hudMainIcon">🚨</div>
     <div class="hud-main-status" id="hudStatusText">TOW</div>
     <div class="hud-sub-plate" id="hudPlateText">790WSY</div>
-    <div class="hud-detail-line" id="hudDetailText">EXPIRED - READY TO TOW</div>
-
-    <button type="button" id="hudTowActionBtn" class="hud-action-tow-btn" onclick="openTowFromHud(event)">🚨 LOAD TOW APP</button>
-
-    <!-- STACKED MANUAL REGO INPUT & CONFIRM BUTTON -->
-    <div id="hudManualWrap" onclick="event.stopPropagation()">
-        <div class="hud-manual-box">
-            <input type="text" id="hudManualInput" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
-            <button type="button" class="hud-manual-btn" onclick="submitManualHudCheck()">CHECK VEHICLE</button>
-        </div>
+    <div style="font-size:18px; font-weight:800; color:#000; margin-top:6px;" id="hudDetailText">EXPIRED - READY TO TOW</div>
+    <button type="button" id="hudTowActionBtn" style="display:none; margin-top:16px; background:#000; color:#ff1744; border:2px solid #fff; padding:14px 26px; border-radius:10px; font-size:20px; font-weight:900;" onclick="openTowFromHud(event)">🚨 LOAD TOW APP</button>
+    <div id="hudManualWrap" style="display:none; margin-top:12px; width:80%; max-width:300px;" onclick="event.stopPropagation()">
+        <input type="text" id="hudManualInput" placeholder="ENTER REGO" style="width:100%; height:48px; border-radius:8px; border:2px solid #ffab00; background:#111; color:#fff; font-size:22px; font-weight:900; text-align:center;">
+        <button type="button" style="width:100%; height:44px; margin-top:6px; border-radius:8px; border:none; background:#ffab00; color:#000; font-weight:900;" onclick="submitManualHudCheck()">CHECK VEHICLE</button>
     </div>
-
-    <div class="hud-reset-hint">TAP OUTSIDE TO SCAN NEXT ↺</div>
 </div>
 
-<!-- GHOST COMPARISON MODAL -->
+<!-- GHOST VIEW FINDER -->
 <div id="overlayModal" class="overlay-modal">
     <div class="modal-header">
-        <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
-        <span class="close-btn" onclick="closeOverlayModal()">✕</span>
-    </div>
-    <div class="opacity-bar">
-        <span>GHOST OPACITY:</span>
-        <input type="range" id="opacitySlider" min="0" max="100" value="45">
+        <span style="font-weight:900; color:#fff;" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
+        <span style="color:#ff1744; font-size:24px; cursor:pointer;" onclick="closeOverlayModal()">✕</span>
     </div>
     <div class="viewfinder-container">
         <video id="overlayVideo" autoplay playsinline muted></video>
         <img id="ghostImage" alt="Ghost Overlay">
     </div>
     <div class="modal-footer">
-        <button id="matchBtn" class="match-btn">MATCH & TOW</button>
-        <button id="skipBtn" class="skip-btn">SKIP & TOW</button>
-    </div>
-</div>
-
-<!-- PHOTO PREVIEW MODAL -->
-<div id="previewModal" class="preview-modal">
-    <div class="preview-header">
-        <button class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
-        <div style="display:flex; flex-direction:column;">
-            <span style="font-size:18px; font-weight:900; color:#fff;" id="previewTitle"></span>
-            <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
-        </div>
-    </div>
-    <div class="preview-body">
-        <img id="previewImg" alt="Mark Photo">
+        <button id="matchBtn" class="match-btn">MATCH & STITCH TOW</button>
+        <button id="skipBtn" class="skip-btn" onclick="skipAndTow()">SKIP & TOW</button>
     </div>
 </div>
 
@@ -357,51 +148,20 @@
     let rawData = [];
     let propertyGroups = {};
     let hudStream = null;
-    let isProcessingScan = false;
-    let lastMatchedTowVehicle = null;
-
+    let hudTrack = null;
+    let isHudTorchOn = false;
+    let currentZoom = 1.0;
+    let lastMatchedVehicle = null;
     let overlayStream = null;
     let currentGhostVehicle = null;
 
-    let audioCtx = null;
-    function getAudioContext() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        return audioCtx;
-    }
+    window.addEventListener('load', loadTowRun);
 
-    function playTowAlertSiren() {
-        try {
-            const ctx = getAudioContext();
-            if (!ctx) return;
-            const now = ctx.currentTime;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(880, now);
-            osc.frequency.setValueAtTime(587, now + 0.15);
-            osc.frequency.setValueAtTime(880, now + 0.30);
-            osc.frequency.setValueAtTime(587, now + 0.45);
-            gain.gain.setValueAtTime(0.4, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.65);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(now);
-            osc.stop(now + 0.65);
-        } catch(e) {}
-    }
-
-    window.addEventListener('load', () => {
-        loadTowRun();
-        setupGhostModalEvents();
-    });
-
-    document.getElementById('refreshBtn').addEventListener('click', () => {
+    function clearBlacklistAndReload() {
         localStorage.removeItem('towed_blacklist');
         localStorage.removeItem('cached_run_data');
-        document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>REFRESHING...</div>";
         loadTowRun();
-    });
+    }
 
     async function loadTowRun() {
         try {
@@ -411,69 +171,33 @@
             parseAndRenderRun(rawData);
         } catch(e) {
             const cached = localStorage.getItem('cached_run_data');
-            if (cached) {
-                rawData = JSON.parse(cached);
-                parseAndRenderRun(rawData);
-            }
+            if (cached) parseAndRenderRun(JSON.parse(cached));
         }
     }
 
     function parseAndRenderRun(data) {
-        if (!data || !Array.isArray(data) || data.length === 0) {
-            document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
+        if (!Array.isArray(data) || data.length === 0) {
+            document.getElementById('runContainer').innerHTML = "<div style='text-align:center; padding:30px; font-weight:800; color:#888;'>NO CARS ON RUN</div>";
             return;
         }
 
         const nowMs = Date.now();
-
-        data = data.filter(item => {
-            const r = String(item.rego || '').trim().toUpperCase();
-            return !!r;
-        });
-
         propertyGroups = {};
         data.forEach(item => {
             const prop = item.property || "GENERAL";
             if (!propertyGroups[prop]) propertyGroups[prop] = [];
-
             let status = "WAIT";
-            if (item.pass === "YES") {
-                status = "PASS";
-            } else if (item.rawExpiryMs > 0 && nowMs >= item.rawExpiryMs) {
-                status = "READY";
-            } else {
-                let expMs = item.rawExpiryMs || 0;
-                if (!expMs && item.expiryTime) {
-                    const cleanExp = item.expiryTime.replace(/^[A-Za-z]+\s+/, "");
-                    const parts = cleanExp.split(/[\s-:]+/);
-                    if (parts.length >= 4) {
-                        expMs = new Date(new Date().getFullYear(), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10), parseInt(parts[2], 10), parseInt(parts[3], 10)).getTime();
-                    }
-                }
-                if (expMs > 0 && nowMs >= expMs) status = "READY";
-            }
+            if (item.pass === "YES") status = "PASS";
+            else if (item.rawExpiryMs > 0 && nowMs >= item.rawExpiryMs) status = "READY";
 
             propertyGroups[prop].push({
-                rego: item.rego,
-                markedTimeStr: formatCleanDisplayTime(item.markedTime),
-                expiryTimeStr: formatCleanDisplayTime(item.expiryTime),
-                status: status,
-                property: prop,
-                make: item.make || "",
-                model: item.model || "",
-                colour: item.colour || "",
-                bodyType: item.bodyType || "",
+                rego: item.rego, markedTimeStr: item.markedTime || "N/A", expiryTimeStr: item.expiryTime || "N/A",
+                rawExpiryMs: item.rawExpiryMs || 0, status: status, property: prop,
+                make: item.make || "", model: item.model || "", colour: item.colour || "", bodyType: item.bodyType || "",
                 imageUrl: item.imageUrl || item.image || ""
             });
         });
-
         renderSummaryView();
-    }
-
-    function formatCleanDisplayTime(rawStr) {
-        if (!rawStr) return "N/A";
-        const parts = String(rawStr).trim().split(/\s+/);
-        return parts.length >= 3 ? `${parts[0]} ${parts[2]}` : String(rawStr);
     }
 
     function renderSummaryView() {
@@ -481,21 +205,11 @@
             const redA = propertyGroups[a].filter(c => c.status === "READY").length;
             const redB = propertyGroups[b].filter(c => c.status === "READY").length;
             if (redB !== redA) return redB - redA;
-
-            const orangeA = propertyGroups[a].filter(c => c.status === "WAIT").length;
-            const orangeB = propertyGroups[b].filter(c => c.status === "WAIT").length;
-            if (orangeB !== orangeA) return orangeB - orangeA;
-
-            const blueA = propertyGroups[a].filter(c => c.status === "PASS").length;
-            const blueB = propertyGroups[b].filter(c => c.status === "PASS").length;
-            if (blueB !== blueA) return blueB - blueA;
-
             return a.localeCompare(b);
         });
 
         const container = document.getElementById('runContainer');
         container.innerHTML = "";
-
         sortedProps.forEach(prop => {
             const redCount = propertyGroups[prop].filter(c => c.status === "READY").length;
             const orangeCount = propertyGroups[prop].filter(c => c.status === "WAIT").length;
@@ -506,330 +220,169 @@
             card.innerHTML = `
                 <div class="prop-name" onclick="renderDetailView('${prop}', 'ALL')">${prop}</div>
                 <div class="count-btns">
-                    <button class="cnt-btn btn-red" onclick="renderDetailView('${prop}', 'READY')">
-                        <span class="cnt-num">${redCount}</span>
-                        <span class="cnt-lbl">TOW</span>
-                    </button>
-                    <button class="cnt-btn btn-orange" onclick="renderDetailView('${prop}', 'WAIT')">
-                        <span class="cnt-num">${orangeCount}</span>
-                        <span class="cnt-lbl">WAIT</span>
-                    </button>
-                    <button class="cnt-btn btn-blue" onclick="renderDetailView('${prop}', 'PASS')">
-                        <span class="cnt-num">${blueCount}</span>
-                        <span class="cnt-lbl">PASS</span>
-                    </button>
-                </div>
-            `;
+                    <button class="cnt-btn btn-red" onclick="renderDetailView('${prop}', 'READY')"><span class="cnt-num">${redCount}</span><span class="cnt-lbl">TOW</span></button>
+                    <button class="cnt-btn btn-orange" onclick="renderDetailView('${prop}', 'WAIT')"><span class="cnt-num">${orangeCount}</span><span class="cnt-lbl">WAIT</span></button>
+                    <button class="cnt-btn btn-blue" onclick="renderDetailView('${prop}', 'PASS')"><span class="cnt-num">${blueCount}</span><span class="cnt-lbl">PASS</span></button>
+                </div>`;
             container.appendChild(card);
         });
     }
 
     function renderDetailView(prop, filterStatus) {
         const container = document.getElementById('runContainer');
-        container.innerHTML = "";
-
-        const backBtn = document.createElement('div');
-        backBtn.className = 'back-btn';
-        backBtn.innerText = "← BACK TO ALL PROPERTIES";
-        backBtn.onclick = renderSummaryView;
-        container.appendChild(backBtn);
-
-        const title = document.createElement('div');
-        title.className = 'detail-title';
-        title.innerText = `${prop} ${filterStatus !== 'ALL' ? '(' + filterStatus + ')' : ''}`;
-        container.appendChild(title);
+        container.innerHTML = `<div class="back-btn" onclick="renderSummaryView()">← BACK TO ALL PROPERTIES</div><div class="detail-title">${prop}</div>`;
 
         let cars = propertyGroups[prop] || [];
         if (filterStatus !== 'ALL') cars = cars.filter(c => c.status === filterStatus);
+
+        // Strict Priority Sort: RED (READY) -> ORANGE (WAIT) -> BLUE (PASS)
+        const order = { "READY": 1, "WAIT": 2, "PASS": 3 };
+        cars.sort((a, b) => (order[a.status] || 99) - (order[b.status] || 99) || (a.rawExpiryMs - b.rawExpiryMs));
 
         cars.forEach(car => {
             const tile = document.createElement('div');
             tile.className = `car-tile tile-${car.status.toLowerCase()}`;
             tile.innerHTML = `
                 <div>
-                    <div class="rego-header-line">
-                        <span class="car-rego">${car.rego}</span>
-                        <span class="car-time-mkd">MKD: ${car.markedTimeStr}</span>
-                    </div>
+                    <div><span class="car-rego">${car.rego}</span><span class="car-time-mkd">MKD: ${car.markedTimeStr}</span></div>
                     <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
                 </div>
-                <div class="tile-right-box">
-                    <button type="button" class="pic-preview-btn" title="View Mark Photo" onclick="event.stopPropagation(); openPhotoPreview('${car.rego}', '${car.property}', '${car.imageUrl}')">📷</button>
-                    <button type="button" class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</button>
-                </div>
-            `;
-
-            const handleSelect = (e) => {
-                e.stopPropagation();
-                if (car.status === "READY") {
-                    openOverlayModal(car);
-                } else if (car.status === "WAIT") {
-                    navigateToTow(car);
-                } else {
-                    window.location.href = `passes.html`;
-                }
+                <button type="button" class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</button>`;
+            tile.onclick = () => {
+                if (car.status === "READY") openOverlayModal(car);
+                else navigateToTow(car);
             };
-
-            tile.addEventListener('click', handleSelect);
-            tile.querySelector('.badge').addEventListener('click', handleSelect);
-
             container.appendChild(tile);
         });
     }
 
     function navigateToTow(car) {
         closeOverlayModal();
-        const q = new URLSearchParams({
-            rego: car.rego || "",
-            prop: car.property || "",
-            make: car.make || "",
-            model: car.model || "",
-            colour: car.colour || "",
-            body: car.bodyType || ""
-        });
+        const q = new URLSearchParams({ rego: car.rego || "", prop: car.property || "", make: car.make || "", model: car.model || "", colour: car.colour || "", body: car.bodyType || "" });
         window.location.href = `tow.html?${q.toString()}`;
     }
 
-    // ==========================================
-    // ⚡ DRIVE-BY HUD SCANNER ENGINE
-    // ==========================================
+    // --- HUD CAMERA & ZOOM CONTROLS ---
     async function openDriveByCam() {
-        getAudioContext();
-        const modal = document.getElementById('hudCamModal');
-        const video = document.getElementById('hudVideo');
-        modal.style.display = 'flex';
-
+        document.getElementById('hudCamModal').style.display = 'flex';
         try {
-            hudStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                audio: false
-            });
-            video.srcObject = hudStream;
-            await video.play().catch(() => {});
-        } catch(err) {
-            alert("Camera permission required: " + err.message);
-            closeDriveByCam();
-        }
+            hudStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 } } });
+            document.getElementById('hudVideo').srcObject = hudStream;
+            hudTrack = hudStream.getVideoTracks()[0];
+        } catch(e) { closeDriveByCam(); }
     }
-
     function closeDriveByCam() {
-        if (hudStream) {
-            hudStream.getTracks().forEach(t => t.stop());
-            hudStream = null;
-        }
+        if (hudStream) { hudStream.getTracks().forEach(t => t.stop()); hudStream = null; hudTrack = null; }
         document.getElementById('hudCamModal').style.display = 'none';
-        dismissHudFlash();
+    }
+    async function toggleHudTorch() {
+        if (!hudTrack) return;
+        isHudTorchOn = !isHudTorchOn;
+        try { await hudTrack.applyConstraints({ advanced: [{ torch: isHudTorchOn }] }); } catch(e) {}
+    }
+    async function cycleHudZoom() {
+        if (!hudTrack) return;
+        currentZoom = currentZoom === 1.0 ? 2.0 : (currentZoom === 2.0 ? 3.0 : 1.0);
+        document.getElementById('hudZoomBtn').innerText = `🔍 ${currentZoom.toFixed(1)}x`;
+        try { await hudTrack.applyConstraints({ advanced: [{ zoom: currentZoom }] }); } catch(e) {}
     }
 
     async function triggerDriveByScan() {
-        if (isProcessingScan) return;
-        isProcessingScan = true;
-
-        const video = document.getElementById('hudVideo');
-        const snapBtn = document.getElementById('hudSnapBtn');
-        snapBtn.style.opacity = "0.4";
-
-        const vW = video.videoWidth || 1280;
-        const vH = video.videoHeight || 720;
-        const aspect = vH / vW;
-
+        const vid = document.getElementById('hudVideo');
         const canvas = document.createElement('canvas');
-        canvas.width = 600;
-        canvas.height = Math.round(600 * aspect);
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+        canvas.width = 600; canvas.height = 450;
+        canvas.getContext('2d').drawImage(vid, 0, 0, 600, 450);
         canvas.toBlob(async (blob) => {
+            const fd = new FormData();
+            fd.append('upload', blob, 'p.jpg');
+            fd.append('regions', 'au');
             try {
-                const formData = new FormData();
-                formData.append('upload', blob, 'plate.jpg');
-                formData.append('regions', 'au');
-
-                const resp = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Token ' + ANPR_API_KEY },
-                    body: formData
-                });
+                const resp = await fetch('https://api.platerecognizer.com/v1/plate-reader/', { method: 'POST', headers: { 'Authorization': 'Token ' + ANPR_API_KEY }, body: fd });
                 const json = await resp.json();
-
-                if (json && json.results && json.results.length > 0) {
-                    const plate = String(json.results[0].plate || "").toUpperCase();
-                    evaluatePlateAndFlashHUD(plate);
-                } else {
-                    flashResultOverlay("noplate", "NO PLATE", "NO VEHICLE PLATE DETECTED", true);
-                }
-            } catch(e) {
-                flashResultOverlay("noplate", "OFFLINE", "SCAN FAILED — ENTER MANUALLY", true);
-            } finally {
-                isProcessingScan = false;
-                snapBtn.style.opacity = "1";
-            }
+                if (json.results && json.results.length > 0) evaluatePlate(String(json.results[0].plate || "").toUpperCase());
+                else flashOverlay("noplate", "NO PLATE", "NO VEHICLE DETECTED");
+            } catch(e) { flashOverlay("noplate", "ERROR", "SCAN FAILED"); }
         }, 'image/jpeg', 0.55);
     }
 
-    function evaluatePlateAndFlashHUD(plate) {
-        const cleanRego = plate.replace(/[^A-Z0-9]/g, '');
-        let matchedItem = null;
-
-        for (const prop in propertyGroups) {
-            const found = propertyGroups[prop].find(c => c.rego.replace(/[^A-Z0-9]/g, '') === cleanRego);
-            if (found) { matchedItem = found; break; }
+    function evaluatePlate(plate) {
+        const clean = plate.replace(/[^A-Z0-9]/g, '');
+        let match = null;
+        for (const p in propertyGroups) {
+            const f = propertyGroups[p].find(c => c.rego.replace(/[^A-Z0-9]/g, '') === clean);
+            if (f) { match = f; break; }
         }
-
-        lastMatchedTowVehicle = matchedItem;
-
-        if (matchedItem && matchedItem.status === "PASS") {
-            flashResultOverlay("pass", cleanRego, `PASS ON FILE (${matchedItem.property})`, false);
-        } else if (matchedItem && matchedItem.status === "READY") {
-            playTowAlertSiren();
-            if (navigator.vibrate) {
-                try { navigator.vibrate([250, 100, 250, 100, 400]); } catch(e) { navigator.vibrate(500); }
-            }
-            flashResultOverlay("tow", cleanRego, `TOW READY (${matchedItem.property})`, false);
-        } else if (matchedItem && matchedItem.status === "WAIT") {
-            flashResultOverlay("wait", cleanRego, `MARKED: EXP ${matchedItem.expiryTimeStr}`, false);
-        } else {
-            flashResultOverlay("nomark", cleanRego, "NO ACTIVE MARK - UNMARKED", false);
-        }
+        lastMatchedVehicle = match;
+        if (match && match.status === "READY") flashOverlay("tow", clean, `TOW READY (${match.property})`, true);
+        else if (match && match.status === "WAIT") flashOverlay("wait", clean, `MARKED - EXP ${match.expiryTimeStr}`);
+        else if (match && match.status === "PASS") flashOverlay("pass", clean, `PASS ON FILE (${match.property})`);
+        else flashOverlay("nomark", clean, "NO ACTIVE MARK");
     }
 
-    function flashResultOverlay(type, plate, detail, showManualInput) {
-        const overlay = document.getElementById('hudFlashOverlay');
-        const iconEl = document.getElementById('hudMainIcon');
-        const statusEl = document.getElementById('hudStatusText');
-        const plateEl = document.getElementById('hudPlateText');
-        const detailEl = document.getElementById('hudDetailText');
-        const manualWrap = document.getElementById('hudManualWrap');
-        const manualInput = document.getElementById('hudManualInput');
-        const towActionBtn = document.getElementById('hudTowActionBtn');
-
-        overlay.className = `hud-flash-${type}`;
-        overlay.style.display = 'flex';
-
-        if (type === 'tow') {
-            iconEl.innerText = "🚨";
-            statusEl.innerText = "TOW";
-            towActionBtn.style.display = "block";
-        } else {
-            towActionBtn.style.display = "none";
-            if (type === 'pass') { iconEl.innerText = "🎫"; statusEl.innerText = "PASS"; }
-            else if (type === 'wait') { iconEl.innerText = "⏳"; statusEl.innerText = "WAIT"; }
-            else if (type === 'nomark') { iconEl.innerText = "🟢"; statusEl.innerText = "NO MARK"; }
-            else if (type === 'noplate') { iconEl.innerText = "❌"; statusEl.innerText = "NO PLATE"; }
-        }
-
-        plateEl.innerText = plate;
-        detailEl.innerText = detail;
-
-        if (showManualInput) {
-            manualWrap.style.display = 'block';
-            setTimeout(() => { manualInput.focus(); }, 100);
-        } else {
-            manualWrap.style.display = 'none';
-        }
+    function flashOverlay(type, plate, detail, showTowBtn = false) {
+        const ov = document.getElementById('hudFlashOverlay');
+        ov.className = `hud-flash-${type}`;
+        ov.style.display = 'flex';
+        document.getElementById('hudPlateText').innerText = plate;
+        document.getElementById('hudDetailText').innerText = detail;
+        document.getElementById('hudTowActionBtn').style.display = showTowBtn ? 'block' : 'none';
     }
+    function dismissHudFlash() { document.getElementById('hudFlashOverlay').style.display = 'none'; }
+    function openTowFromHud(e) { e.stopPropagation(); if (lastMatchedVehicle) { closeDriveByCam(); navigateToTow(lastMatchedVehicle); } }
 
-    function openTowFromHud(e) {
-        e.stopPropagation();
-        if (!lastMatchedTowVehicle) return;
-        closeDriveByCam();
-        navigateToTow(lastMatchedTowVehicle);
-    }
-
-    function showManualEntryOverlay() {
-        flashResultOverlay("noplate", "MANUAL CHECK", "TYPE LICENCE PLATE TO CHECK", true);
-    }
-
-    function submitManualHudCheck() {
-        const manualInput = document.getElementById('hudManualInput');
-        const val = manualInput.value.trim().toUpperCase();
-        if (val.length < 2) return;
-        manualInput.value = "";
-        evaluatePlateAndFlashHUD(val);
-    }
-
-    function handleHudOverlayTap(e) {
-        dismissHudFlash();
-    }
-
-    function dismissHudFlash() {
-        document.getElementById('hudFlashOverlay').style.display = 'none';
-        document.getElementById('hudManualWrap').style.display = 'none';
-        document.getElementById('hudManualInput').value = "";
-    }
-
-    // ==========================================
-    // 👻 GHOST COMPARISON VIEWFINDER LOGIC
-    // ==========================================
+    // --- STITCHED SIDE-BY-SIDE COMPARISON ENGINE ---
     async function openOverlayModal(car) {
         currentGhostVehicle = car;
         document.getElementById('modalRegoTitle').innerText = `${car.rego} - ALIGN & VERIFY TOW`;
-        
-        const ghostImg = document.getElementById('ghostImage');
-        const driveIdMatch = car.imageUrl ? String(car.imageUrl).match(/[-\w]{25,}/) : null;
-        ghostImg.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (car.imageUrl || "");
-        
+        const ghost = document.getElementById('ghostImage');
+        ghost.crossOrigin = "anonymous";
+        ghost.src = car.imageUrl || "";
         document.getElementById('overlayModal').classList.add('show');
-        
         try {
-            overlayStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                audio: false
-            });
+            overlayStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 } } });
             document.getElementById('overlayVideo').srcObject = overlayStream;
-        } catch(err) {
-            alert("Camera access required for ghost alignment: " + err.message);
-        }
+        } catch(e) {}
     }
-
     function closeOverlayModal() {
-        if (overlayStream) {
-            overlayStream.getTracks().forEach(t => t.stop());
-            overlayStream = null;
-        }
+        if (overlayStream) { overlayStream.getTracks().forEach(t => t.stop()); overlayStream = null; }
         document.getElementById('overlayModal').classList.remove('show');
     }
+    function skipAndTow() { if (currentGhostVehicle) navigateToTow(currentGhostVehicle); }
 
-    function setupGhostModalEvents() {
-        const slider = document.getElementById('opacitySlider');
-        if (slider) {
-            slider.addEventListener('input', (e) => {
-                document.getElementById('ghostImage').style.opacity = e.target.value / 100;
-            });
-        }
+    document.getElementById('matchBtn').addEventListener('click', () => {
+        if (!currentGhostVehicle) return;
+        const vid = document.getElementById('overlayVideo');
+        const ghost = document.getElementById('ghostImage');
 
-        const skipBtn = document.getElementById('skipBtn');
-        if (skipBtn) {
-            skipBtn.addEventListener('click', () => {
-                if (currentGhostVehicle) navigateToTow(currentGhostVehicle);
-            });
-        }
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200; canvas.height = 800;
+        const ctx = canvas.getContext('2d');
 
-        const matchBtn = document.getElementById('matchBtn');
-        if (matchBtn) {
-            matchBtn.addEventListener('click', () => {
-                if (!currentGhostVehicle) return;
-                const vid = document.getElementById('overlayVideo');
-                const canvas = document.createElement('canvas');
-                canvas.width = 800; canvas.height = 600;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(vid, 0, 0, 800, 600);
-                const b64 = canvas.toDataURL('image/jpeg', 0.6);
-                
-                localStorage.setItem('pending_comp_' + currentGhostVehicle.rego, b64);
-                navigateToTow(currentGhostVehicle);
-            });
-        }
-    }
+        // Draw Left (Mark) & Right (Tow)
+        try { ctx.drawImage(ghost, 0, 0, 600, 800); } catch(e) { ctx.fillStyle = "#111"; ctx.fillRect(0,0,600,800); }
+        ctx.drawImage(vid, 600, 0, 600, 800);
 
-    // Photo Preview Lightbox
-    function openPhotoPreview(rego, prop, url) {
-        document.getElementById('previewTitle').innerText = `${rego} (${prop})`;
-        const driveIdMatch = url ? String(url).match(/[-\w]{25,}/) : null;
-        document.getElementById('previewImg').src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (url || "");
-        document.getElementById('previewModal').classList.add('show');
-    }
-    function closePhotoPreview() { document.getElementById('previewModal').classList.remove('show'); }
+        // Center seam line
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(600, 0); ctx.lineTo(600, 800); ctx.stroke();
+
+        // High contrast date banners
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.fillRect(0, 740, 600, 60);
+        ctx.fillRect(600, 740, 600, 60);
+
+        ctx.font = "bold 22px sans-serif";
+        ctx.fillStyle = "#ffab00";
+        ctx.fillText(`MARKED: ${currentGhostVehicle.markedTimeStr}`, 20, 778);
+        ctx.fillStyle = "#ff1744";
+        const nowD = new Date();
+        const towTimeStr = `${String(nowD.getDate()).padStart(2,'0')}/${String(nowD.getMonth()+1).padStart(2,'0')} ${String(nowD.getHours()).padStart(2,'0')}:${String(nowD.getMinutes()).padStart(2,'0')}`;
+        ctx.fillText(`TOWED: ${towTimeStr}`, 620, 778);
+
+        const b64 = canvas.toDataURL('image/jpeg', 0.65);
+        localStorage.setItem('pending_comp_' + currentGhostVehicle.rego, b64);
+        navigateToTow(currentGhostVehicle);
+    });
 </script>
 </body>
 </html>
