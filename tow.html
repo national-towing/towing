@@ -2,76 +2,237 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
     <title>TOW</title>
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10004">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10004">
+    
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10003">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10003">
+    <link rel="manifest" href="manifest-tow.json?v=10003">
+
     <style>
-        :root { --c-mark: #2979ff; --c-run: #ffab00; --c-tow: #ff1744; --c-pass: #ab47bc; --c-yard: #00b0ff; --c-rel: #00e676; }
+        :root {
+            --c-mark: #2979ff;
+            --c-run: #ffab00;
+            --c-tow: #ff1744;
+            --c-pass: #ab47bc;
+            --c-yard: #00b0ff;
+            --c-rel: #00e676;
+        }
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; margin: 0; padding: 12px; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 8px; }
-        .header-box h1 { margin: 0; font-size: 34px; font-weight: 900; color: #ff1744; letter-spacing: 2px; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
-        .sync-badge { background: #ffab00; color: #000; font-weight: 900; font-size: 12px; padding: 6px 14px; border-radius: 20px; margin-bottom: 8px; display: none; cursor: pointer; }
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 12px; }
-        .nav-tile { height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+        
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+
+        .sync-badge {
+            background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
+            padding: 6px 14px; border-radius: 20px; margin-bottom: 10px; display: none;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* 3x2 Grid Navigation */
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 14px auto; }
+        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-tile:active { transform: scale(0.96); }
         .t-mark { background: var(--c-mark); color: #fff; }
         .t-run  { background: var(--c-run); color: #000; }
         .t-tow  { background: var(--c-tow); color: #fff; box-shadow: 0 0 0 2px #fff; }
         .t-pass { background: var(--c-pass); color: #fff; }
         .t-yard { background: var(--c-yard); color: #000; }
         .t-rel  { background: var(--c-rel); color: #000; }
-        .card { background: #1e1e1e; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 8px; font-weight: 900; }
-        input, select { width: 100%; height: 48px; padding: 0 12px; border-radius: 8px; border: 1.5px solid #444; background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 800; margin-top: 4px; outline: none; -webkit-appearance: none; }
-        ::placeholder { color: #888888 !important; }
-        .field-missing { border-color: #ffab00 !important; background: #2e2208 !important; }
-        .row-2 { display: flex; gap: 8px; }
+
+        .card { background: #1e1e1e; border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
+        
+        label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
+        input, select {
+            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 20px; font-weight: 900; margin-top: 4px; outline: none;
+            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        ::placeholder { color: #888888 !important; opacity: 1; }
+        input::placeholder, textarea::placeholder { color: #888888 !important; opacity: 1; }
+
+        select option { background: #2a2a2a; color: #ffffff; }
+        select option[value=""] { color: #888888; }
+
+        .field-missing { border: 2px solid #ffab00 !important; background: #332600 !important; }
+        .field-valid { border: 1px solid #444 !important; background: #2a2a2a !important; }
+
+        .row-rego-state { display: flex; gap: 10px; }
+        .row-rego-state > div:first-child { flex: 2; }
+        .row-rego-state > div:last-child { flex: 1; }
+
+        .row-2 { display: flex; gap: 10px; }
         .row-2 > div { flex: 1; }
-        .open-cam-btn { background: #2a1215; border: 2px dashed #ff1744; color: #ff1744; font-size: 15px; font-weight: 900; border-radius: 10px; padding: 14px; width: 100%; margin-top: 12px; cursor: pointer; text-transform: uppercase; }
-        .thumb-gallery { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; }
+
+        .open-cam-btn {
+            background: #2a1215; border: 2px dashed #ff1744; color: #ff1744;
+            font-size: 16px; font-weight: 900; border-radius: 12px; padding: 16px;
+            width: 100%; margin-top: 14px; cursor: pointer; text-align: center;
+            letter-spacing: 1px; text-transform: uppercase; transition: border 0.2s ease, background 0.2s ease;
+        }
+        .open-cam-btn:active { background: #3d1b20; transform: scale(0.98); }
+
+        .photo-count-banner {
+            font-size: 13px; font-weight: 900; color: #00e676; margin-top: 10px;
+            text-align: center; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .thumb-gallery { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding-bottom: 6px; }
         .thumb-container { position: relative; flex-shrink: 0; }
-        .thumb-img { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; border: 2px solid #ff1744; }
-        .thumb-del { position: absolute; top: -6px; right: -6px; background: #ff1744; color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; cursor: pointer; }
-        .submit-btn { background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 12px; height: 56px; font-size: 22px; width: 100%; margin-top: 16px; cursor: pointer; text-transform: uppercase; }
-        .submit-btn:disabled { opacity: 0.5; }
-        #status { text-align: center; font-weight: 800; font-size: 14px; margin-top: 10px; min-height: 20px; color: #ffab00; }
-        .cam-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 99999; flex-direction: column; }
+        .thumb-img { width: 78px; height: 78px; border-radius: 10px; object-fit: cover; border: 2px solid #ff1744; cursor: pointer; }
+        .thumb-del {
+            position: absolute; top: -6px; right: -6px; background: #ff1744; color: #fff;
+            border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center;
+            justify-content: center; font-size: 12px; font-weight: 900; border: 2px solid #1e1e1e;
+        }
+
+        .submit-btn {
+            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
+            height: 62px; font-size: 26px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 2px;
+            transition: opacity 0.3s ease;
+        }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+        #status { text-align: center; font-weight: 900; font-size: 15px; margin-top: 12px; min-height: 24px; color: #ffab00; }
+
+        /* FULLSCREEN SUCCESS OVERLAY */
+        #successOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 230, 118, 0.95); z-index: 999999; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+        }
+        #successOverlay h1 { font-size: 48px; font-weight: 900; color: #000; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; }
+        #successOverlay p { font-size: 18px; font-weight: 800; color: #111; margin: 0 0 40px 0; max-width: 80%; }
+        .ok-btn {
+            background: #000; color: #00e676; font-size: 32px; font-weight: 900; border: none;
+            border-radius: 16px; padding: 20px 60px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            letter-spacing: 3px; width: 250px;
+        }
+        .ok-btn:active { transform: scale(0.95); }
+
+        /* FULLSCREEN CAMERA MODAL */
+        .cam-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 99999; flex-direction: column;
+        }
         .cam-modal.show { display: flex; }
-        .cam-header { height: 50px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; position: absolute; top: 0; width: 100%; z-index: 10; }
-        .cam-snap-btn { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 80px; height: 80px; background: #ff1744; border: 4px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cam-snap-inner { width: 58px; height: 58px; border-radius: 50%; border: 3px solid #000; }
+        
+        .cam-header {
+            height: 55px; background: rgba(0,0,0,0.8); display: flex;
+            align-items: center; justify-content: space-between; padding: 0 16px;
+            position: absolute; top: 0; left: 0; width: 100%; z-index: 10;
+        }
+        .cam-done-btn {
+            background: #00e676; color: #000; font-size: 14px; font-weight: 900;
+            padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+        }
+        .cam-counter { font-size: 15px; font-weight: 900; color: #ffab00; }
+
+        .cam-viewfinder { flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .cam-torch-btn {
+            position: absolute; top: 70px; right: 16px; background: rgba(0,0,0,0.75);
+            border: 1.5px solid #ffab00; color: #ffab00; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 20; letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .cam-snap-btn {
+            position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+            width: 88px; height: 88px; background: #ff1744; border: 5px solid #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.8); cursor: pointer; z-index: 10;
+        }
+        .cam-snap-btn:active { transform: translateX(-50%) scale(0.90); }
+        .cam-snap-inner { width: 64px; height: 64px; border-radius: 50%; border: 3px solid #000; }
     </style>
 </head>
 <body>
-<div class="header-box"><h1>TOW</h1><div class="icon-btn" onclick="window.location.reload(true)">🔄</div></div>
-<div class="sync-badge" id="syncBadge" onclick="syncPendingTows()">⚡ OFFLINE QUEUE: <span id="queueCount">0</span> (SAVED LOCALLY)</div>
+
+<div class="header-box">
+    <h1>TOW</h1>
+    <div class="icon-btn" id="refreshBtn">🔄</div>
+</div>
+
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ BASEMENT QUEUE: <span id="queueCount">0</span> (SAVED LOCALLY)</div>
+
 <div class="nav-grid-3x2">
-    <a href="mark.html" class="nav-tile t-mark">MARK</a><a href="run.html" class="nav-tile t-run">RUN</a><a href="tow.html" class="nav-tile t-tow">TOW</a>
-    <a href="passes.html" class="nav-tile t-pass">PASS</a><a href="yard.html" class="nav-tile t-yard">YARD</a><a href="release.html" class="nav-tile t-rel">REL</a>
+    <a href="mark.html" class="nav-tile t-mark">MARK</a>
+    <a href="run.html" class="nav-tile t-run">RUN</a>
+    <a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="yard.html" class="nav-tile t-yard">YARD</a>
+    <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
 
 <div class="card">
     <label>PROPERTY</label>
-    <select id="propertySelect"><option value="">PROPERTY</option></select>
+    <select id="propertySelect">
+        <option value="" disabled selected>PROPERTY</option>
+    </select>
 
-    <div class="row-2">
-        <div style="flex:2;"><label>REGO</label><input type="text" id="regoInput" placeholder="REGO" style="color:#ff1744; text-transform:uppercase;" onfocus="handleFieldFocus(this)"></div>
-        <div style="flex:1;"><label>STATE</label><select id="stateSelect"><option value="QLD" selected>QLD</option><option value="NSW">NSW</option><option value="VIC">VIC</option><option value="SA">SA</option><option value="WA">WA</option><option value="TAS">TAS</option><option value="NT">NT</option><option value="ACT">ACT</option></select></div>
+    <div class="row-rego-state">
+        <div>
+            <label>REGO</label>
+            <input type="text" id="regoInput" placeholder="REGO" style="color:#ff1744; text-transform:uppercase;">
+        </div>
+        <div>
+            <label>STATE</label>
+            <select id="stateSelect" style="color:#ffab00;">
+                <option value="QLD" selected>QLD</option>
+                <option value="NSW">NSW</option>
+                <option value="VIC">VIC</option>
+                <option value="NT">NT</option>
+                <option value="SA">SA</option>
+                <option value="TAS">TAS</option>
+                <option value="ACT">ACT</option>
+                <option value="WA">WA</option>
+            </select>
+        </div>
     </div>
 
     <div class="row-2">
         <div>
             <label>MAKE</label>
             <select id="makeSelect" onchange="checkMakeOther(this)">
-                <option value="">MAKE</option><option value="Toyota">Toyota</option><option value="Holden">Holden</option><option value="Ford">Ford</option><option value="Hyundai">Hyundai</option><option value="Nissan">Nissan</option><option value="Mitsubishi">Mitsubishi</option><option value="Mazda">Mazda</option><option value="Subaru">Subaru</option><option value="Volkswagen">Volkswagen</option><option value="BMW">BMW</option><option value="Mercedes-Benz">Mercedes-Benz</option><option value="Kia">Kia</option><option value="Other">Other</option>
+                <option value="" disabled selected>MAKE</option>
+                <option value="Toyota">Toyota</option>
+                <option value="Holden">Holden</option>
+                <option value="Ford">Ford</option>
+                <option value="Hyundai">Hyundai</option>
+                <option value="Nissan">Nissan</option>
+                <option value="Mitsubishi">Mitsubishi</option>
+                <option value="Mazda">Mazda</option>
+                <option value="MG">MG</option>
+                <option value="Subaru">Subaru</option>
+                <option value="Honda">Honda</option>
+                <option value="Volkswagen">Volkswagen</option>
+                <option value="Kia">Kia</option>
+                <option value="BMW">BMW</option>
+                <option value="Mercedes-Benz">Mercedes-Benz</option>
+                <option value="Audi">Audi</option>
+                <option value="Jeep">Jeep</option>
+                <option value="Other">Other</option>
             </select>
-            <input type="text" id="makeOtherInput" placeholder="ENTER MAKE" style="display:none; margin-top:4px;" onfocus="handleFieldFocus(this)">
+            <input type="text" id="makeOtherInput" placeholder="ENTER MAKE" style="display:none; margin-top:4px; font-size:18px;">
         </div>
         <div>
             <label>MODEL</label>
-            <input type="text" id="modelInput" placeholder="MODEL" onfocus="handleFieldFocus(this)">
+            <input type="text" id="modelInput" placeholder="MODEL">
         </div>
     </div>
 
@@ -79,260 +240,777 @@
         <div>
             <label>COLOUR</label>
             <select id="colourSelect" onchange="checkColourOther(this)">
-                <option value="">COLOUR</option><option value="White">White</option><option value="Black">Black</option><option value="Silver">Silver</option><option value="Grey">Grey</option><option value="Blue">Blue</option><option value="Red">Red</option><option value="Green">Green</option><option value="Yellow">Yellow</option><option value="Gold">Gold</option><option value="Other">Other</option>
+                <option value="" disabled selected>COLOUR</option>
+                <option value="White">White</option>
+                <option value="Black">Black</option>
+                <option value="Silver">Silver</option>
+                <option value="Grey">Grey</option>
+                <option value="Blue">Blue</option>
+                <option value="Red">Red</option>
+                <option value="Green">Green</option>
+                <option value="Yellow">Yellow</option>
+                <option value="Gold">Gold</option>
+                <option value="Bronze">Bronze</option>
+                <option value="Orange">Orange</option>
+                <option value="Purple">Purple</option>
+                <option value="Brown">Brown</option>
+                <option value="Other">Other</option>
             </select>
-            <input type="text" id="colourOtherInput" placeholder="ENTER COLOUR" style="display:none; margin-top:4px;" onfocus="handleFieldFocus(this)">
+            <input type="text" id="colourOtherInput" placeholder="ENTER COLOUR" style="display:none; margin-top:4px; font-size:18px;">
         </div>
         <div>
             <label>BODY TYPE</label>
-            <select id="bodyTypeSelect"><option value="Sedan">Sedan</option><option value="Hatchback">Hatchback</option><option value="SUV">SUV</option><option value="Station Wagon">Station Wagon</option><option value="Utility">Utility</option><option value="Van">Van</option><option value="Other">Other</option></select>
+            <select id="bodyTypeSelect">
+                <option value="" disabled selected>BODY TYPE</option>
+                <option value="Sedan">Sedan</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="SUV">SUV</option>
+                <option value="Station Wagon">Station Wagon</option>
+                <option value="Utility">Utility</option>
+                <option value="Van">Van</option>
+                <option value="Other">Other</option>
+            </select>
         </div>
     </div>
 
-    <label>DRIVER</label>
-    <select id="officerSelect"><option value="Brian" selected>Brian</option><option value="Brett">Brett</option></select>
+    <label>DRIVER / OFFICER</label>
+    <select id="officerSelect" onchange="checkOfficerOther(this)">
+        <option value="Brian" selected>Brian</option>
+        <option value="Brett">Brett</option>
+        <option value="Other">Other...</option>
+    </select>
+    <input type="text" id="officerOtherInput" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px; font-size:18px;">
 
-    <button type="button" class="open-cam-btn field-missing" id="openCamBtn" onclick="openCamera()">📷 CAPTURE CONDITION PHOTOS</button>
-    <div id="compPhotoBanner" style="display:none; font-size:12px; font-weight:900; color:#00e676; text-align:center; margin-top:6px;">✔ SIDE-BY-SIDE VERIFICATION ATTACHED</div>
+    <!-- CAMERA LAUNCHER -->
+    <button type="button" class="open-cam-btn field-missing" id="openCamBtn">📷 CAPTURE CONDITION PHOTOS</button>
+    <div class="photo-count-banner" id="photoCountBanner">0 PHOTOS TAKEN</div>
+    <div id="compPhotoBanner" style="display:none; font-size:12px; font-weight:900; color:#00e676; text-align:center; margin-top:8px;">✔ SIDE-BY-SIDE VERIFICATION ATTACHED</div>
     <div class="thumb-gallery" id="thumbGallery"></div>
 
-    <button class="submit-btn" id="submitBtn" disabled onclick="submitTow()">LOG TOW</button>
+    <button class="submit-btn" id="submitBtn" disabled>LOG TOW</button>
     <div id="status"></div>
 </div>
 
+<!-- FULLSCREEN SUCCESS OVERLAY -->
+<div id="successOverlay">
+    <h1 id="successRego">VEHICLE TOWED</h1>
+    <p>Secured and syncing in background.</p>
+    <button class="ok-btn" onclick="window.location.href='tow.html';">OK</button>
+</div>
+
+<!-- FULLSCREEN VIEW FINDER -->
 <div class="cam-modal" id="camModal">
     <div class="cam-header">
-        <span style="font-weight:900; color:#ffab00;" id="modalCounter">0 PHOTOS</span>
-        <button style="background:#2a2a2a; border:1px solid #ffab00; color:#ffab00; padding:6px 12px; border-radius:6px; font-weight:900;" onclick="toggleTowTorch()">🔦 TORCH</button>
-        <button style="background:#00e676; border:none; padding:6px 14px; border-radius:6px; font-weight:900;" onclick="closeCamera()">DONE ✓</button>
+        <span class="cam-counter" id="modalCounter">0 PHOTOS</span>
+        <button class="cam-done-btn" id="camDoneBtn">DONE ✓</button>
     </div>
-    <div style="flex:1; position:relative; overflow:hidden;">
-        <video id="videoElem" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-        <button id="camRetryBtn" style="display:none; position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); background:#ff1744; color:#fff; border:none; padding:12px 20px; border-radius:8px; font-weight:900;" onclick="startCameraStream()">🔄 RESTART CAMERA</button>
-        <div class="cam-snap-btn" onclick="takeConditionSnap()"><div class="cam-snap-inner"></div></div>
+    <div class="cam-viewfinder">
+        <video id="videoElem" autoplay playsinline></video>
+        <button class="cam-torch-btn" id="torchBtn">⚡ FLASH: AUTO</button>
+        <div class="cam-snap-btn" id="snapBtn"><div class="cam-snap-inner"></div></div>
     </div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+    const propertySelect = document.getElementById('propertySelect');
+    const regoInput = document.getElementById('regoInput');
+    const stateSelect = document.getElementById('stateSelect');
+    const makeSelect = document.getElementById('makeSelect');
+    const makeOtherInput = document.getElementById('makeOtherInput');
+    const modelInput = document.getElementById('modelInput');
+    const colourSelect = document.getElementById('colourSelect');
+    const colourOtherInput = document.getElementById('colourOtherInput');
+    const bodyTypeSelect = document.getElementById('bodyTypeSelect');
+    const officerSelect = document.getElementById('officerSelect');
+    const officerOtherInput = document.getElementById('officerOtherInput');
+
+    const openCamBtn = document.getElementById('openCamBtn');
+    const camModal = document.getElementById('camModal');
+    const camDoneBtn = document.getElementById('camDoneBtn');
+    const modalCounter = document.getElementById('modalCounter');
+    const photoCountBanner = document.getElementById('photoCountBanner');
+    const compPhotoBanner = document.getElementById('compPhotoBanner');
+    const videoElem = document.getElementById('videoElem');
+    const snapBtn = document.getElementById('snapBtn');
+    const torchBtn = document.getElementById('torchBtn');
+    const thumbGallery = document.getElementById('thumbGallery');
+    const submitBtn = document.getElementById('submitBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statusDiv = document.getElementById('status');
+    const syncBadge = document.getElementById('syncBadge');
+    const queueCount = document.getElementById('queueCount');
+    const successOverlay = document.getElementById('successOverlay');
+    const successRego = document.getElementById('successRego');
+
     let conditionPhotos = [];
+    let isSubmitting = false;
     let videoStream = null;
     let videoTrack = null;
-    let isTorchOn = false;
+    let trackCapabilities = {};
+    let targetProperty = "";
 
-    // --- INDEXED-DB OFFLINE STORAGE ---
-    const DB_NAME = "NationalTowingDB";
-    let db = null;
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = (e) => { e.target.result.createObjectStore("tows", { keyPath: "id" }); };
-    req.onsuccess = (e) => { db = e.target.result; updateQueueUI(); syncPendingTows(); };
+    let flashMode = localStorage.getItem('tow_flash_mode') || 'auto';
 
-    window.addEventListener('DOMContentLoaded', () => {
-        loadProperties();
-        populateFromUrl();
-        checkCompPhoto();
-        setupValidation();
-        window.addEventListener('online', syncPendingTows);
-    });
-
-    function handleFieldFocus(input) {
-        if (input.value === "Vehicle" || input.value === "Unknown" || input.value === "MODEL" || input.value === "REGO") {
-            input.value = "";
-        } else {
-            input.select();
-        }
+    function syncDropdownColors() {
+        document.querySelectorAll('select').forEach(sel => {
+            const updateColor = () => {
+                if (!sel.value || sel.value === "") {
+                    sel.style.color = "#888888";
+                } else if (sel.id === 'stateSelect') {
+                    sel.style.color = "#ffab00";
+                } else {
+                    sel.style.color = "#ffffff";
+                }
+            };
+            updateColor();
+            sel.removeEventListener('change', updateColor);
+            sel.addEventListener('change', updateColor);
+        });
     }
 
-    function checkMakeOther(s) { document.getElementById('makeOtherInput').style.display = s.value === 'Other' ? 'block' : 'none'; validate(); }
-    function checkColourOther(s) { document.getElementById('colourOtherInput').style.display = s.value === 'Other' ? 'block' : 'none'; validate(); }
+    window.addEventListener('DOMContentLoaded', () => {
+        updateTorchUI();
+        loadProperties();
+        updateQueueUI();
+        readUrlParamsAndPopulate();
+        checkCompPhoto();
+        setupLiveValidation();
+        syncDropdownColors();
+        window.addEventListener('online', syncPendingTowsInBackground);
+        syncPendingTowsInBackground();
+        setInterval(syncPendingTowsInBackground, 10000);
+    });
 
-    function populateFromUrl() {
-        const p = new URLSearchParams(window.location.search);
-        if (p.get('rego')) document.getElementById('regoInput').value = p.get('rego').toUpperCase();
-        if (p.get('model')) document.getElementById('modelInput').value = p.get('model');
-        validate();
+    regoInput.addEventListener('input', () => { checkCompPhoto(); autoPopulateFromCache(); });
+    regoInput.addEventListener('change', () => { checkCompPhoto(); autoPopulateFromCache(); });
+
+    // PARSES URL PARAMS & AUTO-POPULATES ALL VEHICLE DETAILS
+    function readUrlParamsAndPopulate() {
+        const params = new URLSearchParams(window.location.search);
+        const urlRego = (params.get('rego') || '').trim().toUpperCase();
+        const urlProp = (params.get('prop') || '').trim();
+        const urlMake = (params.get('make') || '').trim();
+        const urlModel = (params.get('model') || '').trim();
+        const urlColour = (params.get('colour') || '').trim();
+        const urlBody = (params.get('body') || '').trim();
+
+        if (urlRego) regoInput.value = urlRego;
+        if (urlProp) targetProperty = decodeURIComponent(urlProp).toUpperCase();
+
+        let cachedCar = null;
+        try {
+            const cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || '[]');
+            cachedCar = cachedRun.find(c => String(c.rego).trim().toUpperCase() === urlRego) || null;
+        } catch(e) {}
+
+        const makeVal = urlMake || (cachedCar ? cachedCar.make : "");
+        const modelVal = urlModel || (cachedCar ? cachedCar.model : "");
+        const colourVal = urlColour || (cachedCar ? cachedCar.colour : "");
+        const bodyVal = urlBody || (cachedCar ? cachedCar.bodyType : "");
+
+        if (makeVal) {
+            let matched = false;
+            for (let i = 0; i < makeSelect.options.length; i++) {
+                if (makeSelect.options[i].value.toLowerCase() === makeVal.toLowerCase()) {
+                    makeSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                makeSelect.value = "Other";
+                makeOtherInput.style.display = 'block';
+                makeOtherInput.value = makeVal;
+            } else {
+                makeOtherInput.style.display = 'none';
+            }
+        }
+
+        if (modelVal) modelInput.value = modelVal;
+
+        if (colourVal) {
+            let matched = false;
+            for (let i = 0; i < colourSelect.options.length; i++) {
+                if (colourSelect.options[i].value.toLowerCase() === colourVal.toLowerCase()) {
+                    colourSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                colourSelect.value = "Other";
+                colourOtherInput.style.display = 'block';
+                colourOtherInput.value = colourVal;
+            } else {
+                colourOtherInput.style.display = 'none';
+            }
+        }
+
+        if (bodyVal) {
+            for (let i = 0; i < bodyTypeSelect.options.length; i++) {
+                const optVal = bodyTypeSelect.options[i].value.toLowerCase();
+                const bLower = bodyVal.toLowerCase();
+                if (optVal === bLower || (bLower === "ute" && optVal === "utility") || (bLower === "wagon" && optVal === "station wagon")) {
+                    bodyTypeSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        validateForm();
+        syncDropdownColors();
+    }
+
+    function autoPopulateFromCache() {
+        const curRego = regoInput.value.trim().toUpperCase();
+        if (!curRego) return;
+        try {
+            const cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || '[]');
+            const found = cachedRun.find(c => String(c.rego).trim().toUpperCase() === curRego);
+            if (found) {
+                if (found.property && (!propertySelect.value || propertySelect.value === "")) {
+                    for (let i = 0; i < propertySelect.options.length; i++) {
+                        if (propertySelect.options[i].value.toUpperCase() === found.property.toUpperCase()) {
+                            propertySelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (found.make && (!makeSelect.value || makeSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < makeSelect.options.length; i++) {
+                        if (makeSelect.options[i].value.toLowerCase() === found.make.toLowerCase()) {
+                            makeSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        makeSelect.value = "Other";
+                        makeOtherInput.style.display = 'block';
+                        makeOtherInput.value = found.make;
+                    }
+                }
+                if (found.model && !modelInput.value) modelInput.value = found.model;
+                if (found.colour && (!colourSelect.value || colourSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < colourSelect.options.length; i++) {
+                        if (colourSelect.options[i].value.toLowerCase() === found.colour.toLowerCase()) {
+                            colourSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        colourSelect.value = "Other";
+                        colourOtherInput.style.display = 'block';
+                        colourOtherInput.value = found.colour;
+                    }
+                }
+                validateForm();
+                syncDropdownColors();
+            }
+        } catch(e) {}
     }
 
     function checkCompPhoto() {
-        const rego = document.getElementById('regoInput').value.trim().toUpperCase();
-        document.getElementById('compPhotoBanner').style.display = (rego && localStorage.getItem('pending_comp_' + rego)) ? 'block' : 'none';
-    }
-
-    async function loadProperties() {
-        const sel = document.getElementById('propertySelect');
-        const cached = localStorage.getItem('cached_properties');
-        if (cached) { try { populateProps(JSON.parse(cached)); } catch(e) {} }
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
-            const data = await res.json();
-            populateProps(data);
-        } catch(e) {}
-    }
-    function populateProps(list) {
-        const sel = document.getElementById('propertySelect');
-        sel.innerHTML = '<option value="">PROPERTY</option>';
-        const params = new URLSearchParams(window.location.search);
-        const target = (params.get('prop') || '').toUpperCase();
-        list.forEach(p => {
-            const name = p.name || p;
-            const opt = document.createElement('option');
-            opt.value = name; opt.innerText = name;
-            if (target && name.toUpperCase() === target) opt.selected = true;
-            sel.appendChild(opt);
-        });
-        validate();
-    }
-
-    function setupValidation() {
-        ['propertySelect','regoInput','makeSelect','modelInput','colourSelect'].forEach(id => {
-            document.getElementById(id).addEventListener('input', validate);
-            document.getElementById(id).addEventListener('change', validate);
-        });
-    }
-
-    function validate() {
-        const valid = document.getElementById('propertySelect').value !== "" &&
-                      document.getElementById('regoInput').value.trim() !== "" &&
-                      document.getElementById('makeSelect').value !== "" &&
-                      document.getElementById('modelInput').value.trim() !== "" &&
-                      document.getElementById('colourSelect').value !== "" &&
-                      conditionPhotos.length > 0;
-        document.getElementById('submitBtn').disabled = !valid;
-        return valid;
-    }
-
-    // --- CAMERA ENGINE ---
-    async function openCamera() {
-        document.getElementById('camModal').classList.add('show');
-        await startCameraStream();
-    }
-    async function startCameraStream() {
-        document.getElementById('camRetryBtn').style.display = 'none';
-        try {
-            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 } } });
-            document.getElementById('videoElem').srcObject = videoStream;
-            videoTrack = videoStream.getVideoTracks()[0];
-        } catch(e) { document.getElementById('camRetryBtn').style.display = 'block'; }
-    }
-    function closeCamera() {
-        if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; videoTrack = null; }
-        document.getElementById('camModal').classList.remove('show');
-        validate();
-    }
-    async function toggleTowTorch() {
-        if (!videoTrack) return;
-        isTorchOn = !isTorchOn;
-        try { await videoTrack.applyConstraints({ advanced: [{ torch: isTorchOn }] }); } catch(e) {}
-    }
-
-    function takeConditionSnap() {
-        const vid = document.getElementById('videoElem');
-        const canvas = document.createElement('canvas');
-        canvas.width = 800; canvas.height = 600;
-        canvas.getContext('2d').drawImage(vid, 0, 0, 800, 600);
-        const b64 = canvas.toDataURL('image/jpeg', 0.55);
-        conditionPhotos.push(b64);
-        renderThumbs();
-        if (conditionPhotos.length === 1 && (!document.getElementById('regoInput').value || !document.getElementById('modelInput').value)) {
-            triggerAiAutofill(b64);
+        const rego = regoInput.value.trim().toUpperCase();
+        if (compPhotoBanner) {
+            if (rego && localStorage.getItem('pending_comp_' + rego)) {
+                compPhotoBanner.style.display = 'block';
+            } else {
+                compPhotoBanner.style.display = 'none';
+            }
         }
     }
 
-    async function triggerAiAutofill(b64) {
-        document.getElementById('status').innerText = "🔍 AI IDENTIFYING CAR...";
+    refreshBtn.addEventListener('click', () => { window.location.reload(true); });
+
+    function checkMakeOther(s) { 
+        makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; 
+        syncDropdownColors();
+    }
+    function checkColourOther(s) { 
+        colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; 
+        syncDropdownColors();
+    }
+    function checkOfficerOther(s) { 
+        officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; 
+        syncDropdownColors();
+    }
+
+    async function loadProperties() {
+        const cached = localStorage.getItem('cached_properties');
+        if (cached) { try { populatePropertiesUI(JSON.parse(cached)); } catch(e) {} }
+
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'ai_classify', photoBytes: b64 }) });
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
             const data = await res.json();
-            if (data.result) {
-                if (data.result.make && !document.getElementById('makeSelect').value) document.getElementById('makeSelect').value = data.result.make;
-                if (data.result.model && !document.getElementById('modelInput').value) document.getElementById('modelInput').value = data.result.model;
-                if (data.result.colour && !document.getElementById('colourSelect').value) document.getElementById('colourSelect').value = data.result.colour;
-                validate();
-            }
+            localStorage.setItem('cached_properties', JSON.stringify(data));
+            populatePropertiesUI(data);
         } catch(e) {}
-        document.getElementById('status').innerText = "";
+    }
+
+    function populatePropertiesUI(data) {
+        if (!Array.isArray(data) || data.length === 0) return;
+        propertySelect.innerHTML = '<option value="" disabled selected>PROPERTY</option>';
+        data.forEach(p => {
+            const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+            if (propName) {
+                const opt = document.createElement('option');
+                opt.value = propName; opt.innerText = propName;
+                if (targetProperty && propName.toUpperCase() === targetProperty) opt.selected = true;
+                propertySelect.appendChild(opt);
+            }
+        });
+        validateForm();
+        syncDropdownColors();
+    }
+
+    function setupLiveValidation() {
+        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
+        inputs.forEach(elem => {
+            if (elem) {
+                elem.addEventListener('input', () => { validateForm(); syncDropdownColors(); });
+                elem.addEventListener('change', () => { validateForm(); syncDropdownColors(); });
+            }
+        });
+        validateForm();
+    }
+
+    function validateForm() {
+        let isValid = true;
+        function mark(elem, cond) {
+            if (!elem) return;
+            if (cond) {
+                elem.classList.remove('field-missing'); 
+                elem.classList.add('field-valid');
+            } else {
+                elem.classList.remove('field-valid'); 
+                elem.classList.add('field-missing');
+                isValid = false;
+            }
+        }
+
+        mark(propertySelect, propertySelect && propertySelect.value !== "");
+        mark(regoInput, regoInput && regoInput.value.trim() !== "");
+        
+        mark(makeSelect, makeSelect && makeSelect.value !== "");
+        if (makeSelect && makeSelect.value === "Other") {
+            mark(makeOtherInput, makeOtherInput && makeOtherInput.value.trim() !== "");
+        }
+
+        mark(modelInput, modelInput && modelInput.value.trim() !== "");
+        
+        mark(colourSelect, colourSelect && colourSelect.value !== "");
+        if (colourSelect && colourSelect.value === "Other") {
+            mark(colourOtherInput, colourOtherInput && colourOtherInput.value.trim() !== "");
+        }
+
+        mark(bodyTypeSelect, bodyTypeSelect && bodyTypeSelect.value !== "");
+
+        if (conditionPhotos.length === 0) {
+            isValid = false;
+            openCamBtn.classList.add('field-missing');
+        } else {
+            openCamBtn.classList.remove('field-missing');
+        }
+
+        if (isValid) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = "1";
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.5";
+        }
+        
+        return isValid;
+    }
+
+    openCamBtn.addEventListener('click', async () => {
+        camModal.classList.add('show');
+        await startCamera();
+    });
+
+    camDoneBtn.addEventListener('click', () => {
+        stopCamera();
+        camModal.classList.remove('show');
+    });
+
+    function updateTorchUI() {
+        if (flashMode === 'auto') {
+            torchBtn.innerText = "⚡ FLASH: AUTO";
+            torchBtn.style.borderColor = "#ffab00";
+            torchBtn.style.color = "#ffab00";
+        } else if (flashMode === 'torch') {
+            torchBtn.innerText = "🔦 TORCH: ON";
+            torchBtn.style.borderColor = "#00e676";
+            torchBtn.style.color = "#00e676";
+        } else {
+            torchBtn.innerText = "⚡ FLASH: OFF";
+            torchBtn.style.borderColor = "#ff1744";
+            torchBtn.style.color = "#ff1744";
+        }
+    }
+
+    torchBtn.addEventListener('click', async () => {
+        if (flashMode === 'auto') flashMode = 'torch';
+        else if (flashMode === 'torch') flashMode = 'off';
+        else flashMode = 'auto';
+
+        localStorage.setItem('tow_flash_mode', flashMode);
+        updateTorchUI();
+
+        if (videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ torch: (flashMode === 'torch') }] });
+            } catch(e) {}
+        }
+    });
+
+    function isLowLight(video) {
+        try {
+            const miniCanvas = document.createElement('canvas');
+            miniCanvas.width = 20;
+            miniCanvas.height = 20;
+            const miniCtx = miniCanvas.getContext('2d', { willReadFrequently: true });
+            miniCtx.drawImage(video, 0, 0, 20, 20);
+            const imgData = miniCtx.getImageData(0, 0, 20, 20).data;
+            let totalLuminance = 0;
+            for (let i = 0; i < imgData.length; i += 4) {
+                totalLuminance += (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
+            }
+            return (totalLuminance / (imgData.length / 4)) < 50;
+        } catch(e) { return false; }
+    }
+
+    async function startCamera() {
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                audio: false
+            });
+            videoElem.srcObject = videoStream;
+            videoTrack = videoStream.getVideoTracks()[0];
+
+            if (videoTrack) {
+                trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+                if (!trackCapabilities.torch) {
+                    torchBtn.style.display = 'none';
+                } else {
+                    torchBtn.style.display = 'block';
+                    if (flashMode === 'torch') {
+                        try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
+                    }
+                }
+            }
+        } catch(err) {
+            alert("Camera error: " + err.message);
+        }
+    }
+
+    function stopCamera() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(t => t.stop());
+            videoStream = null;
+            videoTrack = null;
+        }
+    }
+
+    snapBtn.addEventListener('click', async () => {
+        let firedFlash = false;
+        const needsFlash = (flashMode === 'torch') || (flashMode === 'auto' && isLowLight(videoElem));
+
+        if (needsFlash && videoTrack && trackCapabilities.torch) {
+            try {
+                await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
+                firedFlash = true;
+                if (flashMode !== 'torch') await new Promise(r => setTimeout(r, 300));
+            } catch(e) {}
+        }
+
+        const vW = videoElem.videoWidth || 1280;
+        const vH = videoElem.videoHeight || 720;
+        const aspect = vH / vW;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = Math.round(600 * aspect);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+        
+        const b64 = canvas.toDataURL('image/jpeg', 0.45);
+        conditionPhotos.push(b64);
+        
+        // Auto-run AI classification on first condition photo if fields are blank
+        if (conditionPhotos.length === 1 && (!regoInput.value || !makeSelect.value || !modelInput.value)) {
+            triggerStandaloneAiClassification(b64);
+        }
+
+        if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
+            try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
+        }
+
+        renderThumbs();
+        modalCounter.innerText = `${conditionPhotos.length} PHOTOS TAKEN`;
+        if (navigator.vibrate) navigator.vibrate(40);
+    });
+
+    async function triggerStandaloneAiClassification(b64) {
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "🔍 AI SCANNING REGO & VEHICLE DETAILS...";
+
+        const needsRego = !regoInput.value || regoInput.value.trim() === "";
+        const needsMMCT = !makeSelect.value || !modelInput.value;
+
+        // 1. Kick off ANPR Plate Reader if Rego is blank
+        const anprTask = needsRego ? fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 })
+        }).then(r => r.json()).catch(() => null) : Promise.resolve(null);
+
+        // 2. Kick off OpenAI Vision for MMCT if vehicle details are blank
+        const aiTask = needsMMCT ? fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'ai_classify', photoBytes: b64 })
+        }).then(r => r.json()).catch(() => null) : Promise.resolve(null);
+
+        try {
+            const [anprRes, aiRes] = await Promise.all([anprTask, aiTask]);
+
+            // Populate Rego
+            if (anprRes && anprRes.rego && (!regoInput.value || regoInput.value.trim() === "")) {
+                regoInput.value = anprRes.rego.trim().toUpperCase();
+            }
+
+            // Populate MMCT
+            if (aiRes && aiRes.status === "SUCCESS" && aiRes.result) {
+                const r = aiRes.result;
+
+                // Match Make
+                if (r.make && (!makeSelect.value || makeSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < makeSelect.options.length; i++) {
+                        if (makeSelect.options[i].value.toLowerCase() === r.make.toLowerCase()) {
+                            makeSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        makeSelect.value = "Other";
+                        makeOtherInput.style.display = 'block';
+                        makeOtherInput.value = r.make;
+                    }
+                }
+
+                // Match Model
+                if (r.model && !modelInput.value) {
+                    modelInput.value = r.model;
+                }
+
+                // Match Colour
+                if (r.colour && (!colourSelect.value || colourSelect.value === "")) {
+                    let matched = false;
+                    for (let i = 0; i < colourSelect.options.length; i++) {
+                        if (colourSelect.options[i].value.toLowerCase() === r.colour.toLowerCase()) {
+                            colourSelect.selectedIndex = i;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        colourSelect.value = "Other";
+                        colourOtherInput.style.display = 'block';
+                        colourOtherInput.value = r.colour;
+                    }
+                }
+
+                // Match Body Type
+                if (r.bodyType && (!bodyTypeSelect.value || bodyTypeSelect.value === "")) {
+                    for (let i = 0; i < bodyTypeSelect.options.length; i++) {
+                        const optVal = bodyTypeSelect.options[i].value.toLowerCase();
+                        const bLower = r.bodyType.toLowerCase();
+                        if (optVal === bLower || (bLower === "ute" && optVal === "utility") || (bLower === "wagon" && optVal === "station wagon")) {
+                            bodyTypeSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            validateForm();
+            syncDropdownColors();
+            checkCompPhoto();
+
+            const detectedPlate = regoInput.value ? `${regoInput.value} • ` : "";
+            const detectedVeh = makeSelect.value ? `${makeSelect.value} ${modelInput.value || ''}` : "DETAILS LOGGED";
+            statusDiv.style.color = "#00e676";
+            statusDiv.innerText = `✔ AI CAPTURED: ${detectedPlate}${detectedVeh}`;
+        } catch(e) {
+            statusDiv.innerText = "";
+        }
     }
 
     function renderThumbs() {
-        const gal = document.getElementById('thumbGallery');
-        gal.innerHTML = "";
+        thumbGallery.innerHTML = "";
         conditionPhotos.forEach((src, idx) => {
             const wrap = document.createElement('div');
             wrap.className = 'thumb-container';
-            wrap.innerHTML = `<img src="${src}" class="thumb-img"><div class="thumb-del" onclick="conditionPhotos.splice(${idx},1); renderThumbs(); validate();">✕</div>`;
-            gal.appendChild(wrap);
+
+            const img = document.createElement('img');
+            img.src = src; img.className = 'thumb-img';
+
+            const del = document.createElement('div');
+            del.className = 'thumb-del';
+            del.innerText = '✕';
+            del.onclick = (e) => {
+                e.stopPropagation();
+                conditionPhotos.splice(idx, 1);
+                renderThumbs();
+            };
+
+            wrap.appendChild(img);
+            wrap.appendChild(del);
+            thumbGallery.appendChild(wrap);
         });
-        document.getElementById('modalCounter').innerText = `${conditionPhotos.length} PHOTOS`;
+
+        const countText = `${conditionPhotos.length} CONDITION PHOTOS CAPTURED`;
+        photoCountBanner.innerText = countText;
+        modalCounter.innerText = countText;
+        validateForm();
     }
 
-    // --- SUBMISSION & INDEXED-DB OFFLINE QUEUE ---
-    function submitTow() {
-        if (!validate()) return;
-        const rego = document.getElementById('regoInput').value.trim().toUpperCase();
-        const make = document.getElementById('makeSelect').value === 'Other' ? document.getElementById('makeOtherInput').value : document.getElementById('makeSelect').value;
-        const colour = document.getElementById('colourSelect').value === 'Other' ? document.getElementById('colourOtherInput').value : document.getElementById('colourSelect').value;
-        const comp = localStorage.getItem('pending_comp_' + rego) || "";
+    submitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+            statusDiv.innerText = "⚠️ FILL HIGHLIGHTED FIELDS & ATTACH PHOTO";
+            return; 
+        }
+        if (isSubmitting) return;
+
+        const rego = regoInput.value.trim().toUpperCase();
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "SECURING TOW...";
+
+        const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
+        const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
+        const driver = officerSelect.value === "Other" ? officerOtherInput.value.trim() : officerSelect.value;
+        const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
 
         const payload = {
-            id: 'TOW_' + Date.now(),
+            id: 'TOW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_tow',
-            property: document.getElementById('propertySelect').value,
+            property: propertySelect.value || targetProperty || 'GENERAL',
             rego: rego,
-            state: document.getElementById('stateSelect').value,
-            make: make,
-            model: document.getElementById('modelInput').value.trim(),
-            colour: colour,
-            bodyType: document.getElementById('bodyTypeSelect').value,
-            officer: document.getElementById('officerSelect').value,
+            state: stateSelect.value,
+            make: finalMake,
+            model: modelInput.value.trim(),
+            colour: finalColour,
+            bodyType: bodyTypeSelect.value,
+            officer: driver,
+            photoBytes: conditionPhotos.length > 0 ? conditionPhotos[0] : "",
             photos: conditionPhotos,
-            photoBytes: conditionPhotos[0] || "",
-            comparisonPhoto: comp,
+            comparisonPhoto: compB64,
             timestamp: new Date().toISOString()
         };
 
-        localStorage.removeItem('pending_comp_' + rego);
-        saveTowToDB(payload);
-        alert(`✔ ${rego} LOGGED LOCALLY\nSyncing in background.`);
-        window.location.href = 'run.html';
+        try {
+            let blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
+            blacklisted[rego] = Date.now();
+            localStorage.setItem('towed_blacklist', JSON.stringify(blacklisted));
+
+            let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
+            cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
+            localStorage.setItem('cached_run_data', JSON.stringify(cachedRun));
+            localStorage.removeItem('pending_comp_' + rego);
+        } catch(err) {}
+
+        saveToOfflineQueue(payload);
+
+        if (navigator.onLine) {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).then(res => res.json())
+              .then(data => {
+                  if (data && data.status === "SUCCESS") {
+                      removeFromOfflineQueue(payload.id);
+                  }
+              }).catch(e => console.warn("Background upload paused, keeping in queue"));
+        }
+
+        successRego.innerText = rego + " LOGGED";
+        successOverlay.style.display = "flex";
+    });
+
+    function saveToOfflineQueue(payload) {
+        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        if (!queue.some(item => item.id === payload.id)) {
+            queue.push(payload);
+            localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+        }
+        updateQueueUI();
     }
 
-    function saveTowToDB(item) {
-        if (!db) return;
-        const tx = db.transaction("tows", "readwrite");
-        tx.objectStore("tows").put(item);
+    function removeFromOfflineQueue(id) {
+        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        queue = queue.filter(item => item.id !== id);
+        localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
         updateQueueUI();
-        syncPendingTows();
     }
 
     function updateQueueUI() {
-        if (!db) return;
-        const tx = db.transaction("tows", "readonly");
-        const countReq = tx.objectStore("tows").count();
-        countReq.onsuccess = () => {
-            const c = countReq.result;
-            document.getElementById('queueCount').innerText = c;
-            document.getElementById('syncBadge').style.display = c > 0 ? 'block' : 'none';
-        };
+        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        if (queue.length > 0 && !navigator.onLine) {
+            queueCount.innerText = queue.length;
+            syncBadge.style.display = 'block';
+        } else {
+            syncBadge.style.display = 'none';
+        }
     }
 
-    async function syncPendingTows() {
-        if (!db || !navigator.onLine) return;
-        const tx = db.transaction("tows", "readonly");
-        const getReq = tx.objectStore("tows").getAll();
-        getReq.onsuccess = async () => {
-            const list = getReq.result;
-            for (const item of list) {
-                try {
-                    const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) });
-                    const rJson = await res.json();
-                    if (rJson.status === "SUCCESS") {
-                        const delTx = db.transaction("tows", "readwrite");
-                        delTx.objectStore("tows").delete(item.id);
-                        delTx.oncomplete = updateQueueUI;
-                    }
-                } catch(e) { break; }
+    let isSyncingQueue = false;
+    async function syncPendingTowsInBackground() {
+        if (isSyncingQueue || !navigator.onLine) return;
+        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        if (queue.length === 0) {
+            updateQueueUI();
+            return;
+        }
+
+        isSyncingQueue = true;
+        for (let i = 0; i < queue.length; i++) {
+            const item = queue[i];
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
+                const resJson = await res.json();
+                if (resJson && resJson.status === "SUCCESS") {
+                    removeFromOfflineQueue(item.id);
+                }
+            } catch(err) {
+                break;
             }
-        };
+        }
+        isSyncingQueue = false;
+        updateQueueUI();
+    }
+
+    async function processOfflineQueue() {
+        await syncPendingTowsInBackground();
     }
 </script>
 </body>
