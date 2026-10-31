@@ -54,14 +54,14 @@
     .card-list { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 440px; margin: 0 auto; }
     .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--c-yard); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     
-    .card-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer; }
+    /* CLEAN TOP ROW: REGO + PROPERTY (EDIT PILL REMOVED, PROPERTY SHUFFLED LEFT) */
+    .card-row-top { display: flex; align-items: baseline; gap: 12px; cursor: pointer; }
     .rego-text { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #facc15; flex-shrink: 0; }
-    .prop-text { font-size: 20px; font-weight: 900; color: #aaa; text-align: right; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .edit-pill { background: #2a2a2a; border: 1px solid var(--c-yard); color: var(--c-yard); font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px; }
+    .prop-text { font-size: 20px; font-weight: 900; color: #aaa; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 
     .card-body { display: flex; gap: 12px; align-items: center; cursor: pointer; }
     
-    /* CORRECTED LANDSCAPE THUMBNAIL (NEVER STRETCHED OR SQUISHED) */
+    /* CORRECTED LANDSCAPE THUMBNAIL */
     .thumb-wrap { 
       width: 92px; 
       height: 68px; 
@@ -204,7 +204,7 @@
     <div class="modal-box" style="max-height: 90vh;">
       <div class="modal-title">
         <span id="editModalPlateTitle" style="color:#facc15; font-size:22px;"></span>
-        <span class="edit-pill">EDIT VEHICLE</span>
+        <span class="edit-pill" style="background:#2a2a2a; border:1px solid var(--c-yard); color:var(--c-yard); font-size:11px; font-weight:900; padding:3px 8px; border-radius:6px;">EDIT VEHICLE</span>
       </div>
 
       <div class="edit-grid">
@@ -475,10 +475,7 @@
         card.innerHTML = `
           <div class="card-row-top" onclick="openEditModalByIndex(${idx})">
             <span class="rego-text">${v.rego}</span>
-            <div style="display:flex; align-items:center; gap:6px;">
-              <span class="prop-text">${v.property || 'GENERAL'}</span>
-              <span class="edit-pill">✎ EDIT</span>
-            </div>
+            <span class="prop-text">${v.property || 'GENERAL'}</span>
           </div>
 
           <div class="card-body" onclick="openEditModalByIndex(${idx})">
