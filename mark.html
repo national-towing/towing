@@ -3,97 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta id="themeColor" name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-
     <title>MARK</title>
-    
     <link rel="apple-touch-icon" href="icon-mark.png?v=999">
     <link rel="icon" type="image/png" href="icon-mark.png?v=999">
     <link rel="manifest" href="manifest-mark.json?v=999">
-
     <style>
         :root {
-            --c-mark: #2979ff;
-            --c-run: #ffab00;
-            --c-tow: #ff1744;
-            --c-pass: #ab47bc;
-            --c-yard: #00b0ff;
-            --c-rel: #00e676;
+            --c-mark: #2979ff; --c-run: #ffab00; --c-tow: #ff1744;
+            --c-pass: #ab47bc; --c-yard: #00b0ff; --c-rel: #00e676;
         }
         * { box-sizing: border-box; }
         html, body { 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background: #121212; 
-            color: #fff; 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            transition: background 0.3s ease;
+            height: 100%; margin: 0; padding: 0; overflow: hidden; 
+            background: #121212; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
         }
-
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
-            position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 10px; padding-top: max(14px, env(safe-area-inset-top));
         }
-        
         .header-box { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative; 
-            width: 100%; 
-            max-width: 440px; 
-            margin-bottom: 8px; 
-            flex-shrink: 0;
-            padding: 4px 10px;
-            border-radius: 12px;
-            transition: background 0.3s ease;
+            display: flex; align-items: center; justify-content: center; position: relative; 
+            width: 100%; max-width: 440px; margin-bottom: 8px; flex-shrink: 0; padding: 4px 10px; border-radius: 12px;
         }
-        .header-box.success-bg { background: #00e676; }
-        .header-box.error-bg { background: #ff1744; }
-
-        .header-box h1 { 
-            margin: 0; 
-            font-size: 36px; 
-            font-weight: 900; 
-            color: #ffab00; 
-            letter-spacing: 2px; 
-            text-align: center; 
-            transition: color 0.3s ease;
-        }
-        .header-box.success-bg h1, .header-box.error-bg h1 { color: #fff; }
-
+        .header-box h1 { margin: 0; font-size: 36px; font-weight: 900; color: #ffab00; letter-spacing: 2px; }
         .icon-btn { 
-            position: absolute; 
-            right: 4px; 
-            background: #2a2a2a; 
-            border: 1px solid #444; 
-            border-radius: 10px; 
-            font-size: 18px; 
-            width: 38px; 
-            height: 38px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            color: #fff; 
+            position: absolute; right: 4px; background: #2a2a2a; border: 1px solid #444; 
+            border-radius: 10px; font-size: 18px; width: 38px; height: 38px; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; 
         }
-        .icon-btn:active { transform: scale(0.9); }
-
-        /* 3x2 Grid Navigation */
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 8px auto; flex-shrink: 0; }
-        .nav-tile { height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
-        .nav-tile:active { transform: scale(0.96); }
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 8px; flex-shrink: 0; }
+        .nav-tile { height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; }
         .t-mark { background: var(--c-mark); color: #fff; box-shadow: 0 0 0 2px #fff; }
         .t-run  { background: var(--c-run); color: #000; }
         .t-tow  { background: var(--c-tow); color: #fff; }
@@ -102,90 +45,59 @@
         .t-rel  { background: var(--c-rel); color: #000; }
 
         .card { 
-            background: #1e1e1e; 
-            border-radius: 18px; 
-            padding: 10px; 
-            width: 100%; 
-            max-width: 440px; 
-            border: 1px solid #333; 
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-            margin-bottom: 4px;
-            position: relative;
+            background: #1e1e1e; border-radius: 18px; padding: 10px; width: 100%; 
+            max-width: 440px; border: 1px solid #333; display: flex; flex-direction: column; 
+            flex: 1; min-height: 0; margin-bottom: 4px; position: relative; 
         }
-
         .prop-select-wrap { width: 100%; margin-bottom: 6px; flex-shrink: 0; }
         select {
             width: 100%; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 900; outline: none;
-            -webkit-appearance: none;
+            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 900; outline: none; -webkit-appearance: none;
         }
 
-        /* MAXIMIZED FULL VIEWPORT CAMERA BOX */
         .camera-box {
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-            background: #000;
-            border-radius: 14px;
-            border: 2px solid #333;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            touch-action: none;
+            width: 100%; flex: 1; min-height: 0; background: #000; border-radius: 14px;
+            border: 2px solid #333; overflow: hidden; display: flex; align-items: center;
+            justify-content: center; position: relative; touch-action: none;
         }
-        video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        }
+        video { width: 100%; height: 100%; object-fit: cover; }
 
-        .torch-btn {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.75);
-            border: 1.5px solid #ffab00; color: #ffab00; padding: 6px 14px; border-radius: 20px;
-            font-size: 11px; font-weight: 900; cursor: pointer; z-index: 20; letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        .cam-controls { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 8px; z-index: 20; }
+        .ctrl-btn { 
+            background: rgba(0,0,0,0.75); border: 1.5px solid #ffab00; color: #ffab00; 
+            padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 900; cursor: pointer; 
         }
 
         .circle-cam-btn {
             position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
             width: 78px; height: 78px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); cursor: pointer; user-select: none; z-index: 15;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); cursor: pointer; z-index: 15;
         }
         .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
         .circle-cam-inner { width: 58px; height: 58px; border-radius: 50%; border: 3px solid #000; }
 
-        /* FULL-SCREEN FLASH OVERLAYS */
         .full-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999; pointer-events: none; opacity: 0;
+            position: fixed; inset: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 9999; pointer-events: none; opacity: 0;
             transition: opacity 0.15s ease-in-out;
         }
         .full-overlay.green { background: rgba(0, 230, 118, 0.94); }
         .full-overlay.red { background: rgba(255, 23, 68, 0.94); }
         .full-overlay.show { opacity: 1; }
-        .full-overlay-symbol { font-size: 140px; color: #fff; line-height: 1; text-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-        .full-overlay-text { font-size: 28px; font-weight: 900; color: #000; text-transform: uppercase; margin-top: 10px; letter-spacing: 2px; }
+        .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; }
+        .full-overlay-text { font-size: 28px; font-weight: 900; color: #000; text-transform: uppercase; margin-top: 10px; }
 
-        /* CONDITIONAL MANUAL REGO MODAL (APPEARS ONLY ON FAILURE) */
         .manual-rego-modal {
             display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.85);
-            border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; justify-content: center;
-            padding: 16px;
+            border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; 
+            justify-content: center; padding: 16px;
         }
         .manual-rego-card {
             width: 100%; max-width: 320px; background: #1e1e1e; border: 2px solid #ff1744;
             border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
-        .manual-title { font-size: 18px; font-weight: 900; color: #ff1744; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        .manual-title { font-size: 18px; font-weight: 900; color: #ff1744; text-align: center; }
         .manual-input {
             width: 100%; height: 50px; background: #2a2a2a; border: 2px solid #ffab00; border-radius: 10px;
             color: #fff; font-size: 24px; font-weight: 900; text-align: center; text-transform: uppercase; outline: none;
@@ -193,8 +105,7 @@
         .manual-btn-row { display: flex; gap: 8px; margin-top: 4px; }
         .btn-cancel { flex: 1; height: 44px; border: none; border-radius: 8px; background: #333; color: #fff; font-weight: 900; cursor: pointer; text-transform: uppercase; }
         .btn-submit { flex: 1; height: 44px; border: none; border-radius: 8px; background: #00e676; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 15px; }
-
-        #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 6px; color: #ffab00; flex-shrink: 0; min-height: 18px; }
+        #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 6px; color: #ffab00; min-height: 18px; }
     </style>
 </head>
 <body>
@@ -208,9 +119,9 @@
     <div class="full-overlay-text" id="redText">NO PLATE DETECTED</div>
 </div>
 
-<div class="header-box" id="headerBox">
+<div class="header-box">
     <h1>MARK</h1>
-    <div class="icon-btn" id="refreshBtn">🔄</div>
+    <div class="icon-btn" onclick="window.location.reload(true)">🔄</div>
 </div>
 
 <div class="nav-grid-3x2">
@@ -229,7 +140,10 @@
 
     <div class="camera-box">
         <video id="videoElem" autoplay playsinline></video>
-        <button class="torch-btn" id="torchBtn">⚡ FLASH: AUTO</button>
+        <div class="cam-controls">
+            <button class="ctrl-btn" id="torchBtn" onclick="toggleContinuousTorch()">🔦 TORCH: OFF</button>
+            <label class="ctrl-btn" style="text-align:center; display:none;" id="nativeIosCamBtn">⚡ FLASH CAM<input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleNativeIosCapture(this)"></label>
+        </div>
         <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
 
         <div class="manual-rego-modal" id="manualRegoModal">
@@ -253,88 +167,35 @@
     const propertySelect = document.getElementById('propertySelect');
     const videoElem = document.getElementById('videoElem');
     const torchBtn = document.getElementById('torchBtn');
+    const nativeIosCamBtn = document.getElementById('nativeIosCamBtn');
     const snapBtn = document.getElementById('snapBtn');
-    const refreshBtn = document.getElementById('refreshBtn');
     const statusDiv = document.getElementById('status');
     const greenOverlay = document.getElementById('greenOverlay');
     const redOverlay = document.getElementById('redOverlay');
     const greenText = document.getElementById('greenText');
     const redText = document.getElementById('redText');
-    const headerBox = document.getElementById('headerBox');
-    const themeMeta = document.getElementById('themeColor');
     const manualRegoModal = document.getElementById('manualRegoModal');
     const manualRegoInput = document.getElementById('manualRegoInput');
 
     let videoStream = null;
     let videoTrack = null;
-    let trackCapabilities = {};
+    let isTorchOn = false;
     let pendingFailedPhoto = "";
     let isProcessing = false;
-
-    let flashMode = localStorage.getItem('mark_flash_mode') || 'auto';
     let initialPinchDistance = null;
     let initialZoom = 1;
 
     window.addEventListener('load', () => {
-        updateTorchUI();
         loadProperties();
         initCamera();
         setupPinchZoom();
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) nativeIosCamBtn.style.display = 'block';
     });
-
-    refreshBtn.addEventListener('click', () => {
-        window.location.reload(true);
-    });
-
-    function updateTorchUI() {
-        if (flashMode === 'auto') {
-            torchBtn.innerText = "⚡ FLASH: AUTO";
-            torchBtn.style.borderColor = "#ffab00";
-            torchBtn.style.color = "#ffab00";
-        } else if (flashMode === 'torch') {
-            torchBtn.innerText = "🔦 TORCH: ON";
-            torchBtn.style.borderColor = "#00e676";
-            torchBtn.style.color = "#00e676";
-        } else {
-            torchBtn.innerText = "⚡ FLASH: OFF";
-            torchBtn.style.borderColor = "#ff1744";
-            torchBtn.style.color = "#ff1744";
-        }
-    }
-
-    torchBtn.addEventListener('click', async () => {
-        if (flashMode === 'auto') flashMode = 'torch';
-        else if (flashMode === 'torch') flashMode = 'off';
-        else flashMode = 'auto';
-
-        localStorage.setItem('mark_flash_mode', flashMode);
-        updateTorchUI();
-
-        if (videoTrack && trackCapabilities.torch) {
-            try {
-                await videoTrack.applyConstraints({ advanced: [{ torch: (flashMode === 'torch') }] });
-            } catch(e) {}
-        }
-    });
-
-    function isLowLight() {
-        try {
-            const miniCanvas = document.createElement('canvas');
-            miniCanvas.width = 20;
-            miniCanvas.height = 20;
-            const miniCtx = miniCanvas.getContext('2d', { willReadFrequently: true });
-            miniCtx.drawImage(videoElem, 0, 0, 20, 20);
-            const imgData = miniCtx.getImageData(0, 0, 20, 20).data;
-            let totalLuminance = 0;
-            for (let i = 0; i < imgData.length; i += 4) {
-                totalLuminance += (0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2]);
-            }
-            return (totalLuminance / (imgData.length / 4)) < 50;
-        } catch(e) { return false; }
-    }
 
     async function loadProperties() {
-        useCachedProperties();
+        const cached = localStorage.getItem('cached_properties');
+        if (cached) { try { populatePropertyDropdown(JSON.parse(cached)); } catch(e) {} }
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
             if (res.ok) {
@@ -344,23 +205,7 @@
                     populatePropertyDropdown(properties);
                 }
             }
-        } catch(e) {
-            useCachedProperties();
-        }
-    }
-
-    function useCachedProperties() {
-        const cached = localStorage.getItem('cached_properties');
-        if (cached) {
-            try {
-                const parsed = JSON.parse(cached);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    populatePropertyDropdown(parsed);
-                    return;
-                }
-            } catch(e) {}
-        }
-        propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+        } catch(e) {}
     }
 
     function populatePropertyDropdown(properties) {
@@ -370,8 +215,7 @@
             const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
             if (propName) {
                 const opt = document.createElement('option');
-                opt.value = propName;
-                opt.innerText = propName;
+                opt.value = propName; opt.innerText = propName;
                 if (savedProp && propName === savedProp) opt.selected = true;
                 propertySelect.appendChild(opt);
             }
@@ -385,33 +229,40 @@
             });
             videoElem.srcObject = videoStream;
             videoTrack = videoStream.getVideoTracks()[0];
-            
-            if (videoTrack) {
-                trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
-                if (!trackCapabilities.torch) torchBtn.style.display = 'none';
-                else if (flashMode === 'torch') {
-                    try { await videoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e) {}
-                }
-            }
         } catch(e) {
             statusDiv.innerText = "CAMERA ACCESS ERROR";
         }
     }
 
+    // DIRECT ANDROID TORCH CONTROL (NO GATING BEHIND getCapabilities)
+    async function toggleContinuousTorch() {
+        if (!videoTrack) return;
+        isTorchOn = !isTorchOn;
+        try {
+            await videoTrack.applyConstraints({ advanced: [{ torch: isTorchOn }] });
+            torchBtn.innerText = isTorchOn ? "🔦 TORCH: ON" : "🔦 TORCH: OFF";
+            torchBtn.style.borderColor = isTorchOn ? "#00e676" : "#ffab00";
+            torchBtn.style.color = isTorchOn ? "#00e676" : "#ffab00";
+        } catch(e) {
+            torchBtn.innerText = "⚡ NO TORCH";
+            isTorchOn = false;
+        }
+    }
+
     function setupPinchZoom() {
-        const cameraContainer = document.querySelector('.camera-box');
-        cameraContainer.addEventListener('touchstart', (e) => {
+        const cameraBox = document.querySelector('.camera-box');
+        cameraBox.addEventListener('touchstart', (e) => {
             if (e.touches.length === 2) {
                 initialPinchDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 if (videoTrack && videoTrack.getSettings) initialZoom = videoTrack.getSettings().zoom || 1;
             }
         }, { passive: true });
 
-        cameraContainer.addEventListener('touchmove', async (e) => {
-            if (e.touches.length === 2 && initialPinchDistance && videoTrack && trackCapabilities.zoom) {
+        cameraBox.addEventListener('touchmove', async (e) => {
+            if (e.touches.length === 2 && initialPinchDistance && videoTrack) {
                 const currentDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 let targetZoom = initialZoom * (currentDistance / initialPinchDistance);
-                targetZoom = Math.min(Math.max(targetZoom, trackCapabilities.zoom.min || 1), trackCapabilities.zoom.max || 5);
+                targetZoom = Math.min(Math.max(targetZoom, 1), 5);
                 try {
                     await videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] });
                     statusDiv.innerText = `🔍 ZOOM: ${targetZoom.toFixed(1)}x`;
@@ -419,7 +270,7 @@
             }
         }, { passive: true });
 
-        cameraContainer.addEventListener('touchend', (e) => {
+        cameraBox.addEventListener('touchend', (e) => {
             if (e.touches.length < 2) {
                 initialPinchDistance = null;
                 setTimeout(() => { if (statusDiv.innerText.includes("ZOOM")) statusDiv.innerText = "READY"; }, 800);
@@ -439,16 +290,6 @@
         isProcessing = true;
         statusDiv.innerText = "🔍 READING PLATE...";
 
-        let firedFlash = false;
-        const needsFlash = (flashMode === 'torch') || (flashMode === 'auto' && isLowLight());
-        if (needsFlash && videoTrack && trackCapabilities.torch) {
-            try {
-                await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
-                firedFlash = true;
-                if (flashMode !== 'torch') await new Promise(r => setTimeout(r, 250));
-            } catch(e) {}
-        }
-
         const vW = videoElem.videoWidth || 1280;
         const vH = videoElem.videoHeight || 720;
         
@@ -464,11 +305,10 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
         const b64 = canvas.toDataURL('image/jpeg', 0.65);
+        executeAnprScan(b64, property);
+    });
 
-        if (firedFlash && flashMode !== 'torch' && videoTrack && trackCapabilities.torch) {
-            try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch(e) {}
-        }
-
+    async function executeAnprScan(b64, property) {
         try {
             const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -494,7 +334,20 @@
             openManualModal();
             isProcessing = false;
         }
-    });
+    }
+
+    function handleNativeIosCapture(input) {
+        if (!input.files || !input.files[0]) return;
+        const prop = propertySelect.value;
+        if (!prop) { triggerRedOverlay("SELECT PROPERTY"); return; }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            statusDiv.innerText = "🔍 PROCESSING FLASH PHOTO...";
+            executeAnprScan(e.target.result, prop);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
 
     function sendMarkToServer(rego, property, photoBytes) {
         localStorage.setItem('last_property', property);
@@ -542,37 +395,15 @@
     function triggerGreenOverlay(rego) {
         greenText.innerText = rego || "MARKED";
         greenOverlay.classList.add('show');
-        headerBox.classList.remove('error-bg');
-        headerBox.classList.add('success-bg');
-        document.body.style.background = "#00e676";
-        themeMeta.setAttribute('content', '#00e676');
-
         if (navigator.vibrate) navigator.vibrate(80);
-
-        setTimeout(() => {
-            greenOverlay.classList.remove('show');
-            document.body.style.background = "#121212";
-            themeMeta.setAttribute('content', '#121212');
-            headerBox.classList.remove('success-bg');
-        }, 650);
+        setTimeout(() => greenOverlay.classList.remove('show'), 650);
     }
 
     function triggerRedOverlay(msg) {
         redText.innerText = msg || "NO PLATE DETECTED";
         redOverlay.classList.add('show');
-        headerBox.classList.remove('success-bg');
-        headerBox.classList.add('error-bg');
-        document.body.style.background = "#ff1744";
-        themeMeta.setAttribute('content', '#ff1744');
-
         if (navigator.vibrate) navigator.vibrate([150, 60, 150]);
-
-        setTimeout(() => {
-            redOverlay.classList.remove('show');
-            document.body.style.background = "#121212";
-            themeMeta.setAttribute('content', '#121212');
-            headerBox.classList.remove('error-bg');
-        }, 650);
+        setTimeout(() => redOverlay.classList.remove('show'), 650);
     }
 </script>
 </body>
