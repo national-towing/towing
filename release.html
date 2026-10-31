@@ -1,20 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>RELEASE VEHICLE</title><!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <title>RELEASE</title>
     
@@ -35,7 +29,9 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             margin: 0; padding: 14px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(40px, env(safe-area-inset-bottom));
         }
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
@@ -59,7 +55,7 @@
         .section-title { font-size: 16px; font-weight: 900; color: #00e676; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 6px; margin-top: 14px; margin-bottom: 6px; }
 
         label { font-size: 12px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
-        input, select {
+        input, select { 
             width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
             background: #2a2a2a; color: #fff; font-size: 18px; font-weight: 900; margin-top: 4px; outline: none;
             -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease;
@@ -128,11 +124,17 @@
             background-color: rgba(0, 230, 118, 0.95); z-index: 9999; flex-direction: column;
             align-items: center; justify-content: center; text-align: center; padding: 20px;
         }
-        #successOverlay h1 { font-size: 44px; font-weight: 900; color: #000; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; }
-        #successOverlay p { font-size: 18px; font-weight: 800; color: #111; margin: 0 0 30px 0; max-width: 90%; }
+        #successOverlay h1 { font-size: 40px; font-weight: 950; color: #000; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase; }
+        #successOverlay p { font-size: 18px; font-weight: 800; color: #111; margin: 0 0 24px 0; max-width: 90%; }
+        .view-inv-btn { 
+            background: #000; color: #fff; padding: 16px 32px; border-radius: 12px; font-size: 18px; font-weight: 900; 
+            text-decoration: none; display: inline-block; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        .view-inv-btn:active { transform: scale(0.96); }
         .ok-btn {
-            background: #000; color: #00e676; font-size: 26px; font-weight: 900; border: none;
-            border-radius: 14px; padding: 18px 40px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            background: #000; color: #00e676; font-size: 22px; font-weight: 900; border: none;
+            border-radius: 14px; padding: 16px 36px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             letter-spacing: 2px; width: 260px;
         }
         .ok-btn:active { transform: scale(0.95); }
@@ -276,7 +278,8 @@
 <div id="successOverlay">
     <h1 id="successRego">VEHICLE RELEASED</h1>
     <p>Tax Invoice Sent via SMS & Archived to Google Drive.</p>
-    <button type="button" class="ok-btn" onclick="window.location.reload(true);">DONE ✓</button>
+    <a href="#" id="viewPdfBtn" target="_blank" class="view-inv-btn" style="display:none;">📄 VIEW TAX INVOICE</a>
+    <button type="button" class="ok-btn" onclick="window.location.href='yard.html';">RETURN TO YARD ➔</button>
 </div>
 
 <script>
@@ -652,7 +655,7 @@
             idNumber: idNumInput.value.trim(),
             ownerAddress: ownerAddressInput.value.trim(),
             ownerPhone: ownerPhoneInput.value.trim(),
-            ownerEmail: "", // EMAIL REMOVED 
+            ownerEmail: "", 
             releaseFee: releaseFeeInput.value,
             storageFee: storageFeeInput.value,
             officer: finalOfficer,
@@ -671,6 +674,13 @@
             
             if (resData && resData.status === "SUCCESS") {
                 successRego.innerText = payload.rego + " RELEASED";
+                if (resData.pdfUrl) {
+                    const viewBtn = document.getElementById('viewPdfBtn');
+                    if (viewBtn) {
+                        viewBtn.href = resData.pdfUrl;
+                        viewBtn.style.display = 'inline-block';
+                    }
+                }
                 successOverlay.style.display = "flex";
             } else {
                 statusDiv.style.color = "#ff1744";
@@ -688,362 +698,5 @@
         }
     });
 </script>
-</body>
-</html>
-  
-  <style>
-    :root {
-      --bg: #121212;
-      --card-bg: #1e1e1e;
-      --border: #333333;
-      --text: #ffffff;
-      --c-rel: #00e676;
-      --c-gold: #ffab00;
-      --c-yard: #00b0ff;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    
-    body { 
-      background: var(--bg); 
-      color: var(--text); 
-      padding: 14px;
-      padding-top: max(16px, env(safe-area-inset-top)); 
-      padding-bottom: max(40px, env(safe-area-inset-bottom));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 12px; }
-    .header-box h1 { margin: 0; font-size: 32px; font-weight: 900; color: var(--c-rel); letter-spacing: 2px; }
-    .back-btn { position: absolute; left: 0; background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 14px; border-radius: 8px; font-weight: 900; text-decoration: none; font-size: 13px; }
-
-    .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 12px; }
-    .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
-    .t-mark { background: #2979ff; color: #fff; }
-    .t-run  { background: #ffab00; color: #000; }
-    .t-tow  { background: #ff1744; color: #fff; }
-    .t-pass { background: #ab47bc; color: #fff; }
-    .t-yard { background: var(--c-yard); color: #000; }
-    .t-rel  { background: var(--c-rel); color: #000; box-shadow: 0 0 0 2px #fff; }
-
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; width: 100%; max-width: 440px; margin-bottom: 12px; }
-    
-    .veh-banner { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
-    .rego-large { font-size: 32px; font-weight: 900; color: #facc15; letter-spacing: 1px; }
-    .prop-large { font-size: 18px; font-weight: 900; color: #aaa; text-align: right; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .veh-sub-desc { font-size: 15px; font-weight: 800; color: #ccc; margin-bottom: 6px; }
-
-    .sec-title { font-size: 12px; font-weight: 900; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; margin-bottom: 8px; }
-
-    label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 8px; font-weight: 900; letter-spacing: 0.5px; }
-    input, select { 
-      width: 100%; height: 48px; background: #2a2a2a; border: 1.5px solid #444; border-radius: 8px; 
-      color: #fff; font-size: 16px; font-weight: 800; padding: 0 12px; margin-top: 4px; outline: none; -webkit-appearance: none;
-    }
-    input:focus, select:focus { border-color: var(--c-rel); }
-
-    .sig-canvas-wrap { border: 2px dashed #ffab00; border-radius: 10px; background: #ffffff; margin-top: 6px; position: relative; touch-action: none; }
-    canvas { width: 100%; height: 130px; display: block; border-radius: 8px; cursor: crosshair; }
-    .clear-sig-btn { position: absolute; top: 6px; right: 6px; background: #222; color: #fff; border: 1px solid #666; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 900; cursor: pointer; }
-
-    .fee-box { background: #141414; border: 1.5px solid #333; border-radius: 10px; padding: 12px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .fee-label { font-size: 12px; font-weight: 800; color: #aaa; text-transform: uppercase; }
-    .total-paid { font-size: 24px; font-weight: 900; color: var(--c-rel); }
-
-    .submit-rel-btn { 
-      width: 100%; height: 60px; background: var(--c-rel); color: #000; border: none; border-radius: 12px; 
-      font-size: 20px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; margin-top: 16px; 
-    }
-    .submit-rel-btn:active { transform: scale(0.98); }
-    .submit-rel-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    #successModal { 
-      display: none; position: fixed; inset: 0; background: rgba(0, 230, 118, 0.98); z-index: 9999; 
-      flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; 
-    }
-    #successModal h2 { font-size: 40px; font-weight: 950; color: #000; margin-bottom: 8px; text-transform: uppercase; }
-    #successModal p { font-size: 17px; font-weight: 800; color: #111; margin-bottom: 24px; max-width: 90%; }
-    .view-inv-btn { 
-      background: #000; color: #fff; padding: 16px 32px; border-radius: 12px; font-size: 18px; font-weight: 900; 
-      text-decoration: none; display: inline-block; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    }
-    .btn-return-yard { color: #000; font-weight: 900; font-size: 16px; text-decoration: underline; text-transform: uppercase; cursor: pointer; }
-  </style>
-</head>
-<body>
-
-  <div class="header-box">
-    <a href="yard.html" class="back-btn">← YARD</a>
-    <h1>RELEASE</h1>
-  </div>
-
-  <div class="nav-grid-3x2">
-    <a href="mark.html" class="nav-tile t-mark">MARK</a>
-    <a href="run.html" class="nav-tile t-run">RUN</a>
-    <a href="tow.html" class="nav-tile t-tow">TOW</a>
-    <a href="passes.html" class="nav-tile t-pass">PASS</a>
-    <a href="yard.html" class="nav-tile t-yard">YARD</a>
-    <a href="release.html" class="nav-tile t-rel">REL</a>
-  </div>
-
-  <div class="card">
-    <div id="regoSelectWrapper" style="display:none; margin-bottom: 12px;">
-      <label>SELECT VEHICLE IN YARD</label>
-      <select id="vehicleDropdown" onchange="handleDropdownVehicleSelect(this.value)">
-        <option value="">-- SELECT VEHICLE --</option>
-      </select>
-    </div>
-
-    <div class="veh-banner">
-      <span class="rego-large" id="dispRego">LOADING...</span>
-      <span class="prop-large" id="dispProp"></span>
-    </div>
-    <div class="veh-sub-desc" id="dispVehDesc"></div>
-
-    <div class="sec-title">Collector / Owner Identification</div>
-    
-    <label>FULL NAME</label>
-    <input type="text" id="ownerName" placeholder="Full Legal Name" autocomplete="off" onfocus="this.select()">
-
-    <label>ID / DRIVERS LICENCE NUMBER</label>
-    <input type="text" id="idNumber" placeholder="Licence / ID Number" autocomplete="off" onfocus="this.select()">
-
-    <label>RESIDENTIAL ADDRESS</label>
-    <input type="text" id="ownerAddress" placeholder="Street, Suburb, Postcode" autocomplete="off" onfocus="this.select()">
-
-    <label>CONTACT MOBILE NUMBER</label>
-    <input type="tel" id="ownerPhone" placeholder="04xx xxx xxx" autocomplete="off" onfocus="this.select()">
-
-    <label>RELEASE OFFICER</label>
-    <select id="officerSelect">
-      <option value="Brian" selected>Brian</option>
-      <option value="Brett">Brett</option>
-    </select>
-
-    <label>OWNER SIGNATURE (SIGN BELOW)</label>
-    <div class="sig-canvas-wrap">
-      <canvas id="sigCanvas"></canvas>
-      <button type="button" class="clear-sig-btn" onclick="clearSig()">CLEAR</button>
-    </div>
-
-    <div class="fee-box">
-      <div>
-        <div class="fee-label">TOTAL PAID IN FULL</div>
-        <div style="font-size:11px; color:#888;">Tow Fee: $310.05 + AH Fee: $140.00</div>
-      </div>
-      <div class="total-paid">$450.05</div>
-    </div>
-
-    <button type="button" class="submit-rel-btn" id="releaseBtn" onclick="processRelease()">CONFIRM RELEASE & GENERATE TAX INVOICE</button>
-  </div>
-
-  <div id="successModal">
-    <h2>✔ RELEASED!</h2>
-    <p id="invNoticeText">Tax invoice generated and SMS dispatched to customer.</p>
-    <a href="#" id="viewPdfBtn" target="_blank" class="view-inv-btn">📄 VIEW TAX INVOICE</a>
-    <div><a href="yard.html" class="btn-return-yard">RETURN TO YARD ➔</a></div>
-  </div>
-
-  <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
-
-    let targetRego = "";
-    let selectedVehicle = null;
-    let canvas, ctx;
-    let isDrawing = false;
-    let hasSigned = false;
-
-    window.addEventListener('DOMContentLoaded', () => {
-      initSigPad();
-
-      const params = new URLSearchParams(window.location.search);
-      targetRego = (params.get('rego') || '').trim().toUpperCase();
-
-      loadVehicleContext();
-    });
-
-    function initSigPad() {
-      canvas = document.getElementById('sigCanvas');
-      ctx = canvas.getContext('2d');
-      canvas.width = canvas.offsetWidth;
-      canvas.height = 130;
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = "#000";
-
-      function getPos(e) {
-        const r = canvas.getBoundingClientRect();
-        const ev = e.touches ? e.touches[0] : e;
-        return { x: ev.clientX - r.left, y: ev.clientY - r.top };
-      }
-
-      function start(e) { 
-        isDrawing = true; 
-        hasSigned = true; 
-        const p = getPos(e); 
-        ctx.beginPath(); 
-        ctx.moveTo(p.x, p.y); 
-      }
-      function move(e) { 
-        if (!isDrawing) return; 
-        e.preventDefault(); 
-        const p = getPos(e); 
-        ctx.lineTo(p.x, p.y); 
-        ctx.stroke(); 
-      }
-      function stop() { isDrawing = false; }
-
-      canvas.addEventListener('mousedown', start);
-      canvas.addEventListener('mousemove', move);
-      window.addEventListener('mouseup', stop);
-
-      canvas.addEventListener('touchstart', start, { passive: false });
-      canvas.addEventListener('touchmove', move, { passive: false });
-      window.addEventListener('touchend', stop);
-    }
-
-    function clearSig() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      hasSigned = false;
-    }
-
-    function loadVehicleContext() {
-      let cachedList = [];
-      try {
-        cachedList = JSON.parse(localStorage.getItem('cached_yard_inventory') || '[]');
-      } catch(e) {}
-
-      if (targetRego) {
-        document.getElementById('dispRego').innerText = targetRego;
-        const car = cachedList.find(c => c.rego && c.rego.toUpperCase() === targetRego);
-        if (car) populateCarFields(car);
-        else fetchFromBackend(targetRego);
-      } else {
-        document.getElementById('regoSelectWrapper').style.display = 'block';
-        document.getElementById('dispRego').innerText = "SELECT VEHICLE";
-        populateDropdown(cachedList);
-        fetchFromBackend();
-      }
-    }
-
-    function populateDropdown(list) {
-      const dd = document.getElementById('vehicleDropdown');
-      dd.innerHTML = '<option value="">-- SELECT VEHICLE IN YARD --</option>';
-      list.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.rego;
-        opt.innerText = `${c.rego} - ${c.make || ''} ${c.model || ''} (${c.property || 'GENERAL'})`;
-        dd.appendChild(opt);
-      });
-    }
-
-    function handleDropdownVehicleSelect(rego) {
-      if (!rego) return;
-      targetRego = rego.toUpperCase();
-      document.getElementById('dispRego').innerText = targetRego;
-      let cachedList = [];
-      try { cachedList = JSON.parse(localStorage.getItem('cached_yard_inventory') || '[]'); } catch(e) {}
-      const car = cachedList.find(c => c.rego && c.rego.toUpperCase() === targetRego);
-      if (car) populateCarFields(car);
-    }
-
-    async function fetchFromBackend(searchRego) {
-      try {
-        const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
-        const list = await res.json();
-        if (Array.isArray(list)) {
-          localStorage.setItem('cached_yard_inventory', JSON.stringify(list));
-          if (!targetRego) populateDropdown(list);
-          if (searchRego) {
-            const car = list.find(c => c.rego && c.rego.toUpperCase() === searchRego);
-            if (car) populateCarFields(car);
-          }
-        }
-      } catch(e) {}
-    }
-
-    function populateCarFields(car) {
-      selectedVehicle = car;
-      document.getElementById('dispRego').innerText = car.rego;
-      document.getElementById('dispProp').innerText = car.property || "GENERAL";
-      const desc = [car.make, car.model, car.colour ? `(${car.colour})` : ''].filter(Boolean).join(' ');
-      document.getElementById('dispVehDesc').innerText = desc || "Vehicle Details on File";
-      if (car.callerPhone) {
-        document.getElementById('ownerPhone').value = car.callerPhone;
-      }
-    }
-
-    async function processRelease() {
-      const rego = targetRego || document.getElementById('dispRego').innerText.trim().toUpperCase();
-      const name = document.getElementById('ownerName').value.trim();
-      const idNum = document.getElementById('idNumber').value.trim();
-      const addr = document.getElementById('ownerAddress').value.trim();
-      const phone = document.getElementById('ownerPhone').value.trim();
-      const officer = document.getElementById('officerSelect').value;
-
-      if (!rego || rego === "LOADING..." || rego === "SELECT VEHICLE") {
-        alert("Please select a valid vehicle to release.");
-        return;
-      }
-      if (!name) { alert("Please enter the Collector / Owner Name."); return; }
-      if (!idNum) { alert("Please enter Driver Licence / ID Number."); return; }
-      if (!phone || phone.length < 8) { alert("Please enter a valid Contact Mobile Number."); return; }
-      if (!hasSigned) { alert("Please obtain the Collector Signature in the signature box."); return; }
-
-      const btn = document.getElementById('releaseBtn');
-      btn.disabled = true;
-      btn.innerText = "PROCESSING RELEASE & TAX INVOICE...";
-
-      const payload = {
-        action: 'process_release',
-        rego: rego,
-        property: (selectedVehicle && selectedVehicle.property) || document.getElementById('dispProp').innerText || "GENERAL",
-        ownerName: name,
-        idNumber: idNum,
-        ownerAddress: addr || "On File",
-        ownerPhone: phone,
-        ownerSigBytes: canvas.toDataURL('image/png'),
-        releaseFee: 310.05,
-        storageFee: 140.00,
-        officer: officer
-      };
-
-      try {
-        const res = await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-
-        if (data && data.status === "SUCCESS") {
-          try {
-            let inv = JSON.parse(localStorage.getItem('cached_yard_inventory') || '[]');
-            inv = inv.filter(c => c.rego && c.rego.toUpperCase() !== rego);
-            localStorage.setItem('cached_yard_inventory', JSON.stringify(inv));
-          } catch(e) {}
-
-          if (data.pdfUrl) {
-            document.getElementById('viewPdfBtn').href = data.pdfUrl;
-            document.getElementById('viewPdfBtn').style.display = 'inline-block';
-          } else {
-            document.getElementById('viewPdfBtn').style.display = 'none';
-          }
-          document.getElementById('invNoticeText').innerText = `Tax Invoice #${data.invoiceNum || ''} issued and sent via SMS to ${phone}.`;
-          document.getElementById('successModal').style.display = 'flex';
-        } else {
-          alert("Release error: " + (data.message || "Could not complete release."));
-          btn.disabled = false;
-          btn.innerText = "CONFIRM RELEASE & GENERATE TAX INVOICE";
-        }
-      } catch(err) {
-        alert("Network error processing release: " + err.message);
-        btn.disabled = false;
-        btn.innerText = "CONFIRM RELEASE & GENERATE TAX INVOICE";
-      }
-    }
-  </script>
 </body>
 </html>
