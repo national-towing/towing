@@ -7,36 +7,87 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>MARK</title>
-    <link rel="apple-touch-icon" href="icon-mark.png?v=999">
-    <link rel="icon" type="image/png" href="icon-mark.png?v=999">
-    <link rel="manifest" href="manifest-mark.json?v=999">
+    
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1001">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1001">
+    <link rel="manifest" href="manifest-mark.json?v=1001">
+
     <style>
         :root {
-            --c-mark: #2979ff; --c-run: #ffab00; --c-tow: #ff1744;
-            --c-pass: #ab47bc; --c-yard: #00b0ff; --c-rel: #00e676;
+            --c-mark: #2979ff;
+            --c-run: #ffab00;
+            --c-tow: #ff1744;
+            --c-pass: #ab47bc;
+            --c-yard: #00b0ff;
+            --c-rel: #00e676;
         }
         * { box-sizing: border-box; }
         html, body { 
-            height: 100%; margin: 0; padding: 0; overflow: hidden; 
-            background: #121212; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: #121212; 
+            color: #fff; 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            transition: background 0.3s ease;
         }
+
         body {
-            display: flex; flex-direction: column; align-items: center;
-            padding: 10px; padding-top: max(14px, env(safe-area-inset-top));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
+        
         .header-box { 
-            display: flex; align-items: center; justify-content: center; position: relative; 
-            width: 100%; max-width: 440px; margin-bottom: 8px; flex-shrink: 0; padding: 4px 10px; border-radius: 12px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            width: 100%; 
+            max-width: 440px; 
+            margin-bottom: 8px; 
+            flex-shrink: 0;
+            padding: 4px 10px;
+            border-radius: 12px;
         }
-        .header-box h1 { margin: 0; font-size: 36px; font-weight: 900; color: #ffab00; letter-spacing: 2px; }
+        .header-box h1 { 
+            margin: 0; 
+            font-size: 36px; 
+            font-weight: 900; 
+            color: #ffab00; 
+            letter-spacing: 2px; 
+            text-align: center; 
+        }
+
         .icon-btn { 
-            position: absolute; right: 4px; background: #2a2a2a; border: 1px solid #444; 
-            border-radius: 10px; font-size: 18px; width: 38px; height: 38px; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; 
+            position: absolute; 
+            right: 4px; 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            color: #fff; 
         }
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 8px; flex-shrink: 0; }
-        .nav-tile { height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; }
+        .icon-btn:active { transform: scale(0.92); }
+
+        /* 3x2 Grid Navigation */
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 10px; flex-shrink: 0; }
+        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-tile:active { transform: scale(0.96); }
         .t-mark { background: var(--c-mark); color: #fff; box-shadow: 0 0 0 2px #fff; }
         .t-run  { background: var(--c-run); color: #000; }
         .t-tow  { background: var(--c-tow); color: #fff; }
@@ -45,59 +96,122 @@
         .t-rel  { background: var(--c-rel); color: #000; }
 
         .card { 
-            background: #1e1e1e; border-radius: 18px; padding: 10px; width: 100%; 
-            max-width: 440px; border: 1px solid #333; display: flex; flex-direction: column; 
-            flex: 1; min-height: 0; margin-bottom: 4px; position: relative; 
+            background: #1e1e1e; 
+            border-radius: 18px; 
+            padding: 12px; 
+            width: 100%; 
+            max-width: 440px; 
+            border: 1px solid #333; 
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 4px;
+            position: relative;
         }
-        .prop-select-wrap { width: 100%; margin-bottom: 6px; flex-shrink: 0; }
+
+        .prop-select-wrap { width: 100%; margin-bottom: 10px; flex-shrink: 0; }
         select {
-            width: 100%; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 900; outline: none; -webkit-appearance: none;
+            width: 100%; height: 48px; padding: 0 12px; border-radius: 10px; border: 1.5px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 17px; font-weight: 900; outline: none;
+            -webkit-appearance: none;
+        }
+        select:focus { border-color: var(--c-mark); }
+
+        /* CENTRAL NATIVE CAMERA LAUNCHER AREA */
+        .camera-trigger-box {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            background: #111;
+            border-radius: 14px;
+            border: 2.5px dashed #444;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            user-select: none;
+        }
+        .camera-trigger-box:active { 
+            background: #181818; 
+            border-color: var(--c-mark); 
         }
 
-        .camera-box {
-            width: 100%; flex: 1; min-height: 0; background: #000; border-radius: 14px;
-            border: 2px solid #333; overflow: hidden; display: flex; align-items: center;
-            justify-content: center; position: relative; touch-action: none;
+        .cam-icon-circle {
+            width: 105px;
+            height: 105px;
+            background: #2a2a2a;
+            border: 3.5px solid var(--c-mark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #fff;
+            box-shadow: 0 8px 26px rgba(41, 121, 255, 0.35);
+            margin-bottom: 14px;
         }
-        video { width: 100%; height: 100%; object-fit: cover; }
-
-        .cam-controls { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 8px; z-index: 20; }
-        .ctrl-btn { 
-            background: rgba(0,0,0,0.75); border: 1.5px solid #ffab00; color: #ffab00; 
-            padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 900; cursor: pointer; 
+        .camera-trigger-box:active .cam-icon-circle {
+            transform: scale(0.94);
         }
 
-        .circle-cam-btn {
-            position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
-            width: 78px; height: 78px; background: #ffab00; border: 4px solid #fff; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); cursor: pointer; z-index: 15;
+        .cam-launch-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        .circle-cam-btn:active { transform: translateX(-50%) scale(0.90); }
-        .circle-cam-inner { width: 58px; height: 58px; border-radius: 50%; border: 3px solid #000; }
+        .cam-launch-sub {
+            font-size: 12px;
+            font-weight: 800;
+            color: #888;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
 
+        /* CAPTURED THUMBNAIL PREVIEW INSIDE BOX */
+        .preview-img-display {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            border-radius: 12px;
+        }
+
+        /* FULL-SCREEN RESULT FLASH OVERLAYS */
         .full-overlay {
-            position: fixed; inset: 0; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; z-index: 9999; pointer-events: none; opacity: 0;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; pointer-events: none; opacity: 0;
             transition: opacity 0.15s ease-in-out;
         }
-        .full-overlay.green { background: rgba(0, 230, 118, 0.94); }
-        .full-overlay.red { background: rgba(255, 23, 68, 0.94); }
+        .full-overlay.green { background: rgba(0, 230, 118, 0.96); }
+        .full-overlay.red { background: rgba(255, 23, 68, 0.96); }
         .full-overlay.show { opacity: 1; }
-        .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; }
-        .full-overlay-text { font-size: 28px; font-weight: 900; color: #000; text-transform: uppercase; margin-top: 10px; }
+        .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; text-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+        .full-overlay-text { font-size: 30px; font-weight: 950; color: #000; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; }
 
+        /* MANUAL ENTRY MODAL (ONLY POPULATES ON ANPR MISS) */
         .manual-rego-modal {
-            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.85);
-            border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; 
-            justify-content: center; padding: 16px;
+            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88);
+            border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; justify-content: center;
+            padding: 16px;
         }
         .manual-rego-card {
             width: 100%; max-width: 320px; background: #1e1e1e; border: 2px solid #ff1744;
             border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
-        .manual-title { font-size: 18px; font-weight: 900; color: #ff1744; text-align: center; }
+        .manual-title { font-size: 18px; font-weight: 900; color: #ff1744; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
         .manual-input {
             width: 100%; height: 50px; background: #2a2a2a; border: 2px solid #ffab00; border-radius: 10px;
             color: #fff; font-size: 24px; font-weight: 900; text-align: center; text-transform: uppercase; outline: none;
@@ -105,7 +219,8 @@
         .manual-btn-row { display: flex; gap: 8px; margin-top: 4px; }
         .btn-cancel { flex: 1; height: 44px; border: none; border-radius: 8px; background: #333; color: #fff; font-weight: 900; cursor: pointer; text-transform: uppercase; }
         .btn-submit { flex: 1; height: 44px; border: none; border-radius: 8px; background: #00e676; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 15px; }
-        #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 6px; color: #ffab00; min-height: 18px; }
+
+        #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 8px; color: #ffab00; flex-shrink: 0; min-height: 18px; }
     </style>
 </head>
 <body>
@@ -138,15 +253,15 @@
         <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
     </div>
 
-    <div class="camera-box">
-        <video id="videoElem" autoplay playsinline></video>
-        <div class="cam-controls">
-            <button class="ctrl-btn" id="torchBtn" onclick="toggleContinuousTorch()">🔦 TORCH: OFF</button>
-            <label class="ctrl-btn" style="text-align:center; display:none;" id="nativeIosCamBtn">⚡ FLASH CAM<input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleNativeIosCapture(this)"></label>
-        </div>
-        <div class="circle-cam-btn" id="snapBtn"><div class="circle-cam-inner"></div></div>
+    <!-- DIRECT NATIVE CAMERA LAUNCHER BOX -->
+    <div class="camera-trigger-box" onclick="launchNativeCamera()">
+        <img id="lastSnapPreview" class="preview-img-display" alt="Mark Preview">
+        <div class="cam-icon-circle">📷</div>
+        <div class="cam-launch-title">SNAP VEHICLE</div>
+        <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
 
-        <div class="manual-rego-modal" id="manualRegoModal">
+        <!-- CONDITIONAL POPUP (ONLY ON ANPR FAILURE) -->
+        <div class="manual-rego-modal" id="manualRegoModal" onclick="event.stopPropagation()">
             <div class="manual-rego-card">
                 <div class="manual-title">⚠️ UNREADABLE PLATE</div>
                 <input type="text" id="manualRegoInput" class="manual-input" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
@@ -158,6 +273,8 @@
         </div>
     </div>
 
+    <input type="file" id="nativeCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativePhoto(this)">
+
     <div id="status">READY</div>
 </div>
 
@@ -165,10 +282,8 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
     const propertySelect = document.getElementById('propertySelect');
-    const videoElem = document.getElementById('videoElem');
-    const torchBtn = document.getElementById('torchBtn');
-    const nativeIosCamBtn = document.getElementById('nativeIosCamBtn');
-    const snapBtn = document.getElementById('snapBtn');
+    const nativeCamInput = document.getElementById('nativeCamInput');
+    const lastSnapPreview = document.getElementById('lastSnapPreview');
     const statusDiv = document.getElementById('status');
     const greenOverlay = document.getElementById('greenOverlay');
     const redOverlay = document.getElementById('redOverlay');
@@ -177,32 +292,25 @@
     const manualRegoModal = document.getElementById('manualRegoModal');
     const manualRegoInput = document.getElementById('manualRegoInput');
 
-    let videoStream = null;
-    let videoTrack = null;
-    let isTorchOn = false;
-    let pendingFailedPhoto = "";
     let isProcessing = false;
-    let initialPinchDistance = null;
-    let initialZoom = 1;
+    let pendingFailedPhoto = "";
 
     window.addEventListener('load', () => {
         loadProperties();
-        initCamera();
-        setupPinchZoom();
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        if (isIOS) nativeIosCamBtn.style.display = 'block';
     });
 
     async function loadProperties() {
         const cached = localStorage.getItem('cached_properties');
-        if (cached) { try { populatePropertyDropdown(JSON.parse(cached)); } catch(e) {} }
+        if (cached) {
+            try { populatePropertyDropdown(JSON.parse(cached)); } catch(e) {}
+        }
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
             if (res.ok) {
-                const properties = await res.json();
-                if (Array.isArray(properties) && properties.length > 0) {
-                    localStorage.setItem('cached_properties', JSON.stringify(properties));
-                    populatePropertyDropdown(properties);
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    localStorage.setItem('cached_properties', JSON.stringify(data));
+                    populatePropertyDropdown(data);
                 }
             }
         } catch(e) {}
@@ -215,107 +323,82 @@
             const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
             if (propName) {
                 const opt = document.createElement('option');
-                opt.value = propName; opt.innerText = propName;
+                opt.value = propName;
+                opt.innerText = propName;
                 if (savedProp && propName === savedProp) opt.selected = true;
                 propertySelect.appendChild(opt);
             }
         });
     }
 
-    async function initCamera() {
-        try {
-            videoStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
-            });
-            videoElem.srcObject = videoStream;
-            videoTrack = videoStream.getVideoTracks()[0];
-        } catch(e) {
-            statusDiv.innerText = "CAMERA ACCESS ERROR";
-        }
-    }
-
-    // DIRECT ANDROID TORCH CONTROL (NO GATING BEHIND getCapabilities)
-    async function toggleContinuousTorch() {
-        if (!videoTrack) return;
-        isTorchOn = !isTorchOn;
-        try {
-            await videoTrack.applyConstraints({ advanced: [{ torch: isTorchOn }] });
-            torchBtn.innerText = isTorchOn ? "🔦 TORCH: ON" : "🔦 TORCH: OFF";
-            torchBtn.style.borderColor = isTorchOn ? "#00e676" : "#ffab00";
-            torchBtn.style.color = isTorchOn ? "#00e676" : "#ffab00";
-        } catch(e) {
-            torchBtn.innerText = "⚡ NO TORCH";
-            isTorchOn = false;
-        }
-    }
-
-    function setupPinchZoom() {
-        const cameraBox = document.querySelector('.camera-box');
-        cameraBox.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                initialPinchDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                if (videoTrack && videoTrack.getSettings) initialZoom = videoTrack.getSettings().zoom || 1;
-            }
-        }, { passive: true });
-
-        cameraBox.addEventListener('touchmove', async (e) => {
-            if (e.touches.length === 2 && initialPinchDistance && videoTrack) {
-                const currentDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                let targetZoom = initialZoom * (currentDistance / initialPinchDistance);
-                targetZoom = Math.min(Math.max(targetZoom, 1), 5);
-                try {
-                    await videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] });
-                    statusDiv.innerText = `🔍 ZOOM: ${targetZoom.toFixed(1)}x`;
-                } catch(err) {}
-            }
-        }, { passive: true });
-
-        cameraBox.addEventListener('touchend', (e) => {
-            if (e.touches.length < 2) {
-                initialPinchDistance = null;
-                setTimeout(() => { if (statusDiv.innerText.includes("ZOOM")) statusDiv.innerText = "READY"; }, 800);
-            }
-        });
-    }
-
-    snapBtn.addEventListener('click', async () => {
+    function launchNativeCamera() {
         if (isProcessing) return;
-        const property = propertySelect.value;
-        if (!property) {
+        const prop = propertySelect.value;
+        if (!prop) {
             statusDiv.innerText = "⚠️ SELECT PROPERTY FIRST";
             triggerRedOverlay("SELECT PROPERTY");
             return;
         }
+        nativeCamInput.value = "";
+        nativeCamInput.click();
+    }
+
+    function handleNativePhoto(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const prop = propertySelect.value;
 
         isProcessing = true;
-        statusDiv.innerText = "🔍 READING PLATE...";
+        statusDiv.innerText = "⚡ COMPRESSING & READING PLATE...";
 
-        const vW = videoElem.videoWidth || 1280;
-        const vH = videoElem.videoHeight || 720;
-        
-        const canvas = document.createElement('canvas');
-        if (vW > vH) {
-            canvas.width = 960;
-            canvas.height = Math.round(960 * (vH / vW));
-        } else {
-            canvas.height = 960;
-            canvas.width = Math.round(960 * (vW / vH));
-        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Client-side instant canvas downscaler: shrinks 15MB file to ~140KB in 30ms
+                const canvas = document.createElement('canvas');
+                const maxDim = 960;
+                let w = img.width;
+                let h = img.height;
 
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-        const b64 = canvas.toDataURL('image/jpeg', 0.65);
-        executeAnprScan(b64, property);
-    });
+                if (w > h) {
+                    if (w > maxDim) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    }
+                } else {
+                    if (h > maxDim) {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                }
 
-    async function executeAnprScan(b64, property) {
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+
+                const fastB64 = canvas.toDataURL('image/jpeg', 0.65);
+                
+                // Show captured image preview inside box
+                lastSnapPreview.src = fastB64;
+                lastSnapPreview.style.display = "block";
+
+                executeFastAnpr(fastB64, prop);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function executeFastAnpr(b64, property) {
         try {
-            const nprRes = await fetch(GOOGLE_SCRIPT_URL, {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 })
             });
-            const nprResult = await nprRes.json();
-            const detectedRego = nprResult && nprResult.rego ? String(nprResult.rego).trim().toUpperCase() : "";
+            const data = await res.json();
+            const detectedRego = data && data.rego ? String(data.rego).trim().toUpperCase() : "";
 
             if (detectedRego) {
                 triggerGreenOverlay(detectedRego);
@@ -334,19 +417,6 @@
             openManualModal();
             isProcessing = false;
         }
-    }
-
-    function handleNativeIosCapture(input) {
-        if (!input.files || !input.files[0]) return;
-        const prop = propertySelect.value;
-        if (!prop) { triggerRedOverlay("SELECT PROPERTY"); return; }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            statusDiv.innerText = "🔍 PROCESSING FLASH PHOTO...";
-            executeAnprScan(e.target.result, prop);
-        };
-        reader.readAsDataURL(input.files[0]);
     }
 
     function sendMarkToServer(rego, property, photoBytes) {
@@ -396,14 +466,18 @@
         greenText.innerText = rego || "MARKED";
         greenOverlay.classList.add('show');
         if (navigator.vibrate) navigator.vibrate(80);
-        setTimeout(() => greenOverlay.classList.remove('show'), 650);
+        setTimeout(() => {
+            greenOverlay.classList.remove('show');
+        }, 700);
     }
 
     function triggerRedOverlay(msg) {
         redText.innerText = msg || "NO PLATE DETECTED";
         redOverlay.classList.add('show');
         if (navigator.vibrate) navigator.vibrate([150, 60, 150]);
-        setTimeout(() => redOverlay.classList.remove('show'), 650);
+        setTimeout(() => {
+            redOverlay.classList.remove('show');
+        }, 700);
     }
 </script>
 </body>
