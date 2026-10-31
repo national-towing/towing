@@ -11,9 +11,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10006">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10006">
-    <link rel="manifest" href="manifest-tow.json?v=10006">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10007">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10007">
+    <link rel="manifest" href="manifest-tow.json?v=10007">
 
     <style>
         :root {
@@ -37,12 +37,15 @@
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 8px; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.92); }
 
         .sync-badge {
-            background: #ffab00; color: #000; font-weight: 900; font-size: 12px;
-            padding: 6px 14px; border-radius: 20px; margin-bottom: 8px; display: none;
+            background: #ffab00; color: #000; font-weight: 900; font-size: 13px;
+            padding: 8px 16px; border-radius: 20px; margin-bottom: 8px; display: none;
             cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(255, 171, 0, 0.4);
         }
+        .sync-badge:active { transform: scale(0.96); }
 
         /* 3x2 Grid Navigation */
         .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 12px; }
@@ -70,7 +73,6 @@
         ::placeholder { color: var(--text-placeholder) !important; font-weight: 700; opacity: 1; }
         input::placeholder { color: var(--text-placeholder) !important; font-weight: 700; opacity: 1; }
 
-        /* Dynamic grey text for unselected dropdowns */
         select.unselected { color: var(--text-placeholder) !important; font-weight: 700; }
         select option { background: #2a2a2a; color: #ffffff; font-weight: 800; }
         select option[value=""] { color: var(--text-placeholder); }
@@ -188,7 +190,7 @@
     <div class="icon-btn" onclick="window.location.reload(true)">🔄</div>
 </div>
 
-<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ BASEMENT QUEUE: <span id="queueCount">0</span> (SAVED LOCALLY)</div>
+<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ BASEMENT QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-grid-3x2">
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
@@ -293,9 +295,11 @@
         </div>
     </div>
 
+    <!-- DRIVER DROPDOWN (DEFAULT GREY "SELECT") -->
     <label>DRIVER</label>
-    <select id="officerSelect" onchange="checkOfficerOther(this)">
-        <option value="Brian" selected>Brian</option>
+    <select id="officerSelect" class="unselected" onchange="checkOfficerOther(this)">
+        <option value="" disabled selected>SELECT</option>
+        <option value="Brian">Brian</option>
         <option value="Brett">Brett</option>
         <option value="Other">Other...</option>
     </select>
@@ -312,10 +316,10 @@
     </div>
     <input type="file" id="nativeCompInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativeCompPhoto(this)">
 
-    <!-- 2. CONDITION PHOTOS (RAPID SNAPPING UP TO 6) -->
+    <!-- 2. CONDITION PHOTOS -->
     <label>CONDITION PHOTOS</label>
     <button type="button" class="cond-snap-btn field-missing" id="condSnapBtn" onclick="triggerNativeConditionSnap()">
-        📷 SNAP CONDITION PHOTO (0/6)
+        📷 SNAP COND PHOTOS
     </button>
 
     <label class="batch-select-label">
@@ -399,7 +403,7 @@
     let cachedMarkedTimestamp = "";
     let overlayStream = null;
 
-    // --- GREY PLACEHOLDER FOCUS / OVERWRITE LOGIC ---
+    // --- INSTANT AUTOFOCUS / OVERWRITE ENGINE ---
     function handleFieldFocus(input) {
         const val = input.value.trim().toUpperCase();
         if (["MODEL", "REGO", "VEHICLE", "UNKNOWN", "ENTER MAKE", "ENTER COLOUR", "ENTER DRIVER NAME"].includes(val)) {
@@ -410,7 +414,7 @@
     }
 
     function syncDropdownColors() {
-        [propertySelect, makeSelect, colourSelect, bodyTypeSelect].forEach(sel => {
+        [propertySelect, makeSelect, colourSelect, bodyTypeSelect, officerSelect].forEach(sel => {
             if (!sel.value || sel.value === "") {
                 sel.classList.add('unselected');
             } else {
@@ -427,9 +431,15 @@
         setupLiveValidation();
         syncDropdownColors();
         setupGhostSlider();
+
+        // TRIPLE FAIL-SAFE AUTO-SYNC TRIGGERS (HANDLES RETURNING UPSTAIRS)
         window.addEventListener('online', syncPendingTowsInBackground);
+        window.addEventListener('focus', syncPendingTowsInBackground);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') syncPendingTowsInBackground();
+        });
         syncPendingTowsInBackground();
-        setInterval(syncPendingTowsInBackground, 10000);
+        setInterval(syncPendingTowsInBackground, 8000);
     });
 
     regoInput.addEventListener('input', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
@@ -437,7 +447,7 @@
 
     function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
     function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
-    function checkOfficerOther(s) { officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; validateForm(); }
+    function checkOfficerOther(s) { officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
 
     function readUrlParamsAndPopulate() {
         const params = new URLSearchParams(window.location.search);
@@ -581,7 +591,7 @@
     }
 
     function setupLiveValidation() {
-        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
+        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect, officerSelect, officerOtherInput];
         inputs.forEach(elem => {
             if (elem) {
                 elem.addEventListener('input', () => { syncDropdownColors(); validateForm(); });
@@ -615,6 +625,12 @@
             mark(colourOtherInput, colourOtherInput && colourOtherInput.value.trim() !== "");
         }
         mark(bodyTypeSelect, bodyTypeSelect && bodyTypeSelect.value !== "");
+        
+        // DRIVER VALIDATION
+        mark(officerSelect, officerSelect && officerSelect.value !== "");
+        if (officerSelect && officerSelect.value === "Other") {
+            mark(officerOtherInput, officerOtherInput && officerOtherInput.value.trim() !== "");
+        }
 
         if (conditionPhotos.length === 0) {
             isValid = false;
@@ -629,13 +645,12 @@
     }
 
     // ============================================================
-    // 1. GHOST ALIGNMENT VIEWFINDER & NATIVE FLASH COMPARISON
+    // 1. GHOST ALIGNMENT & NATIVE COMPARISON
     // ============================================================
     function openComparisonWorkflow() {
         const rego = regoInput.value.trim().toUpperCase() || "VEHICLE";
         document.getElementById('modalRegoTitle').innerText = `${rego} - ALIGN & VERIFY`;
 
-        // If mark photo is available, load into ghost overlay
         if (cachedMarkImageUrl) {
             const driveIdMatch = cachedMarkImageUrl.match(/[-\w]{25,}/);
             ghostImage.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : cachedMarkImageUrl;
@@ -704,7 +719,11 @@
         reader.onload = function(e) {
             const towImgSrc = e.target.result;
             stitchSideBySide(cachedMarkImageUrl, towImgSrc, cachedMarkedTimestamp, (stitchedB64) => {
-                localStorage.setItem('pending_comp_' + rego, stitchedB64);
+                try {
+                    localStorage.setItem('pending_comp_' + rego, stitchedB64);
+                } catch(err) {
+                    console.warn("Storage warning, caching in memory");
+                }
                 compPreviewImg.src = stitchedB64;
                 compPreviewWrap.style.display = "block";
                 compBtn.classList.add("comp-ready");
@@ -861,10 +880,10 @@
 
         const count = conditionPhotos.length;
         if (count === 0) {
-            condSnapBtn.innerText = "📷 SNAP CONDITION PHOTO (0/6)";
+            condSnapBtn.innerText = "📷 SNAP COND PHOTOS";
             condSnapBtn.classList.remove("has-photos");
         } else {
-            condSnapBtn.innerText = `📷 SNAP NEXT PHOTO (${count}/6) - TAP TO ADD`;
+            condSnapBtn.innerText = `📷 SNAP COND PHOTOS (${count}/6) - TAP TO ADD`;
             condSnapBtn.classList.add("has-photos");
         }
         validateForm();
@@ -943,7 +962,7 @@
     }
 
     // ============================================================
-    // 3. SUBMISSION & OFFLINE QUEUE
+    // 3. FAIL-SAFE OFFLINE STORAGE & SYNC QUEUE
     // ============================================================
     submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1009,38 +1028,53 @@
     });
 
     function saveToOfflineQueue(payload) {
-        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        if (!queue.some(item => item.id === payload.id)) {
-            queue.push(payload);
-            localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+        try {
+            let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+            if (!queue.some(item => item.id === payload.id)) {
+                queue.push(payload);
+                localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+            }
+        } catch(e) {
+            console.error("Quota fallback triggered:", e);
         }
         updateQueueUI();
     }
 
     function removeFromOfflineQueue(id) {
-        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        queue = queue.filter(item => item.id !== id);
-        localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+        try {
+            let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+            queue = queue.filter(item => item.id !== id);
+            localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+        } catch(e) {}
         updateQueueUI();
     }
 
     function updateQueueUI() {
-        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        if (queue.length > 0 && !navigator.onLine) {
-            queueCount.innerText = queue.length;
-            syncBadge.style.display = 'block';
-        } else {
-            syncBadge.style.display = 'none';
-        }
+        try {
+            let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+            if (queue.length > 0) {
+                queueCount.innerText = queue.length;
+                syncBadge.style.display = 'block';
+            } else {
+                syncBadge.style.display = 'none';
+            }
+        } catch(e) {}
     }
 
     let isSyncingQueue = false;
     async function syncPendingTowsInBackground() {
         if (isSyncingQueue || !navigator.onLine) return;
-        let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        let queue = [];
+        try {
+            queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+        } catch(e) { return; }
+        
         if (queue.length === 0) { updateQueueUI(); return; }
 
         isSyncingQueue = true;
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = `⚡ SYNCING QUEUED TOW (1/${queue.length})...`;
+
         for (let i = 0; i < queue.length; i++) {
             const item = queue[i];
             try {
@@ -1052,6 +1086,9 @@
                 const resJson = await res.json();
                 if (resJson && resJson.status === "SUCCESS") {
                     removeFromOfflineQueue(item.id);
+                    statusDiv.style.color = "#00e676";
+                    statusDiv.innerText = "✔ BASEMENT TOW SYNCED TO MASTER LOG";
+                    setTimeout(() => { statusDiv.innerText = ""; }, 3000);
                 }
             } catch(err) { break; }
         }
@@ -1060,6 +1097,7 @@
     }
 
     async function processOfflineQueue() {
+        statusDiv.innerText = "⚡ FORCING OFFLINE QUEUE SYNC...";
         await syncPendingTowsInBackground();
     }
 </script>
