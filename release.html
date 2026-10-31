@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>RELEASE VEHICLE</title>
   
   <style>
@@ -14,7 +16,6 @@
       --text: #ffffff;
       --c-rel: #00e676;
       --c-gold: #ffab00;
-      --c-tow: #ff1744;
       --c-yard: #00b0ff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -22,7 +23,7 @@
     body { 
       background: var(--bg); 
       color: var(--text); 
-      padding: 12px;
+      padding: 14px;
       padding-top: max(16px, env(safe-area-inset-top)); 
       padding-bottom: max(40px, env(safe-area-inset-bottom));
       display: flex;
@@ -31,11 +32,10 @@
       min-height: 100vh;
     }
 
-    .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
-    .header-box h1 { margin: 0; font-size: 34px; font-weight: 900; color: var(--c-rel); letter-spacing: 2px; }
+    .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 12px; }
+    .header-box h1 { margin: 0; font-size: 32px; font-weight: 900; color: var(--c-rel); letter-spacing: 2px; }
     .back-btn { position: absolute; left: 0; background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 14px; border-radius: 8px; font-weight: 900; text-decoration: none; font-size: 13px; }
 
-    /* 3x2 Nav Grid */
     .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 12px; }
     .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
     .t-mark { background: #2979ff; color: #fff; }
@@ -50,9 +50,9 @@
     .veh-banner { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
     .rego-large { font-size: 32px; font-weight: 900; color: #facc15; letter-spacing: 1px; }
     .prop-large { font-size: 18px; font-weight: 900; color: #aaa; text-align: right; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .veh-sub-desc { font-size: 15px; font-weight: 800; color: #ccc; margin-bottom: 4px; }
+    .veh-sub-desc { font-size: 15px; font-weight: 800; color: #ccc; margin-bottom: 6px; }
 
-    .sec-title { font-size: 12px; font-weight: 900; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; margin-bottom: 8px; }
+    .sec-title { font-size: 12px; font-weight: 900; color: #ffab00; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; margin-bottom: 8px; }
 
     label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 8px; font-weight: 900; letter-spacing: 0.5px; }
     input, select { 
@@ -61,12 +61,10 @@
     }
     input:focus, select:focus { border-color: var(--c-rel); }
 
-    /* SIGNATURE PAD */
     .sig-canvas-wrap { border: 2px dashed #ffab00; border-radius: 10px; background: #ffffff; margin-top: 6px; position: relative; touch-action: none; }
     canvas { width: 100%; height: 130px; display: block; border-radius: 8px; cursor: crosshair; }
     .clear-sig-btn { position: absolute; top: 6px; right: 6px; background: #222; color: #fff; border: 1px solid #666; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 900; cursor: pointer; }
 
-    /* PAYMENT SUMMARY */
     .fee-box { background: #141414; border: 1.5px solid #333; border-radius: 10px; padding: 12px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center; }
     .fee-label { font-size: 12px; font-weight: 800; color: #aaa; text-transform: uppercase; }
     .total-paid { font-size: 24px; font-weight: 900; color: var(--c-rel); }
@@ -78,7 +76,6 @@
     .submit-rel-btn:active { transform: scale(0.98); }
     .submit-rel-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* SUCCESS MODAL OVERLAY */
     #successModal { 
       display: none; position: fixed; inset: 0; background: rgba(0, 230, 118, 0.98); z-index: 9999; 
       flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; 
@@ -90,7 +87,6 @@
       text-decoration: none; display: inline-block; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase;
       box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     }
-    .view-inv-btn:active { transform: scale(0.96); }
     .btn-return-yard { color: #000; font-weight: 900; font-size: 16px; text-decoration: underline; text-transform: uppercase; cursor: pointer; }
   </style>
 </head>
@@ -161,7 +157,6 @@
     <button type="button" class="submit-rel-btn" id="releaseBtn" onclick="processRelease()">CONFIRM RELEASE & GENERATE TAX INVOICE</button>
   </div>
 
-  <!-- SUCCESS MODAL OVERLAY -->
   <div id="successModal">
     <h2>✔ RELEASED!</h2>
     <p id="invNoticeText">Tax invoice generated and SMS dispatched to customer.</p>
@@ -243,7 +238,6 @@
         if (car) populateCarFields(car);
         else fetchFromBackend(targetRego);
       } else {
-        // No rego passed: Show dropdown of available vehicles
         document.getElementById('regoSelectWrapper').style.display = 'block';
         document.getElementById('dispRego').innerText = "SELECT VEHICLE";
         populateDropdown(cachedList);
@@ -342,7 +336,6 @@
         const data = await res.json();
 
         if (data && data.status === "SUCCESS") {
-          // Remove from local cache immediately
           try {
             let inv = JSON.parse(localStorage.getItem('cached_yard_inventory') || '[]');
             inv = inv.filter(c => c.rego && c.rego.toUpperCase() !== rego);
