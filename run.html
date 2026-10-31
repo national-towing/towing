@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="National Towing">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
 
     <title>RUN</title>
     
@@ -27,10 +27,8 @@
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 12px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-top: max(16px, env(safe-area-inset-top));
-            padding-bottom: max(30px, env(safe-area-inset-bottom));
+            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
         }
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
@@ -39,7 +37,7 @@
         .icon-btn:active { transform: scale(0.9); }
 
         /* 3x2 Grid Navigation */
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 12px; }
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
         .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tile:active { transform: scale(0.96); }
         .t-mark { background: var(--c-mark); color: #fff; }
@@ -49,6 +47,7 @@
         .t-yard { background: var(--c-yard); color: #000; }
         .t-rel  { background: var(--c-rel); color: #000; }
 
+        /* DRIVE-BY HUD CHECK BUTTON */
         .hud-check-btn {
             width: 100%; max-width: 440px; height: 56px; border-radius: 12px; border: none;
             background: linear-gradient(135deg, #ff1744 0%, #ffab00 100%); color: #000;
@@ -128,7 +127,7 @@
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
 
-        /* DRIVE-BY HUD CAMERA MODAL */
+        /* DRIVE-BY HUD CAMERA MODAL (ENLARGED HEADER) */
         #hudCamModal {
             display: none; position: fixed; inset: 0; background: #000; z-index: 99999;
             flex-direction: column;
@@ -216,6 +215,7 @@
             border: 1px solid rgba(255,255,255,0.4); text-transform: uppercase;
         }
 
+        /* STACKED FULL-WIDTH MANUAL REGO INPUT & CONFIRM BUTTON */
         #hudManualWrap { display: none; margin-top: 18px; width: 88%; max-width: 320px; }
         .hud-manual-box { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         #hudManualInput {
@@ -305,6 +305,7 @@
 
     <button type="button" id="hudTowActionBtn" class="hud-action-tow-btn" onclick="openTowFromHud(event)">🚨 LOAD TOW APP</button>
 
+    <!-- STACKED MANUAL REGO INPUT & CONFIRM BUTTON -->
     <div id="hudManualWrap" onclick="event.stopPropagation()">
         <div class="hud-manual-box">
             <input type="text" id="hudManualInput" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
@@ -456,7 +457,6 @@
                 rego: item.rego,
                 markedTimeStr: formatCleanDisplayTime(item.markedTime),
                 expiryTimeStr: formatCleanDisplayTime(item.expiryTime),
-                rawExpiryMs: item.rawExpiryMs || 0,
                 status: status,
                 property: prop,
                 make: item.make || "",
@@ -524,7 +524,6 @@
         });
     }
 
-    // STRICT VEHICLE DETAIL SORT: RED (TOW) -> ORANGE (WAIT) -> BLUE (PASS)
     function renderDetailView(prop, filterStatus) {
         const container = document.getElementById('runContainer');
         container.innerHTML = "";
@@ -542,9 +541,6 @@
 
         let cars = propertyGroups[prop] || [];
         if (filterStatus !== 'ALL') cars = cars.filter(c => c.status === filterStatus);
-
-        const statusRank = { "READY": 1, "WAIT": 2, "PASS": 3 };
-        cars.sort((a, b) => (statusRank[a.status] || 99) - (statusRank[b.status] || 99) || (a.rawExpiryMs - b.rawExpiryMs));
 
         cars.forEach(car => {
             const tile = document.createElement('div');
@@ -594,7 +590,9 @@
         window.location.href = `tow.html?${q.toString()}`;
     }
 
-    // --- DRIVE-BY HUD SCANNER ENGINE ---
+    // ==========================================
+    // ⚡ DRIVE-BY HUD SCANNER ENGINE
+    // ==========================================
     async function openDriveByCam() {
         getAudioContext();
         const modal = document.getElementById('hudCamModal');
@@ -760,7 +758,9 @@
         document.getElementById('hudManualInput').value = "";
     }
 
-    // --- GHOST COMPARISON MODAL ---
+    // ==========================================
+    // 👻 GHOST COMPARISON VIEWFINDER LOGIC
+    // ==========================================
     async function openOverlayModal(car) {
         currentGhostVehicle = car;
         document.getElementById('modalRegoTitle').innerText = `${car.rego} - ALIGN & VERIFY TOW`;
