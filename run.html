@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="National Towing">
@@ -175,22 +175,7 @@
         #hudManualInput { width: 100%; height: 56px; border-radius: 12px; border: 2.5px solid #ffab00; background: #111; color: #fff; font-size: 26px; font-weight: 900; text-align: center; text-transform: uppercase; outline: none; }
         .hud-manual-btn { width: 100%; height: 52px; border-radius: 12px; border: none; background: #ffab00; color: #000; font-weight: 900; font-size: 20px; cursor: pointer; text-transform: uppercase; }
 
-        /* GHOST MODAL */
-        .overlay-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 100005; flex-direction: column; }
-        .overlay-modal.show { display: flex; }
-        .modal-header { height: 52px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
-        .modal-title { font-weight: bold; font-size: 15px; color: #fff; }
-        .close-btn { color: #ff1744; font-weight: bold; font-size: 24px; cursor: pointer; }
-        .opacity-bar { background: #2a2a2a; padding: 8px 16px; display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: bold; color: #ffab00; border-bottom: 1px solid #333; }
-        .opacity-bar input { flex: 1; accent-color: #ff1744; }
-        .viewfinder-container { flex: 1; position: relative; overflow: hidden; background: #000; }
-        #overlayVideo { width: 100%; height: 100%; object-fit: cover; }
-        #ghostImage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; pointer-events: none; }
-        .modal-footer { height: 75px; background: #1e1e1e; display: flex; justify-content: space-evenly; align-items: center; border-top: 1px solid #333; padding: 0 10px; gap: 10px; }
-        .match-btn { flex: 1; background: #ff1744; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-        .skip-btn { flex: 1; background: #444; color: #fff; border: none; padding: 14px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-
-        /* PREVIEW MODAL */
+        /* PHOTO PREVIEW MODAL */
         .preview-modal { display: none; position: fixed; inset: 0; background: #121212; z-index: 100006; flex-direction: column; }
         .preview-modal.show { display: flex; }
         .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 14px; gap: 12px; }
@@ -253,26 +238,6 @@
     <div class="hud-reset-hint">TAP OUTSIDE TO SCAN NEXT ↺</div>
 </div>
 
-<!-- GHOST COMPARISON MODAL -->
-<div id="overlayModal" class="overlay-modal">
-    <div class="modal-header">
-        <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
-        <span class="close-btn" onclick="closeOverlayModal()">✕</span>
-    </div>
-    <div class="opacity-bar">
-        <span>GHOST OPACITY:</span>
-        <input type="range" id="opacitySlider" min="0" max="100" value="45">
-    </div>
-    <div class="viewfinder-container">
-        <video id="overlayVideo" autoplay playsinline muted></video>
-        <img id="ghostImage" alt="Ghost Overlay">
-    </div>
-    <div class="modal-footer">
-        <button id="matchBtn" class="match-btn">MATCH & TOW</button>
-        <button id="skipBtn" class="skip-btn">SKIP & TOW</button>
-    </div>
-</div>
-
 <!-- PHOTO PREVIEW MODAL -->
 <div id="previewModal" class="preview-modal">
     <div class="preview-header">
@@ -294,8 +259,6 @@
     let hudStream = null;
     let isProcessingScan = false;
     let lastMatchedTowVehicle = null;
-    let overlayStream = null;
-    let currentGhostVehicle = null;
 
     let audioCtx = null;
     function getAudioContext() {
@@ -327,7 +290,6 @@
 
     window.addEventListener('load', () => {
         loadTowRun();
-        setupGhostModalEvents();
     });
 
     document.getElementById('refreshBtn').addEventListener('click', () => {
@@ -352,7 +314,7 @@
         }
     }
 
-    // STRICT DAY-FIRST (DD-MM) PARSING FOR RELIABLE TIMESTAMPS
+    // STRICT DAY-FIRST (DD-MM) PARSING FOR AUSTRALIAN TIMESTAMPS
     function parseAndRenderRun(data) {
         if (!data || !Array.isArray(data) || data.length === 0) {
             document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
@@ -386,7 +348,7 @@
                     const mins = parseInt(parts[3], 10);
                     
                     let expYear = currentYear;
-                    if (now.getMonth() === 11 && month === 0) expYear++; // Handle year rollover Dec->Jan
+                    if (now.getMonth() === 11 && month === 0) expYear++; // Handle Dec->Jan rollover
 
                     expMs = new Date(expYear, month, day, hours, mins).getTime();
                 }
@@ -527,12 +489,10 @@
             
             const handleSelect = (e) => {
                 e.stopPropagation();
-                if (car.status === "READY") {
-                    openOverlayModal(car);
-                } else if (car.status === "WAIT") {
-                    navigateToTow(car);
-                } else {
+                if (car.status === "PASS") {
                     window.location.href = `passes.html`;
+                } else {
+                    navigateToTow(car);
                 }
             };
 
@@ -543,14 +503,16 @@
     }
 
     function navigateToTow(car) {
-        closeOverlayModal();
         const q = new URLSearchParams({
             rego: car.rego || "",
             prop: car.property || "",
             make: car.make || "",
             model: car.model || "",
             colour: car.colour || "",
-            body: car.bodyType || ""
+            body: car.bodyType || "",
+            img: car.imageUrl || car.image || "",
+            mkd: car.markedTimeStr || "",
+            openComp: car.status === "READY" ? "1" : "0"
         });
         window.location.href = `tow.html?${q.toString()}`;
     }
@@ -717,68 +679,16 @@
         document.getElementById('hudManualInput').value = "";
     }
 
-    async function openOverlayModal(car) {
-        currentGhostVehicle = car;
-        document.getElementById('modalRegoTitle').innerText = `${car.rego} - ALIGN & VERIFY TOW`;
-        const ghostImg = document.getElementById('ghostImage');
-        const driveIdMatch = car.imageUrl ? String(car.imageUrl).match(/[-\w]{25,}/) : null;
-        ghostImg.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (car.imageUrl || "");
-        document.getElementById('overlayModal').classList.add('show');
-        try {
-            overlayStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                audio: false
-            });
-            document.getElementById('overlayVideo').srcObject = overlayStream;
-        } catch(err) {
-            alert("Camera access required for ghost alignment: " + err.message);
-        }
-    }
-
-    function closeOverlayModal() {
-        if (overlayStream) {
-            overlayStream.getTracks().forEach(t => t.stop());
-            overlayStream = null;
-        }
-        document.getElementById('overlayModal').classList.remove('show');
-    }
-
-    function setupGhostModalEvents() {
-        const slider = document.getElementById('opacitySlider');
-        if (slider) {
-            slider.addEventListener('input', (e) => {
-                document.getElementById('ghostImage').style.opacity = e.target.value / 100;
-            });
-        }
-        const skipBtn = document.getElementById('skipBtn');
-        if (skipBtn) {
-            skipBtn.addEventListener('click', () => {
-                if (currentGhostVehicle) navigateToTow(currentGhostVehicle);
-            });
-        }
-        const matchBtn = document.getElementById('matchBtn');
-        if (matchBtn) {
-            matchBtn.addEventListener('click', () => {
-                if (!currentGhostVehicle) return;
-                const vid = document.getElementById('overlayVideo');
-                const canvas = document.createElement('canvas');
-                canvas.width = 800; canvas.height = 600;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(vid, 0, 0, 800, 600);
-                const b64 = canvas.toDataURL('image/jpeg', 0.6);
-                localStorage.setItem('pending_comp_' + currentGhostVehicle.rego, b64);
-                navigateToTow(currentGhostVehicle);
-            });
-        }
-    }
-
     function openPhotoPreview(rego, prop, url) {
         document.getElementById('previewTitle').innerText = `${rego} (${prop})`;
         const driveIdMatch = url ? String(url).match(/[-\w]{25,}/) : null;
         document.getElementById('previewImg').src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (url || "");
         document.getElementById('previewModal').classList.add('show');
     }
-    function closePhotoPreview() { document.getElementById('previewModal').classList.remove('show'); }
+
+    function closePhotoPreview() { 
+        document.getElementById('previewModal').classList.remove('show'); 
+    }
 </script>
 </body>
 </html>
