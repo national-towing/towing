@@ -11,9 +11,9 @@
 
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10008">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10008">
-    <link rel="manifest" href="manifest-tow.json?v=10008">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=10009">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=10009">
+    <link rel="manifest" href="manifest-tow.json?v=10009">
 
     <style>
         :root {
@@ -83,7 +83,7 @@
         .row-2 { display: flex; gap: 8px; }
         .row-2 > div { flex: 1; }
 
-        /* SOLID ACTION BUTTONS */
+        /* SOLID BLUE / TRANSITION TO VERIFIED */
         .comp-btn {
             background: #0088cc; border: 2px solid #00b0ff; color: #fff;
             font-size: 17px; font-weight: 900; border-radius: 12px; height: 54px;
@@ -108,6 +108,7 @@
             color: #00e676; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px;
         }
 
+        /* PERMANENT SOLID GREEN CONDITION BUTTON */
         .cond-snap-btn {
             background: #00a854; border: 2px solid #00e676; color: #000;
             font-size: 17px; font-weight: 900; border-radius: 12px; height: 54px;
@@ -116,9 +117,6 @@
             box-shadow: 0 4px 14px rgba(0, 230, 118, 0.25);
         }
         .cond-snap-btn:active { transform: scale(0.98); }
-        .cond-snap-btn.has-photos {
-            background: #1f1f1f; color: #00e676; border-color: #00e676;
-        }
 
         .batch-select-label {
             display: block; text-align: center; font-size: 12px; font-weight: 900;
@@ -927,14 +925,7 @@
             thumbGallery.appendChild(wrap);
         });
 
-        const count = conditionPhotos.length;
-        if (count === 0) {
-            condSnapBtn.innerText = "📷 SNAP COND PHOTOS";
-            condSnapBtn.classList.remove("has-photos");
-        } else {
-            condSnapBtn.innerText = `📷 COND PHOTOS (${count}) - TAP TO ADD`;
-            condSnapBtn.classList.add("has-photos");
-        }
+        // Button stays permanently solid green with static text
         validateForm();
     }
 
