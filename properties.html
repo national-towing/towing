@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212">
+    <title>PROPERTIES</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 12px; padding-top: max(16px, env(safe-area-inset-top)); 
+            background: #121212; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; height: 100vh;
+        }
+        
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 12px; flex-shrink: 0; }
+        .header-box h1 { margin: 0; font-size: 28px; font-weight: 900; color: #00b0ff; letter-spacing: 1px; text-transform: uppercase; }
+        .btn-refresh { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .btn-refresh:active { transform: scale(0.92); }
+
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 12px; flex-shrink: 0; }
+        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; }
+        .t-mark { background: #2979ff; color: #fff; }
+        .t-run  { background: #ffab00; color: #000; }
+        .t-tow  { background: #ff1744; color: #fff; }
+        .t-pass { background: #ab47bc; color: #fff; }
+        .t-yard { background: #00b0ff; color: #000; box-shadow: 0 0 0 2px #fff; }
+        .t-rel  { background: #00e676; color: #000; }
+
+        .container {
+            background: #1e1e1e; border: 1px solid #333; border-radius: 14px; 
+            width: 100%; max-width: 440px; display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden;
+        }
+
+        .list-view { display: flex; flex-direction: column; height: 100%; }
+        .list-scroll { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .prop-tile { background: #242424; border: 1px solid #383838; border-radius: 10px; padding: 14px; cursor: pointer; }
+        .prop-tile:active { background: #333; }
+        .p-name { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+        .p-addr { font-size: 12px; color: #888; font-weight: 600; }
+
+        .btn-add-new { background: #00e676; color: #000; border: none; padding: 14px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+        
+        .detail-view { display: none; flex-direction: column; height: 100%; background: #181818; }
+        .detail-header { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #333; background: #1e1e1e; gap: 10px; flex-shrink: 0; }
+        .btn-back { background: #333; border: none; color: #00b0ff; font-weight: 800; font-size: 12px; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        .detail-title { font-weight: 900; color: #fff; font-size: 16px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .form-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .f-field { display: flex; flex-direction: column; gap: 4px; }
+        .f-label { font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .f-input { width: 100%; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; color: #fff; padding: 10px 12px; font-size: 14px; font-weight: 600; outline: none; }
+        .f-input:focus { border-color: #00b0ff; }
+        
+        .detail-footer { display: flex; padding: 12px; border-top: 1px solid #333; background: #1e1e1e; flex-shrink: 0; gap: 10px; }
+        .btn-save { flex: 1; background: #00e676; border: none; color: #000; font-weight: 900; font-size: 14px; padding: 14px; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+
+        .loader { padding: 30px; text-align: center; color: #888; font-weight: 800; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="header-box">
+    <h1>PROPERTIES</h1>
+    <div class="btn-refresh" onclick="fetchProperties()">🔄</div>
+</div>
+
+<div class="nav-grid-3x2">
+    <a href="mark.html" class="nav-tile t-mark">MARK</a>
+    <a href="run.html" class="nav-tile t-run">RUN</a>
+    <a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="yard.html" class="nav-tile t-yard">PROPS</a>
+    <a href="release.html" class="nav-tile t-rel">REL</a>
+</div>
+
+<div class="container">
+    <!-- LIST VIEW -->
+    <div id="listView" class="list-view">
+        <div id="propList" class="list-scroll">
+            <div class="loader">Loading Properties...</div>
+        </div>
+        <button class="btn-add-new" onclick="openDetail(-1)">➕ ADD NEW PROPERTY</button>
+    </div>
+
+    <!-- DETAIL EDIT VIEW -->
+    <div id="detailView" class="detail-view">
+        <div class="detail-header">
+            <button class="btn-back" onclick="showList()">◀ BACK</button>
+            <div id="detailTitle" class="detail-title">EDIT PROPERTY</div>
+        </div>
+        <div id="formContainer" class="form-scroll"></div>
+        <div class="detail-footer">
+            <button id="btnSave" class="btn-save" onclick="saveProperty()">💾 SAVE CHANGES</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    
+    let cacheHeaders = [];
+    let cacheRows = [];
+    let currentRowIdx = null;
+
+    window.onload = fetchProperties;
+
+    async function fetchProperties() {
+        const list = document.getElementById('propList');
+        list.innerHTML = '<div class="loader">Syncing with Master Log...</div>';
+        
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_all_properties_data");
+            const data = await res.json();
+            
+            if (data.status === "SUCCESS") {
+                cacheHeaders = data.headers;
+                cacheRows = data.rows;
+                renderList();
+            } else {
+                list.innerHTML = `<div class="loader" style="color:#ff1744;">Error: ${data.message}</div>`;
+            }
+        } catch(e) {
+            list.innerHTML = `<div class="loader" style="color:#ff1744;">Connection Failed.</div>`;
+        }
+    }
+
+    function renderList() {
+        const list = document.getElementById('propList');
+        if (cacheRows.length === 0) {
+            list.innerHTML = '<div class="loader">No properties found.</div>';
+            return;
+        }
+
+        list.innerHTML = cacheRows.map((r, i) => {
+            const name = String(r.values[0] || "Unnamed Property").trim();
+            const addr = String(r.values[1] || "").trim() || "No Address Provided";
+            return `
+                <div class="prop-tile" onclick="openDetail(${i})">
+                    <div class="p-name">${name}</div>
+                    <div class="p-addr">${addr}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function openDetail(arrayIndex) {
+        document.getElementById('listView').style.display = 'none';
+        document.getElementById('detailView').style.display = 'flex';
+        
+        const form = document.getElementById('formContainer');
+        let vals = [];
+
+        if (arrayIndex === -1) {
+            currentRowIdx = -1; // New property flag
+            document.getElementById('detailTitle').innerText = "ADD NEW PROPERTY";
+            vals = new Array(cacheHeaders.length).fill("");
+        } else {
+            const rowData = cacheRows[arrayIndex];
+            currentRowIdx = rowData.rowIdx;
+            document.getElementById('detailTitle').innerText = String(rowData.values[0] || "EDIT PROPERTY");
+            vals = rowData.values;
+        }
+
+        // Dynamically build inputs based on spreadsheet headers
+        form.innerHTML = cacheHeaders.map((header, colIdx) => {
+            const val = String(vals[colIdx] || "").replace(/"/g, '&quot;');
+            return `
+                <div class="f-field">
+                    <div class="f-label">${header || `Column ${colIdx + 1}`}</div>
+                    <input type="text" class="f-input" id="col_${colIdx}" value="${val}">
+                </div>
+            `;
+        }).join('');
+    }
+
+    function showList() {
+        document.getElementById('listView').style.display = 'flex';
+        document.getElementById('detailView').style.display = 'none';
+    }
+
+    async function saveProperty() {
+        const btn = document.getElementById('btnSave');
+        btn.innerText = "SAVING...";
+        btn.disabled = true;
+
+        const newValues = [];
+        for (let i = 0; i < cacheHeaders.length; i++) {
+            const el = document.getElementById('col_' + i);
+            newValues.push(el ? el.value.trim() : "");
+        }
+
+        const payload = {
+            action: currentRowIdx === -1 ? "add_new_property" : "update_property_data",
+            rowIdx: currentRowIdx,
+            values: newValues
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            
+            if (result.status === "SUCCESS") {
+                showList();
+                fetchProperties(); // Re-sync to get the updated row indices
+            } else {
+                alert("Error saving: " + result.message);
+            }
+        } catch(err) {
+            alert("Network Error.");
+        } finally {
+            btn.innerText = "💾 SAVE CHANGES";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
