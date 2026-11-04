@@ -2,268 +2,231 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-
     <title>TOW</title>
     
-    <link rel="apple-touch-icon" href="icon-tow.png?v=10009">
-    <link rel="icon" type="image/png" href="icon-tow.png?v=10009">
-    <link rel="manifest" href="manifest-tow.json?v=10009">
+    <link rel="apple-touch-icon" href="icon-tow.png?v=1002">
+    <link rel="icon" type="image/png" href="icon-tow.png?v=1002">
+    <link rel="manifest" href="manifest-tow.json?v=1002">
 
     <style>
         :root {
             --c-mark: #2979ff;
             --c-run: #ffab00;
             --c-tow: #ff1744;
-            --c-pass: #ab47bc;
+            --c-admin: #ab47bc;
             --c-yard: #00b0ff;
             --c-rel: #00e676;
-            --text-placeholder: #888888;
         }
         * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 12px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-top: max(16px, env(safe-area-inset-top));
-            padding-bottom: max(30px, env(safe-area-inset-bottom));
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #121212;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 8px; }
-        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ff1744; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+
+        .header-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .header-box h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--c-tow);
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        .icon-btn {
+            position: absolute;
+            right: 0;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 18px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+        }
         .icon-btn:active { transform: scale(0.92); }
 
-        .sync-badge {
-            background: #ffab00; color: #000; font-weight: 900; font-size: 13px;
-            padding: 8px 16px; border-radius: 20px; margin-bottom: 8px; display: none;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 4px 12px rgba(255, 171, 0, 0.4);
-        }
-        .sync-badge:active { transform: scale(0.96); }
-
         /* 3x2 Grid Navigation */
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 12px; }
-        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-grid-3x2 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 440px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .nav-tile {
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 900;
+            text-decoration: none;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         .nav-tile:active { transform: scale(0.96); }
-        .t-mark { background: var(--c-mark); color: #fff; }
-        .t-run  { background: var(--c-run); color: #000; }
-        .t-tow  { background: var(--c-tow); color: #fff; box-shadow: 0 0 0 2px #fff; }
-        .t-pass { background: var(--c-pass); color: #fff; }
-        .t-yard { background: var(--c-yard); color: #000; }
-        .t-rel  { background: var(--c-rel); color: #000; }
+        .t-mark  { background: var(--c-mark); color: #fff; }
+        .t-run   { background: var(--c-run); color: #000; }
+        .t-tow   { background: var(--c-tow); color: #fff; box-shadow: 0 0 0 2px #fff; }
+        .t-admin { background: var(--c-admin); color: #fff; }
+        .t-yard  { background: var(--c-yard); color: #000; }
+        .t-rel   { background: var(--c-rel); color: #000; }
 
-        .card { background: #1e1e1e; border-radius: 18px; padding: 16px; width: 100%; max-width: 440px; border: 1px solid #333; margin-bottom: 16px; }
-        
-        label { font-size: 11px; text-transform: uppercase; color: #aaa; display: block; margin-top: 10px; font-weight: 900; letter-spacing: 1px; }
-        
-        input, select {
-            width: 100%; height: 50px; padding: 0 12px; border-radius: 10px; border: 1.5px solid #444;
-            background: #2a2a2a; color: #fff; font-size: 19px; font-weight: 900; margin-top: 4px; outline: none;
-            -webkit-appearance: none; transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
-        }
-        input:focus, select:focus { border-color: #ff1744; }
-
-        ::placeholder { color: var(--text-placeholder) !important; font-weight: 700; opacity: 1; }
-        select.unselected { color: var(--text-placeholder) !important; font-weight: 700; }
-        select option { background: #2a2a2a; color: #ffffff; font-weight: 800; }
-
-        .field-missing { border-color: #ffab00 !important; background: #2b2207 !important; }
-        .field-valid { border-color: #444 !important; background: #2a2a2a !important; }
-
-        .row-rego-state { display: flex; gap: 8px; }
-        .row-rego-state > div:first-child { flex: 2; }
-        .row-rego-state > div:last-child { flex: 1; }
-
-        .row-2 { display: flex; gap: 8px; }
-        .row-2 > div { flex: 1; }
-
-        /* SOLID BLUE / TRANSITION TO VERIFIED */
-        .comp-btn {
-            background: #0088cc; border: 2px solid #00b0ff; color: #fff;
-            font-size: 17px; font-weight: 900; border-radius: 12px; height: 54px;
-            width: 100%; margin-top: 6px; cursor: pointer; text-align: center;
-            letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 14px rgba(0, 176, 255, 0.25);
-        }
-        .comp-btn:active { transform: scale(0.98); }
-        .comp-btn.comp-ready {
-            background: #0d2818; border: 2px solid #00e676; color: #00e676;
-            box-shadow: 0 4px 14px rgba(0, 230, 118, 0.2);
-        }
-        
-        .comp-preview-wrap {
-            display: none; margin-top: 8px; border-radius: 12px; overflow: hidden;
-            border: 2px solid #00e676; background: #000; position: relative; cursor: pointer;
-        }
-        .comp-preview-img { width: 100%; height: 140px; object-fit: contain; display: block; }
-        .comp-preview-badge {
-            position: absolute; bottom: 4px; right: 8px; background: rgba(0,0,0,0.85);
-            color: #00e676; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px;
+        .container {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 14px;
+            gap: 10px;
         }
 
-        /* PERMANENT SOLID GREEN CONDITION BUTTON */
-        .cond-snap-btn {
-            background: #00a854; border: 2px solid #00e676; color: #000;
-            font-size: 17px; font-weight: 900; border-radius: 12px; height: 54px;
-            width: 100%; margin-top: 6px; cursor: pointer; text-align: center;
-            letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 14px rgba(0, 230, 118, 0.25);
+        .f-field { display: flex; flex-direction: column; gap: 4px; }
+        .f-label { font-size: 10px; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .f-input {
+            width: 100%;
+            height: 42px;
+            background: #242424;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
         }
-        .cond-snap-btn:active { transform: scale(0.98); }
+        .f-input:focus { border-color: var(--c-tow); }
+        .f-rego { font-family: monospace; font-size: 20px; text-transform: uppercase; }
 
-        .batch-select-label {
-            display: block; text-align: center; font-size: 12px; font-weight: 900;
-            color: #00b0ff; margin-top: 8px; cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase;
-            padding: 10px; border-radius: 8px; background: #141f29; border: 1.5px solid #0088cc;
-        }
-        .batch-select-label:active { background: #1f364d; }
+        .f-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-        .thumb-gallery { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; min-height: 80px; align-items: center; }
-        .thumb-container { position: relative; flex-shrink: 0; }
-        .thumb-img { width: 74px; height: 74px; border-radius: 8px; object-fit: cover; border: 2px solid #00e676; }
-        .thumb-del {
-            position: absolute; top: -6px; right: -6px; background: #ff1744; color: #fff;
-            border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center;
-            justify-content: center; font-size: 12px; font-weight: 900; border: 2px solid #1e1e1e; cursor: pointer;
+        .cam-box {
+            width: 100%;
+            height: 120px;
+            background: #111;
+            border: 2px dashed #444;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
         }
+        .cam-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+        .cam-box-label { font-size: 11px; font-weight: 900; color: #aaa; text-transform: uppercase; margin-top: 4px; }
 
-        .submit-btn {
-            background: #ff1744; color: #fff; font-weight: 900; border: none; border-radius: 14px;
-            height: 60px; font-size: 24px; width: 100%; margin-top: 18px; cursor: pointer; letter-spacing: 1.5px;
-            text-transform: uppercase; box-shadow: 0 4px 16px rgba(255, 23, 68, 0.4);
+        .btn-submit-tow {
+            height: 48px;
+            background: var(--c-tow);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 8px;
+            flex-shrink: 0;
         }
-        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
-
-        #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 10px; min-height: 22px; color: #ffab00; }
-
-        /* GHOST ALIGNMENT MODAL */
-        .overlay-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 100005; flex-direction: column; }
-        .overlay-modal.show { display: flex; }
-        .modal-header { height: 54px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
-        .modal-title { font-weight: 900; font-size: 15px; color: #00e676; text-transform: uppercase; }
-        .close-btn { color: #ff1744; font-weight: 900; font-size: 26px; cursor: pointer; }
-        
-        .opacity-bar { 
-            background: #2a2a2a; padding: 8px 16px; display: flex; align-items: center; gap: 12px; 
-            font-size: 12px; font-weight: 900; color: #ffab00; border-bottom: 1px solid #333; text-transform: uppercase; 
-        }
-        .opacity-bar input { flex: 1; accent-color: #ffab00; }
-        .torch-btn {
-            background: #333; border: 1.5px solid #ffab00; color: #ffab00; border-radius: 8px;
-            font-size: 12px; font-weight: 900; padding: 4px 10px; cursor: pointer;
-        }
-
-        .viewfinder-container { flex: 1; position: relative; overflow: hidden; background: #000; }
-        #overlayVideo { width: 100%; height: 100%; object-fit: cover; }
-        #ghostImage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.45; pointer-events: none; }
-        
-        .modal-footer { height: 86px; background: #1e1e1e; display: flex; gap: 8px; padding: 0 10px; align-items: center; border-top: 1px solid #333; }
-        .btn-modal-action { flex: 1; height: 56px; border: none; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-snap-live { background: #00e676; color: #000; }
-        .btn-snap-native { background: #00b0ff; color: #000; }
-
-        /* FULLSCREEN SUCCESS OVERLAY */
-        #successOverlay {
-            display: none; position: fixed; inset: 0;
-            background-color: rgba(0, 230, 118, 0.96); z-index: 999999; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center; padding: 20px;
-        }
-        #successOverlay h1 { font-size: 44px; font-weight: 950; color: #000; margin: 0 0 10px 0; text-transform: uppercase; }
-        #successOverlay p { font-size: 17px; font-weight: 800; color: #111; margin: 0 0 30px 0; max-width: 80%; }
-        .ok-btn {
-            background: #000; color: #00e676; font-size: 28px; font-weight: 900; border: none;
-            border-radius: 14px; padding: 18px 50px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            letter-spacing: 2px;
-        }
+        .btn-submit-tow:disabled { background: #555; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
 <div class="header-box">
-    <h1>TOW</h1>
+    <h1>TOW VEHICLE</h1>
     <div class="icon-btn" onclick="window.location.reload(true)">🔄</div>
 </div>
-
-<div class="sync-badge" id="syncBadge" onclick="processOfflineQueue()">⚡ BASEMENT QUEUE: <span id="queueCount">0</span> (TAP TO SYNC)</div>
 
 <div class="nav-grid-3x2">
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
     <a href="run.html" class="nav-tile t-run">RUN</a>
     <a href="tow.html" class="nav-tile t-tow">TOW</a>
-    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="admin.html" class="nav-tile t-admin">ADMIN</a>
     <a href="yard.html" class="nav-tile t-yard">YARD</a>
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
 
-<div class="card">
-    <label>PROPERTY</label>
-    <select id="propertySelect" class="unselected">
-        <option value="" disabled selected>PROPERTY</option>
-    </select>
+<form class="container" onsubmit="submitTow(event)">
+    <div class="f-field">
+        <label class="f-label">Property</label>
+        <select id="towProperty" class="f-input" required></select>
+    </div>
 
-    <div class="row-rego-state">
-        <div>
-            <label>REGO</label>
-            <input type="text" id="regoInput" placeholder="REGO" style="color:#ff1744; text-transform:uppercase;" onfocus="handleFieldFocus(this)">
+    <div class="f-field">
+        <label class="f-label">Registration Number</label>
+        <input type="text" id="towRego" class="f-input f-rego" placeholder="ENTER PLATE" required>
+    </div>
+
+    <!-- AI CAMERA HOOK -->
+    <div class="f-field">
+        <label class="f-label">Vehicle Photo (AI Vision Scan)</label>
+        <div class="cam-box" onclick="triggerCam('mainCamInput')">
+            <img id="mainCamPreview" style="display:none;">
+            <div style="font-size:32px;">📷</div>
+            <div class="cam-box-label" id="camStatus">Tap to Photograph Vehicle</div>
         </div>
-        <div>
-            <label>STATE</label>
-            <select id="stateSelect" style="color:#ffab00;">
-                <option value="QLD" selected>QLD</option>
-                <option value="NSW">NSW</option>
-                <option value="VIC">VIC</option>
-                <option value="NT">NT</option>
-                <option value="SA">SA</option>
-                <option value="TAS">TAS</option>
-                <option value="ACT">ACT</option>
-                <option value="WA">WA</option>
-            </select>
+        <input type="file" id="mainCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleTowPhoto(this)">
+    </div>
+
+    <div class="f-grid-2">
+        <div class="f-field">
+            <label class="f-label">Make</label>
+            <input type="text" id="towMake" class="f-input" placeholder="e.g. Toyota">
+        </div>
+        <div class="f-field">
+            <label class="f-label">Model</label>
+            <input type="text" id="towModel" class="f-input" placeholder="e.g. Corolla">
         </div>
     </div>
 
-    <div class="row-2">
-        <div>
-            <label>MAKE</label>
-            <select id="makeSelect" class="unselected" onchange="checkMakeOther(this)">
-                <option value="" disabled selected>MAKE</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Holden">Holden</option>
-                <option value="Ford">Ford</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Nissan">Nissan</option>
-                <option value="Mitsubishi">Mitsubishi</option>
-                <option value="Mazda">Mazda</option>
-                <option value="MG">MG</option>
-                <option value="Subaru">Subaru</option>
-                <option value="Honda">Honda</option>
-                <option value="Volkswagen">Volkswagen</option>
-                <option value="Kia">Kia</option>
-                <option value="BMW">BMW</option>
-                <option value="Mercedes-Benz">Mercedes-Benz</option>
-                <option value="Audi">Audi</option>
-                <option value="Jeep">Jeep</option>
-                <option value="Other">Other</option>
-            </select>
-            <input type="text" id="makeOtherInput" placeholder="ENTER MAKE" style="display:none; margin-top:4px;" onfocus="handleFieldFocus(this)">
-        </div>
-        <div>
-            <label>MODEL</label>
-            <input type="text" id="modelInput" placeholder="MODEL" onfocus="handleFieldFocus(this)">
-        </div>
-    </div>
-
-    <div class="row-2">
-        <div>
-            <label>COLOUR</label>
-            <select id="colourSelect" class="unselected" onchange="checkColourOther(this)">
-                <option value="" disabled selected>COLOUR</option>
+    <div class="f-grid-2">
+        <div class="f-field">
+            <label class="f-label">Colour</label>
+            <select id="towColour" class="f-input">
                 <option value="White">White</option>
                 <option value="Black">Black</option>
                 <option value="Silver">Silver</option>
@@ -279,866 +242,168 @@
                 <option value="Brown">Brown</option>
                 <option value="Other">Other</option>
             </select>
-            <input type="text" id="colourOtherInput" placeholder="ENTER COLOUR" style="display:none; margin-top:4px;" onfocus="handleFieldFocus(this)">
         </div>
-        <div>
-            <label>BODY TYPE</label>
-            <select id="bodyTypeSelect" class="unselected">
-                <option value="" disabled selected>BODY TYPE</option>
+        <div class="f-field">
+            <label class="f-label">Body Type</label>
+            <select id="towBodyType" class="f-input">
                 <option value="Sedan">Sedan</option>
                 <option value="Hatchback">Hatchback</option>
                 <option value="SUV">SUV</option>
                 <option value="Station Wagon">Station Wagon</option>
                 <option value="Utility">Utility</option>
                 <option value="Van">Van</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Convertible">Convertible</option>
                 <option value="Other">Other</option>
             </select>
         </div>
     </div>
 
-    <label>DRIVER</label>
-    <select id="officerSelect" class="unselected" onchange="checkOfficerOther(this)">
-        <option value="" disabled selected>SELECT DRIVER</option>
-        <option value="Brian">Brian</option>
-        <option value="Brett">Brett</option>
-        <option value="Other">Other...</option>
-    </select>
-    <input type="text" id="officerOtherInput" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px;" onfocus="handleFieldFocus(this)">
-
-    <!-- 1. SOLID BLUE COMPARISON BUTTON -->
-    <label>SIDE-BY-SIDE COMPARISON (VERIFICATION)</label>
-    <button type="button" class="comp-btn" id="compBtn" onclick="openComparisonWorkflow()">
-        <span id="compBtnText">📷 ALIGN & SNAP COMPARISON</span>
-    </button>
-    <div class="comp-preview-wrap" id="compPreviewWrap" onclick="openComparisonWorkflow()">
-        <img id="compPreviewImg" class="comp-preview-img" alt="Comparison Preview">
-        <span class="comp-preview-badge">SIDE-BY-SIDE VERIFIED (TAP TO RETAKE)</span>
+    <div class="f-grid-2">
+        <div class="f-field">
+            <label class="f-label">Driver</label>
+            <select id="towDriver" class="f-input">
+                <option value="Brian">Brian (Truck 3676)</option>
+                <option value="Brett">Brett (Truck 3921)</option>
+            </select>
+        </div>
+        <div class="f-field">
+            <label class="f-label">Tow Reason</label>
+            <input type="text" id="towReason" class="f-input" value="EXPIRED PARKING / NO PASS">
+        </div>
     </div>
-    <input type="file" id="nativeCompInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativeCompPhoto(this)">
 
-    <!-- 2. SOLID GREEN CONDITION PHOTOS BUTTON -->
-    <label>CONDITION PHOTOS</label>
-    <button type="button" class="cond-snap-btn" id="condSnapBtn" onclick="triggerNativeConditionSnap()">
-        📷 SNAP COND PHOTOS
-    </button>
-
-    <label class="batch-select-label">
-        🖼️ OR SELECT MULTIPLE FROM CAMERA ROLL
-        <input type="file" id="batchCondInput" accept="image/*" multiple style="display:none;" onchange="handleBatchConditionPhotos(this)">
-    </label>
-    <input type="file" id="nativeCondInput" accept="image/*" capture="environment" style="display:none;" onchange="handleSingleConditionPhoto(this)">
-
-    <div class="thumb-gallery" id="thumbGallery"></div>
-
-    <button class="submit-btn" id="submitBtn" disabled>LOG TOW</button>
-    <div id="status"></div>
-</div>
-
-<!-- GHOST ALIGNMENT VIEWFINDER MODAL -->
-<div id="overlayModal" class="overlay-modal">
-    <div class="modal-header">
-        <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
-        <span class="close-btn" onclick="closeOverlayModal()">✕</span>
-    </div>
-    <div class="opacity-bar">
-        <span>GHOST:</span>
-        <input type="range" id="opacitySlider" min="0" max="100" value="45">
-        <button type="button" class="torch-btn" id="torchBtn" onclick="toggleTorch()">🔦 TORCH</button>
-    </div>
-    <div class="viewfinder-container">
-        <video id="overlayVideo" autoplay playsinline muted></video>
-        <img id="ghostImage" alt="Ghost Overlay">
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn-modal-action btn-snap-live" onclick="snapLiveGhostPhoto()">⚡ SNAP ALIGNED (IN-APP)</button>
-        <button type="button" class="btn-modal-action btn-snap-native" onclick="launchNativeFromGhost()">📷 NATIVE CAMERA</button>
-    </div>
-</div>
-
-<div id="successOverlay">
-    <h1 id="successRego">VEHICLE TOWED</h1>
-    <p>Secured and syncing in background.</p>
-    <button class="ok-btn" onclick="window.location.href='tow.html';">OK</button>
-</div>
+    <button type="submit" id="btnSubmit" class="btn-submit-tow">IMPOUND VEHICLE 🚨</button>
+</form>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    let capturedPhotoBase64 = "";
 
-    const propertySelect = document.getElementById('propertySelect');
-    const regoInput = document.getElementById('regoInput');
-    const stateSelect = document.getElementById('stateSelect');
-    const makeSelect = document.getElementById('makeSelect');
-    const makeOtherInput = document.getElementById('makeOtherInput');
-    const modelInput = document.getElementById('modelInput');
-    const colourSelect = document.getElementById('colourSelect');
-    const colourOtherInput = document.getElementById('colourOtherInput');
-    const bodyTypeSelect = document.getElementById('bodyTypeSelect');
-    const officerSelect = document.getElementById('officerSelect');
-    const officerOtherInput = document.getElementById('officerOtherInput');
-
-    const compBtn = document.getElementById('compBtn');
-    const compBtnText = document.getElementById('compBtnText');
-    const compPreviewWrap = document.getElementById('compPreviewWrap');
-    const compPreviewImg = document.getElementById('compPreviewImg');
-    const nativeCompInput = document.getElementById('nativeCompInput');
-
-    const overlayModal = document.getElementById('overlayModal');
-    const overlayVideo = document.getElementById('overlayVideo');
-    const ghostImage = document.getElementById('ghostImage');
-    const opacitySlider = document.getElementById('opacitySlider');
-
-    const condSnapBtn = document.getElementById('condSnapBtn');
-    const nativeCondInput = document.getElementById('nativeCondInput');
-    const thumbGallery = document.getElementById('thumbGallery');
-    const submitBtn = document.getElementById('submitBtn');
-    const statusDiv = document.getElementById('status');
-    const syncBadge = document.getElementById('syncBadge');
-    const queueCount = document.getElementById('queueCount');
-    const successOverlay = document.getElementById('successOverlay');
-    const successRego = document.getElementById('successRego');
-
-    let conditionPhotos = [];
-    let isSubmitting = false;
-    let targetProperty = "";
-    let cachedMarkImageUrl = "";
-    let cachedMarkedTimestamp = "";
-    let overlayStream = null;
-    let isTorchOn = false;
-
-    function handleFieldFocus(input) {
-        const val = input.value.trim().toUpperCase();
-        if (["MODEL", "REGO", "VEHICLE", "UNKNOWN", "ENTER MAKE", "ENTER COLOUR", "ENTER DRIVER NAME"].includes(val)) {
-            input.value = "";
-        } else if (input.value) {
-            input.select();
-        }
-    }
-
-    function syncDropdownColors() {
-        [propertySelect, makeSelect, colourSelect, bodyTypeSelect, officerSelect].forEach(sel => {
-            if (!sel.value || sel.value === "") {
-                sel.classList.add('unselected');
-            } else {
-                sel.classList.remove('unselected');
-            }
-        });
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', () => {
         loadProperties();
-        updateQueueUI();
-        readUrlParamsAndPopulate();
-        checkExistingCompPhoto();
-        setupLiveValidation();
-        syncDropdownColors();
-        setupGhostSlider();
-
-        window.addEventListener('online', syncPendingTowsInBackground);
-        window.addEventListener('focus', syncPendingTowsInBackground);
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') syncPendingTowsInBackground();
-        });
-        syncPendingTowsInBackground();
-        setInterval(syncPendingTowsInBackground, 8000);
+        
+        // Auto-fill from URL params if coming from Run app
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('rego')) document.getElementById('towRego').value = params.get('rego').toUpperCase();
+        if (params.get('make')) document.getElementById('towMake').value = params.get('make');
+        if (params.get('model')) document.getElementById('towModel').value = params.get('model');
     });
 
-    regoInput.addEventListener('input', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
-    regoInput.addEventListener('change', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
-
-    function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
-    function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
-    function checkOfficerOther(s) { officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
-
-    function readUrlParamsAndPopulate() {
-        const params = new URLSearchParams(window.location.search);
-        const urlRego = (params.get('rego') || '').trim().toUpperCase();
-        const urlProp = (params.get('prop') || '').trim();
-        const urlMake = (params.get('make') || '').trim();
-        const urlModel = (params.get('model') || '').trim();
-        const urlColour = (params.get('colour') || '').trim();
-        const urlBody = (params.get('body') || '').trim();
-        const urlImg = (params.get('img') || '').trim();
-        const urlMkd = (params.get('mkd') || '').trim();
-        const shouldOpenComp = params.get('openComp') === "1";
-
-        if (urlRego) regoInput.value = urlRego;
-        if (urlProp) targetProperty = decodeURIComponent(urlProp).toUpperCase();
-        if (urlImg) cachedMarkImageUrl = decodeURIComponent(urlImg);
-        if (urlMkd) cachedMarkedTimestamp = decodeURIComponent(urlMkd);
-
-        let cachedCar = null;
-        try {
-            const cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || '[]');
-            cachedCar = cachedRun.find(c => String(c.rego).trim().toUpperCase() === urlRego) || null;
-            if (cachedCar) {
-                if (!cachedMarkImageUrl) cachedMarkImageUrl = cachedCar.imageUrl || cachedCar.image || "";
-                if (!cachedMarkedTimestamp) cachedMarkedTimestamp = cachedCar.markedTimeStr || cachedCar.markedTime || "";
-            }
-        } catch(e) {}
-
-        const makeVal = urlMake || (cachedCar ? cachedCar.make : "");
-        const modelVal = urlModel || (cachedCar ? cachedCar.model : "");
-        const colourVal = urlColour || (cachedCar ? cachedCar.colour : "");
-        const bodyVal = urlBody || (cachedCar ? cachedCar.bodyType : "");
-
-        if (makeVal) {
-            let matched = false;
-            for (let i = 0; i < makeSelect.options.length; i++) {
-                if (makeSelect.options[i].value.toLowerCase() === makeVal.toLowerCase()) {
-                    makeSelect.selectedIndex = i; matched = true; break;
-                }
-            }
-            if (!matched) {
-                makeSelect.value = "Other"; makeOtherInput.style.display = 'block'; makeOtherInput.value = makeVal;
-            }
-        }
-
-        if (modelVal) modelInput.value = modelVal;
-
-        if (colourVal) {
-            let matched = false;
-            for (let i = 0; i < colourSelect.options.length; i++) {
-                if (colourSelect.options[i].value.toLowerCase() === colourVal.toLowerCase()) {
-                    colourSelect.selectedIndex = i; matched = true; break;
-                }
-            }
-            if (!matched) {
-                colourSelect.value = "Other"; colourOtherInput.style.display = 'block'; colourOtherInput.value = colourVal;
-            }
-        }
-
-        if (bodyVal) {
-            for (let i = 0; i < bodyTypeSelect.options.length; i++) {
-                const optVal = bodyTypeSelect.options[i].value.toLowerCase();
-                const bLower = bodyVal.toLowerCase();
-                if (optVal === bLower || (bLower === "ute" && optVal === "utility") || (bLower === "wagon" && optVal === "station wagon")) {
-                    bodyTypeSelect.selectedIndex = i; break;
-                }
-            }
-        }
-
-        syncDropdownColors();
-        validateForm();
-
-        if (shouldOpenComp && urlRego) {
-            setTimeout(openComparisonWorkflow, 300);
-        }
-    }
-
-    function autoPopulateFromCache() {
-        const curRego = regoInput.value.trim().toUpperCase();
-        if (!curRego) return;
-        try {
-            const cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || '[]');
-            const found = cachedRun.find(c => String(c.rego).trim().toUpperCase() === curRego);
-            if (found) {
-                if (found.imageUrl && !cachedMarkImageUrl) cachedMarkImageUrl = found.imageUrl;
-                if (found.markedTime && !cachedMarkedTimestamp) cachedMarkedTimestamp = found.markedTime;
-                if (found.property && (!propertySelect.value || propertySelect.value === "")) {
-                    for (let i = 0; i < propertySelect.options.length; i++) {
-                        if (propertySelect.options[i].value.toUpperCase() === found.property.toUpperCase()) {
-                            propertySelect.selectedIndex = i; break;
-                        }
-                    }
-                }
-                if (found.make && (!makeSelect.value || makeSelect.value === "")) {
-                    let matched = false;
-                    for (let i = 0; i < makeSelect.options.length; i++) {
-                        if (makeSelect.options[i].value.toLowerCase() === found.make.toLowerCase()) {
-                            makeSelect.selectedIndex = i; matched = true; break;
-                        }
-                    }
-                    if (!matched) {
-                        makeSelect.value = "Other"; makeOtherInput.style.display = 'block'; makeOtherInput.value = found.make;
-                    }
-                }
-                if (found.model && !modelInput.value) modelInput.value = found.model;
-                if (found.colour && (!colourSelect.value || colourSelect.value === "")) {
-                    let matched = false;
-                    for (let i = 0; i < colourSelect.options.length; i++) {
-                        if (colourSelect.options[i].value.toLowerCase() === found.colour.toLowerCase()) {
-                            colourSelect.selectedIndex = i; matched = true; break;
-                        }
-                    }
-                    if (!matched) {
-                        colourSelect.value = "Other"; colourOtherInput.style.display = 'block'; colourOtherInput.value = found.colour;
-                    }
-                }
-                syncDropdownColors();
-                validateForm();
-            }
-        } catch(e) {}
-    }
-
     async function loadProperties() {
-        const cached = localStorage.getItem('cached_properties');
-        if (cached) { try { populatePropertiesUI(JSON.parse(cached)); } catch(e) {} }
+        const propSel = document.getElementById('towProperty');
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
             const data = await res.json();
-            localStorage.setItem('cached_properties', JSON.stringify(data));
-            populatePropertiesUI(data);
+            propSel.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+            data.forEach(p => {
+                const name = typeof p === 'object' ? p.name : p;
+                if (name) {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.innerText = name;
+                    propSel.appendChild(opt);
+                }
+            });
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('property')) propSel.value = params.get('property');
         } catch(e) {}
     }
 
-    function populatePropertiesUI(data) {
-        if (!Array.isArray(data) || data.length === 0) return;
-        propertySelect.innerHTML = '<option value="" disabled selected>PROPERTY</option>';
-        data.forEach(p => {
-            const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
-            if (propName) {
-                const opt = document.createElement('option');
-                opt.value = propName; opt.innerText = propName;
-                if (targetProperty && propName.toUpperCase() === targetProperty) opt.selected = true;
-                propertySelect.appendChild(opt);
-            }
-        });
-        syncDropdownColors();
-        validateForm();
+    function triggerCam(id) {
+        document.getElementById(id).click();
     }
 
-    function setupLiveValidation() {
-        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect, officerSelect, officerOtherInput];
-        inputs.forEach(elem => {
-            if (elem) {
-                elem.addEventListener('input', () => { syncDropdownColors(); validateForm(); });
-                elem.addEventListener('change', () => { syncDropdownColors(); validateForm(); });
-            }
-        });
-        validateForm();
-    }
-
-    function validateForm() {
-        let isValid = true;
-        function mark(elem, cond) {
-            if (!elem) return;
-            if (cond) {
-                elem.classList.remove('field-missing'); elem.classList.add('field-valid');
-            } else {
-                elem.classList.remove('field-valid'); elem.classList.add('field-missing');
-                isValid = false;
-            }
-        }
-
-        mark(propertySelect, propertySelect && propertySelect.value !== "");
-        mark(regoInput, regoInput && regoInput.value.trim() !== "");
-        mark(makeSelect, makeSelect && makeSelect.value !== "");
-        if (makeSelect && makeSelect.value === "Other") {
-            mark(makeOtherInput, makeOtherInput && makeOtherInput.value.trim() !== "");
-        }
-        mark(modelInput, modelInput && modelInput.value.trim() !== "");
-        mark(colourSelect, colourSelect && colourSelect.value !== "");
-        if (colourSelect && colourSelect.value === "Other") {
-            mark(colourOtherInput, colourOtherInput && colourOtherInput.value.trim() !== "");
-        }
-        mark(bodyTypeSelect, bodyTypeSelect && bodyTypeSelect.value !== "");
-        
-        mark(officerSelect, officerSelect && officerSelect.value !== "");
-        if (officerSelect && officerSelect.value === "Other") {
-            mark(officerOtherInput, officerOtherInput && officerOtherInput.value.trim() !== "");
-        }
-
-        if (conditionPhotos.length === 0) {
-            isValid = false;
-        }
-
-        submitBtn.disabled = !isValid;
-        submitBtn.style.opacity = isValid ? "1" : "0.5";
-        return isValid;
-    }
-
-    // ============================================================
-    // 1. HYBRID GHOST ALIGNMENT & NATIVE COMPARISON
-    // ============================================================
-    function openComparisonWorkflow() {
-        const rego = regoInput.value.trim().toUpperCase() || "VEHICLE";
-        document.getElementById('modalRegoTitle').innerText = `${rego} - ALIGN & VERIFY`;
-
-        if (cachedMarkImageUrl) {
-            const driveIdMatch = cachedMarkImageUrl.match(/[-\w]{25,}/);
-            ghostImage.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : cachedMarkImageUrl;
-            ghostImage.style.display = "block";
-        } else {
-            ghostImage.style.display = "none";
-        }
-
-        overlayModal.classList.add('show');
-        startOverlayCamera();
-    }
-
-    async function startOverlayCamera() {
-        try {
-            overlayStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
-                audio: false
-            });
-            overlayVideo.srcObject = overlayStream;
-        } catch(e) {
-            alert("Camera access required for alignment: " + e.message);
-        }
-    }
-
-    async function toggleTorch() {
-        if (!overlayStream) return;
-        const track = overlayStream.getVideoTracks()[0];
-        if (!track) return;
-        try {
-            isTorchOn = !isTorchOn;
-            await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
-            document.getElementById('torchBtn').innerText = isTorchOn ? "🔦 TORCH ON" : "🔦 TORCH";
-            document.getElementById('torchBtn').style.background = isTorchOn ? "#ffab00" : "#333";
-            document.getElementById('torchBtn').style.color = isTorchOn ? "#000" : "#ffab00";
-        } catch(err) {
-            alert("Torch not supported on this camera stream.");
-        }
-    }
-
-    function closeOverlayModal() {
-        if (overlayStream) {
-            overlayStream.getTracks().forEach(t => t.stop());
-            overlayStream = null;
-        }
-        isTorchOn = false;
-        overlayModal.classList.remove('show');
-    }
-
-    function setupGhostSlider() {
-        if (opacitySlider) {
-            opacitySlider.addEventListener('input', (e) => {
-                ghostImage.style.opacity = e.target.value / 100;
-            });
-        }
-    }
-
-    // IN-APP ALIGNED SNAP
-    function snapLiveGhostPhoto() {
-        statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = "⚡ FREEZING & STITCHING SIDE-BY-SIDE...";
-
-        const vW = overlayVideo.videoWidth || 1280;
-        const vH = overlayVideo.videoHeight || 720;
-        const canvas = document.createElement('canvas');
-        canvas.width = vW;
-        canvas.height = vH;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(overlayVideo, 0, 0, vW, vH);
-        const liveTowB64 = canvas.toDataURL('image/jpeg', 0.85);
-
-        closeOverlayModal();
-
-        stitchSideBySide(cachedMarkImageUrl, liveTowB64, cachedMarkedTimestamp, (stitchedB64) => {
-            saveCompResult(stitchedB64);
-        });
-    }
-
-    // NATIVE CAMERA LAUNCH
-    function launchNativeFromGhost() {
-        closeOverlayModal();
-        nativeCompInput.value = "";
-        nativeCompInput.click();
-    }
-
-    function handleNativeCompPhoto(input) {
+    function handleTowPhoto(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
-
-        statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = "⚡ COMPRESSING & STITCHING SIDE-BY-SIDE...";
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            stitchSideBySide(cachedMarkImageUrl, e.target.result, cachedMarkedTimestamp, (stitchedB64) => {
-                saveCompResult(stitchedB64);
-            });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function saveCompResult(stitchedB64) {
-        const rego = regoInput.value.trim().toUpperCase() || "VEHICLE";
-        try {
-            localStorage.setItem('pending_comp_' + rego, stitchedB64);
-        } catch(err) {
-            console.warn("Storage warning, caching in memory");
-        }
-        compPreviewImg.src = stitchedB64;
-        compPreviewWrap.style.display = "block";
-        compBtn.classList.add("comp-ready");
-        compBtnText.innerText = "✔ COMPARISON VERIFIED (TAP TO RETAKE)";
-        statusDiv.style.color = "#00e676";
-        statusDiv.innerText = "✔ SIDE-BY-SIDE VERIFICATION ATTACHED";
-        if (navigator.vibrate) navigator.vibrate(50);
-    }
-
-    function checkExistingCompPhoto() {
-        const rego = regoInput.value.trim().toUpperCase();
-        if (!rego) return;
-        const existing = localStorage.getItem('pending_comp_' + rego);
-        if (existing) {
-            compPreviewImg.src = existing;
-            compPreviewWrap.style.display = "block";
-            compBtn.classList.add("comp-ready");
-            compBtnText.innerText = "✔ COMPARISON ATTACHED (TAP TO RETAKE)";
-        }
-    }
-
-    // BULLETPROOF SIDE-BY-SIDE STITCHER
-    function stitchSideBySide(markSrc, towSrc, mkdTime, callback) {
-        const nowD = new Date();
-        const towTime = `${String(nowD.getDate()).padStart(2,'0')}/${String(nowD.getMonth()+1).padStart(2,'0')} ${String(nowD.getHours()).padStart(2,'0')}:${String(nowD.getMinutes()).padStart(2,'0')}`;
-        const markLabel = mkdTime ? `MARKED: ${mkdTime}` : "MARKED VEHICLE";
-
-        const towImg = new Image();
-        towImg.onload = function() {
-            if (markSrc) {
-                const markImg = new Image();
-                markImg.crossOrigin = "anonymous";
-                markImg.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 1200; canvas.height = 800;
-                    const ctx = canvas.getContext('2d');
-
-                    ctx.drawImage(markImg, 0, 0, 600, 800);
-                    ctx.drawImage(towImg, 600, 0, 600, 800);
-
-                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 4;
-                    ctx.beginPath(); ctx.moveTo(600, 0); ctx.lineTo(600, 800); ctx.stroke();
-
-                    ctx.fillStyle = "rgba(0,0,0,0.80)";
-                    ctx.fillRect(0, 730, 600, 70);
-                    ctx.fillRect(600, 730, 600, 70);
-
-                    ctx.font = "bold 24px sans-serif";
-                    ctx.fillStyle = "#ffab00";
-                    ctx.fillText(markLabel, 20, 774);
-
-                    ctx.fillStyle = "#00e676";
-                    ctx.fillText(`TOWED: ${towTime}`, 620, 774);
-
-                    try {
-                        callback(canvas.toDataURL('image/jpeg', 0.70));
-                    } catch(err) {
-                        fallbackTowOnlyCanvas(towImg, towTime, callback);
-                    }
-                };
-                markImg.onerror = function() {
-                    fallbackTowOnlyCanvas(towImg, towTime, callback);
-                };
-                markImg.src = markSrc;
-            } else {
-                fallbackTowOnlyCanvas(towImg, towTime, callback);
-            }
-        };
-        towImg.src = towSrc;
-    }
-
-    function fallbackTowOnlyCanvas(towImg, towTime, callback) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 960; canvas.height = 720;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(towImg, 0, 0, 960, 720);
-        ctx.fillStyle = "rgba(0,0,0,0.80)";
-        ctx.fillRect(0, 650, 960, 70);
-        ctx.font = "bold 26px sans-serif";
-        ctx.fillStyle = "#00e676";
-        ctx.fillText(`TOWED: ${towTime}`, 20, 695);
-        callback(canvas.toDataURL('image/jpeg', 0.70));
-    }
-
-    // ============================================================
-    // 2. CONDITION PHOTOS ENGINE
-    // ============================================================
-    function triggerNativeConditionSnap() {
-        nativeCondInput.value = "";
-        nativeCondInput.click();
-    }
-
-    function handleSingleConditionPhoto(input) {
-        if (!input.files || !input.files[0]) return;
-        compressAndAddPhoto(input.files[0]);
-    }
-
-    function handleBatchConditionPhotos(input) {
-        if (!input.files || input.files.length === 0) return;
-        Array.from(input.files).forEach(file => {
-            compressAndAddPhoto(file);
-        });
-    }
-
-    function compressAndAddPhoto(file) {
-        statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = "⚡ COMPRESSING CONDITION PHOTO...";
+        document.getElementById('camStatus').innerText = "Analyzing with AI...";
 
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const maxDim = 800;
+                const maxDim = 960;
                 let w = img.width, h = img.height;
-                if (w > h) {
-                    if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
-                } else {
-                    if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                    else { w = Math.round((w * maxDim) / h); h = maxDim; }
                 }
                 canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.65);
+                
+                const prev = document.getElementById('mainCamPreview');
+                prev.src = capturedPhotoBase64;
+                prev.style.display = 'block';
 
-                const fastB64 = canvas.toDataURL('image/jpeg', 0.55);
-                conditionPhotos.push(fastB64);
-
-                renderThumbs();
-                if (navigator.vibrate) navigator.vibrate(40);
-
-                if (conditionPhotos.length === 1 && (!regoInput.value || !makeSelect.value || !modelInput.value)) {
-                    triggerStandaloneAiClassification(fastB64);
-                } else {
-                    statusDiv.innerText = "";
-                }
+                // Query ANPR & Gemini Server-Side
+                queryAiClassification(capturedPhotoBase64);
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    function renderThumbs() {
-        thumbGallery.innerHTML = "";
-        conditionPhotos.forEach((src, idx) => {
-            const wrap = document.createElement('div');
-            wrap.className = 'thumb-container';
-
-            const img = document.createElement('img');
-            img.src = src; img.className = 'thumb-img';
-
-            const del = document.createElement('div');
-            del.className = 'thumb-del';
-            del.innerText = '✕';
-            del.onclick = (e) => {
-                e.stopPropagation();
-                conditionPhotos.splice(idx, 1);
-                renderThumbs();
-            };
-
-            wrap.appendChild(img);
-            wrap.appendChild(del);
-            thumbGallery.appendChild(wrap);
-        });
-
-        // Button stays permanently solid green with static text
-        validateForm();
-    }
-
-    async function triggerStandaloneAiClassification(b64) {
-        statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = "🔍 AI SCANNING REGO & VEHICLE DETAILS...";
-
-        const needsRego = !regoInput.value || regoInput.value.trim() === "";
-        const needsMMCT = !makeSelect.value || !modelInput.value;
-
-        const anprTask = needsRego ? fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 })
-        }).then(r => r.json()).catch(() => null) : Promise.resolve(null);
-
-        const aiTask = needsMMCT ? fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'ai_classify', photoBytes: b64 })
-        }).then(r => r.json()).catch(() => null) : Promise.resolve(null);
-
+    async function queryAiClassification(b64) {
         try {
-            const [anprRes, aiRes] = await Promise.all([anprTask, aiTask]);
-
-            if (anprRes && anprRes.rego && (!regoInput.value || regoInput.value.trim() === "")) {
-                regoInput.value = anprRes.rego.trim().toUpperCase();
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'ai_classify', photoBytes: b64 })
+            });
+            const data = await res.json();
+            if (data.status === "SUCCESS" && data.result) {
+                if (data.result.make) document.getElementById('towMake').value = data.result.make;
+                if (data.result.model) document.getElementById('towModel').value = data.result.model;
+                if (data.result.colour) document.getElementById('towColour').value = data.result.colour;
+                if (data.result.bodyType) document.getElementById('towBodyType').value = data.result.bodyType;
+                document.getElementById('camStatus').innerText = "AI Identified Vehicle ✔";
             }
-
-            if (aiRes && aiRes.status === "SUCCESS" && aiRes.result) {
-                const r = aiRes.result;
-                if (r.make && (!makeSelect.value || makeSelect.value === "")) {
-                    let matched = false;
-                    for (let i = 0; i < makeSelect.options.length; i++) {
-                        if (makeSelect.options[i].value.toLowerCase() === r.make.toLowerCase()) {
-                            makeSelect.selectedIndex = i; matched = true; break;
-                        }
-                    }
-                    if (!matched) {
-                        makeSelect.value = "Other"; makeOtherInput.style.display = 'block'; makeOtherInput.value = r.make;
-                    }
-                }
-                if (r.model && !modelInput.value) modelInput.value = r.model;
-                if (r.colour && (!colourSelect.value || colourSelect.value === "")) {
-                    let matched = false;
-                    for (let i = 0; i < colourSelect.options.length; i++) {
-                        if (colourSelect.options[i].value.toLowerCase() === r.colour.toLowerCase()) {
-                            colourSelect.selectedIndex = i; matched = true; break;
-                        }
-                    }
-                    if (!matched) {
-                        colourSelect.value = "Other"; colourOtherInput.style.display = 'block'; colourOtherInput.value = r.colour;
-                    }
-                }
-                if (r.bodyType && (!bodyTypeSelect.value || bodyTypeSelect.value === "")) {
-                    for (let i = 0; i < bodyTypeSelect.options.length; i++) {
-                        const optVal = bodyTypeSelect.options[i].value.toLowerCase();
-                        const bLower = r.bodyType.toLowerCase();
-                        if (optVal === bLower || (bLower === "ute" && optVal === "utility") || (bLower === "wagon" && optVal === "station wagon")) {
-                            bodyTypeSelect.selectedIndex = i; break;
-                        }
-                    }
-                }
-            }
-
-            syncDropdownColors();
-            validateForm();
-            statusDiv.style.color = "#00e676";
-            statusDiv.innerText = "✔ DETAILS AUTO-POPULATED";
-            setTimeout(() => { statusDiv.innerText = ""; }, 2500);
         } catch(e) {
-            statusDiv.innerText = "";
+            document.getElementById('camStatus').innerText = "Photo Saved";
         }
     }
 
-    // ============================================================
-    // 3. OFFLINE STORAGE & TOW SUBMISSION
-    // ============================================================
-    submitBtn.addEventListener('click', (e) => {
+    async function submitTow(e) {
         e.preventDefault();
-        if (!validateForm() || isSubmitting) return;
-
-        const rego = regoInput.value.trim().toUpperCase();
-        isSubmitting = true;
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = "0.5";
-        statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = "SECURING TOW LOG...";
-
-        const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
-        const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
-        const driver = officerSelect.value === "Other" ? officerOtherInput.value.trim() : officerSelect.value;
-        const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
+        const btn = document.getElementById('btnSubmit');
+        btn.innerText = "IMPOUNDING TO YARD...";
+        btn.disabled = true;
 
         const payload = {
-            id: 'TOW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_tow',
-            property: propertySelect.value || targetProperty || 'GENERAL',
-            rego: rego,
-            state: stateSelect.value,
-            make: finalMake,
-            model: modelInput.value.trim(),
-            colour: finalColour,
-            bodyType: bodyTypeSelect.value,
-            officer: driver,
-            photoBytes: conditionPhotos.length > 0 ? conditionPhotos[0] : "",
-            photos: conditionPhotos,
-            comparisonPhoto: compB64,
-            timestamp: new Date().toISOString()
+            property: document.getElementById('towProperty').value,
+            rego: document.getElementById('towRego').value.trim().toUpperCase(),
+            make: document.getElementById('towMake').value.trim(),
+            model: document.getElementById('towModel').value.trim(),
+            colour: document.getElementById('towColour').value,
+            bodyType: document.getElementById('towBodyType').value,
+            officer: document.getElementById('towDriver').value,
+            reason: document.getElementById('towReason').value,
+            photoBytes: capturedPhotoBase64
         };
 
         try {
-            let blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
-            blacklisted[rego] = Date.now();
-            localStorage.setItem('towed_blacklist', JSON.stringify(blacklisted));
-
-            let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
-            cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
-            localStorage.setItem('cached_run_data', JSON.stringify(cachedRun));
-            localStorage.removeItem('pending_comp_' + rego);
-        } catch(err) {}
-
-        saveToOfflineQueue(payload);
-
-        if (navigator.onLine) {
-            fetch(GOOGLE_SCRIPT_URL, {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
-            }).then(res => res.json())
-              .then(data => {
-                  if (data && data.status === "SUCCESS") {
-                      removeFromOfflineQueue(payload.id);
-                  }
-              }).catch(() => console.warn("Background upload queued"));
-        }
-
-        successRego.innerText = rego + " LOGGED";
-        successOverlay.style.display = "flex";
-    });
-
-    function saveToOfflineQueue(payload) {
-        try {
-            let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-            if (!queue.some(item => item.id === payload.id)) {
-                queue.push(payload);
-                localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
-            }
-        } catch(e) {
-            console.error("Quota fallback triggered:", e);
-        }
-        updateQueueUI();
-    }
-
-    function removeFromOfflineQueue(id) {
-        try {
-            let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-            queue = queue.filter(item => item.id !== id);
-            localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
-        } catch(e) {}
-        updateQueueUI();
-    }
-
-    function updateQueueUI() {
-        try {
-            let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-            if (queue.length > 0) {
-                queueCount.innerText = queue.length;
-                syncBadge.style.display = 'block';
+            });
+            const data = await res.json();
+            if (data.status === "SUCCESS") {
+                alert(`Vehicle ${payload.rego} successfully impounded into Yard Log!`);
+                window.location.href = "yard.html";
             } else {
-                syncBadge.style.display = 'none';
+                alert("Error: " + data.message);
+                btn.innerText = "IMPOUND VEHICLE 🚨";
+                btn.disabled = false;
             }
-        } catch(e) {}
-    }
-
-    let isSyncingQueue = false;
-    async function syncPendingTowsInBackground() {
-        if (isSyncingQueue || !navigator.onLine) return;
-        let queue = [];
-        try {
-            queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        } catch(e) { return; }
-        
-        if (queue.length === 0) { updateQueueUI(); return; }
-
-        isSyncingQueue = true;
-        statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = `⚡ SYNCING QUEUED TOW (1/${queue.length})...`;
-
-        for (let i = 0; i < queue.length; i++) {
-            const item = queue[i];
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(item)
-                });
-                const resJson = await res.json();
-                if (resJson && resJson.status === "SUCCESS") {
-                    removeFromOfflineQueue(item.id);
-                    statusDiv.style.color = "#00e676";
-                    statusDiv.innerText = "✔ BASEMENT TOW SYNCED TO MASTER LOG";
-                    setTimeout(() => { statusDiv.innerText = ""; }, 3000);
-                }
-            } catch(err) { break; }
+        } catch(err) {
+            alert("Network error processing tow.");
+            btn.innerText = "IMPOUND VEHICLE 🚨";
+            btn.disabled = false;
         }
-        isSyncingQueue = false;
-        updateQueueUI();
-    }
-
-    async function processOfflineQueue() {
-        statusDiv.innerText = "⚡ FORCING OFFLINE QUEUE SYNC...";
-        await syncPendingTowsInBackground();
     }
 </script>
 </body>
