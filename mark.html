@@ -21,7 +21,7 @@
             --c-mark: #2979ff;
             --c-run: #ffab00;
             --c-tow: #ff1744;
-            --c-pass: #ab47bc;
+            --c-admin: #ab47bc;
             --c-yard: #00b0ff;
             --c-rel: #00e676;
         }
@@ -88,12 +88,12 @@
         .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 8px; flex-shrink: 0; }
         .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tile:active { transform: scale(0.96); }
-        .t-mark { background: var(--c-mark); color: #fff; box-shadow: 0 0 0 2px #fff; }
-        .t-run  { background: var(--c-run); color: #000; }
-        .t-tow  { background: var(--c-tow); color: #fff; }
-        .t-pass { background: var(--c-pass); color: #fff; }
-        .t-yard { background: var(--c-yard); color: #000; }
-        .t-rel  { background: var(--c-rel); color: #000; }
+        .t-mark  { background: var(--c-mark); color: #fff; box-shadow: 0 0 0 2px #fff; }
+        .t-run   { background: var(--c-run); color: #000; }
+        .t-tow   { background: var(--c-tow); color: #fff; }
+        .t-admin { background: var(--c-admin); color: #fff; }
+        .t-yard  { background: var(--c-yard); color: #000; }
+        .t-rel   { background: var(--c-rel); color: #000; }
 
         /* Sub-navigation bar */
         .sub-nav-bar {
@@ -446,7 +446,7 @@
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
     <a href="run.html" class="nav-tile t-run">RUN</a>
     <a href="tow.html" class="nav-tile t-tow">TOW</a>
-    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="admin.html" class="nav-tile t-admin">ADMIN</a>
     <a href="yard.html" class="nav-tile t-yard">YARD</a>
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
@@ -910,7 +910,6 @@
         const propSel = document.getElementById('mProperty');
         propSel.innerHTML = "";
         
-        // Populate options from property dropdown cache
         const allProps = propertyListCache.length > 0 ? propertyListCache : [{ name: item.property }];
         allProps.forEach(p => {
             const pName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
