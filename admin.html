@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ADMIN</title>
+    
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1002">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1002">
+
+    <style>
+        :root {
+            --c-mark: #2979ff;
+            --c-run: #ffab00;
+            --c-tow: #ff1744;
+            --c-admin: #ab47bc;
+            --c-yard: #00b0ff;
+            --c-rel: #00e676;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #121212;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+
+        .header-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .header-box h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--c-admin);
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        .icon-btn {
+            position: absolute;
+            right: 0;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 18px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+        }
+        .icon-btn:active { transform: scale(0.92); }
+
+        /* 3x2 Grid Navigation */
+        .nav-grid-3x2 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 440px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .nav-tile {
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 900;
+            text-decoration: none;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-tile:active { transform: scale(0.96); }
+        .t-mark  { background: var(--c-mark); color: #fff; }
+        .t-run   { background: var(--c-run); color: #000; }
+        .t-tow   { background: var(--c-tow); color: #fff; }
+        .t-admin { background: var(--c-admin); color: #fff; box-shadow: 0 0 0 2px #fff; }
+        .t-yard  { background: var(--c-yard); color: #000; }
+        .t-rel   { background: var(--c-rel); color: #000; }
+
+        /* Sub-Nav Switcher */
+        .sub-nav-bar {
+            display: flex;
+            width: 100%;
+            max-width: 440px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sub-tab {
+            flex: 1;
+            height: 40px;
+            border: none;
+            background: transparent;
+            color: #888;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+        .sub-tab.active {
+            background: var(--c-admin);
+            color: #fff;
+        }
+
+        .container {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Top Action Bar inside Tabs */
+        .action-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border-bottom: 1px solid #2d2d2d;
+            background: #181818;
+            flex-shrink: 0;
+        }
+        .search-input {
+            flex: 1;
+            height: 38px;
+            background: #242424;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0 10px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--c-admin); }
+        .btn-action-primary {
+            height: 38px;
+            padding: 0 12px;
+            background: #00e676;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Pass Card */
+        .pass-card {
+            background: #242424;
+            border: 1px solid #383838;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+        }
+        .pass-card:active { background: #2f2f2f; }
+        .p-row-top { display: flex; justify-content: space-between; align-items: center; }
+        .p-rego { font-family: monospace; font-size: 18px; font-weight: 900; color: #fff; }
+        .p-prop-badge { background: #333; color: #ffab00; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; }
+        .p-row-mid { font-size: 12px; color: #aaa; display: flex; justify-content: space-between; }
+        .p-notes { font-size: 11px; color: #00e676; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Property Tile */
+        .prop-tile {
+            background: #242424;
+            border: 1px solid #383838;
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+        }
+        .prop-tile:active { background: #2f2f2f; }
+        .prop-tile-name { font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 2px; }
+        .prop-tile-addr { font-size: 11px; color: #888; font-weight: 600; }
+
+        /* Shared Detail/Edit Fullscreen Sheet */
+        .modal-sheet {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: #181818;
+            z-index: 50;
+            flex-direction: column;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #1e1e1e;
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        }
+        .modal-title { font-size: 15px; font-weight: 900; color: var(--c-admin); text-transform: uppercase; }
+        .btn-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .f-field { display: flex; flex-direction: column; gap: 4px; }
+        .f-label { font-size: 10px; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .f-input {
+            width: 100%;
+            height: 42px;
+            background: #242424;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+        }
+        .f-input:focus { border-color: var(--c-admin); }
+        .f-rego { font-family: monospace; font-size: 18px; text-transform: uppercase; }
+
+        .modal-footer {
+            padding: 12px;
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .btn-cancel { flex: 1; height: 44px; background: #333; border: none; color: #fff; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+        .btn-submit { flex: 2; height: 44px; background: #00e676; border: none; color: #000; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 14px; }
+
+        .loading-box { text-align: center; padding: 30px; color: #888; font-weight: 800; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="header-box">
+    <h1>ADMIN</h1>
+    <div class="icon-btn" onclick="refreshActiveTab()">🔄</div>
+</div>
+
+<!-- 3x2 NAVIGATION GRID -->
+<div class="nav-grid-3x2">
+    <a href="mark.html" class="nav-tile t-mark">MARK</a>
+    <a href="run.html" class="nav-tile t-run">RUN</a>
+    <a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="admin.html" class="nav-tile t-admin">ADMIN</a>
+    <a href="yard.html" class="nav-tile t-yard">YARD</a>
+    <a href="release.html" class="nav-tile t-rel">REL</a>
+</div>
+
+<!-- SUB-NAV SWITCHER: PASSES vs PROPERTIES -->
+<div class="sub-nav-bar">
+    <button class="sub-tab active" id="tabBtnPasses" onclick="switchAdminTab('passes')">🎫 PASSES (<span id="lblPassCount">0</span>)</button>
+    <button class="sub-tab" id="tabBtnProps" onclick="switchAdminTab('props')">🏢 PROPERTIES (<span id="lblPropCount">0</span>)</button>
+</div>
+
+<div class="container">
+    <!-- ==================== VIEW 1: PASSES ==================== -->
+    <div id="viewPasses" style="display:flex; flex-direction:column; height:100%;">
+        <div class="action-bar">
+            <input type="text" id="passSearch" class="search-input" placeholder="Search plate or property..." oninput="filterPassList()">
+            <button class="btn-action-primary" onclick="openIssuePassModal()">➕ ISSUE PASS</button>
+        </div>
+        <div class="scroll-content" id="passList">
+            <div class="loading-box">Loading active passes...</div>
+        </div>
+    </div>
+
+    <!-- ==================== VIEW 2: PROPERTIES ==================== -->
+    <div id="viewProps" style="display:none; flex-direction:column; height:100%;">
+        <div class="action-bar">
+            <input type="text" id="propSearch" class="search-input" placeholder="Search property name..." oninput="filterPropList()">
+            <button class="btn-action-primary" onclick="openPropertyDetail(-1)">➕ NEW PROPERTY</button>
+        </div>
+        <div class="scroll-content" id="propList">
+            <div class="loading-box">Loading properties...</div>
+        </div>
+    </div>
+
+    <!-- ==================== PASS MODAL (ISSUE / EDIT) ==================== -->
+    <div id="passModal" class="modal-sheet">
+        <div class="modal-header">
+            <div class="modal-title" id="passModalTitle">ISSUE VISITOR PASS</div>
+            <button class="btn-close" onclick="closeModal('passModal')">✕</button>
+        </div>
+        <form class="modal-body" onsubmit="submitPassForm(event)">
+            <input type="hidden" id="pRowIdx">
+            
+            <div class="f-field">
+                <label class="f-label">Property</label>
+                <select id="pProperty" class="f-input" required></select>
+            </div>
+
+            <div class="f-field">
+                <label class="f-label">Vehicle Registration</label>
+                <input type="text" id="pRego" class="f-input f-rego" placeholder="e.g. 790WSY" required>
+            </div>
+
+            <div class="f-field">
+                <label class="f-label">Duration</label>
+                <select id="pDuration" class="f-input">
+                    <option value="1">1 Day</option>
+                    <option value="2">2 Days</option>
+                    <option value="3">3 Days</option>
+                    <option value="7">7 Days (1 Week)</option>
+                    <option value="14">14 Days (2 Weeks)</option>
+                    <option value="30">30 Days (1 Month)</option>
+                </select>
+            </div>
+
+            <div class="f-field">
+                <label class="f-label">Notes (Unit / Bay / Name)</label>
+                <input type="text" id="pNotes" class="f-input" placeholder="e.g. Unit 302 / Bay 4">
+            </div>
+
+            <div class="modal-footer" style="padding:0; margin-top:auto;">
+                <button type="button" class="btn-cancel" onclick="closeModal('passModal')">Cancel</button>
+                <button type="submit" id="btnSavePass" class="btn-submit">CONFIRM PASS ✔</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ==================== PROPERTY MODAL (DYNAMIC EDIT) ==================== -->
+    <div id="propModal" class="modal-sheet">
+        <div class="modal-header">
+            <div class="modal-title" id="propModalTitle">EDIT PROPERTY</div>
+            <button class="btn-close" onclick="closeModal('propModal')">✕</button>
+        </div>
+        <div class="modal-body" id="propFormFields"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeModal('propModal')">Cancel</button>
+            <button type="button" id="btnSaveProp" class="btn-submit" onclick="submitPropertyForm()">SAVE PROPERTY ✔</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+    let activeTab = "passes";
+    let passesCache = [];
+    let propertiesCache = [];
+    let propHeaders = [];
+    let currentPropRowIdx = null;
+
+    window.addEventListener('load', () => {
+        // Handle direct linking to ?tab=props if needed
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'props' || params.get('tab') === 'properties') {
+            switchAdminTab('props');
+        } else {
+            loadPasses();
+            loadPropertiesDropdown();
+        }
+    });
+
+    function switchAdminTab(tab) {
+        activeTab = tab;
+        document.getElementById('tabBtnPasses').classList.toggle('active', tab === 'passes');
+        document.getElementById('tabBtnProps').classList.toggle('active', tab === 'props');
+        document.getElementById('viewPasses').style.display = tab === 'passes' ? 'flex' : 'none';
+        document.getElementById('viewProps').style.display = tab === 'props' ? 'flex' : 'none';
+
+        if (tab === 'passes') {
+            loadPasses();
+        } else {
+            loadPropertiesData();
+        }
+    }
+
+    function refreshActiveTab() {
+        if (activeTab === 'passes') loadPasses();
+        else loadPropertiesData();
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    /* ==================== PASSES CONTROLLER ==================== */
+    async function loadPasses() {
+        const list = document.getElementById('passList');
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_passes");
+            passesCache = await res.json();
+            document.getElementById('lblPassCount').innerText = passesCache.length;
+            renderPassList(passesCache);
+        } catch(e) {
+            list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading passes.</div>`;
+        }
+    }
+
+    function renderPassList(items) {
+        const list = document.getElementById('passList');
+        if (!items || items.length === 0) {
+            list.innerHTML = `<div class="loading-box">NO ACTIVE PASSES</div>`;
+            return;
+        }
+
+        list.innerHTML = items.map(p => `
+            <div class="pass-card" onclick="openEditPassModal(${p.rowIdx})">
+                <div class="p-row-top">
+                    <span class="p-rego">${p.rego}</span>
+                    <span class="p-prop-badge">${p.property || 'GENERAL'}</span>
+                </div>
+                <div class="p-row-mid">
+                    <span>Valid: <strong>${p.duration}</strong></span>
+                    <span>Expires: <strong>${p.expiry}</strong></span>
+                </div>
+                <div class="p-notes">${p.notes ? '📝 ' + p.notes : ''}</div>
+            </div>
+        `).join('');
+    }
+
+    function filterPassList() {
+        const q = document.getElementById('passSearch').value.trim().toUpperCase();
+        if (!q) { renderPassList(passesCache); return; }
+        const filtered = passesCache.filter(p => 
+            p.rego.includes(q) || (p.property && p.property.includes(q)) || (p.notes && p.notes.toUpperCase().includes(q))
+        );
+        renderPassList(filtered);
+    }
+
+    async function loadPropertiesDropdown() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
+            const data = await res.json();
+            const select = document.getElementById('pProperty');
+            select.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+            data.forEach(p => {
+                const name = typeof p === 'object' ? p.name : p;
+                if (name) {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.innerText = name;
+                    select.appendChild(opt);
+                }
+            });
+        } catch(e) {}
+    }
+
+    function openIssuePassModal() {
+        document.getElementById('passModalTitle').innerText = "ISSUE VISITOR PASS";
+        document.getElementById('pRowIdx').value = "";
+        document.getElementById('pRego').value = "";
+        document.getElementById('pNotes').value = "";
+        document.getElementById('pDuration').value = "1";
+        document.getElementById('passModal').style.display = 'flex';
+    }
+
+    function openEditPassModal(rowIdx) {
+        const pass = passesCache.find(p => p.rowIdx === rowIdx);
+        if (!pass) return;
+
+        document.getElementById('passModalTitle').innerText = "EDIT PASS: " + pass.rego;
+        document.getElementById('pRowIdx').value = pass.rowIdx;
+        document.getElementById('pProperty').value = pass.property;
+        document.getElementById('pRego').value = pass.rego;
+        document.getElementById('pNotes').value = pass.notes || "";
+        
+        const days = parseInt(pass.duration, 10);
+        document.getElementById('pDuration').value = !isNaN(days) ? String(days) : "1";
+        
+        document.getElementById('passModal').style.display = 'flex';
+    }
+
+    async function submitPassForm(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSavePass');
+        btn.innerText = "SAVING...";
+        btn.disabled = true;
+
+        const rowIdx = document.getElementById('pRowIdx').value;
+        const payload = {
+            action: rowIdx ? "update_pass" : "add_pass",
+            rowIdx: rowIdx,
+            property: document.getElementById('pProperty').value,
+            rego: document.getElementById('pRego').value.trim().toUpperCase(),
+            newRego: document.getElementById('pRego').value.trim().toUpperCase(),
+            duration: document.getElementById('pDuration').value,
+            notes: document.getElementById('pNotes').value.trim()
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === "SUCCESS") {
+                closeModal('passModal');
+                loadPasses();
+            } else {
+                alert("Error: " + (result.message || "Failed to save pass"));
+            }
+        } catch(err) {
+            alert("Network connection error.");
+        } finally {
+            btn.innerText = "CONFIRM PASS ✔";
+            btn.disabled = false;
+        }
+    }
+
+    /* ==================== PROPERTIES CONTROLLER ==================== */
+    async function loadPropertiesData() {
+        const list = document.getElementById('propList');
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_all_properties_data");
+            const data = await res.json();
+            if (data.status === "SUCCESS") {
+                propHeaders = data.headers;
+                propertiesCache = data.rows;
+                document.getElementById('lblPropCount').innerText = propertiesCache.length;
+                renderPropList(propertiesCache);
+            }
+        } catch(e) {
+            list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading properties.</div>`;
+        }
+    }
+
+    function renderPropList(items) {
+        const list = document.getElementById('propList');
+        if (!items || items.length === 0) {
+            list.innerHTML = `<div class="loading-box">NO PROPERTIES RECORDED</div>`;
+            return;
+        }
+
+        list.innerHTML = items.map((r, idx) => {
+            const name = String(r.values[0] || "Unnamed").trim();
+            const addr = String(r.values[1] || "No Address Provided").trim();
+            return `
+                <div class="prop-tile" onclick="openPropertyDetail(${idx})">
+                    <div class="prop-tile-name">${name}</div>
+                    <div class="prop-tile-addr">${addr}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function filterPropList() {
+        const q = document.getElementById('propSearch').value.trim().toUpperCase();
+        if (!q) { renderPropList(propertiesCache); return; }
+        const filtered = propertiesCache.filter(r => 
+            String(r.values[0] || '').toUpperCase().includes(q) || String(r.values[1] || '').toUpperCase().includes(q)
+        );
+        renderPropList(filtered);
+    }
+
+    function openPropertyDetail(idx) {
+        const fieldsContainer = document.getElementById('propFormFields');
+        let vals = [];
+
+        if (idx === -1) {
+            currentPropRowIdx = -1;
+            document.getElementById('propModalTitle').innerText = "ADD NEW PROPERTY";
+            vals = new Array(propHeaders.length).fill("");
+        } else {
+            const rowData = propertiesCache[idx];
+            currentPropRowIdx = rowData.rowIdx;
+            document.getElementById('propModalTitle').innerText = String(rowData.values[0] || "EDIT PROPERTY");
+            vals = rowData.values;
+        }
+
+        fieldsContainer.innerHTML = propHeaders.map((header, colIdx) => {
+            const val = String(vals[colIdx] || "").replace(/"/g, '&quot;');
+            return `
+                <div class="f-field">
+                    <label class="f-label">${header || `Column ${colIdx + 1}`}</label>
+                    <input type="text" class="f-input" id="col_${colIdx}" value="${val}">
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('propModal').style.display = 'flex';
+    }
+
+    async function submitPropertyForm() {
+        const btn = document.getElementById('btnSaveProp');
+        btn.innerText = "SAVING...";
+        btn.disabled = true;
+
+        const newValues = [];
+        for (let i = 0; i < propHeaders.length; i++) {
+            const el = document.getElementById('col_' + i);
+            newValues.push(el ? el.value.trim() : "");
+        }
+
+        const payload = {
+            action: currentPropRowIdx === -1 ? "add_new_property" : "update_property_data",
+            rowIdx: currentPropRowIdx,
+            values: newValues
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === "SUCCESS") {
+                closeModal('propModal');
+                loadPropertiesData();
+                loadPropertiesDropdown();
+            } else {
+                alert("Error: " + (result.message || "Failed to save"));
+            }
+        } catch(err) {
+            alert("Network connection error.");
+        } finally {
+            btn.innerText = "SAVE PROPERTY ✔";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
