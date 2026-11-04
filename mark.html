@@ -60,7 +60,7 @@
         }
         .header-box h1 { 
             margin: 0; 
-            font-size: 36px; 
+            font-size: 32px; 
             font-weight: 900; 
             color: #ffab00; 
             letter-spacing: 2px; 
@@ -85,7 +85,7 @@
         .icon-btn:active { transform: scale(0.92); }
 
         /* 3x2 Grid Navigation */
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 10px; flex-shrink: 0; }
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin-bottom: 8px; flex-shrink: 0; }
         .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tile:active { transform: scale(0.96); }
         .t-mark { background: var(--c-mark); color: #fff; box-shadow: 0 0 0 2px #fff; }
@@ -94,6 +94,36 @@
         .t-pass { background: var(--c-pass); color: #fff; }
         .t-yard { background: var(--c-yard); color: #000; }
         .t-rel  { background: var(--c-rel); color: #000; }
+
+        /* Sub-navigation bar */
+        .sub-nav-bar {
+            display: flex;
+            width: 100%;
+            max-width: 440px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sub-tab {
+            flex: 1;
+            height: 38px;
+            border: none;
+            background: transparent;
+            color: #888;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+        .sub-tab.active {
+            background: var(--c-mark);
+            color: #fff;
+        }
 
         .card { 
             background: #1e1e1e; 
@@ -106,7 +136,6 @@
             flex-direction: column;
             flex: 1;
             min-height: 0;
-            margin-bottom: 4px;
             position: relative;
         }
 
@@ -118,7 +147,7 @@
         }
         select:focus { border-color: var(--c-mark); }
 
-        /* CENTRAL NATIVE CAMERA TRIGGER */
+        /* Camera trigger */
         .camera-trigger-box {
             width: 100%;
             flex: 1;
@@ -185,7 +214,182 @@
             border-radius: 12px;
         }
 
-        /* FULL-SCREEN RESULT FLASH OVERLAYS */
+        /* Log views */
+        .log-scroll-view {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 2px;
+        }
+
+        .log-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        .log-bar-title {
+            font-size: 13px;
+            font-weight: 900;
+            color: #ffab00;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-mini-refresh {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* Property tile */
+        .prop-tile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #242424;
+            border: 1.5px solid #383838;
+            border-radius: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .prop-tile:active { background: #333; transform: scale(0.98); }
+        .prop-tile-name { font-weight: 900; font-size: 15px; color: #fff; }
+        .prop-tile-count { 
+            background: var(--c-mark); 
+            color: #fff; 
+            font-weight: 900; 
+            font-size: 14px; 
+            padding: 4px 10px; 
+            border-radius: 12px;
+        }
+
+        /* Vehicle card */
+        .v-card {
+            display: flex;
+            align-items: center;
+            background: #242424;
+            border: 1.5px solid #383838;
+            border-radius: 10px;
+            padding: 10px;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .v-card:active { background: #333; }
+        .v-thumb {
+            width: 58px;
+            height: 58px;
+            border-radius: 6px;
+            background: #111;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid #444;
+        }
+        .v-info { flex: 1; min-width: 0; }
+        .v-row-1 { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .v-rego { font-family: monospace; font-size: 17px; font-weight: 900; color: #fff; }
+        .v-pass { font-size: 9px; font-weight: 900; padding: 2px 5px; border-radius: 4px; }
+        .pass-y { background: var(--c-rel); color: #000; }
+        .pass-n { background: var(--c-tow); color: #fff; }
+        .v-desc { font-size: 12px; color: #bbb; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+        .v-times { font-size: 10px; color: #777; font-weight: 700; display: flex; gap: 8px; }
+
+        .btn-back-prop {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #ffab00;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            align-self: flex-start;
+        }
+
+        /* Edit modal */
+        .edit-modal {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            border-radius: 18px;
+            z-index: 50;
+            flex-direction: column;
+            padding: 14px;
+            overflow-y: auto;
+        }
+        .edit-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .edit-title { font-size: 16px; font-weight: 900; color: #ffab00; text-transform: uppercase; }
+        .btn-edit-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; }
+
+        .audit-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .audit-box {
+            background: #111;
+            border: 1px dashed #444;
+            border-radius: 8px;
+            padding: 6px 8px;
+            font-size: 10px;
+            color: #888;
+            font-weight: 800;
+            text-align: center;
+        }
+        .audit-box strong { display: block; font-size: 11px; color: #00e676; margin-top: 2px; }
+
+        .f-field { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+        .f-field label { font-size: 10px; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .f-input {
+            width: 100%;
+            height: 40px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            outline: none;
+        }
+        .f-input:focus { border-color: var(--c-mark); }
+        .f-rego { font-size: 18px; font-family: monospace; text-transform: uppercase; letter-spacing: 1px; }
+
+        .f-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .edit-btn-row { display: flex; gap: 8px; margin-top: 8px; }
+        .btn-save-edit {
+            flex: 1;
+            height: 44px;
+            background: #00e676;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* Overlay alerts */
         .full-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -199,7 +403,7 @@
         .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; text-shadow: 0 6px 24px rgba(0,0,0,0.4); }
         .full-overlay-text { font-size: 30px; font-weight: 950; color: #000; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; }
 
-        /* MANUAL ENTRY MODAL */
+        /* Manual modal */
         .manual-rego-modal {
             display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88);
             border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; justify-content: center;
@@ -247,32 +451,142 @@
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
 
+<!-- SUB-NAV TOGGLE -->
+<div class="sub-nav-bar">
+    <button class="sub-tab active" id="tabSnap" onclick="showView('snap')">📷 SNAP / MARK</button>
+    <button class="sub-tab" id="tabLogs" onclick="showView('props')">📋 ACTIVE MARKS (<span id="totalMarksBadge">0</span>)</button>
+</div>
+
 <div class="card">
-    <div class="prop-select-wrap">
-        <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
-    </div>
+    <!-- VIEW 1: SNAP / SCAN -->
+    <div id="viewSnap" style="display:flex; flex-direction:column; width:100%; height:100%;">
+        <div class="prop-select-wrap">
+            <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
+        </div>
 
-    <div class="camera-trigger-box" onclick="launchNativeCamera()">
-        <img id="lastSnapPreview" class="preview-img-display" alt="Mark Preview">
-        <div class="cam-icon-circle">📷</div>
-        <div class="cam-launch-title">SNAP VEHICLE</div>
-        <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
+        <div class="camera-trigger-box" onclick="launchNativeCamera()">
+            <img id="lastSnapPreview" class="preview-img-display" alt="Mark Preview">
+            <div class="cam-icon-circle">📷</div>
+            <div class="cam-launch-title">SNAP VEHICLE</div>
+            <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
 
-        <div class="manual-rego-modal" id="manualRegoModal" onclick="event.stopPropagation()">
-            <div class="manual-rego-card">
-                <div class="manual-title">⚠️ UNREADABLE PLATE</div>
-                <input type="text" id="manualRegoInput" class="manual-input" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
-                <div class="manual-btn-row">
-                    <button type="button" class="btn-cancel" onclick="cancelManualMark()">RETAKE 📷</button>
-                    <button type="button" class="btn-submit" onclick="submitManualMark()">MARK ✔</button>
+            <div class="manual-rego-modal" id="manualRegoModal" onclick="event.stopPropagation()">
+                <div class="manual-rego-card">
+                    <div class="manual-title">⚠️ UNREADABLE PLATE</div>
+                    <input type="text" id="manualRegoInput" class="manual-input" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
+                    <div class="manual-btn-row">
+                        <button type="button" class="btn-cancel" onclick="cancelManualMark()">RETAKE 📷</button>
+                        <button type="button" class="btn-submit" onclick="submitManualMark()">MARK ✔</button>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <input type="file" id="nativeCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativePhoto(this)">
+        <div id="status">READY</div>
     </div>
 
-    <input type="file" id="nativeCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativePhoto(this)">
+    <!-- VIEW 2: PROPERTY LIST -->
+    <div id="viewProps" style="display:none; flex-direction:column; width:100%; height:100%;">
+        <div class="log-bar">
+            <span class="log-bar-title">Properties With Marks</span>
+            <button class="btn-mini-refresh" onclick="fetchMarkingLogs()">🔄 REFRESH</button>
+        </div>
+        <div class="log-scroll-view" id="propertyTilesList">
+            <div style="text-align:center; padding:20px; color:#888;">Loading active marks...</div>
+        </div>
+    </div>
 
-    <div id="status">READY</div>
+    <!-- VIEW 3: VEHICLE DETAIL LIST (NEWEST AT TOP) -->
+    <div id="viewVehicles" style="display:none; flex-direction:column; width:100%; height:100%;">
+        <button class="btn-back-prop" onclick="showView('props')">◀ ALL PROPERTIES</button>
+        <div class="log-bar">
+            <span class="log-bar-title" id="selectedPropLabel">PROPERTY</span>
+            <span id="propCountLabel" style="font-size:11px; color:#aaa; font-weight:800;"></span>
+        </div>
+        <div class="log-scroll-view" id="vehicleCardsList"></div>
+    </div>
+
+    <!-- VIEW 4: VEHICLE EDIT MODAL -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-title-row">
+            <div class="edit-title">EDIT MARK DETAILS</div>
+            <button class="btn-edit-close" onclick="closeEditModal()">✕</button>
+        </div>
+
+        <!-- READ-ONLY TIMESTAMPS -->
+        <div class="audit-info-grid">
+            <div class="audit-box">MARKED TIME<strong id="mMarkedTime">-</strong></div>
+            <div class="audit-box">EXPIRY TIME<strong id="mExpiryTime">-</strong></div>
+        </div>
+
+        <form onsubmit="saveMarkEdit(event)">
+            <input type="hidden" id="mRowIdx">
+            <input type="hidden" id="mOrigRego">
+
+            <div class="f-field">
+                <label>Property</label>
+                <select id="mProperty" class="f-input" required></select>
+            </div>
+
+            <div class="f-field">
+                <label>Registration Number</label>
+                <input type="text" id="mRego" class="f-input f-rego" required>
+            </div>
+
+            <div class="f-grid-2">
+                <div class="f-field">
+                    <label>Make</label>
+                    <input type="text" id="mMake" class="f-input">
+                </div>
+                <div class="f-field">
+                    <label>Model</label>
+                    <input type="text" id="mModel" class="f-input">
+                </div>
+            </div>
+
+            <div class="f-grid-2">
+                <div class="f-field">
+                    <label>Colour</label>
+                    <select id="mColour" class="f-input">
+                        <option value="White">White</option>
+                        <option value="Black">Black</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Grey">Grey</option>
+                        <option value="Blue">Blue</option>
+                        <option value="Red">Red</option>
+                        <option value="Green">Green</option>
+                        <option value="Yellow">Yellow</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Bronze">Bronze</option>
+                        <option value="Orange">Orange</option>
+                        <option value="Purple">Purple</option>
+                        <option value="Brown">Brown</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="f-field">
+                    <label>Body Type</label>
+                    <select id="mBodyType" class="f-input">
+                        <option value="Sedan">Sedan</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Station Wagon">Station Wagon</option>
+                        <option value="Utility">Utility</option>
+                        <option value="Van">Van</option>
+                        <option value="Coupe">Coupe</option>
+                        <option value="Convertible">Convertible</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="edit-btn-row">
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">CANCEL</button>
+                <button type="submit" id="btnSaveMark" class="btn-save-edit">SAVE CHANGES ✔</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -291,8 +605,10 @@
 
     let isProcessing = false;
     let pendingFailedPhoto = "";
+    let markingLogCache = [];
+    let propertyListCache = [];
+    let activeSelectedProperty = "";
 
-    // IMMEDIATELY SAVE PROPERTY TO LOCALSTORAGE ON EVERY USER CHANGE
     propertySelect.addEventListener('change', () => {
         if (propertySelect.value) {
             localStorage.setItem('last_property', propertySelect.value.trim());
@@ -301,18 +617,36 @@
 
     window.addEventListener('load', () => {
         loadProperties();
+        fetchMarkingLogs(true);
     });
+
+    function showView(view) {
+        document.getElementById('viewSnap').style.display = view === 'snap' ? 'flex' : 'none';
+        document.getElementById('viewProps').style.display = view === 'props' ? 'flex' : 'none';
+        document.getElementById('viewVehicles').style.display = view === 'vehicles' ? 'flex' : 'none';
+
+        document.getElementById('tabSnap').classList.toggle('active', view === 'snap');
+        document.getElementById('tabLogs').classList.toggle('active', view === 'props' || view === 'vehicles');
+
+        if (view === 'props') {
+            fetchMarkingLogs();
+        }
+    }
 
     async function loadProperties() {
         const cached = localStorage.getItem('cached_properties');
         if (cached) {
-            try { populatePropertyDropdown(JSON.parse(cached)); } catch(e) {}
+            try { 
+                propertyListCache = JSON.parse(cached);
+                populatePropertyDropdown(propertyListCache); 
+            } catch(e) {}
         }
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
             if (res.ok) {
                 const data = await res.json();
                 if (Array.isArray(data) && data.length > 0) {
+                    propertyListCache = data;
                     localStorage.setItem('cached_properties', JSON.stringify(data));
                     populatePropertyDropdown(data);
                 }
@@ -339,7 +673,6 @@
             }
         });
 
-        // Ensure saved property is retained
         if (matched && propertySelect.value) {
             localStorage.setItem('last_property', propertySelect.value);
         }
@@ -446,6 +779,8 @@
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
+        }).then(() => {
+            fetchMarkingLogs(true);
         }).catch(() => {});
     }
 
@@ -490,6 +825,157 @@
         setTimeout(() => {
             redOverlay.classList.remove('show');
         }, 700);
+    }
+
+    /* MARK LOG FETCH & RENDER ENGINE */
+    async function fetchMarkingLogs(silent = false) {
+        const container = document.getElementById('propertyTilesList');
+        if (!silent) container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Refreshing records...</div>';
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_marking_log");
+            if (res.ok) {
+                markingLogCache = await res.json();
+                document.getElementById('totalMarksBadge').innerText = markingLogCache.length;
+                renderPropertyTiles();
+            }
+        } catch(e) {
+            if (!silent) container.innerHTML = '<div style="text-align:center; padding:20px; color:#ff1744;">Error loading log.</div>';
+        }
+    }
+
+    function renderPropertyTiles() {
+        const container = document.getElementById('propertyTilesList');
+        if (!markingLogCache || markingLogCache.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:30px; color:#888; font-weight:800;">NO ACTIVE MARKS RECORDED</div>';
+            return;
+        }
+
+        const propMap = {};
+        markingLogCache.forEach(item => {
+            const p = item.property || "GENERAL";
+            propMap[p] = (propMap[p] || 0) + 1;
+        });
+
+        const sorted = Object.keys(propMap).sort();
+        container.innerHTML = sorted.map(prop => `
+            <div class="prop-tile" onclick="openPropertyVehicles('${prop.replace(/'/g, "\\'")}')">
+                <div class="prop-tile-name">${prop}</div>
+                <div class="prop-tile-count">${propMap[prop]}</div>
+            </div>
+        `).join('');
+    }
+
+    function openPropertyVehicles(propName) {
+        activeSelectedProperty = propName;
+        document.getElementById('selectedPropLabel').innerText = propName;
+        
+        const filtered = markingLogCache.filter(m => (m.property || "GENERAL") === propName);
+        document.getElementById('propCountLabel').innerText = `${filtered.length} marked`;
+
+        const container = document.getElementById('vehicleCardsList');
+        container.innerHTML = filtered.map(v => `
+            <div class="v-card" onclick="openEditModal(${v.rowIdx})">
+                ${v.imageUrl ? `<img src="${v.imageUrl}" class="v-thumb" loading="lazy">` : `<div class="v-thumb" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;">NO PIC</div>`}
+                <div class="v-info">
+                    <div class="v-row-1">
+                        <span class="v-rego">${v.rego}</span>
+                        <span class="v-pass ${v.pass === 'YES' ? 'pass-y' : 'pass-n'}">${v.pass === 'YES' ? 'PASS ACTIVE' : 'NO PASS'}</span>
+                    </div>
+                    <div class="v-desc">
+                        ${[v.colour, v.make, v.model].filter(Boolean).join(' ') || 'Unknown Vehicle'} • ${v.bodyType || 'Sedan'}
+                    </div>
+                    <div class="v-times">
+                        <span>Marked: ${v.markedTime}</span>
+                        <span>Expires: ${v.expiryTime}</span>
+                    </div>
+                </div>
+                <div style="font-size:16px; color:#666;">✏️</div>
+            </div>
+        `).join('');
+
+        showView('vehicles');
+    }
+
+    /* EDIT MODAL */
+    function openEditModal(rowIdx) {
+        const item = markingLogCache.find(v => v.rowIdx === rowIdx);
+        if (!item) return;
+
+        document.getElementById('mRowIdx').value = item.rowIdx;
+        document.getElementById('mOrigRego').value = item.rego;
+        document.getElementById('mMarkedTime').innerText = item.markedTime;
+        document.getElementById('mExpiryTime').innerText = item.expiryTime;
+
+        const propSel = document.getElementById('mProperty');
+        propSel.innerHTML = "";
+        
+        // Populate options from property dropdown cache
+        const allProps = propertyListCache.length > 0 ? propertyListCache : [{ name: item.property }];
+        allProps.forEach(p => {
+            const pName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+            if (pName) {
+                const opt = document.createElement('option');
+                opt.value = pName;
+                opt.innerText = pName;
+                if (pName.toUpperCase() === (item.property || "").toUpperCase()) opt.selected = true;
+                propSel.appendChild(opt);
+            }
+        });
+
+        document.getElementById('mRego').value = item.rego;
+        document.getElementById('mMake').value = item.make || "";
+        document.getElementById('mModel').value = item.model || "";
+        document.getElementById('mColour').value = item.colour || "Silver";
+        document.getElementById('mBodyType').value = item.bodyType || "Sedan";
+
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    async function saveMarkEdit(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveMark');
+        btn.innerText = "SAVING...";
+        btn.disabled = true;
+
+        const payload = {
+            action: "update_mark_details",
+            rowIdx: document.getElementById('mRowIdx').value,
+            origRego: document.getElementById('mOrigRego').value,
+            property: document.getElementById('mProperty').value,
+            rego: document.getElementById('mRego').value,
+            make: document.getElementById('mMake').value,
+            model: document.getElementById('mModel').value,
+            colour: document.getElementById('mColour').value,
+            bodyType: document.getElementById('mBodyType').value
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === "SUCCESS") {
+                closeEditModal();
+                await fetchMarkingLogs();
+                if (activeSelectedProperty) {
+                    openPropertyVehicles(payload.property || activeSelectedProperty);
+                }
+            } else {
+                alert("Error updating mark: " + (result.message || "Failed"));
+            }
+        } catch(err) {
+            alert("Connection error: " + err.message);
+        } finally {
+            btn.innerText = "SAVE CHANGES ✔";
+            btn.disabled = false;
+        }
     }
 </script>
 </body>
