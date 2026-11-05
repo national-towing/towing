@@ -56,7 +56,7 @@
         .sub-tab { flex: 1; height: 40px; border: none; background: transparent; color: #888; font-size: 13px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
         .sub-tab.active { background: var(--c-admin); color: #fff; }
 
-        /* Screen Elements */
+        /* Search & Actions */
         .search-bar-wrap { width: 100%; max-width: 440px; margin: 0 auto 10px auto; display: flex; gap: 8px; flex-shrink: 0; }
         .search-input { flex: 1; height: 44px; background: #1e1e1e; border: 1px solid #333; border-radius: 10px; padding: 0 12px; color: #fff; font-size: 14px; font-weight: 700; outline: none; }
         .search-input:focus { border-color: var(--c-admin); }
@@ -74,16 +74,39 @@
         .pd-row-top { display: flex; justify-content: space-between; align-items: center; }
         .pd-rego { font-family: monospace; font-size: 22px; font-weight: 900; color: #fff; }
         .pd-exp { font-size: 13px; font-weight: 900; color: #ffab00; background: #2a2212; padding: 4px 8px; border-radius: 6px; }
-        .pd-origin { font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+        .pd-origin { font-size: 11px; color: #aaa; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
         .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
 
-        /* Properties Tile Status Colors */
-        .tile-green { border: 2px solid #00e676; background: #0a1f12; }
-        .tile-orange { border: 2px solid #ffab00; background: #2a2212; }
-        .tile-red { border: 2px solid #ff1744; background: #2a1215; }
-        .prop-tile { border-radius: 12px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
-        .prop-tile-name { font-size: 16px; font-weight: 900; color: #fff; text-transform: uppercase; }
-        .prop-tile-addr { font-size: 11px; color: #888; font-weight: 600; }
+        /* SOLID High-Contrast Property Tiles (Matching Nav Tiles) */
+        .prop-tile { 
+            border-radius: 12px; 
+            padding: 14px; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+            border: none;
+            transition: transform 0.1s ease;
+        }
+        .prop-tile:active { transform: scale(0.98); }
+
+        /* Solid Green (REL Theme) */
+        .tile-green { background: #00e676; color: #000; box-shadow: 0 4px 12px rgba(0, 230, 118, 0.25); }
+        .tile-green .prop-tile-name { color: #000; font-weight: 950; }
+        .tile-green .prop-tile-addr { color: #1a1a1a; font-weight: 700; }
+
+        /* Solid Orange (RUN Theme) */
+        .tile-orange { background: #ffab00; color: #000; box-shadow: 0 4px 12px rgba(255, 171, 0, 0.25); }
+        .tile-orange .prop-tile-name { color: #000; font-weight: 950; }
+        .tile-orange .prop-tile-addr { color: #222; font-weight: 700; }
+
+        /* Solid Red (TOW Theme) */
+        .tile-red { background: #ff1744; color: #fff; box-shadow: 0 4px 12px rgba(255, 23, 68, 0.3); }
+        .tile-red .prop-tile-name { color: #fff; font-weight: 950; }
+        .tile-red .prop-tile-addr { color: #f0f0f0; font-weight: 700; }
+
+        .prop-tile-name { font-size: 17px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .prop-tile-addr { font-size: 12px; }
 
         /* Shared Detail/Edit Fullscreen Sheet */
         .modal-sheet { display: none; position: fixed; inset: 0; background: #121212; z-index: 9999; flex-direction: column; }
@@ -149,7 +172,7 @@
     </div>
 </div>
 
-<!-- ==================== PASS MODAL (ISSUE / EDIT) ==================== -->
+<!-- ==================== PASS MODAL ==================== -->
 <div id="passModal" class="modal-sheet">
     <div class="modal-header">
         <div class="modal-title" id="passModalTitle">ISSUE VISITOR PASS</div>
@@ -191,7 +214,7 @@
     </div>
 </div>
 
-<!-- ==================== PROPERTY MODAL (DYNAMIC EDIT) ==================== -->
+<!-- ==================== PROPERTY MODAL ==================== -->
 <div id="propModal" class="modal-sheet">
     <div class="modal-header">
         <div class="modal-title" id="propModalTitle">EDIT PROPERTY</div>
@@ -316,7 +339,6 @@
 
     function filterPassList() {
         const q = document.getElementById('passSearch').value.trim().toUpperCase();
-        
         let filtered = passesCache;
         if (q) {
             filtered = passesCache.filter(p => 
@@ -326,7 +348,6 @@
         } else if (activePropFilter === "SEARCH RESULTS") {
             activePropFilter = null;
         }
-        
         renderPassList(filtered);
     }
 
@@ -443,6 +464,34 @@
         return str;
     }
 
+    function parseAustralianDate(str) {
+        if (!str) return null;
+        if (str instanceof Date) return str;
+        const s = String(str).trim();
+        if (s.toUpperCase() === "OPEN ENDED") return "OPEN ENDED";
+        
+        // Handle DD/MM/YYYY or DD-MM-YYYY
+        const dmy = s.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2,4})/);
+        if (dmy) {
+            let yr = parseInt(dmy[3], 10);
+            if (yr < 100) yr += 2000;
+            return new Date(yr, parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+        }
+
+        // Handle DD Mon YY (e.g., "12 Mar 27" or "19 Aug 21")
+        const monMap = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5, JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+        const dMonY = s.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{2,4})/);
+        if (dMonY) {
+            let yr = parseInt(dMonY[3], 10);
+            if (yr < 100) yr += 2000;
+            const m = monMap[dMonY[2].toUpperCase()];
+            if (m !== undefined) return new Date(yr, m, parseInt(dMonY[1], 10));
+        }
+
+        const fallback = new Date(s);
+        return isNaN(fallback.getTime()) ? null : fallback;
+    }
+
     function renderPropList(items) {
         const list = document.getElementById('propList');
         if (!items || items.length === 0) {
@@ -455,44 +504,50 @@
             return idx !== -1 ? idx : fallback;
         };
 
-        const authNameIdx = getIdx("Auth Person Name", 4);
+        const authNameIdx  = getIdx("Auth Person Name", 4);
         const authPhoneIdx = getIdx("Auth Person Phone", 6);
         const authEmailIdx = getIdx("Auth Person Email", 7);
-        const saDateIdx = getIdx("SA Date", 13);
-        const tcFileIdx = getIdx("TC On File", 15);
-        const tcExpIdx = getIdx("TC Expiry", 17);
+        const saDateIdx    = getIdx("SA Date", 13);
+        const tcFileIdx    = getIdx("TC On File", 15);
+        const tcExpIdx     = getIdx("TC Expiry", 17);
 
-        const today = new Date();
-        const oneMonthFromNow = new Date();
-        oneMonthFromNow.setMonth(today.getMonth() + 1);
-
-        const isExpiringOrBlank = (dateStr) => {
-            if (!dateStr || String(dateStr).trim() === "") return true;
-            if (String(dateStr).trim().toUpperCase() === "OPEN ENDED") return false;
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return true; 
-            return d < oneMonthFromNow;
-        };
+        const now = new Date();
+        const oneMonthFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
 
         list.innerHTML = items.map((r, idx) => {
             const vals = r.values || [];
             const name = String(vals[0] || "Unnamed").trim();
             const addr = String(vals[1] || "No Address Provided").trim();
             
-            const tcExpiryVal = vals[tcExpIdx];
-            const saDateVal = vals[saDateIdx];
-            const isRed = isExpiringOrBlank(tcExpiryVal) || isExpiringOrBlank(saDateVal);
-            
+            const authName  = String(vals[authNameIdx] || "").trim();
+            const authPhone = String(vals[authPhoneIdx] || "").trim();
+            const authEmail = String(vals[authEmailIdx] || "").trim();
+            const saDateRaw = String(vals[saDateIdx] || "").trim();
+            const tcFile    = String(vals[tcFileIdx] || "").trim().toUpperCase();
+            const tcExpRaw  = String(vals[tcExpIdx] || "").trim();
+
+            const parsedExpiry = parseAustralianDate(tcExpRaw);
+
+            // 1. RED CONDITIONS:
+            // - TC Expiry is completely blank
+            // - TC Expiry is less than 1 month away (and not "Open Ended")
+            // - SA Date is completely blank
+            let isRed = false;
+            if (!tcExpRaw || !saDateRaw) {
+                isRed = true;
+            } else if (parsedExpiry !== "OPEN ENDED") {
+                if (!parsedExpiry || parsedExpiry < oneMonthFromNow) {
+                    isRed = true;
+                }
+            }
+
             let statusClass = "tile-green";
             if (isRed) {
                 statusClass = "tile-red";
             } else {
-                const authName = String(vals[authNameIdx] || "").trim();
-                const authPhone = String(vals[authPhoneIdx] || "").trim();
-                const authEmail = String(vals[authEmailIdx] || "").trim();
-                const tcFile = String(vals[tcFileIdx] || "").trim().toUpperCase();
-
-                if (!authName || !authPhone || !authEmail || tcFile === "NO" || tcFile === "") {
+                // 2. ORANGE CONDITIONS:
+                // Missing any of: Auth Person Name, Phone, Email, or TC On File !== YES
+                if (!authName || !authPhone || !authEmail || tcFile !== "YES") {
                     statusClass = "tile-orange";
                 }
             }
