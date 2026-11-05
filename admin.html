@@ -399,7 +399,6 @@
     let currentPropRowIdx = null;
 
     window.addEventListener('load', () => {
-        // Handle direct linking to ?tab=props if needed
         const params = new URLSearchParams(window.location.search);
         if (params.get('tab') === 'props' || params.get('tab') === 'properties') {
             switchAdminTab('props');
