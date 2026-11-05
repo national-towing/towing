@@ -77,7 +77,7 @@
         .pd-origin { font-size: 11px; color: #aaa; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
         .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
 
-        /* SOLID High-Contrast Property Tiles (Matching Nav Tiles) */
+        /* SOLID High-Contrast Property Tiles */
         .prop-tile { 
             border-radius: 12px; 
             padding: 14px; 
@@ -107,6 +107,24 @@
 
         .prop-tile-name { font-size: 17px; text-transform: uppercase; letter-spacing: 0.5px; }
         .prop-tile-addr { font-size: 12px; }
+
+        /* View Tow Consent Button inside Modal */
+        .btn-view-consent {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 44px;
+            background: #00b0ff;
+            color: #000;
+            font-weight: 900;
+            font-size: 13px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .btn-view-consent:active { transform: scale(0.98); }
 
         /* Shared Detail/Edit Fullscreen Sheet */
         .modal-sheet { display: none; position: fixed; inset: 0; background: #121212; z-index: 9999; flex-direction: column; }
@@ -297,8 +315,8 @@
             html += `<div style="font-size:15px; font-weight:900; color:#ab47bc; margin:4px 0 10px 0; text-transform:uppercase;">${activePropFilter} (${filtered.length})</div>`;
             
             html += filtered.map(p => {
-                const parts = p.expiry.split(/[-\s]/);
-                const shortExp = parts.length >= 3 ? `${parts[0]} ${parts[1]} ${parts[2]}` : p.expiry;
+                const parts = (p.expiry || "").split(/[-\s]/);
+                const shortExp = parts.length >= 3 ? `${parts[0]} ${parts[1]} ${parts[2]}` : (p.expiry || "N/A");
                 return `
                 <div class="pass-detail-card" onclick="openEditPassModal(${p.rowIdx})">
                     <div class="pd-row-top">
@@ -342,7 +360,7 @@
         let filtered = passesCache;
         if (q) {
             filtered = passesCache.filter(p => 
-                p.rego.includes(q) || (p.property && p.property.toUpperCase().includes(q))
+                (p.rego && p.rego.includes(q)) || (p.property && p.property.toUpperCase().includes(q))
             );
             activePropFilter = "SEARCH RESULTS"; 
         } else if (activePropFilter === "SEARCH RESULTS") {
@@ -438,14 +456,17 @@
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_all_properties_data");
             const data = await res.json();
-            if (data.status === "SUCCESS") {
-                propHeaders = data.headers;
-                propertiesCache = data.rows;
+            if (data && data.status === "SUCCESS") {
+                propHeaders = Array.isArray(data.headers) ? data.headers : [];
+                propertiesCache = Array.isArray(data.rows) ? data.rows : [];
                 document.getElementById('lblPropCount').innerText = propertiesCache.length;
                 renderPropList(propertiesCache);
+            } else {
+                list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading properties.</div>`;
             }
         } catch(e) {
-            list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading properties.</div>`;
+            console.error("loadPropertiesData error:", e);
+            list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading properties: ${e.message}</div>`;
         }
     }
 
@@ -494,13 +515,14 @@
 
     function renderPropList(items) {
         const list = document.getElementById('propList');
-        if (!items || items.length === 0) {
+        if (!items || !Array.isArray(items) || items.length === 0) {
             list.innerHTML = `<div class="loading-box">NO PROPERTIES RECORDED</div>`;
             return;
         }
 
         const getIdx = (name, fallback) => {
-            const idx = propHeaders.findIndex(h => String(h).toUpperCase().includes(name.toUpperCase()));
+            if (!Array.isArray(propHeaders)) return fallback;
+            const idx = propHeaders.findIndex(h => h && String(h).toUpperCase().includes(name.toUpperCase()));
             return idx !== -1 ? idx : fallback;
         };
 
@@ -508,8 +530,12 @@
         const authPhoneIdx = getIdx("Auth Person Phone", 6);
         const authEmailIdx = getIdx("Auth Person Email", 7);
         const saDateIdx    = getIdx("SA Date", 13);
-        const tcFileIdx    = getIdx("TC On File", 15);
-        const tcExpIdx     = getIdx("TC Expiry", 17);
+        
+        // Match TC Link or legacy TC On File
+        let tcLinkIdx = getIdx("TC LINK", -1);
+        if (tcLinkIdx === -1) tcLinkIdx = getIdx("TC ON FILE", 15);
+
+        const tcExpIdx = getIdx("TC EXPIRY", 17);
 
         const now = new Date();
         const oneMonthFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
@@ -517,13 +543,20 @@
         list.innerHTML = items.map((r, idx) => {
             const vals = r.values || [];
             const name = String(vals[0] || "Unnamed").trim();
-            const addr = String(vals[1] || "No Address Provided").trim();
+            const addr = String(vals[1] || "").trim();
+            const suburb = String(vals[2] || "").trim();
+
+            let displayLoc = addr;
+            if (suburb) {
+                displayLoc = displayLoc ? `${displayLoc}, ${suburb}` : suburb;
+            }
+            if (!displayLoc) displayLoc = "No Address Provided";
             
             const authName  = String(vals[authNameIdx] || "").trim();
             const authPhone = String(vals[authPhoneIdx] || "").trim();
             const authEmail = String(vals[authEmailIdx] || "").trim();
             const saDateRaw = String(vals[saDateIdx] || "").trim();
-            const tcFile    = String(vals[tcFileIdx] || "").trim().toUpperCase();
+            const tcLinkVal = String(vals[tcLinkIdx] || "").trim();
             const tcExpRaw  = String(vals[tcExpIdx] || "").trim();
 
             const parsedExpiry = parseAustralianDate(tcExpRaw);
@@ -546,8 +579,11 @@
                 statusClass = "tile-red";
             } else {
                 // 2. ORANGE CONDITIONS:
-                // Missing any of: Auth Person Name, Phone, Email, or TC On File !== YES
-                if (!authName || !authPhone || !authEmail || tcFile !== "YES") {
+                // Missing any of: Auth Person Name, Phone, Email, or TC Link is NO / blank
+                const tcUp = tcLinkVal.toUpperCase();
+                const hasValidConsent = tcLinkVal.includes("http://") || tcLinkVal.includes("https://") || tcLinkVal.includes("drive.google") || tcUp === "YES";
+
+                if (!authName || !authPhone || !authEmail || !hasValidConsent || tcUp === "NO") {
                     statusClass = "tile-orange";
                 }
             }
@@ -555,7 +591,7 @@
             return `
                 <div class="prop-tile ${statusClass}" onclick="openPropertyDetail(${idx})">
                     <div class="prop-tile-name">${name}</div>
-                    <div class="prop-tile-addr">${addr}</div>
+                    <div class="prop-tile-addr">${displayLoc}</div>
                 </div>
             `;
         }).join('');
@@ -565,7 +601,9 @@
         const q = document.getElementById('propSearch').value.trim().toUpperCase();
         if (!q) { renderPropList(propertiesCache); return; }
         const filtered = propertiesCache.filter(r => 
-            String(r.values[0] || '').toUpperCase().includes(q) || String(r.values[1] || '').toUpperCase().includes(q)
+            String(r.values[0] || '').toUpperCase().includes(q) || 
+            String(r.values[1] || '').toUpperCase().includes(q) ||
+            String(r.values[2] || '').toUpperCase().includes(q)
         );
         renderPropList(filtered);
     }
@@ -577,7 +615,7 @@
         if (idx === -1) {
             currentPropRowIdx = -1;
             document.getElementById('propModalTitle').innerText = "ADD NEW PROPERTY";
-            vals = new Array(propHeaders.length).fill("");
+            vals = new Array(propHeaders.length || 20).fill("");
         } else {
             const rowData = propertiesCache[idx];
             currentPropRowIdx = rowData.rowIdx;
@@ -587,10 +625,19 @@
 
         fieldsContainer.innerHTML = propHeaders.map((header, colIdx) => {
             let val = String(vals[colIdx] || "");
+            const cleanHeader = String(header || "").trim().toUpperCase();
+            
+            // If the column is TC LINK and contains a URL, add the prominent blue view button
+            let extraHtml = "";
+            if ((cleanHeader.includes("TC LINK") || cleanHeader.includes("TC ON FILE")) && (val.includes("http://") || val.includes("https://") || val.includes("drive.google"))) {
+                extraHtml = `<a href="${val}" target="_blank" rel="noopener noreferrer" class="btn-view-consent">📂 VIEW TOW CONSENT</a>`;
+            }
+
             val = formatDateString(val).replace(/"/g, '&quot;');
             return `
                 <div class="f-field">
                     <label class="f-label">${header || `Column ${colIdx + 1}`}</label>
+                    ${extraHtml}
                     <input type="text" class="f-input" id="col_${colIdx}" value="${val}">
                 </div>
             `;
