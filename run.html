@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="National Towing">
@@ -28,24 +28,24 @@
         * { box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 14px; background: #121212; color: #fff; 
+            margin: 0; padding: 12px; background: #121212; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
             padding-top: max(16px, env(safe-area-inset-top));
             padding-bottom: max(30px, env(safe-area-inset-bottom));
         }
         
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin-bottom: 10px; }
-        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; }
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 20px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-run); letter-spacing: 2px; text-align: center; line-height: 1.2; padding-top: 4px; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
         .icon-btn:active { transform: scale(0.9); }
 
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
         .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tile:active { transform: scale(0.96); }
         .t-mark { background: var(--c-mark); color: #fff; }
         .t-run  { background: var(--c-run); color: #000; box-shadow: 0 0 0 2px #fff; }
         .t-tow  { background: var(--c-tow); color: #fff; }
-        .t-pass { background: var(--c-pass); color: #fff; }
+        .t-admin { background: var(--c-pass); color: #fff; }
         .t-yard { background: var(--c-yard); color: #000; }
         .t-rel  { background: var(--c-rel); color: #000; }
 
@@ -195,7 +195,7 @@
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
     <a href="run.html" class="nav-tile t-run">RUN</a>
     <a href="tow.html" class="nav-tile t-tow">TOW</a>
-    <a href="passes.html" class="nav-tile t-pass">PASS</a>
+    <a href="admin.html" class="nav-tile t-admin">ADMIN</a>
     <a href="yard.html" class="nav-tile t-yard">YARD</a>
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
