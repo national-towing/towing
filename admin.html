@@ -20,27 +20,43 @@
             --c-yard: #00b0ff;
             --c-rel: #00e676;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        
-        body { 
-            background: #121212; 
-            color: #fff; 
-            min-height: 100vh; 
-            padding: 12px; 
+        * { box-sizing: border-box; }
+        html, body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            margin: 0; padding: 12px; background: #121212; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
             padding-top: max(16px, env(safe-area-inset-top));
             padding-bottom: max(30px, env(safe-area-inset-bottom));
         }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
 
-        /* Benchmark Header Box */
-        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
-        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-admin); letter-spacing: 2px; text-align: center; line-height: 1.2; }
-
-        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-admin); letter-spacing: 2px; text-align: center; line-height: 1.2; padding-top: 4px; }
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
         .icon-btn:active { transform: scale(0.92); }
 
-        /* Benchmark 3x2 Grid Navigation */
-        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 14px auto; }
-        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+        /* 3x2 Grid Navigation */
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
+        .nav-tile {
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 900;
+            text-decoration: none;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         .nav-tile:active { transform: scale(0.96); }
         .t-mark  { background: var(--c-mark); color: #fff; }
         .t-run   { background: var(--c-run); color: #000; }
@@ -54,15 +70,16 @@
             display: flex;
             width: 100%;
             max-width: 440px;
-            margin: 0 auto 10px auto;
             background: #1e1e1e;
             border-radius: 10px;
             border: 1px solid #333;
+            margin-bottom: 8px;
             overflow: hidden;
+            flex-shrink: 0;
         }
         .sub-tab {
             flex: 1;
-            height: 42px;
+            height: 40px;
             border: none;
             background: transparent;
             color: #888;
@@ -84,14 +101,15 @@
             border-radius: 14px;
             width: 100%;
             max-width: 440px;
-            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            min-height: 520px;
+            flex: 1;
+            min-height: 0;
             overflow: hidden;
             position: relative;
         }
 
+        /* Top Action Bar inside Tabs */
         .action-bar {
             display: flex;
             gap: 8px;
@@ -102,20 +120,20 @@
         }
         .search-input {
             flex: 1;
-            height: 42px;
+            height: 38px;
             background: #242424;
             border: 1px solid #444;
             border-radius: 8px;
             padding: 0 10px;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             outline: none;
         }
         .search-input:focus { border-color: var(--c-admin); }
         .btn-action-primary {
-            height: 42px;
-            padding: 0 14px;
+            height: 38px;
+            padding: 0 12px;
             background: #00e676;
             color: #000;
             border: none;
@@ -130,6 +148,7 @@
         .scroll-content {
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 10px;
             display: flex;
             flex-direction: column;
@@ -141,7 +160,7 @@
             background: #242424;
             border: 1px solid #383838;
             border-radius: 10px;
-            padding: 12px;
+            padding: 10px 12px;
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -151,9 +170,13 @@
         .p-row-top { display: flex; justify-content: space-between; align-items: center; }
         .p-rego { font-family: monospace; font-size: 18px; font-weight: 900; color: #fff; }
         .p-prop-badge { background: #333; color: #ffab00; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; }
-        .p-row-mid { font-size: 12px; color: #aaa; display: flex; justify-content: space-between; margin-top: 2px; }
-        .p-notes { font-size: 11px; color: #00e676; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .p-row-mid { font-size: 12px; color: #aaa; display: flex; justify-content: space-between; }
+        .p-notes { font-size: 11px; color: #00e676; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* Property Tile Status Colors */
+        .tile-green { border: 2px solid #00e676; background: #0a1f12; }
+        .tile-orange { border: 2px solid #ffab00; background: #2a2212; }
+        .tile-red { border: 2px solid #ff1744; background: #2a1215; }
         /* Property Tile */
         .prop-tile {
             background: #242424;
@@ -166,7 +189,7 @@
         .prop-tile-name { font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 2px; }
         .prop-tile-addr { font-size: 11px; color: #888; font-weight: 600; }
 
-        /* Modal Sheets */
+        /* Shared Detail/Edit Fullscreen Sheet */
         .modal-sheet {
             display: none;
             position: absolute;
@@ -190,6 +213,7 @@
         .modal-body {
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 14px;
             display: flex;
             flex-direction: column;
@@ -233,6 +257,7 @@
     <div class="icon-btn" onclick="refreshActiveTab()">🔄</div>
 </div>
 
+<!-- 3x2 NAVIGATION GRID -->
 <div class="nav-grid-3x2">
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
     <a href="run.html" class="nav-tile t-run">RUN</a>
@@ -242,13 +267,14 @@
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
 
+<!-- SUB-NAV SWITCHER: PASSES vs PROPERTIES -->
 <div class="sub-nav-bar">
     <button class="sub-tab active" id="tabBtnPasses" onclick="switchAdminTab('passes')">🎫 PASSES (<span id="lblPassCount">0</span>)</button>
     <button class="sub-tab" id="tabBtnProps" onclick="switchAdminTab('props')">🏢 PROPERTIES (<span id="lblPropCount">0</span>)</button>
 </div>
 
 <div class="container">
-    <!-- VIEW 1: PASSES -->
+    <!-- ==================== VIEW 1: PASSES ==================== -->
     <div id="viewPasses" style="display:flex; flex-direction:column; height:100%;">
         <div class="action-bar">
             <input type="text" id="passSearch" class="search-input" placeholder="Search plate or property..." oninput="filterPassList()">
@@ -259,7 +285,7 @@
         </div>
     </div>
 
-    <!-- VIEW 2: PROPERTIES -->
+    <!-- ==================== VIEW 2: PROPERTIES ==================== -->
     <div id="viewProps" style="display:none; flex-direction:column; height:100%;">
         <div class="action-bar">
             <input type="text" id="propSearch" class="search-input" placeholder="Search property name..." oninput="filterPropList()">
@@ -270,7 +296,7 @@
         </div>
     </div>
 
-    <!-- PASS MODAL -->
+    <!-- ==================== PASS MODAL (ISSUE / EDIT) ==================== -->
     <div id="passModal" class="modal-sheet">
         <div class="modal-header">
             <div class="modal-title" id="passModalTitle">ISSUE VISITOR PASS</div>
@@ -313,7 +339,7 @@
         </form>
     </div>
 
-    <!-- PROPERTY MODAL -->
+    <!-- ==================== PROPERTY MODAL (DYNAMIC EDIT) ==================== -->
     <div id="propModal" class="modal-sheet">
         <div class="modal-header">
             <div class="modal-title" id="propModalTitle">EDIT PROPERTY</div>
@@ -369,7 +395,7 @@
         document.getElementById(id).style.display = 'none';
     }
 
-    /* PASSES LOGIC */
+    /* ==================== PASSES CONTROLLER ==================== */
     async function loadPasses() {
         const list = document.getElementById('passList');
         try {
@@ -494,7 +520,7 @@
         }
     }
 
-    /* PROPERTIES LOGIC */
+    /* ==================== PROPERTIES CONTROLLER ==================== */
     async function loadPropertiesData() {
         const list = document.getElementById('propList');
         try {
@@ -511,6 +537,21 @@
         }
     }
 
+    function formatDateString(str) {
+        if (!str) return "";
+        const s = String(str);
+        if (s.includes("T") && s.includes("Z")) {
+            const d = new Date(s);
+            if (!isNaN(d.getTime())) {
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yyyy = d.getFullYear();
+                return `${dd}/${mm}/${yyyy}`;
+            }
+        }
+        return str;
+    }
+
     function renderPropList(items) {
         const list = document.getElementById('propList');
         if (!items || items.length === 0) {
@@ -518,11 +559,57 @@
             return;
         }
 
+        // Find column indices dynamically with fallbacks
+        const getIdx = (name, fallback) => {
+            const idx = propHeaders.findIndex(h => String(h).toUpperCase().includes(name.toUpperCase()));
+            return idx !== -1 ? idx : fallback;
+        };
+
+        const authNameIdx = getIdx("Auth Person Name", 4);
+        const authPhoneIdx = getIdx("Auth Person Phone", 6);
+        const authEmailIdx = getIdx("Auth Person Email", 7);
+        const saDateIdx = getIdx("SA Date", 13);
+        const tcFileIdx = getIdx("TC On File", 15);
+        const tcExpIdx = getIdx("TC Expiry", 17);
+
+        const today = new Date();
+        const oneMonthFromNow = new Date();
+        oneMonthFromNow.setMonth(today.getMonth() + 1);
+
+        const isExpiringOrBlank = (dateStr) => {
+            if (!dateStr || String(dateStr).trim() === "") return true;
+            if (String(dateStr).trim().toUpperCase() === "OPEN ENDED") return false;
+            
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return true; 
+            return d < oneMonthFromNow;
+        };
+
         list.innerHTML = items.map((r, idx) => {
-            const name = String(r.values[0] || "Unnamed").trim();
-            const addr = String(r.values[1] || "No Address Provided").trim();
+            const vals = r.values || [];
+            const name = String(vals[0] || "Unnamed").trim();
+            const addr = String(vals[1] || "No Address Provided").trim();
+            
+            const tcExpiryVal = vals[tcExpIdx];
+            const saDateVal = vals[saDateIdx];
+            const isRed = isExpiringOrBlank(tcExpiryVal) || isExpiringOrBlank(saDateVal);
+            
+            let statusClass = "tile-green";
+            if (isRed) {
+                statusClass = "tile-red";
+            } else {
+                const authName = String(vals[authNameIdx] || "").trim();
+                const authPhone = String(vals[authPhoneIdx] || "").trim();
+                const authEmail = String(vals[authEmailIdx] || "").trim();
+                const tcFile = String(vals[tcFileIdx] || "").trim().toUpperCase();
+
+                if (!authName || !authPhone || !authEmail || tcFile === "NO" || tcFile === "") {
+                    statusClass = "tile-orange";
+                }
+            }
+
             return `
-                <div class="prop-tile" onclick="openPropertyDetail(${idx})">
+                <div class="prop-tile ${statusClass}" onclick="openPropertyDetail(${idx})">
                     <div class="prop-tile-name">${name}</div>
                     <div class="prop-tile-addr">${addr}</div>
                 </div>
@@ -555,7 +642,8 @@
         }
 
         fieldsContainer.innerHTML = propHeaders.map((header, colIdx) => {
-            const val = String(vals[colIdx] || "").replace(/"/g, '&quot;');
+            let val = String(vals[colIdx] || "");
+            val = formatDateString(val).replace(/"/g, '&quot;');
             return `
                 <div class="f-field">
                     <label class="f-label">${header || `Column ${colIdx + 1}`}</label>
