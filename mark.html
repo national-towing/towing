@@ -63,11 +63,62 @@
             border: 1px solid #333; 
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-            min-height: 540px;
+            flex: 1;
             margin-bottom: 4px;
             position: relative;
         }
+
+        /* Sub-Nav Switcher */
+        .sub-nav-bar { display: flex; width: 100%; max-width: 440px; background: #1e1e1e; border-radius: 10px; border: 1px solid #333; margin-bottom: 8px; overflow: hidden; flex-shrink: 0; }
+        .sub-tab { flex: 1; height: 40px; border: none; background: transparent; color: #888; font-size: 13px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
+        .sub-tab.active { background: var(--c-mark); color: #fff; }
+        
+        .search-bar-wrap { width: 100%; max-width: 440px; margin: 0 auto 10px auto; display: flex; gap: 8px; flex-shrink: 0; }
+        .search-input { flex: 1; height: 44px; background: #1e1e1e; border: 1px solid #333; border-radius: 10px; padding: 0 12px; color: #fff; font-size: 14px; font-weight: 700; outline: none; }
+        .search-input:focus { border-color: var(--c-mark); }
+
+        .list-container { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-bottom: 20px; }
+
+        /* Group Tile (Blue) */
+        .group-tile { background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .group-name { font-size: 16px; font-weight: 900; color: #fff; text-transform: uppercase; }
+        .group-count { background: #2979ff; color: #fff; font-size: 14px; font-weight: 900; padding: 4px 12px; border-radius: 8px; }
+
+        /* Vehicle Detail Card */
+        .veh-card { background: #1e1e1e; border: 1px solid #333; border-left: 5px solid #2979ff; border-radius: 12px; padding: 12px; display: flex; gap: 12px; cursor: pointer; }
+        .veh-card:active { background: #2f2f2f; }
+        .vc-thumb { width: 70px; height: 70px; border-radius: 8px; background: #000; border: 1.5px solid #444; object-fit: cover; flex-shrink: 0; }
+        .vc-details { display: flex; flex-direction: column; justify-content: center; gap: 3px; flex: 1; min-width: 0; }
+        .vc-rego { font-family: monospace; font-size: 22px; font-weight: 900; color: #fff; line-height: 1; }
+        .vc-prop { font-size: 12px; font-weight: 800; color: #aaa; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vc-time { font-size: 11px; font-weight: 800; color: #ffab00; }
+        .vc-mmct { font-size: 11px; font-weight: 700; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vc-pass { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; width: fit-content; margin-top: 2px; }
+        .vc-pass.yes { background: #00e676; color: #000; }
+        .vc-pass.no { background: #ff1744; color: #fff; }
+        
+        .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
+
+        /* Shared Detail/Edit Fullscreen Sheet */
+        .modal-sheet { display: none; position: fixed; inset: 0; background: #121212; z-index: 9999; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #1e1e1e; border-bottom: 1px solid #333; flex-shrink: 0; padding-top: max(16px, env(safe-area-inset-top)); }
+        .modal-title { font-size: 16px; font-weight: 900; color: var(--c-mark); text-transform: uppercase; }
+        .btn-close { background: none; border: none; font-size: 24px; color: #aaa; cursor: pointer; line-height: 1; }
+        .modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; display: flex; flex-direction: column; gap: 12px; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+        
+        .f-field { display: flex; flex-direction: column; gap: 4px; }
+        .f-label { font-size: 11px; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .f-input { width: 100%; height: 44px; background: #242424; border: 1px solid #444; border-radius: 8px; padding: 0 12px; color: #fff; font-size: 15px; font-weight: 700; outline: none; -webkit-appearance: none; }
+        .f-input:focus { border-color: var(--c-mark); }
+        .f-rego { font-family: monospace; font-size: 20px; text-transform: uppercase; color: #ffab00; }
+
+        .modal-footer { padding: 16px; background: #1e1e1e; border-top: 1px solid #333; display: flex; gap: 8px; flex-shrink: 0; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+        .btn-cancel-modal { flex: 1; height: 48px; background: #333; border: none; color: #fff; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+        .btn-submit-modal { flex: 2; height: 48px; background: #00e676; border: none; color: #000; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 15px; }
+
+        .loading-box { text-align: center; padding: 30px; color: #888; font-weight: 800; font-size: 14px; }
+        .wrapper { width: 100%; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
 
         .prop-select-wrap { width: 100%; margin-bottom: 10px; flex-shrink: 0; }
         select {
@@ -202,33 +253,98 @@
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
 
-<div class="card">
-    <div class="prop-select-wrap">
-        <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
-    </div>
 
-    <div class="camera-trigger-box" onclick="launchNativeCamera()">
-        <img id="lastSnapPreview" class="preview-img-display" alt="Mark Preview">
-        <div class="cam-icon-circle">📷</div>
-        <div class="cam-launch-title">SNAP VEHICLE</div>
-        <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
+<div class="sub-nav-bar">
+    <button class="sub-tab active" id="tabBtnSnap" onclick="switchTab('snap')">📸 SNAP</button>
+    <button class="sub-tab" id="tabBtnLog" onclick="switchTab('log')">📋 LOG (<span id="lblMarkCount">0</span>)</button>
+</div>
 
-        <div class="manual-rego-modal" id="manualRegoModal" onclick="event.stopPropagation()">
-            <div class="manual-rego-card">
-                <div class="manual-title">⚠️ UNREADABLE PLATE</div>
-                <input type="text" id="manualRegoInput" class="manual-input" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
-                <div class="manual-btn-row">
-                    <button type="button" class="btn-cancel" onclick="cancelManualMark()">RETAKE 📷</button>
-                    <button type="button" class="btn-submit" onclick="submitManualMark()">MARK ✔</button>
+<!-- ==================== VIEW 1: SNAP ==================== -->
+<div id="viewSnap" class="wrapper" style="display:flex;">
+    <div class="card" style="flex: 1; margin: 0; min-height: 0;">
+        <div class="prop-select-wrap">
+            <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
+        </div>
+
+        <div class="camera-trigger-box" onclick="launchNativeCamera()">
+            <img id="lastSnapPreview" class="preview-img-display" alt="Mark Preview">
+            <div class="cam-icon-circle">📷</div>
+            <div class="cam-launch-title">SNAP VEHICLE</div>
+            <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
+
+            <div class="manual-rego-modal" id="manualRegoModal" onclick="event.stopPropagation()">
+                <div class="manual-rego-card">
+                    <div class="manual-title">⚠️ UNREADABLE PLATE</div>
+                    <input type="text" id="manualRegoInput" class="manual-input" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
+                    <div class="manual-btn-row">
+                        <button type="button" class="btn-cancel" onclick="cancelManualMark()">RETAKE 📷</button>
+                        <button type="button" class="btn-submit" onclick="submitManualMark()">MARK ✔</button>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <input type="file" id="nativeCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativePhoto(this)">
+
+        <div id="status">READY</div>
     </div>
-
-    <input type="file" id="nativeCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativePhoto(this)">
-
-    <div id="status">READY</div>
 </div>
+
+<!-- ==================== VIEW 2: LOG ==================== -->
+<div id="viewLog" class="wrapper" style="display:none;">
+    <div class="search-bar-wrap">
+        <input type="text" id="logSearch" class="search-input" placeholder="Search plate or property..." oninput="filterLogList()">
+    </div>
+    <div class="list-container" id="logList">
+        <div class="loading-box">Loading marked vehicles...</div>
+    </div>
+</div>
+
+<!-- ==================== EDIT MARK MODAL ==================== -->
+<div id="editMarkModal" class="modal-sheet">
+    <div class="modal-header">
+        <div class="modal-title" id="editMarkTitle">EDIT MARK</div>
+        <button class="btn-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <form class="modal-body" onsubmit="submitEditMark(event)">
+        <input type="hidden" id="eRowIdx">
+        <input type="hidden" id="eOrigRego">
+        
+        <div class="f-field">
+            <label class="f-label">Registration</label>
+            <input type="text" id="eRego" class="f-input f-rego" required>
+        </div>
+        <div class="f-field">
+            <label class="f-label">Property</label>
+            <select id="eProperty" class="f-input" required></select>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Make</label>
+                <input type="text" id="eMake" class="f-input">
+            </div>
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Model</label>
+                <input type="text" id="eModel" class="f-input">
+            </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Colour</label>
+                <input type="text" id="eColour" class="f-input">
+            </div>
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Body</label>
+                <input type="text" id="eBody" class="f-input">
+            </div>
+        </div>
+    </form>
+    <div class="modal-footer">
+        <button type="button" class="btn-cancel-modal" onclick="closeEditModal()">CANCEL</button>
+        <button type="button" id="btnSaveEdit" class="btn-submit-modal" onclick="document.querySelector('#editMarkModal form').requestSubmit()">SAVE CHANGES ✔</button>
+    </div>
+</div>
+
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
@@ -275,6 +391,7 @@
     }
 
     function populatePropertyDropdown(properties) {
+        propertiesCache = properties;
         propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
         const savedProp = (localStorage.getItem('last_property') || '').trim().toUpperCase();
         let matched = false;
@@ -444,6 +561,192 @@
             redOverlay.classList.remove('show');
         }, 700);
     }
+
+    let activeTab = 'snap';
+    let logCache = [];
+    let activePropFilter = null;
+    let propertiesCache = [];
+
+    function switchTab(tab) {
+        activeTab = tab;
+        document.getElementById('tabBtnSnap').classList.toggle('active', tab === 'snap');
+        document.getElementById('tabBtnLog').classList.toggle('active', tab === 'log');
+        document.getElementById('viewSnap').style.display = tab === 'snap' ? 'flex' : 'none';
+        document.getElementById('viewLog').style.display = tab === 'log' ? 'flex' : 'none';
+
+        if (tab === 'log') {
+            loadMarkingLog();
+        }
+    }
+
+    async function loadMarkingLog() {
+        const list = document.getElementById('logList');
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_marking_log");
+            logCache = await res.json();
+            document.getElementById('lblMarkCount').innerText = logCache.length;
+            renderLogList(logCache);
+        } catch(e) {
+            list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading marking log.</div>`;
+        }
+    }
+
+    function formatTimeFriendly(raw) {
+        if (!raw) return '';
+        const s = String(raw);
+        const m = s.match(/([A-Za-z]{3})\s*(\d{1,2})[-/](\d{1,2})\s+(\d{1,2}):(\d{2})/);
+        if (m) return `${m[1]} ${m[2]}/${m[3]} ${m[4]}:${m[5]}`;
+        return s.substring(0, 16);
+    }
+
+    function renderLogList(items) {
+        const list = document.getElementById('logList');
+        if (!items || items.length === 0) {
+            list.innerHTML = `<div class="loading-box">NO MARKED VEHICLES</div>`;
+            return;
+        }
+
+        if (activePropFilter) {
+            const filtered = items.filter(v => (v.property || 'GENERAL').toUpperCase() === activePropFilter);
+            
+            let html = `<button class="btn-back" onclick="clearLogFilter()">◀ BACK TO PROPERTIES</button>`;
+            html += `<div style="font-size:15px; font-weight:900; color:#2979ff; margin:4px 0 10px 0; text-transform:uppercase;">${activePropFilter} (${filtered.length})</div>`;
+            
+            html += filtered.map(v => {
+                const mm = [v.make, v.model].filter(Boolean).join(' ');
+                const desc = mm ? (v.colour ? `${mm} (${v.colour})` : mm) : (v.colour || 'Vehicle');
+                const mkd = formatTimeFriendly(v.markedTime);
+                const passClass = (v.pass === 'YES') ? 'yes' : 'no';
+                const passTxt = (v.pass === 'YES') ? 'PASS YES' : 'PASS NO';
+                
+                const thumb = v.imageUrl ? `<img src="${v.imageUrl}" class="vc-thumb" onerror="this.style.display='none'">` : `<div class="vc-thumb" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;">NO IMG</div>`;
+
+                return `
+                <div class="veh-card" onclick="openEditModal(${v.rowIdx}, '${v.rego}')">
+                    ${thumb}
+                    <div class="vc-details">
+                        <div class="vc-rego">${v.rego}</div>
+                        <div class="vc-time">MKD: ${mkd}</div>
+                        <div class="vc-mmct">${desc}</div>
+                        <div class="vc-pass ${passClass}">${passTxt}</div>
+                    </div>
+                </div>
+            `}).join('');
+            list.innerHTML = html;
+        } else {
+            const grouped = {};
+            items.forEach(v => {
+                const prop = (v.property || 'GENERAL').toUpperCase();
+                grouped[prop] = (grouped[prop] || 0) + 1;
+            });
+            
+            const sortedProps = Object.keys(grouped).sort();
+            list.innerHTML = sortedProps.map(prop => `
+                <div class="group-tile" onclick="setLogFilter('${prop.replace(/'/g, "\'")}')">
+                    <span class="group-name">${prop}</span>
+                    <span class="group-count">${grouped[prop]}</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    function setLogFilter(propName) {
+        activePropFilter = propName;
+        filterLogList();
+    }
+
+    function clearLogFilter() {
+        activePropFilter = null;
+        document.getElementById('logSearch').value = "";
+        filterLogList();
+    }
+
+    function filterLogList() {
+        const q = document.getElementById('logSearch').value.trim().toUpperCase();
+        let filtered = logCache;
+        if (q) {
+            filtered = logCache.filter(v => 
+                (v.rego && v.rego.toUpperCase().includes(q)) || (v.property && v.property.toUpperCase().includes(q))
+            );
+            activePropFilter = "SEARCH RESULTS"; 
+        } else if (activePropFilter === "SEARCH RESULTS") {
+            activePropFilter = null;
+        }
+        renderLogList(filtered);
+    }
+
+    function openEditModal(rowIdx, rego) {
+        const v = logCache.find(x => x.rowIdx === rowIdx && x.rego === rego);
+        if (!v) return;
+
+        document.getElementById('editMarkTitle').innerText = "EDIT: " + v.rego;
+        document.getElementById('eRowIdx').value = v.rowIdx;
+        document.getElementById('eOrigRego').value = v.rego;
+        document.getElementById('eRego').value = v.rego;
+        
+        const propSel = document.getElementById('eProperty');
+        propSel.innerHTML = "";
+        propertiesCache.forEach(p => {
+            const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+            if (propName) {
+                const opt = document.createElement('option');
+                opt.value = propName; opt.innerText = propName;
+                if (propName.toUpperCase() === (v.property || 'GENERAL').toUpperCase()) opt.selected = true;
+                propSel.appendChild(opt);
+            }
+        });
+        
+        document.getElementById('eMake').value = v.make || "";
+        document.getElementById('eModel').value = v.model || "";
+        document.getElementById('eColour').value = v.colour || "";
+        document.getElementById('eBody').value = v.bodyType || "";
+        
+        document.getElementById('editMarkModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editMarkModal').style.display = 'none';
+    }
+
+    async function submitEditMark(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveEdit');
+        btn.innerText = "SAVING...";
+        btn.disabled = true;
+
+        const payload = {
+            action: "edit_mark",
+            rowIdx: document.getElementById('eRowIdx').value,
+            origRego: document.getElementById('eOrigRego').value,
+            rego: document.getElementById('eRego').value.trim().toUpperCase(),
+            property: document.getElementById('eProperty').value,
+            make: document.getElementById('eMake').value.trim(),
+            model: document.getElementById('eModel').value.trim(),
+            colour: document.getElementById('eColour').value.trim(),
+            bodyType: document.getElementById('eBody').value.trim()
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === "SUCCESS") {
+                closeEditModal();
+                loadMarkingLog();
+            } else {
+                alert("Error: " + (result.message || "Failed to save"));
+            }
+        } catch(err) {
+            alert("Network error.");
+        } finally {
+            btn.innerText = "SAVE CHANGES ✔";
+            btn.disabled = false;
+        }
+    }
+
 </script>
 </body>
 </html>
