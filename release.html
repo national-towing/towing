@@ -702,7 +702,22 @@
             
             if (resData && resData.status === "SUCCESS") {
                 if (procOverlay) procOverlay.style.display = 'none';
-                successRego.innerText = payload.rego + " RELEASED";
+                
+                // Add to local blacklist to instantly hide it in the Yard app
+                try {
+                    let blacklist = JSON.parse(localStorage.getItem('released_blacklist') || "{}");
+                    blacklist[payload.rego] = Date.now();
+                    localStorage.setItem('released_blacklist', JSON.stringify(blacklist));
+                } catch(err) {}
+
+                if (resData.alreadyProcessed) {
+                    successRego.innerText = "ALREADY RELEASED";
+                    document.querySelector('#successOverlay p').innerText = "This vehicle was previously released.\nInvoice: " + (resData.invoiceNum || "Unknown");
+                } else {
+                    successRego.innerText = payload.rego + " RELEASED";
+                    document.querySelector('#successOverlay p').innerText = "Tax Invoice Sent via SMS & Archived to Google Drive.";
+                }
+                
                 if (resData.pdfUrl) {
                     const viewBtn = document.getElementById('viewPdfBtn');
                     if (viewBtn) {

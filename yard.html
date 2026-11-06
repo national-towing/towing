@@ -403,8 +403,22 @@
       document.getElementById('loading').style.display = 'block';
       document.getElementById('cardList').innerHTML = '';
       try {
-        const resp = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles");
-        yardInventory = await resp.json();
+        const resp = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles&_t=" + Date.now());
+        let rawInventory = await resp.json();
+        
+        // Filter out locally blacklisted releases
+        try {
+            const blacklist = JSON.parse(localStorage.getItem('released_blacklist') || "{}");
+            const now = Date.now();
+            // Clean up old blacklist entries (> 24 hours)
+            for (const key in blacklist) {
+                if (now - blacklist[key] > 24 * 60 * 60 * 1000) delete blacklist[key];
+            }
+            localStorage.setItem('released_blacklist', JSON.stringify(blacklist));
+            rawInventory = rawInventory.filter(v => !blacklist[v.rego]);
+        } catch(err) {}
+
+        yardInventory = rawInventory;
         displayedInventory = [...yardInventory];
         renderCards(displayedInventory);
       } catch(e) {
