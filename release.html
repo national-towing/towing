@@ -118,6 +118,15 @@
         /* Lockout Class */
         .section-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); transition: opacity 0.3s ease, filter 0.3s ease; }
 
+        /* Full Screen Red Processing Overlay */
+        #processingOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(255, 23, 68, 0.96); z-index: 99999; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; padding: 20px;
+        }
+        #processingOverlay h1 { font-size: 38px; font-weight: 950; color: #fff; margin: 0; letter-spacing: 2px; text-transform: uppercase; }
+        #processingOverlay p { font-size: 16px; font-weight: 800; color: #fff; margin-top: 14px; opacity: 0.9; }
+
         /* Full Screen Success Overlay */
         #successOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -272,6 +281,12 @@
 
     <button class="submit-btn" id="submitBtn" disabled>PROCESS RELEASE</button>
     <div id="status"></div>
+</div>
+
+<!-- Full Screen Red Processing Overlay -->
+<div id="processingOverlay">
+    <h1>PROCESSING RELEASE</h1>
+    <p>Generating tax invoice & transmitting SMS...</p>
 </div>
 
 <!-- Full Screen Success Overlay -->
@@ -456,14 +471,19 @@
             const resData = await response.json();
 
             if (resData && resData.status === "SUCCESS") {
-                if (resData.name && !ownerNameInput.value.trim()) {
+                const isPlaceholder = (val) => !val || ["NOT PROVIDED", "NOT SPECIFIED", "N/A", "NONE", "UNKNOWN"].includes(String(val).trim().toUpperCase());
+
+                if (resData.name && !isPlaceholder(resData.name) && isPlaceholder(ownerNameInput.value)) {
                     ownerNameInput.value = resData.name.toUpperCase();
                 }
-                if (resData.idNumber && !idNumInput.value.trim()) {
+                if (resData.idNumber && !isPlaceholder(resData.idNumber) && isPlaceholder(idNumInput.value)) {
                     idNumInput.value = String(resData.idNumber).replace(/\D/g, '');
                 }
-                if (resData.address && !ownerAddressInput.value.trim()) {
-                    ownerAddressInput.value = resData.address.toUpperCase();
+                // Allow snap 2 (address side) to cleanly populate or overwrite placeholder address
+                if (resData.address && !isPlaceholder(resData.address)) {
+                    if (isPlaceholder(ownerAddressInput.value) || ownerAddressInput.value.trim().length < 5) {
+                        ownerAddressInput.value = resData.address.toUpperCase();
+                    }
                 }
                 updateStatusBanner();
             } else {
@@ -480,14 +500,17 @@
     }
     
     function updateStatusBanner() {
-        const nameDone = Boolean(ownerNameInput.value && ownerNameInput.value.trim().length > 2);
-        const idDone = Boolean(idNumInput.value && idNumInput.value.trim().length >= 5);
-        const addrDone = Boolean(ownerAddressInput.value && ownerAddressInput.value.trim().length > 4);
+        const isPlaceholder = (val) => !val || ["NOT PROVIDED", "NOT SPECIFIED", "N/A", "NONE", "UNKNOWN"].includes(String(val).trim().toUpperCase());
+
+        const nameDone = Boolean(ownerNameInput.value && !isPlaceholder(ownerNameInput.value) && ownerNameInput.value.trim().length > 2);
+        const idDone = Boolean(idNumInput.value && !isPlaceholder(idNumInput.value) && idNumInput.value.trim().length >= 5);
+        const addrDone = Boolean(ownerAddressInput.value && !isPlaceholder(ownerAddressInput.value) && ownerAddressInput.value.trim().length > 4);
 
         ocrStatus.style.color = "#00e676";
         if (nameDone && idDone && addrDone) {
             ocrStatus.innerText = `✔ ALL DETAILS CAPTURED`;
         } else if (nameDone && idDone && !addrDone) {
+            ocrStatus.style.color = "#ffab00";
             ocrStatus.innerText = `✔ ${ownerNameInput.value} (${idNumInput.value}) SET — SNAP ADDRESS NEXT`;
         } else if (idDone && !nameDone) {
             ocrStatus.innerText = `✔ LICENCE #${idNumInput.value} CAPTURED`;
@@ -594,9 +617,11 @@
         mark(makeInput, makeInput && makeInput.value.trim() !== "");
         mark(modelInput, modelInput && modelInput.value.trim() !== "");
 
-        const nameValid = Boolean(ownerNameInput && ownerNameInput.value.trim().length > 1);
-        const idValid = Boolean(idNumInput && idNumInput.value.trim().length >= 4);
-        const addrValid = Boolean(ownerAddressInput && ownerAddressInput.value.trim().length > 4);
+        const isPlaceholder = (val) => !val || ["NOT PROVIDED", "NOT SPECIFIED", "N/A", "NONE", "UNKNOWN"].includes(String(val).trim().toUpperCase());
+
+        const nameValid = Boolean(ownerNameInput && !isPlaceholder(ownerNameInput.value) && ownerNameInput.value.trim().length > 1);
+        const idValid = Boolean(idNumInput && !isPlaceholder(idNumInput.value) && idNumInput.value.trim().length >= 4);
+        const addrValid = Boolean(ownerAddressInput && !isPlaceholder(ownerAddressInput.value) && ownerAddressInput.value.trim().length > 4);
         const phoneClean = (ownerPhoneInput && ownerPhoneInput.value) ? ownerPhoneInput.value.replace(/[^\d+]/g, '') : "";
         const phoneValid = phoneClean.length >= 8;
 
@@ -632,13 +657,16 @@
     submitBtn.addEventListener('click', async () => {
         if (!validateForm() || isSubmittingRelease) return;
 
-        // HARD DEBOUNCE - LOCK BUTTON
+        // HARD DEBOUNCE - LOCK BUTTON & DISPLAY RED PROCESSING OVERLAY
         isSubmittingRelease = true;
         submitBtn.disabled = true;
         submitBtn.style.opacity = "0.4";
         submitBtn.innerText = "RELEASING & GENERATING INVOICE...";
         statusDiv.style.color = "#ffab00";
         statusDiv.innerText = "Transmitting release archive and SMS...";
+
+        const procOverlay = document.getElementById('processingOverlay');
+        if (procOverlay) procOverlay.style.display = 'flex';
 
         const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
         const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
@@ -673,6 +701,7 @@
             const resData = await res.json();
             
             if (resData && resData.status === "SUCCESS") {
+                if (procOverlay) procOverlay.style.display = 'none';
                 successRego.innerText = payload.rego + " RELEASED";
                 if (resData.pdfUrl) {
                     const viewBtn = document.getElementById('viewPdfBtn');
@@ -683,6 +712,7 @@
                 }
                 successOverlay.style.display = "flex";
             } else {
+                if (procOverlay) procOverlay.style.display = 'none';
                 statusDiv.style.color = "#ff1744";
                 statusDiv.innerText = "ERROR: " + (resData.message || "Failed to release vehicle.");
                 isSubmittingRelease = false;
@@ -690,6 +720,7 @@
                 validateForm();
             }
         } catch(err) {
+            if (procOverlay) procOverlay.style.display = 'none';
             statusDiv.style.color = "#ff1744";
             statusDiv.innerText = "Network error. Vehicle release may still be processing on server.";
             isSubmittingRelease = false;
