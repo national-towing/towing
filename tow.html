@@ -176,6 +176,45 @@
             border-radius: 14px; padding: 18px 50px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             letter-spacing: 2px;
         }
+    
+        .truck-btn-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            margin-top: 4px;
+        }
+        .btn-truck-half {
+            flex: 1;
+            height: 50px;
+            border-radius: 10px;
+            font-size: 19px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 1px;
+            outline: none;
+            transition: all 0.15s ease;
+            opacity: 0.45;
+        }
+        .btn-white-3921 {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #ffffff;
+        }
+        .btn-black-3676 {
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #555555;
+        }
+        .btn-truck-half.active {
+            opacity: 1 !important;
+            border: 3px solid #00e676 !important;
+            box-shadow: 0 0 16px rgba(0, 230, 118, 0.45);
+            transform: scale(1.02);
+        }
+
     </style>
 </head>
 <body>
@@ -289,14 +328,12 @@
         </div>
     </div>
 
-    <label>DRIVER</label>
-    <select id="officerSelect" class="unselected" onchange="checkOfficerOther(this)">
-        <option value="" disabled selected>SELECT DRIVER</option>
-        <option value="Brian">Brian</option>
-        <option value="Brett">Brett</option>
-        <option value="Other">Other...</option>
-    </select>
-    <input type="text" id="officerOtherInput" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px;" onfocus="handleFieldFocus(this)">
+    <label>TRUCK</label>
+    <div class="truck-btn-row" id="truckBtnRow">
+        <button type="button" class="btn-truck-half btn-white-3921" id="btnTruck3921" onclick="selectTruck('3921')">3921</button>
+        <button type="button" class="btn-truck-half btn-black-3676" id="btnTruck3676" onclick="selectTruck('3676')">3676</button>
+    </div>
+    <input type="hidden" id="truckSelectedInput" value="">
 
     <!-- 1. SOLID BLUE COMPARISON BUTTON -->
     <label>SIDE-BY-SIDE COMPARISON (VERIFICATION)</label>
@@ -407,7 +444,7 @@
     }
 
     function syncDropdownColors() {
-        [propertySelect, makeSelect, colourSelect, bodyTypeSelect, officerSelect].forEach(sel => {
+        [propertySelect, makeSelect, colourSelect, bodyTypeSelect].forEach(sel => {
             if (!sel.value || sel.value === "") {
                 sel.classList.add('unselected');
             } else {
@@ -438,8 +475,19 @@
     regoInput.addEventListener('change', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
 
     function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
+    
+    let selectedTruck = "";
+
+    function selectTruck(truckNum) {
+        selectedTruck = truckNum;
+        document.getElementById('truckSelectedInput').value = truckNum;
+        document.getElementById('btnTruck3921').classList.toggle('active', truckNum === '3921');
+        document.getElementById('btnTruck3676').classList.toggle('active', truckNum === '3676');
+        validateForm();
+    }
+
     function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
-    function checkOfficerOther(s) { officerOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
+    
 
     function readUrlParamsAndPopulate() {
         const params = new URLSearchParams(window.location.search);
@@ -590,7 +638,7 @@
     }
 
     function setupLiveValidation() {
-        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect, officerSelect, officerOtherInput];
+        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect, ];
         inputs.forEach(elem => {
             if (elem) {
                 elem.addEventListener('input', () => { syncDropdownColors(); validateForm(); });
@@ -625,9 +673,12 @@
         }
         mark(bodyTypeSelect, bodyTypeSelect && bodyTypeSelect.value !== "");
         
-        mark(officerSelect, officerSelect && officerSelect.value !== "");
-        if (officerSelect && officerSelect.value === "Other") {
-            mark(officerOtherInput, officerOtherInput && officerOtherInput.value.trim() !== "");
+        const truckRow = document.getElementById('truckBtnRow');
+        if (!selectedTruck) {
+            isValid = false;
+            if (truckRow) truckRow.style.outline = "2px dashed #ffab00";
+        } else {
+            if (truckRow) truckRow.style.outline = "none";
         }
 
         if (conditionPhotos.length === 0) {
@@ -1031,7 +1082,7 @@
 
         const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
         const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
-        const driver = officerSelect.value === "Other" ? officerOtherInput.value.trim() : officerSelect.value;
+        const driver = selectedTruck;
         const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
 
         const payload = {
@@ -1044,7 +1095,8 @@
             model: modelInput.value.trim(),
             colour: finalColour,
             bodyType: bodyTypeSelect.value,
-            officer: driver,
+            officer: selectedTruck,
+            truck: selectedTruck,
             photoBytes: conditionPhotos.length > 0 ? conditionPhotos[0] : "",
             photos: conditionPhotos,
             comparisonPhoto: compB64,
@@ -1137,3 +1189,4 @@
 </script>
 </body>
 </html>
+

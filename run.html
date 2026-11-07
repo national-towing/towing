@@ -90,10 +90,21 @@
         .detail-title { font-size: 22px; font-weight: 900; color: #ffab00; margin-bottom: 10px; text-transform: uppercase; }
 
         .car-tile {
-            background: #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 12px;
-            display: flex; align-items: center; justify-content: space-between; border: 2px solid #333;
+            background: #1e1e1e; border-radius: 14px; padding: 12px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 12px; border: 2px solid #333;
             color: #fff; transition: transform 0.1s ease; cursor: pointer;
         }
+        .run-tile-thumb {
+            width: 70px; height: 70px; border-radius: 8px;
+            object-fit: cover; border: 1.5px solid #444; background: #000;
+            flex-shrink: 0; cursor: pointer;
+        }
+        .run-tile-thumb:active { transform: scale(0.96); }
+        .run-tile-thumb.no-thumb {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 800; color: #555;
+        }
+        .tile-mid-content { flex: 1; min-width: 0; }
         .car-tile:active { transform: scale(0.98); }
         .tile-ready { border-color: #ff1744; background: #2a1215; }
         .tile-wait { border-color: #ffab00; background: #2a2212; }
@@ -180,8 +191,11 @@
         .preview-modal.show { display: flex; }
         .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 14px; gap: 12px; }
         .preview-back-btn { background: #2a2a2a; border: 1px solid #555; color: #ffab00; font-size: 14px; font-weight: 900; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; padding: 10px; }
-        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; }
+        .preview-zoom-btn { background: #00b0ff; color: #000; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 900; font-size: 13px; cursor: pointer; }
+        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; padding: 10px; overflow: auto; touch-action: pan-x pan-y pinch-zoom; }
+        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; transition: transform 0.2s ease; cursor: zoom-in; }
+        #previewImg.is-zoomed { transform: scale(2.2); cursor: zoom-out; }
     </style>
 </head>
 <body>
@@ -238,16 +252,17 @@
     <div class="hud-reset-hint">TAP OUTSIDE TO SCAN NEXT ↺</div>
 </div>
 
-<!-- PHOTO PREVIEW MODAL -->
+<!-- PHOTO PREVIEW MODAL WITH ZOOM -->
 <div id="previewModal" class="preview-modal">
     <div class="preview-header">
-        <button class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
-        <div style="display:flex; flex-direction:column;">
-            <span style="font-size:18px; font-weight:900; color:#fff;" id="previewTitle"></span>
+        <button type="button" class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
+        <div style="display:flex; flex-direction:column; text-align:center;">
+            <span style="font-size:17px; font-weight:900; color:#fff;" id="previewTitle"></span>
             <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
         </div>
+        <button type="button" class="preview-zoom-btn" id="previewZoomBtn" onclick="toggleZoom()">🔍 ZOOM 2X</button>
     </div>
-    <div class="preview-body"><img id="previewImg" alt="Mark Photo"></div>
+    <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
 </div>
 
 <script>
@@ -470,10 +485,17 @@
                 ? (car.colour ? `${makeModel} (${car.colour})` : makeModel) 
                 : (car.colour || '');
 
+            const driveId = car.imageUrl ? (car.imageUrl.match(/[-\w]{25,}/) || [''])[0] : '';
+            const thumbUrl = driveId ? `https://lh3.googleusercontent.com/d/${driveId}` : (car.imageUrl || '');
+            const thumbHtml = thumbUrl 
+                ? `<img src="${thumbUrl}" class="run-tile-thumb" loading="lazy" onclick="event.stopPropagation(); openPhotoPreview('${car.rego}', '${car.property}', '${thumbUrl}')">`
+                : `<div class="run-tile-thumb no-thumb" onclick="event.stopPropagation();">NO PIC</div>`;
+
             const tile = document.createElement('div');
             tile.className = `car-tile tile-${car.status.toLowerCase()}`;
             tile.innerHTML = `
-                <div>
+                ${thumbHtml}
+                <div class="tile-mid-content">
                     <div class="rego-header-line">
                         <span class="car-rego">${car.rego}</span>
                         <span class="car-time-mkd">MKD: ${car.markedTimeStr}</span>
@@ -482,7 +504,6 @@
                     <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
                 </div>
                 <div class="tile-right-box">
-                    <button type="button" class="pic-preview-btn" title="View Mark Photo" onclick="event.stopPropagation(); openPhotoPreview('${car.rego}', '${car.property}', '${car.imageUrl}')">📷</button>
                     <button type="button" class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</button>
                 </div>
             `;
@@ -682,12 +703,25 @@
     function openPhotoPreview(rego, prop, url) {
         document.getElementById('previewTitle').innerText = `${rego} (${prop})`;
         const driveIdMatch = url ? String(url).match(/[-\w]{25,}/) : null;
-        document.getElementById('previewImg').src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (url || "");
+        const img = document.getElementById('previewImg');
+        img.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (url || "");
+        img.classList.remove('is-zoomed');
+        const btn = document.getElementById('previewZoomBtn');
+        if (btn) btn.innerText = "🔍 ZOOM 2X";
         document.getElementById('previewModal').classList.add('show');
     }
 
     function closePhotoPreview() { 
+        const img = document.getElementById('previewImg');
+        img.classList.remove('is-zoomed');
         document.getElementById('previewModal').classList.remove('show'); 
+    }
+
+    function toggleZoom() {
+        const img = document.getElementById('previewImg');
+        const btn = document.getElementById('previewZoomBtn');
+        const isZ = img.classList.toggle('is-zoomed');
+        if (btn) btn.innerText = isZ ? "🔍 RESET" : "🔍 ZOOM 2X";
     }
 </script>
 </body>
