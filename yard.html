@@ -25,14 +25,13 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            margin: 0; padding: 12px; background: #121212; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-top: max(16px, env(safe-area-inset-top));
-            padding-bottom: max(30px, env(safe-area-inset-bottom));
-        }
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+        margin: 0; padding: 12px; background: #121212; color: #fff; 
+        display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        padding-top: max(16px, env(safe-area-inset-top));
+        padding-bottom: max(30px, env(safe-area-inset-bottom));
+    }
 
-    /* Header & 3x2 Navigation Grid */
     .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
     .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-yard); letter-spacing: 2px; text-align: center; line-height: 1.2; padding-top: 4px; }
     .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
@@ -48,23 +47,19 @@
     .t-yard { background: var(--c-yard); color: #000; box-shadow: 0 0 0 2px #fff; }
     .t-rel  { background: var(--c-rel); color: #000; }
 
-    /* Search Filter */
     .controls-wrap { width: 100%; max-width: 440px; margin: 0 auto 12px auto; display: flex; gap: 8px; }
     .search-input { flex: 1; height: 46px; background: #1e1e1e; border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; color: #fff; font-size: 16px; font-weight: 700; outline: none; }
     .search-input:focus { border-color: var(--c-yard); }
 
-    /* Yard Cards */
     .card-list { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 440px; margin: 0 auto; }
     .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--c-yard); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     
-    /* CLEAN TOP ROW: REGO + PROPERTY (EDIT PILL REMOVED, PROPERTY SHUFFLED LEFT) */
     .card-row-top { display: flex; align-items: baseline; gap: 12px; cursor: pointer; }
     .rego-text { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #facc15; flex-shrink: 0; }
     .prop-text { font-size: 20px; font-weight: 900; color: #aaa; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 
     .card-body { display: flex; gap: 12px; align-items: center; cursor: pointer; }
     
-    /* CORRECTED LANDSCAPE THUMBNAIL */
     .thumb-wrap { 
       width: 92px; 
       height: 68px; 
@@ -93,7 +88,6 @@
     .towed-line { color: var(--text-muted); font-size: 13px; font-weight: 700; margin-top: 1px; }
     .meta-sub-line { color: #aaa; font-size: 12px; font-weight: 700; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
     
-    /* TAP-TO-CALL BUTTON ON CARD */
     .phone-tag { 
       color: var(--c-rel); 
       font-size: 13px; 
@@ -111,7 +105,6 @@
     }
     .phone-tag:active { transform: scale(0.96); background: #1b4d2e; }
 
-    /* Interactive Notes Banner */
     .notes-box {
       background: #141414; border: 1px dashed #444; border-left: 3px solid #ffab00;
       padding: 8px 10px; border-radius: 6px; font-size: 12px; color: #ffab00; font-weight: 600;
@@ -119,22 +112,19 @@
     }
     .notes-box:active { background: #222; }
 
-    /* Action Buttons (Adapts to 3 Columns when Folder Exists) */
     .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
-    .action-row.has-folder { grid-template-columns: 0.9fr 1fr 1.2fr; }
+    .action-row.has-folder { grid-template-columns: 0.9fr 1fr 1fr; }
     .btn-action {
-      height: 48px; border: none; border-radius: 10px; font-size: 15px; font-weight: 900;
+      height: 44px; border: none; border-radius: 10px; font-size: 13px; font-weight: 900;
       cursor: pointer; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center;
       gap: 5px; text-decoration: none; text-transform: uppercase;
     }
     .btn-folder { background: #2a2a2a; border: 1.5px solid #00b0ff; color: #00b0ff; }
-    .btn-folder:active { background: #1f364d; transform: scale(0.96); }
     .btn-sms { background: #0284c7; color: #fff; }
-    .btn-sms:active { background: #0369a1; }
     .btn-rel { background: var(--c-rel); color: #000; }
-    .btn-rel:active { background: #00c853; }
+    .btn-onsite { background: #ffab00; color: #000; }
+    .btn-action:active { transform: scale(0.97); }
 
-    /* MODAL OVERLAYS */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1000; align-items: center; justify-content: center; padding: 14px; overflow-y: auto; }
     .modal-box { background: #1c1c1c; border: 1.5px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
     .modal-title { font-size: 18px; font-weight: 900; color: #fff; display: flex; justify-content: space-between; align-items: center; }
@@ -149,8 +139,6 @@
     .form-input:focus, .form-select:focus { border-color: var(--c-yard); }
     .row-2 { display: flex; gap: 8px; }
     .row-2 > div { flex: 1; }
-    
-    .truck-indicator { font-size: 11px; font-weight: 800; color: #00e676; margin-top: 2px; }
 
     .phone-input-wrap { display: flex; gap: 6px; }
     .phone-input { flex: 1; height: 48px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 18px; font-weight: 900; padding: 0 12px; text-align: center; outline: none; }
@@ -177,13 +165,11 @@
 </head>
 <body>
 
-  <!-- Top Title Bar -->
   <div class="header-box">
     <h1>YARD</h1>
     <div class="icon-btn" onclick="fetchYardInventory()">🔄</div>
   </div>
 
-  <!-- 3x2 Grid Navigation -->
   <div class="nav-grid-3x2">
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
     <a href="run.html" class="nav-tile t-run">RUN</a>
@@ -193,12 +179,10 @@
     <a href="release.html" class="nav-tile t-rel">REL</a>
   </div>
 
-  <!-- Search Filter -->
   <div class="controls-wrap">
     <input type="text" id="searchInput" class="search-input" placeholder="Search Rego, Property..." oninput="filterYardCards()">
   </div>
 
-  <!-- Yard Stack -->
   <div id="loading" style="text-align:center; padding: 40px; color:var(--text-muted); font-weight:700;">Loading Holding Yard...</div>
   <div id="cardList" class="card-list"></div>
 
@@ -368,7 +352,6 @@
     </div>
   </div>
 
-  <!-- Fullscreen Photo Lightbox -->
   <div id="photoLightbox" onclick="this.style.display='none'">
     <img id="lightboxImg" src="">
   </div>
@@ -403,11 +386,9 @@
         const resp = await fetch(GOOGLE_SCRIPT_URL + "?action=get_yard_vehicles&_t=" + Date.now());
         let rawInventory = await resp.json();
         
-        // Filter out locally blacklisted releases
         try {
             const blacklist = JSON.parse(localStorage.getItem('released_blacklist') || "{}");
             const now = Date.now();
-            // Clean up old blacklist entries (> 24 hours)
             for (const key in blacklist) {
                 if (now - blacklist[key] > 24 * 60 * 60 * 1000) delete blacklist[key];
             }
@@ -508,10 +489,16 @@
             <span style="font-size:10px; color:#888;">NOTE ✎</span>
           </div>
 
+          <!-- PRIMARY ACTION ROW -->
           <div class="action-row ${hasFolder ? 'has-folder' : ''}">
             ${hasFolder ? `<a href="${v.folderUrl}" target="_blank" class="btn-action btn-folder" onclick="event.stopPropagation();">📁 FOLDER</a>` : ''}
             <button class="btn-action btn-sms" onclick="event.stopPropagation(); openSmsModalByIndex(${idx})">💬 SMS</button>
             <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel" onclick="event.stopPropagation();">RELEASE ➔</a>
+          </div>
+
+          <!-- ON-SITE RELEASE BUTTON -->
+          <div style="margin-top:2px;">
+            <a href="release.html?rego=${encodeURIComponent(v.rego)}&mode=onsite" class="btn-action btn-onsite" style="width:100%;" onclick="event.stopPropagation();">⚡ ON-SITE RELEASE ($186.05)</a>
           </div>
         `;
         list.appendChild(card);
@@ -531,7 +518,6 @@
       renderCards(displayedInventory);
     }
 
-    // --- FULL EDIT MODAL LOGIC ---
     function openEditModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
       if (!selectedVehicle) return;
@@ -600,7 +586,6 @@
       }
 
       document.getElementById('editTruckSelect').value = selectedVehicle.truck || '3676';
-
       document.getElementById('editCallerPhone').value = selectedVehicle.callerPhone || '';
       document.getElementById('editPolicelinkRef').value = selectedVehicle.policelinkRef || '';
 
@@ -619,17 +604,6 @@
       document.getElementById('editColourOther').style.display = sel.value === 'Other' ? 'block' : 'none';
     }
 
-     else if (driverVal === 'Brian') {
-        text.innerText = 'Truck #: 3676 (Assigned to Brian)';
-        text.style.color = '#00e676';
-        otherInput.style.display = 'none';
-      } else {
-        text.innerText = 'Truck #: Custom assignment';
-        text.style.color = '#00b0ff';
-        otherInput.style.display = 'block';
-      }
-    }
-
     function saveVehicleDetailsFromModal() {
       if (!selectedVehicle) return;
 
@@ -641,16 +615,13 @@
       
       const makeSel = document.getElementById('editMakeSelect').value;
       const newMake = makeSel === 'Other' ? document.getElementById('editMakeOther').value.trim() : makeSel;
-      
       const newModel = document.getElementById('editModel').value.trim();
 
       const colourSel = document.getElementById('editColourSelect').value;
       const newColour = colourSel === 'Other' ? document.getElementById('editColourOther').value.trim() : colourSel;
-
       const newBodyType = document.getElementById('editBodyTypeSelect').value;
 
       const newTruck = document.getElementById('editTruckSelect').value;
-
       const newPhone = document.getElementById('editCallerPhone').value.trim().replace(/[^\d+]/g, '');
       const newRef = document.getElementById('editPolicelinkRef').value.trim();
 
@@ -693,7 +664,6 @@
       }).catch(err => console.warn("Background update sync failed:", err));
     }
 
-    // --- PHONE ACTION (PASTE <-> CALL) ---
     function updateModalPhoneBtn() {
       const val = document.getElementById('callerPhoneInput').value;
       const clean = val.replace(/[^\d+]/g, '');
@@ -743,7 +713,6 @@
       }
     }
 
-    // --- SMS MODAL ---
     function openSmsModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
       if (!selectedVehicle) return;
@@ -821,7 +790,6 @@ Thank you`;
       window.location.href = smsUri;
     }
 
-    // --- NOTES MODAL ---
     function openNotesModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
       if (!selectedVehicle) return;
@@ -869,4 +837,3 @@ Thank you`;
   </script>
 </body>
 </html>
-
