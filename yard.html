@@ -54,9 +54,18 @@
     .card-list { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 440px; margin: 0 auto; }
     .yard-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--c-yard); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     
-    .card-row-top { display: flex; align-items: baseline; gap: 12px; cursor: pointer; }
+    .card-row-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; }
+    .card-row-left { display: flex; align-items: baseline; gap: 10px; flex: 1; min-width: 0; overflow: hidden; }
     .rego-text { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #facc15; flex-shrink: 0; }
-    .prop-text { font-size: 20px; font-weight: 900; color: #aaa; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .prop-text { font-size: 18px; font-weight: 900; color: #aaa; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Compact, discreet top-right On-Site Release button */
+    .btn-onsite-top {
+      background: #2a2212; border: 1px solid #ffab00; color: #ffab00; font-size: 11px;
+      font-weight: 900; padding: 5px 9px; border-radius: 6px; text-decoration: none;
+      text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0;
+    }
+    .btn-onsite-top:active { background: #ffab00; color: #000; transform: scale(0.96); }
 
     .card-body { display: flex; gap: 12px; align-items: center; cursor: pointer; }
     
@@ -86,17 +95,20 @@
     }
     .notes-box:active { background: #222; }
 
+    /* Primary bottom action buttons */
     .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
     .action-row.has-folder { grid-template-columns: 0.9fr 1fr 1fr; }
     .btn-action {
-      height: 44px; border: none; border-radius: 10px; font-size: 13px; font-weight: 900;
+      height: 48px; border: none; border-radius: 10px; font-size: 15px; font-weight: 900;
       cursor: pointer; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center;
       gap: 5px; text-decoration: none; text-transform: uppercase;
     }
     .btn-folder { background: #2a2a2a; border: 1.5px solid #00b0ff; color: #00b0ff; }
+    .btn-folder:active { background: #1f364d; transform: scale(0.96); }
     .btn-sms { background: #0284c7; color: #fff; }
+    .btn-sms:active { background: #0369a1; }
     .btn-rel { background: var(--c-rel); color: #000; }
-    .btn-action:active { transform: scale(0.97); }
+    .btn-rel:active { background: #00c853; }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1000; align-items: center; justify-content: center; padding: 14px; overflow-y: auto; }
     .modal-box { background: #1c1c1c; border: 1.5px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
@@ -442,8 +454,11 @@
 
         card.innerHTML = `
           <div class="card-row-top" onclick="openEditModalByIndex(${idx})">
-            <span class="rego-text">${v.rego}</span>
-            <span class="prop-text">${v.property || 'GENERAL'}</span>
+            <div class="card-row-left">
+              <span class="rego-text">${v.rego}</span>
+              <span class="prop-text">${v.property || 'GENERAL'}</span>
+            </div>
+            <a href="release.html?rego=${encodeURIComponent(v.rego)}&mode=onsite" class="btn-onsite-top" onclick="event.stopPropagation();">ON-SITE REL</a>
           </div>
 
           <div class="card-body" onclick="openEditModalByIndex(${idx})">
@@ -466,10 +481,6 @@
             ${hasFolder ? `<a href="${v.folderUrl}" target="_blank" class="btn-action btn-folder" onclick="event.stopPropagation();">📁 FOLDER</a>` : ''}
             <button class="btn-action btn-sms" onclick="event.stopPropagation(); openSmsModalByIndex(${idx})">💬 SMS</button>
             <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel" onclick="event.stopPropagation();">RELEASE ➔</a>
-          </div>
-
-          <div style="margin-top:4px;">
-            <a href="release.html?rego=${encodeURIComponent(v.rego)}&mode=onsite" class="btn-action" style="background:#ffab00; color:#000; width:100%; font-weight:900;" onclick="event.stopPropagation();">⚡ ON-SITE RELEASE ($186.05)</a>
           </div>
         `;
         list.appendChild(card);
