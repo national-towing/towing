@@ -268,7 +268,8 @@
 
     async function loadTowRun() {
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_run");
+            // Anti-cache query parameter ensures instant retrieval of the 11 marked vehicles
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_run&_t=" + Date.now());
             rawData = await res.json();
             localStorage.setItem('cached_run_data', JSON.stringify(rawData));
             parseAndRenderRun(rawData);
@@ -281,7 +282,6 @@
         }
     }
 
-    // STRICT DAY-FIRST (DD-MM) PARSING FOR AUSTRALIAN TIMESTAMPS
     function parseAndRenderRun(data) {
         if (!data || !Array.isArray(data) || data.length === 0) {
             document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
@@ -294,7 +294,7 @@
 
         data = data.filter(item => {
             const r = String(item.rego || '').trim().toUpperCase();
-            return !r;
+            return !!r;
         });
 
         propertyGroups = {};
@@ -315,7 +315,7 @@
                     const mins = parseInt(parts[3], 10);
                     
                     let expYear = currentYear;
-                    if (now.getMonth() === 11 && month === 0) expYear++; // Handle Dec->Jan rollover
+                    if (now.getMonth() === 11 && month === 0) expYear++;
 
                     expMs = new Date(expYear, month, day, hours, mins).getTime();
                 }
