@@ -116,12 +116,6 @@
 
         .section-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); transition: opacity 0.3s ease, filter 0.3s ease; }
 
-        /* On-Site Optional Styling */
-        body.is-onsite .optional-field { opacity: 0.6; }
-        body.is-onsite .optional-field:focus { opacity: 1; }
-        body.is-onsite .section-title { color: #ffab00; }
-        body.is-onsite .submit-btn { background: #ffab00; color: #000; }
-
         /* Full Screen Red Processing Overlay */
         #processingOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -331,7 +325,25 @@
     let isSubmittingRelease = false;
 
     window.addEventListener('DOMContentLoaded', () => {
-        applyModeConfigurations();
+        if (isOnSiteMode) {
+            const h1 = document.querySelector('.header-box h1');
+            if (h1) {
+                h1.innerText = "ON-SITE RELEASE";
+                h1.style.color = "#ffab00";
+            }
+            document.title = "ON-SITE RELEASE";
+            submitBtn.innerText = "CONFIRM ON-SITE RELEASE ✔";
+            submitBtn.style.background = "#ffab00";
+            submitBtn.style.color = "#000";
+            releaseFeeInput.value = "186.05";
+            storageFeeInput.value = "";
+
+            idSectionWrapper.classList.remove('section-disabled');
+            ownerSigWrapper.classList.remove('section-disabled');
+            idSectionWrapper.style.opacity = "0.65";
+            ownerSigWrapper.style.opacity = "0.65";
+            svnInput.style.opacity = "0.65";
+        }
         loadYardVehicles();
         initCamera();
         initSignatureCanvas('ownerSigCanvas');
@@ -339,22 +351,6 @@
     });
 
     refreshBtn.addEventListener('click', () => { window.location.reload(true); });
-
-    function applyModeConfigurations() {
-        if (isOnSiteMode) {
-            document.body.classList.add('is-onsite');
-            document.getElementById('headerMainTitle').innerText = "ON-SITE RELEASE";
-            document.getElementById('headerMainTitle').style.color = "#ffab00";
-            document.getElementById('pageTitle').innerText = "ON-SITE RELEASE";
-            submitBtn.innerText = "CONFIRM ON-SITE RELEASE ✔";
-            releaseFeeInput.value = "186.05";
-            storageFeeInput.value = "";
-            
-            // In on-site mode, sections are permanently unlocked and optional
-            idSectionWrapper.classList.remove('section-disabled');
-            ownerSigWrapper.classList.remove('section-disabled');
-        }
-    }
 
     function populateVehicleFields(rego) {
         const veh = yardVehicles.find(v => v.rego === rego);
@@ -624,9 +620,9 @@
         mark(colourInput, colourInput && colourInput.value.trim() !== "");
         mark(makeInput, makeInput && makeInput.value.trim() !== "");
         mark(modelInput, modelInput && modelInput.value.trim() !== "");
+        mark(releaseFeeInput, releaseFeeInput && releaseFeeInput.value !== "");
 
         if (!isOnSiteMode) {
-            // Standard Yard Release: SVN, Owner details and signature are mandatory
             mark(svnInput, svnInput && svnInput.value.trim() !== "");
 
             const isPlaceholder = (val) => !val || ["NOT PROVIDED", "NOT SPECIFIED", "N/A", "NONE", "UNKNOWN"].includes(String(val).trim().toUpperCase());
@@ -652,16 +648,10 @@
             if (!ownerSigConfirmed) isValid = false;
             mark(storageFeeInput, storageFeeInput && storageFeeInput.value !== "");
         } else {
-            // On-site Release: SVN, Owner details, Signature, AH fee are completely OPTIONAL
-            svnInput.classList.remove('field-missing'); svnInput.classList.add('field-valid');
-            ownerNameInput.classList.remove('field-missing'); ownerNameInput.classList.add('field-valid');
-            idNumInput.classList.remove('field-missing'); idNumInput.classList.add('field-valid');
-            ownerAddressInput.classList.remove('field-missing'); ownerAddressInput.classList.add('field-valid');
-            ownerPhoneInput.classList.remove('field-missing'); ownerPhoneInput.classList.add('field-valid');
-            storageFeeInput.classList.remove('field-missing'); storageFeeInput.classList.add('field-valid');
+            [svnInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, storageFeeInput].forEach(el => {
+                if (el) { el.classList.remove('field-missing'); el.classList.add('field-valid'); }
+            });
         }
-
-        mark(releaseFeeInput, releaseFeeInput && releaseFeeInput.value !== "");
 
         submitBtn.disabled = !isValid || isSubmittingRelease;
         submitBtn.style.opacity = (isValid && !isSubmittingRelease) ? "1" : "0.4";
