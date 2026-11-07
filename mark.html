@@ -91,7 +91,7 @@
         .vc-pass { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; width: fit-content; margin-top: 2px; }
         .vc-pass.pass-blue { background: #2979ff !important; color: #ffffff !important; }
         .vc-pass.pass-red  { background: #ff1744 !important; color: #ffffff !important; }
-        
+
         .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
 
         .modal-sheet { display: none; position: fixed; inset: 0; background: #121212; z-index: 9999; flex-direction: column; }
@@ -298,6 +298,7 @@
     let logCache = [];
     let activePropFilter = null;
     let propertiesCache = [];
+    let syncDebounceTimer = null;
 
     propertySelect.addEventListener('change', () => {
         if (propertySelect.value) {
@@ -307,13 +308,20 @@
 
     window.addEventListener('load', () => {
         loadProperties();
-        window.addEventListener('online', syncPendingMarksInBackground);
-        window.addEventListener('focus', syncPendingMarksInBackground);
+        
+        function scheduleSync() {
+            clearTimeout(syncDebounceTimer);
+            // Allow 3.0s for mobile cellular antenna to handshake before dispatching requests
+            syncDebounceTimer = setTimeout(syncPendingMarksInBackground, 3000);
+        }
+
+        window.addEventListener('online', scheduleSync);
+        window.addEventListener('focus', scheduleSync);
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') syncPendingMarksInBackground();
+            if (document.visibilityState === 'visible') scheduleSync();
         });
-        syncPendingMarksInBackground();
-        setInterval(syncPendingMarksInBackground, 10000);
+        scheduleSync();
+        setInterval(scheduleSync, 12000);
     });
 
     async function loadProperties() {
@@ -438,7 +446,7 @@
                 lastSnapPreview.src = fastB64;
                 lastSnapPreview.style.display = "block";
 
-                // Bake timestamp immediately
+                // Indelible timestamp burned immediately into pixel buffer
                 applyBurnedTimestamp(fastB64, function(stampedB64) {
                     processMarkSnap(stampedB64, prop);
                 });
@@ -450,10 +458,8 @@
 
     async function processMarkSnap(stampedB64, property) {
         const snapTime = new Date().toISOString();
-        const now = new Date();
-        const hhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
-        // 1. If Offline (Underground in Basement): Never block, never prompt manual input
+        // 1. If Offline (Underground in Basement): Never stall, never prompt manual entry
         if (!navigator.onLine) {
             saveMarkToOfflineQueue({
                 id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -462,7 +468,7 @@
                 snapTime: snapTime
             });
             triggerGreenOverlay("CACHED");
-            statusDiv.innerText = "✔ CACHED (OFFLINE - WILL AUTO-SYNC)";
+            statusDiv.innerText = "✔ CACHED (OFFLINE - AUTO-SYNC ON SURFACE)";
             isProcessing = false;
             return;
         }
@@ -488,15 +494,14 @@
                 statusDiv.innerText = `✔ MARKED ${detectedRego}`;
                 sendMarkToServer(detectedRego, property, stampedB64, snapTime);
             } else {
-                // ANPR unreadable: Do NOT prompt manual typing, auto-assign NO REG (HH:MM)
-                const fallbackReg = "NO REG " + hhmm;
-                triggerGreenOverlay(fallbackReg);
-                statusDiv.innerText = `✔ MARKED (${fallbackReg})`;
-                sendMarkToServer(fallbackReg, property, stampedB64, snapTime);
+                // ANPR unreadable online: Dispatch as AUTO; server Plate Recognizer + Gemini will process
+                triggerGreenOverlay("MARKED");
+                statusDiv.innerText = `✔ MARKED (AUTO-ANPR ACTIVE)`;
+                sendMarkToServer("AUTO", property, stampedB64, snapTime);
             }
         } catch(err) {
             clearTimeout(timeoutId);
-            // Weak reception / timeout: Auto-cache to offline queue
+            // Weak reception / timeout: Cache locally to guarantee zero lost vehicles
             saveMarkToOfflineQueue({
                 id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                 property: property,
@@ -504,7 +509,7 @@
                 snapTime: snapTime
             });
             triggerGreenOverlay("CACHED");
-            statusDiv.innerText = "✔ CACHED (OFFLINE - WILL AUTO-SYNC)";
+            statusDiv.innerText = "✔ CACHED (AUTO-SYNCING IN BACKGROUND)";
         } finally {
             isProcessing = false;
         }
@@ -515,7 +520,7 @@
         const payload = {
             action: 'log_mark',
             property: property,
-            rego: rego,
+            rego: rego || "AUTO",
             photoBytes: photoBytes,
             timestamp: timestamp || new Date().toISOString()
         };
@@ -550,36 +555,16 @@
 
         for (let i = 0; i < queue.length; i++) {
             const item = queue[i];
-            let finalRego = "";
-
-            // Run ANPR now that we are online
-            try {
-                const anprRes = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'scan_npr', photoBytes: item.photoBytes })
-                });
-                const anprData = await anprRes.json();
-                if (anprData && anprData.rego) {
-                    finalRego = String(anprData.rego).trim().toUpperCase();
-                }
-            } catch(e) {}
-
-            if (!finalRego) {
-                const snapD = new Date(item.snapTime || Date.now());
-                const hh = String(snapD.getHours()).padStart(2, '0');
-                const mm = String(snapD.getMinutes()).padStart(2, '0');
-                finalRego = `NO REG ${hh}:${mm}`;
-            }
 
             try {
+                // Single resilient call: Server executes ANPR + Gemini AI directly on Google cloud fiber
                 const logRes = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
                         action: 'log_mark',
                         property: item.property,
-                        rego: finalRego,
+                        rego: item.rego || "AUTO",
                         photoBytes: item.photoBytes,
                         timestamp: item.snapTime
                     })
@@ -589,8 +574,11 @@
                     let curQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
                     curQ = curQ.filter(q => q.id !== item.id);
                     localStorage.setItem('mark_offline_queue', JSON.stringify(curQ));
+                } else {
+                    break; // Server error, keep in queue and retry next cycle
                 }
             } catch(e) {
+                // Radio still warming up, leave queue untouched
                 break;
             }
         }
@@ -827,18 +815,5 @@
         if (btn) btn.innerText = isZ ? "🔍 RESET" : "🔍 ZOOM 2X";
     }
 </script>
-
-<!-- PHOTO PREVIEW MODAL WITH ZOOM -->
-<div id="previewModal" class="preview-modal">
-    <div class="preview-header">
-        <button type="button" class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
-        <div style="display:flex; flex-direction:column; text-align:center;">
-            <span style="font-size:17px; font-weight:900; color:#fff;" id="previewTitle"></span>
-            <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
-        </div>
-        <button type="button" class="preview-zoom-btn" id="previewZoomBtn" onclick="toggleZoom()">🔍 ZOOM 2X</button>
-    </div>
-    <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
-</div>
 </body>
 </html>
