@@ -90,10 +90,10 @@
         .detail-title { font-size: 22px; font-weight: 900; color: #ffab00; margin-bottom: 10px; text-transform: uppercase; }
 
         .car-tile { background: #1e1e1e; border-radius: 14px; padding: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; border: 2px solid #333; color: #fff; transition: transform 0.1s ease; cursor: pointer; }
-        .run-tile-thumb { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; border: 1.5px solid #444; background: #000; flex-shrink: 0; cursor: pointer; }
-        .run-tile-thumb:active { transform: scale(0.96); }
-        .run-tile-thumb.no-thumb { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #555; }
-        .tile-mid-content { flex: 1; min-width: 0; }
+.run-tile-thumb { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; border: 1.5px solid #444; background: #000; flex-shrink: 0; cursor: pointer; }
+.run-tile-thumb:active { transform: scale(0.96); }
+.run-tile-thumb.no-thumb { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #555; }
+.tile-mid-content { flex: 1; min-width: 0; }
         .car-tile:active { transform: scale(0.98); }
         .tile-ready { border-color: #ff1744; background: #2a1215; }
         .tile-wait { border-color: #ffab00; background: #2a2212; }
@@ -109,6 +109,12 @@
         .car-time-exp { font-size: 22px; color: #fff; font-weight: 900; margin-top: 6px; letter-spacing: 0.5px; }
 
         .tile-right-box { display: flex; align-items: center; gap: 8px; }
+        .pic-preview-btn {
+            width: 44px; height: 44px; border-radius: 10px; background: #2a2a2a;
+            border: 1px solid #555; font-size: 18px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; color: #fff; flex-shrink: 0;
+        }
+        .pic-preview-btn:active { transform: scale(0.92); }
 
         .badge {
             padding: 10px 16px; border-radius: 8px; font-size: 15px; font-weight: 900;
@@ -122,7 +128,30 @@
 
         .empty-msg { text-align: center; color: #666; font-weight: 800; font-size: 16px; margin-top: 40px; }
 
-        /* HUD FLASH OVERLAY */
+        /* HUD MODALS */
+        #hudCamModal { display: none; position: fixed; inset: 0; background: #000; z-index: 99999; flex-direction: column; }
+        .hud-cam-header { height: 64px; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 10; }
+        .hud-top-btn { background: #2a2a2a; color: #ffab00; border: 1.5px solid #ffab00; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; }
+        .hud-top-title { font-weight: 900; color: #ffab00; font-size: 17px; text-transform: uppercase; }
+        .hud-close-btn { background: #333; color: #fff; border: 1.5px solid #555; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; }
+
+        .hud-cam-view { flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; }
+        #hudVideo { width: 100%; height: 100%; object-fit: cover; }
+        
+        .hud-target-reticle {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            width: 88%; max-width: 420px; height: 160px; border: 3.5px dashed #00e676; border-radius: 16px;
+            pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+        }
+        .hud-target-hint { position: absolute; top: -28px; left: 0; width: 100%; text-align: center; color: #00e676; font-weight: 900; font-size: 12px; text-transform: uppercase; }
+
+        .hud-snap-trigger {
+            position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+            width: 90px; height: 90px; background: #fff; border: 5px solid #000; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20;
+        }
+        .hud-snap-inner { width: 66px; height: 66px; background: #ff1744; border-radius: 50%; }
+
         #hudFlashOverlay { display: none; position: fixed; inset: 0; z-index: 100000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; cursor: pointer; }
         .hud-flash-tow { background: rgba(255, 23, 68, 0.98); }
         .hud-flash-pass { background: rgba(41, 182, 246, 0.98); }
@@ -147,6 +176,7 @@
         #hudManualInput { width: 100%; height: 56px; border-radius: 12px; border: 2.5px solid #ffab00; background: #111; color: #fff; font-size: 26px; font-weight: 900; text-align: center; text-transform: uppercase; outline: none; }
         .hud-manual-btn { width: 100%; height: 52px; border-radius: 12px; border: none; background: #ffab00; color: #000; font-weight: 900; font-size: 20px; cursor: pointer; text-transform: uppercase; }
 
+        
         /* Zoom Modal Styles */
         .preview-modal { display: none; position: fixed; inset: 0; background: #121212; z-index: 100006; flex-direction: column; }
         .preview-modal.show { display: flex; }
@@ -183,6 +213,9 @@
 </div>
 
 <input type="file" id="runNativeCam" capture="environment" accept="image/*" style="display:none;" onchange="handleRunNativeScan(this)">
+        <div class="hud-snap-trigger" id="hudSnapBtn" onclick="triggerDriveByScan()"><div class="hud-snap-inner"></div></div>
+    </div>
+</div>
 
 <!-- HUD FLASH OVERLAY -->
 <div id="hudFlashOverlay" onclick="handleHudOverlayTap(event)">
@@ -213,12 +246,16 @@
     </div>
     <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
 </div>
+    <div class="preview-body"><img id="previewImg" alt="Mark Photo"></div>
+</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    const ANPR_API_KEY = "74a8bb83a49461eef0266274ce63e1e198b4c888";
 
     let rawData = [];
     let propertyGroups = {};
+    let hudStream = null;
     let isProcessingScan = false;
     let lastMatchedTowVehicle = null;
 
@@ -276,6 +313,7 @@
         }
     }
 
+    // STRICT DAY-FIRST (DD-MM) PARSING FOR AUSTRALIAN TIMESTAMPS
     function parseAndRenderRun(data) {
         if (!data || !Array.isArray(data) || data.length === 0) {
             document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
@@ -309,7 +347,7 @@
                     const mins = parseInt(parts[3], 10);
                     
                     let expYear = currentYear;
-                    if (now.getMonth() === 11 && month === 0) expYear++;
+                    if (now.getMonth() === 11 && month === 0) expYear++; // Handle Dec->Jan rollover
 
                     expMs = new Date(expYear, month, day, hours, mins).getTime();
                 }
@@ -484,75 +522,83 @@
         window.location.href = `tow.html?${q.toString()}`;
     }
 
-    function handleRunNativeScan(input) {
-        if (!input.files || !input.files[0]) return;
+    async function document.getElementById('runNativeCam').click() {
+        getAudioContext();
+        const modal = document.getElementById('hudCamModal');
+        const video = document.getElementById('hudVideo');
+        modal.style.display = 'flex';
+
+        try {
+            hudStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                audio: false
+            });
+            video.srcObject = hudStream;
+            await video.play().catch(() => {});
+        } catch(err) {
+            alert("Camera permission required: " + err.message);
+            dismissHudFlash();
+        }
+    }
+
+    function closeDriveByCam() {
+        if (hudStream) {
+            hudStream.getTracks().forEach(t => t.stop());
+            hudStream = null;
+        }
+        document.getElementById('hudCamModal').style.display = 'none';
+        dismissHudFlash();
+    }
+
+    async function triggerDriveByScan() {
         if (isProcessingScan) return;
         isProcessingScan = true;
 
-        const file = input.files[0];
-        document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>⚡ COMPRESSING & SCANNING...</div>";
+        const video = document.getElementById('hudVideo');
+        const snapBtn = document.getElementById('hudSnapBtn');
+        snapBtn.style.opacity = "0.4";
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const maxDim = 960;
-                let w = img.width, h = img.height;
-                if (w > h) { if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; } } 
-                else { if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; } }
-                
-                canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-                const b64 = canvas.toDataURL('image/jpeg', 0.60);
-                executeAnprScan(b64);
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
+        const vW = video.videoWidth || 1280;
+        const vH = video.videoHeight || 720;
+        const aspect = vH / vW;
 
-    async function executeAnprScan(b64) {
-        try {
-            const res = await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 })
-            });
-            const data = await res.json();
-            const plate = data && data.rego ? String(data.rego).trim().toUpperCase() : "";
-            
-            if (plate) {
-                evaluatePlateAndFlashHUD(plate);
-            } else {
-                flashResultOverlay("noplate", "NO PLATE", "NO VEHICLE PLATE DETECTED", true);
-            }
-        } catch(err) {
-            flashResultOverlay("noplate", "OFFLINE", "SCAN FAILED — ENTER MANUALLY", true);
-        } finally {
-            isProcessingScan = false;
-        }
-    }
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = Math.round(600 * aspect);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    function levenshtein(a, b) {
-        const matrix = [];
-        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-        for (let i = 1; i <= b.length; i++) {
-            for (let j = 1; j <= a.length; j++) {
-                if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                    matrix[i][j] = matrix[i - 1][j - 1];
+        canvas.toBlob(async (blob) => {
+            try {
+                const formData = new FormData();
+                formData.append('upload', blob, 'plate.jpg');
+                formData.append('regions', 'au');
+
+                const resp = await fetch('https://api.platerecognizer.com/v1/plate-reader/', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Token ' + ANPR_API_KEY },
+                    body: formData
+                });
+                const json = await resp.json();
+
+                if (json && json.results && json.results.length > 0) {
+                    const plate = String(json.results[0].plate || "").toUpperCase();
+                    evaluatePlateAndFlashHUD(plate);
                 } else {
-                    matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+                    flashResultOverlay("noplate", "NO PLATE", "NO VEHICLE PLATE DETECTED", true);
                 }
+            } catch(e) {
+                flashResultOverlay("noplate", "OFFLINE", "SCAN FAILED — ENTER MANUALLY", true);
+            } finally {
+                isProcessingScan = false;
+                snapBtn.style.opacity = "1";
             }
-        }
-        return matrix[b.length][a.length];
+        }, 'image/jpeg', 0.55);
     }
 
+    
     function evaluatePlateAndFlashHUD(plate) {
-        renderSummaryView();
+        renderSummaryView(); // Restore background UI
         const cleanRego = plate.replace(/[^A-Z0-9]/g, '');
         let exactMatch = null;
         let fuzzyMatch = null;
@@ -587,13 +633,14 @@
             else if (exactMatch.status === "WAIT") flashResultOverlay("wait", cleanRego, `MARKED: EXP ${exactMatch.expiryTimeStr}`, false);
         } else if (fuzzyMatch) {
             lastMatchedTowVehicle = fuzzyMatch; 
-            flashResultOverlay("fuzzy", cleanRego, `FUZZY MATCH DETECTED\nSCANNED: ${cleanRego}\nLOGGED: ${fuzzyMatch.rego} (${fuzzyMatch.status})`, true);
+            flashResultOverlay("fuzzy", cleanRego, `FUZZY MATCH DETECTED
+SCANNED: ${cleanRego}
+LOGGED: ${fuzzyMatch.rego} (${fuzzyMatch.status})`, true);
         } else {
             flashResultOverlay("nomark", cleanRego, "NO ACTIVE MARK - UNMARKED", false);
         }
     }
-
-    function flashResultOverlay(type, plate, detail, showManualInput) {
+function flashResultOverlay(type, plate, detail, showManualInput) {
         const overlay = document.getElementById('hudFlashOverlay');
         const iconEl = document.getElementById('hudMainIcon');
         const statusEl = document.getElementById('hudStatusText');
@@ -606,10 +653,10 @@
         overlay.className = `hud-flash-${type}`;
         overlay.style.display = 'flex';
 
+        
         if (type === 'tow') {
             iconEl.innerText = "🚨"; statusEl.innerText = "TOW";
             towActionBtn.style.display = "block";
-            towActionBtn.innerText = "🚨 LOAD TOW APP";
         } else if (type === 'fuzzy') {
             iconEl.innerText = "⚠️"; statusEl.innerText = "CHECK REGO";
             towActionBtn.style.display = "block"; 
@@ -617,6 +664,11 @@
         } else {
             towActionBtn.style.display = "none";
             if (type === 'pass') { iconEl.innerText = "🎫"; statusEl.innerText = "PASS"; }
+            else if (type === 'wait') { iconEl.innerText = "⏳"; statusEl.innerText = "WAIT"; }
+            else if (type === 'nomark') { iconEl.innerText = "🟢"; statusEl.innerText = "NO MARK"; }
+            else if (type === 'noplate') { iconEl.innerText = "❌"; statusEl.innerText = "NO PLATE"; }
+        }
+
             else if (type === 'wait') { iconEl.innerText = "⏳"; statusEl.innerText = "WAIT"; }
             else if (type === 'nomark') { iconEl.innerText = "🟢"; statusEl.innerText = "NO MARK"; }
             else if (type === 'noplate') { iconEl.innerText = "❌"; statusEl.innerText = "NO PLATE"; }

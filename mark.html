@@ -484,19 +484,38 @@
         reader.readAsDataURL(file);
     }
 
+    
     async function executeFastAnpr(b64, property) {
+        // Deep basement check: if offline, bypass the 5-second cloud timeout immediately
+        if (!navigator.onLine) {
+            statusDiv.innerText = "⚡ OFFLINE: ENTER PLATE";
+            pendingFailedPhoto = b64;
+            openManualModal();
+            isProcessing = false;
+            return;
+        }
+
+        statusDiv.innerText = "🔍 SCANNING PLATE...";
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s quick timeout
+
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 })
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
             const data = await res.json();
             const detectedRego = data && data.rego ? String(data.rego).trim().toUpperCase() : "";
 
             if (detectedRego) {
                 triggerGreenOverlay(detectedRego);
                 statusDiv.innerText = `✔ MARKED ${detectedRego}`;
-                sendMarkToServer(detectedRego, property, b64);
+                applyBurnedTimestamp(b64, detectedRego, 'MARK', stamped => {
+                    sendMarkToServer(detectedRego, property, stamped);
+                });
                 isProcessing = false;
             } else {
                 triggerRedOverlay("NO PLATE DETECTED");
@@ -505,16 +524,55 @@
                 isProcessing = false;
             }
         } catch(err) {
-            triggerRedOverlay("SCAN ERROR");
+            clearTimeout(timeoutId);
+            // Underground / Weak reception: drop straight to manual modal with zero stall
+            statusDiv.innerText = "⚡ OFFLINE: ENTER PLATE";
             pendingFailedPhoto = b64;
             openManualModal();
             isProcessing = false;
         }
     }
 
+    function applyBurnedTimestamp(b64Src, rego, type, callback) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height + 65;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            
+            const now = new Date();
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const dayName = days[now.getDay()];
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const dStr = `${dayName} ${dd}/${mm} ${hh}:${mins}`;
+            
+            ctx.fillStyle = type === "MARK" ? "#ffab00" : "#00e676";
+            ctx.font = "bold 32px sans-serif";
+            ctx.fillText(`${type}: ${dStr}`, 25, canvas.height - 22);
+            
+            if (rego) {
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "right";
+                ctx.fillText(`REGO: ${rego}`, canvas.width - 25, canvas.height - 22);
+            }
+            
+            callback(canvas.toDataURL('image/jpeg', 0.65));
+        };
+        img.src = b64Src;
+    }
+
     function sendMarkToServer(rego, property, photoBytes) {
         localStorage.setItem('last_property', property);
         const payload = {
+            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_mark',
             property: property,
             rego: rego,
@@ -522,13 +580,51 @@
             timestamp: new Date().toISOString()
         };
 
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
-        }).catch(() => {});
+        // Offline storage guarantee
+        saveMarkToOfflineQueue(payload);
+        syncPendingMarksInBackground();
     }
+
+    function saveMarkToOfflineQueue(payload) {
+        try {
+            let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+            queue.push(payload);
+            localStorage.setItem('mark_offline_queue', JSON.stringify(queue));
+        } catch(e) {}
+    }
+
+    let isSyncingMarks = false;
+    async function syncPendingMarksInBackground() {
+        if (isSyncingMarks || !navigator.onLine) return;
+        let queue = [];
+        try {
+            queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+        } catch(e) { return; }
+        if (queue.length === 0) return;
+
+        isSyncingMarks = true;
+        statusDiv.innerText = `⚡ SYNCING OFFLINE MARKS (${queue.length})...`;
+        for (let i = 0; i < queue.length; i++) {
+            const item = queue[i];
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                });
+                const resJson = await res.json();
+                if (resJson && resJson.status === "SUCCESS") {
+                    let curQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+                    curQ = curQ.filter(q => q.id !== item.id);
+                    localStorage.setItem('mark_offline_queue', JSON.stringify(curQ));
+                }
+            } catch(e) { break; }
+        }
+        isSyncingMarks = false;
+        statusDiv.innerText = `READY`;
+        loadMarkingLog();
+    }
+
 
     function openManualModal() {
         manualRegoModal.style.display = "flex";
@@ -551,7 +647,7 @@
 
         triggerGreenOverlay(manualRego);
         statusDiv.innerText = `✔ MARKED ${manualRego}`;
-        sendMarkToServer(manualRego, property, pendingFailedPhoto);
+        applyBurnedTimestamp(pendingFailedPhoto, manualRego, 'MARK', stamped => { sendMarkToServer(manualRego, property, stamped); });
         pendingFailedPhoto = "";
     }
 

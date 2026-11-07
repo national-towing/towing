@@ -878,9 +878,99 @@
     // ============================================================
     // 2. CONDITION PHOTOS ENGINE
     // ============================================================
+    
+    let condStream = null;
+    let condTorch = false;
+    let tempSnapCount = 0;
+
+    async function openCondMultiSnap() {
+        const modal = document.getElementById('condVidModal');
+        const video = document.getElementById('condVideoElem');
+        modal.style.display = 'flex';
+        tempSnapCount = conditionPhotos.length;
+        document.getElementById('multiSnapCount').innerText = tempSnapCount;
+        document.getElementById('modalThumbGallery').innerHTML = "";
+        
+        // Populate modal with existing thumbs
+        conditionPhotos.forEach(src => addThumbToModal(src));
+
+        try {
+            condStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                audio: false
+            });
+            video.srcObject = condStream;
+            await video.play().catch(() => {});
+        } catch(e) {
+            alert("Camera access required.");
+            closeCondVidModal();
+        }
+    }
+
+    async function toggleCondTorch() {
+        if (!condStream) return;
+        const track = condStream.getVideoTracks()[0];
+        if (!track) return;
+        try {
+            condTorch = !condTorch;
+            await track.applyConstraints({ advanced: [{ torch: condTorch }] });
+            const btn = document.getElementById('condTorchBtn');
+            btn.innerText = condTorch ? "🔦 ON" : "🔦 TORCH";
+            btn.style.background = condTorch ? "#ffab00" : "#333";
+            btn.style.color = condTorch ? "#000" : "#ffab00";
+        } catch(err) {}
+    }
+
+    function snapCondFrame() {
+        const video = document.getElementById('condVideoElem');
+        const vW = video.videoWidth || 1280;
+        const vH = video.videoHeight || 720;
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = Math.round(800 * (vH / vW));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const b64 = canvas.toDataURL('image/jpeg', 0.65);
+        
+        // Flash screen
+        const flash = document.getElementById('condFlashIndicator');
+        flash.style.display = 'block';
+        setTimeout(() => flash.style.display = 'none', 100);
+        if (navigator.vibrate) navigator.vibrate(40);
+
+        applyBurnedTimestamp(b64, "COND", stamped => {
+            conditionPhotos.push(stamped);
+            tempSnapCount++;
+            document.getElementById('multiSnapCount').innerText = tempSnapCount;
+            addThumbToModal(stamped);
+            
+            if (conditionPhotos.length === 1 && (!document.getElementById('regoInput').value || !document.getElementById('makeSelect').value)) {
+                triggerStandaloneAiClassification(stamped);
+            }
+        });
+    }
+    
+    function addThumbToModal(src) {
+        const gallery = document.getElementById('modalThumbGallery');
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = "width:60px; height:60px; border-radius:6px; object-fit:cover; border:2px solid #00e676; flex-shrink:0;";
+        gallery.appendChild(img);
+        gallery.scrollLeft = gallery.scrollWidth;
+    }
+
+    function closeCondVidModal() {
+        if (condStream) {
+            condStream.getTracks().forEach(t => t.stop());
+            condStream = null;
+        }
+        document.getElementById('condVidModal').style.display = 'none';
+        renderThumbs(); // Sync main screen
+    }
+
     function triggerNativeConditionSnap() {
-        nativeCondInput.value = "";
-        nativeCondInput.click();
+        openCondMultiSnap();
     }
 
     function handleSingleConditionPhoto(input) {
@@ -916,9 +1006,10 @@
                 ctx.drawImage(img, 0, 0, w, h);
 
                 const fastB64 = canvas.toDataURL('image/jpeg', 0.55);
-                conditionPhotos.push(fastB64);
-
-                renderThumbs();
+                applyBurnedTimestamp(fastB64, "COND", stamped => {
+                    conditionPhotos.push(stamped);
+                    renderThumbs();
+                });
                 if (navigator.vibrate) navigator.vibrate(40);
 
                 if (conditionPhotos.length === 1 && (!regoInput.value || !makeSelect.value || !modelInput.value)) {
@@ -930,6 +1021,44 @@
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
+    }
+
+    
+    function applyBurnedTimestamp(b64Src, type, callback) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height + 65;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            
+            const now = new Date();
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const dayName = days[now.getDay()];
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const dStr = `${dayName} ${dd}/${mm} ${hh}:${mins}`;
+            
+            ctx.fillStyle = "#00e676";
+            ctx.font = "bold 32px sans-serif";
+            ctx.fillText(`${type}: ${dStr}`, 25, canvas.height - 22);
+            
+            const regoVal = document.getElementById('regoInput').value.trim().toUpperCase();
+            if (regoVal) {
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "right";
+                ctx.fillText(`REGO: ${regoVal}`, canvas.width - 25, canvas.height - 22);
+            }
+            
+            callback(canvas.toDataURL('image/jpeg', 0.65));
+        };
+        img.src = b64Src;
     }
 
     function renderThumbs() {
@@ -1152,6 +1281,26 @@
         await syncPendingTowsInBackground();
     }
 </script>
+
+<!-- CONDITION MULTI-SNAP MODAL -->
+<div id="condVidModal" class="overlay-modal" style="z-index:100010;">
+    <div class="modal-header">
+        <button type="button" class="torch-btn" id="condTorchBtn" onclick="toggleCondTorch()">🔦 TORCH</button>
+        <div style="color:#00e676; font-weight:900; text-transform:uppercase;">MULTI-SNAP</div>
+        <button type="button" class="torch-btn" style="color:#fff; border-color:#fff;" onclick="closeCondVidModal()">✔ DONE (<span id="multiSnapCount">0</span>)</button>
+    </div>
+    <div class="viewfinder-container">
+        <video id="condVideoElem" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+        
+        <div class="thumb-gallery" id="modalThumbGallery" style="position:absolute; bottom:120px; left:0; width:100%; padding:0 10px; min-height:80px; overflow-x:auto;"></div>
+        
+        <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:84px; height:84px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="snapCondFrame()">
+            <div style="width:68px; height:68px; background:#00e676; border-radius:50%;"></div>
+        </div>
+        <div id="condFlashIndicator" style="display:none; position:absolute; inset:0; background:#fff; z-index:10; opacity:0.8;"></div>
+    </div>
+</div>
+
 </body>
 </html>
 
