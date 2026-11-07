@@ -91,7 +91,7 @@
         .vc-pass { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; width: fit-content; margin-top: 2px; }
         .vc-pass.pass-blue { background: #2979ff !important; color: #ffffff !important; }
         .vc-pass.pass-red  { background: #ff1744 !important; color: #ffffff !important; }
-
+        
         .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
 
         .modal-sheet { display: none; position: fixed; inset: 0; background: #121212; z-index: 9999; flex-direction: column; }
@@ -150,24 +150,6 @@
         .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; text-shadow: 0 6px 24px rgba(0,0,0,0.4); }
         .full-overlay-text { font-size: 30px; font-weight: 950; color: #000; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; }
 
-        .manual-rego-modal {
-            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88);
-            border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; justify-content: center; padding: 16px;
-        }
-        .manual-rego-card {
-            width: 100%; max-width: 320px; background: #1e1e1e; border: 2px solid #ff1744;
-            border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        .manual-title { font-size: 18px; font-weight: 900; color: #ff1744; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-        .manual-input {
-            width: 100%; height: 50px; background: #2a2a2a; border: 2px solid #ffab00; border-radius: 10px;
-            color: #fff; font-size: 24px; font-weight: 900; text-align: center; text-transform: uppercase; outline: none;
-        }
-        .manual-btn-row { display: flex; gap: 8px; margin-top: 4px; }
-        .btn-cancel { flex: 1; height: 44px; border: none; border-radius: 8px; background: #333; color: #fff; font-weight: 900; cursor: pointer; text-transform: uppercase; }
-        .btn-submit { flex: 1; height: 44px; border: none; border-radius: 8px; background: #00e676; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 15px; }
-
         #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 8px; color: #ffab00; flex-shrink: 0; min-height: 18px; }
 
         /* Zoom Preview Modal */
@@ -223,17 +205,6 @@
             <div class="cam-icon-circle">📷</div>
             <div class="cam-launch-title">SNAP VEHICLE</div>
             <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
-
-            <div class="manual-rego-modal" id="manualRegoModal" onclick="event.stopPropagation()">
-                <div class="manual-rego-card">
-                    <div class="manual-title">⚠️ UNREADABLE PLATE</div>
-                    <input type="text" id="manualRegoInput" class="manual-input" placeholder="ENTER REGO" autocomplete="off" autocorrect="off">
-                    <div class="manual-btn-row">
-                        <button type="button" class="btn-cancel" onclick="cancelManualMark()">RETAKE 📷</button>
-                        <button type="button" class="btn-submit" onclick="submitManualMark()">MARK ✔</button>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <input type="file" id="nativeCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativePhoto(this)">
@@ -321,11 +292,8 @@
     const redOverlay = document.getElementById('redOverlay');
     const greenText = document.getElementById('greenText');
     const redText = document.getElementById('redText');
-    const manualRegoModal = document.getElementById('manualRegoModal');
-    const manualRegoInput = document.getElementById('manualRegoInput');
 
     let isProcessing = false;
-    let pendingFailedPhoto = "";
     let activeTab = 'snap';
     let logCache = [];
     let activePropFilter = null;
@@ -485,7 +453,7 @@
         const now = new Date();
         const hhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
-        // 1. If Offline (Underground in Basement): Never block, never ask for plate
+        // 1. If Offline (Underground in Basement): Never block, never prompt manual input
         if (!navigator.onLine) {
             saveMarkToOfflineQueue({
                 id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -499,10 +467,10 @@
             return;
         }
 
-        // 2. If Online: Attempt fast cloud ANPR (capped at 2.5s timeout)
+        // 2. If Online: Attempt fast cloud ANPR (generous 12s ceiling for GAS)
         statusDiv.innerText = "🔍 SCANNING PLATE...";
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500);
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
 
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL, {
@@ -528,7 +496,7 @@
             }
         } catch(err) {
             clearTimeout(timeoutId);
-            // Weak reception / timeout underground: Auto-cache to offline queue
+            // Weak reception / timeout: Auto-cache to offline queue
             saveMarkToOfflineQueue({
                 id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                 property: property,
@@ -631,31 +599,6 @@
         if (activeTab === 'log') {
             loadMarkingLog();
         }
-    }
-
-    function openManualModal() {
-        manualRegoModal.style.display = "flex";
-        manualRegoInput.value = "";
-        setTimeout(() => manualRegoInput.focus(), 150);
-    }
-
-    function cancelManualMark() {
-        manualRegoModal.style.display = "none";
-        pendingFailedPhoto = "";
-        statusDiv.innerText = "READY";
-    }
-
-    function submitManualMark() {
-        const manualRego = manualRegoInput.value.trim().toUpperCase();
-        if (!manualRego || manualRego.length < 2) return;
-
-        const property = propertySelect.value;
-        manualRegoModal.style.display = "none";
-
-        triggerGreenOverlay(manualRego);
-        statusDiv.innerText = `✔ MARKED ${manualRego}`;
-        sendMarkToServer(manualRego, property, pendingFailedPhoto, new Date().toISOString());
-        pendingFailedPhoto = "";
     }
 
     function triggerGreenOverlay(rego) {
@@ -884,5 +827,18 @@
         if (btn) btn.innerText = isZ ? "🔍 RESET" : "🔍 ZOOM 2X";
     }
 </script>
+
+<!-- PHOTO PREVIEW MODAL WITH ZOOM -->
+<div id="previewModal" class="preview-modal">
+    <div class="preview-header">
+        <button type="button" class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
+        <div style="display:flex; flex-direction:column; text-align:center;">
+            <span style="font-size:17px; font-weight:900; color:#fff;" id="previewTitle"></span>
+            <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
+        </div>
+        <button type="button" class="preview-zoom-btn" id="previewZoomBtn" onclick="toggleZoom()">🔍 ZOOM 2X</button>
+    </div>
+    <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
+</div>
 </body>
 </html>
