@@ -61,26 +61,10 @@
     .card-body { display: flex; gap: 12px; align-items: center; cursor: pointer; }
     
     .thumb-wrap { 
-      width: 92px; 
-      height: 68px; 
-      border-radius: 8px; 
-      overflow: hidden; 
-      background: #000; 
-      border: 1.5px solid var(--border); 
-      flex-shrink: 0; 
-      cursor: pointer; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      position: relative; 
+      width: 92px; height: 68px; border-radius: 8px; overflow: hidden; background: #000; border: 1.5px solid var(--border); 
+      flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; 
     }
-    .thumb-img { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: contain; 
-      background: #000;
-      display: block; 
-    }
+    .thumb-img { width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
     .no-img { font-size: 10px; font-weight: 800; color: #555; text-align: center; }
 
     .details-wrap { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -89,19 +73,9 @@
     .meta-sub-line { color: #aaa; font-size: 12px; font-weight: 700; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
     
     .phone-tag { 
-      color: var(--c-rel); 
-      font-size: 13px; 
-      font-weight: 900; 
-      margin-top: 4px; 
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #0d2818;
-      border: 1.5px solid var(--c-rel);
-      padding: 4px 10px;
-      border-radius: 8px;
-      width: fit-content;
+      color: var(--c-rel); font-size: 13px; font-weight: 900; margin-top: 4px; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 5px; background: #0d2818; border: 1.5px solid var(--c-rel);
+      padding: 4px 10px; border-radius: 8px; width: fit-content;
     }
     .phone-tag:active { transform: scale(0.96); background: #1b4d2e; }
 
@@ -122,7 +96,6 @@
     .btn-folder { background: #2a2a2a; border: 1.5px solid #00b0ff; color: #00b0ff; }
     .btn-sms { background: #0284c7; color: #fff; }
     .btn-rel { background: var(--c-rel); color: #000; }
-    .btn-onsite { background: #ffab00; color: #000; }
     .btn-action:active { transform: scale(0.97); }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1000; align-items: center; justify-content: center; padding: 14px; overflow-y: auto; }
@@ -489,16 +462,14 @@
             <span style="font-size:10px; color:#888;">NOTE ✎</span>
           </div>
 
-          <!-- PRIMARY ACTION ROW -->
           <div class="action-row ${hasFolder ? 'has-folder' : ''}">
             ${hasFolder ? `<a href="${v.folderUrl}" target="_blank" class="btn-action btn-folder" onclick="event.stopPropagation();">📁 FOLDER</a>` : ''}
             <button class="btn-action btn-sms" onclick="event.stopPropagation(); openSmsModalByIndex(${idx})">💬 SMS</button>
             <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel" onclick="event.stopPropagation();">RELEASE ➔</a>
           </div>
 
-          <!-- ON-SITE RELEASE BUTTON -->
-          <div style="margin-top:2px;">
-            <a href="release.html?rego=${encodeURIComponent(v.rego)}&mode=onsite" class="btn-action btn-onsite" style="width:100%;" onclick="event.stopPropagation();">⚡ ON-SITE RELEASE ($186.05)</a>
+          <div style="margin-top:4px;">
+            <a href="release.html?rego=${encodeURIComponent(v.rego)}&mode=onsite" class="btn-action" style="background:#ffab00; color:#000; width:100%; font-weight:900;" onclick="event.stopPropagation();">⚡ ON-SITE RELEASE ($186.05)</a>
           </div>
         `;
         list.appendChild(card);
