@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,14 +36,12 @@
             padding-bottom: max(30px, env(safe-area-inset-bottom));
         }
 
-        /* Benchmark Header Box */
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
         .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; line-height: 1.2; }
 
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
         .icon-btn:active { transform: scale(0.92); }
 
-        /* Benchmark 3x2 Grid Navigation */
         .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 14px auto; }
         .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tile:active { transform: scale(0.96); }
@@ -69,7 +66,6 @@
             position: relative;
         }
 
-        /* Sub-Nav Switcher */
         .sub-nav-bar { display: flex; width: 100%; max-width: 440px; background: #1e1e1e; border-radius: 10px; border: 1px solid #333; margin-bottom: 8px; overflow: hidden; flex-shrink: 0; }
         .sub-tab { flex: 1; height: 40px; border: none; background: transparent; color: #888; font-size: 13px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
         .sub-tab.active { background: var(--c-mark); color: #fff; }
@@ -80,12 +76,10 @@
 
         .list-container { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-bottom: 20px; }
 
-        /* Group Tile (Blue) */
         .group-tile { background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .group-name { font-size: 16px; font-weight: 900; color: #fff; text-transform: uppercase; }
         .group-count { background: #2979ff; color: #fff; font-size: 14px; font-weight: 900; padding: 4px 12px; border-radius: 8px; }
 
-        /* Vehicle Detail Card */
         .veh-card { background: #1e1e1e; border: 1px solid #333; border-left: 5px solid #2979ff; border-radius: 12px; padding: 12px; display: flex; gap: 12px; cursor: pointer; }
         .veh-card:active { background: #2f2f2f; }
         .vc-thumb { width: 70px; height: 70px; border-radius: 8px; background: #000; border: 1.5px solid #444; object-fit: cover; flex-shrink: 0; }
@@ -97,10 +91,9 @@
         .vc-pass { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; width: fit-content; margin-top: 2px; }
         .vc-pass.pass-blue { background: #2979ff !important; color: #ffffff !important; }
         .vc-pass.pass-red  { background: #ff1744 !important; color: #ffffff !important; }
-        
+
         .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
 
-        /* Shared Detail/Edit Fullscreen Sheet */
         .modal-sheet { display: none; position: fixed; inset: 0; background: #121212; z-index: 9999; flex-direction: column; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #1e1e1e; border-bottom: 1px solid #333; flex-shrink: 0; padding-top: max(16px, env(safe-area-inset-top)); }
         .modal-title { font-size: 16px; font-weight: 900; color: var(--c-mark); text-transform: uppercase; }
@@ -120,7 +113,6 @@
         .loading-box { text-align: center; padding: 30px; color: #888; font-weight: 800; font-size: 14px; }
         .wrapper { width: 100%; display: flex; flex-direction: column; flex: 1; min-height: 0; }
 
-
         .prop-select-wrap { width: 100%; margin-bottom: 10px; flex-shrink: 0; }
         select {
             width: 100%; height: 48px; padding: 0 12px; border-radius: 10px; border: 1.5px solid #444;
@@ -129,76 +121,28 @@
         }
         select:focus { border-color: var(--c-mark); }
 
-        /* CENTRAL NATIVE CAMERA TRIGGER */
         .camera-trigger-box {
-            width: 100%;
-            flex: 1;
-            min-height: 380px;
-            background: #111;
-            border-radius: 14px;
-            border: 2.5px dashed #444;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: pointer;
-            user-select: none;
+            width: 100%; flex: 1; min-height: 380px; background: #111; border-radius: 14px;
+            border: 2.5px dashed #444; overflow: hidden; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; position: relative; cursor: pointer; user-select: none;
         }
-        .camera-trigger-box:active { 
-            background: #181818; 
-            border-color: var(--c-mark); 
-        }
+        .camera-trigger-box:active { background: #181818; border-color: var(--c-mark); }
 
         .cam-icon-circle {
-            width: 105px;
-            height: 105px;
-            background: #2a2a2a;
-            border: 3.5px solid var(--c-mark);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: #fff;
-            box-shadow: 0 8px 26px rgba(41, 121, 255, 0.35);
-            margin-bottom: 14px;
+            width: 105px; height: 105px; background: #2a2a2a; border: 3.5px solid var(--c-mark);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 48px; color: #fff; box-shadow: 0 8px 26px rgba(41, 121, 255, 0.35); margin-bottom: 14px;
         }
 
-        .cam-launch-title {
-            font-size: 20px;
-            font-weight: 900;
-            color: #fff;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .cam-launch-sub {
-            font-size: 12px;
-            font-weight: 800;
-            color: #888;
-            margin-top: 4px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
+        .cam-launch-title { font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase; }
+        .cam-launch-sub { font-size: 12px; font-weight: 800; color: #888; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
 
-        .preview-img-display {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-            border-radius: 12px;
-        }
+        .preview-img-display { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 12px; }
 
-        /* FULL-SCREEN RESULT FLASH OVERLAYS */
         .full-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999; pointer-events: none; opacity: 0;
-            transition: opacity 0.15s ease-in-out;
+            z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.15s ease-in-out;
         }
         .full-overlay.green { background: rgba(0, 230, 118, 0.96); }
         .full-overlay.red { background: rgba(255, 23, 68, 0.96); }
@@ -206,11 +150,9 @@
         .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; text-shadow: 0 6px 24px rgba(0,0,0,0.4); }
         .full-overlay-text { font-size: 30px; font-weight: 950; color: #000; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; }
 
-        /* MANUAL ENTRY MODAL */
         .manual-rego-modal {
             display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88);
-            border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; justify-content: center;
-            padding: 16px;
+            border-radius: 14px; z-index: 25; flex-direction: column; align-items: center; justify-content: center; padding: 16px;
         }
         .manual-rego-card {
             width: 100%; max-width: 320px; background: #1e1e1e; border: 2px solid #ff1744;
@@ -227,7 +169,7 @@
         .btn-submit { flex: 1; height: 44px; border: none; border-radius: 8px; background: #00e676; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 15px; }
 
         #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 8px; color: #ffab00; flex-shrink: 0; min-height: 18px; }
-    
+
         /* Zoom Preview Modal */
         .preview-modal { display: none; position: fixed; inset: 0; background: #121212; z-index: 100006; flex-direction: column; }
         .preview-modal.show { display: flex; }
@@ -237,7 +179,7 @@
         .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; padding: 10px; overflow: auto; touch-action: pan-x pan-y pinch-zoom; }
         #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; transition: transform 0.2s ease; cursor: zoom-in; }
         #previewImg.is-zoomed { transform: scale(2.2); cursor: zoom-out; }
-        </style>
+    </style>
 </head>
 <body>
 
@@ -263,7 +205,6 @@
     <a href="yard.html" class="nav-tile t-yard">YARD</a>
     <a href="release.html" class="nav-tile t-rel">REL</a>
 </div>
-
 
 <div class="sub-nav-bar">
     <button class="sub-tab active" id="tabBtnSnap" onclick="switchTab('snap')">📸 SNAP</button>
@@ -356,6 +297,18 @@
     </div>
 </div>
 
+<!-- PHOTO PREVIEW MODAL WITH ZOOM -->
+<div id="previewModal" class="preview-modal">
+    <div class="preview-header">
+        <button type="button" class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
+        <div style="display:flex; flex-direction:column; text-align:center;">
+            <span style="font-size:17px; font-weight:900; color:#fff;" id="previewTitle"></span>
+            <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
+        </div>
+        <button type="button" class="preview-zoom-btn" id="previewZoomBtn" onclick="toggleZoom()">🔍 ZOOM 2X</button>
+    </div>
+    <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
+</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
@@ -373,6 +326,10 @@
 
     let isProcessing = false;
     let pendingFailedPhoto = "";
+    let activeTab = 'snap';
+    let logCache = [];
+    let activePropFilter = null;
+    let propertiesCache = [];
 
     propertySelect.addEventListener('change', () => {
         if (propertySelect.value) {
@@ -382,6 +339,13 @@
 
     window.addEventListener('load', () => {
         loadProperties();
+        window.addEventListener('online', syncPendingMarksInBackground);
+        window.addEventListener('focus', syncPendingMarksInBackground);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') syncPendingMarksInBackground();
+        });
+        syncPendingMarksInBackground();
+        setInterval(syncPendingMarksInBackground, 10000);
     });
 
     async function loadProperties() {
@@ -438,13 +402,43 @@
         nativeCamInput.click();
     }
 
+    function applyBurnedTimestamp(b64Src, callback) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height + 65;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            
+            const now = new Date();
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const dayName = days[now.getDay()];
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const dStr = `${dayName} ${dd}/${mm} ${hh}:${mins}`;
+            
+            ctx.fillStyle = "#ffab00";
+            ctx.font = "bold 32px sans-serif";
+            ctx.fillText(`MARKED: ${dStr}`, 25, canvas.height - 22);
+            
+            callback(canvas.toDataURL('image/jpeg', 0.65));
+        };
+        img.src = b64Src;
+    }
+
     function handleNativePhoto(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
         const prop = propertySelect.value;
 
         isProcessing = true;
-        statusDiv.innerText = "⚡ COMPRESSING & READING PLATE...";
+        statusDiv.innerText = "⚡ COMPRESSING...";
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -473,37 +467,48 @@
                 ctx.drawImage(img, 0, 0, w, h);
 
                 const fastB64 = canvas.toDataURL('image/jpeg', 0.65);
-                
                 lastSnapPreview.src = fastB64;
                 lastSnapPreview.style.display = "block";
 
-                executeFastAnpr(fastB64, prop);
+                // Bake timestamp immediately
+                applyBurnedTimestamp(fastB64, function(stampedB64) {
+                    processMarkSnap(stampedB64, prop);
+                });
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    
-    async function executeFastAnpr(b64, property) {
-        // Deep basement check: if offline, bypass the 5-second cloud timeout immediately
+    async function processMarkSnap(stampedB64, property) {
+        const snapTime = new Date().toISOString();
+        const now = new Date();
+        const hhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+        // 1. If Offline (Underground in Basement): Never block, never ask for plate
         if (!navigator.onLine) {
-            statusDiv.innerText = "⚡ OFFLINE: ENTER PLATE";
-            pendingFailedPhoto = b64;
-            openManualModal();
+            saveMarkToOfflineQueue({
+                id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                property: property,
+                photoBytes: stampedB64,
+                snapTime: snapTime
+            });
+            triggerGreenOverlay("CACHED");
+            statusDiv.innerText = "✔ CACHED (OFFLINE - WILL AUTO-SYNC)";
             isProcessing = false;
             return;
         }
 
+        // 2. If Online: Attempt fast cloud ANPR (capped at 2.5s timeout)
         statusDiv.innerText = "🔍 SCANNING PLATE...";
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s quick timeout
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
 
         try {
             const res = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'scan_npr', photoBytes: b64 }),
+                body: JSON.stringify({ action: 'scan_npr', photoBytes: stampedB64 }),
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
@@ -513,76 +518,46 @@
             if (detectedRego) {
                 triggerGreenOverlay(detectedRego);
                 statusDiv.innerText = `✔ MARKED ${detectedRego}`;
-                applyBurnedTimestamp(b64, detectedRego, 'MARK', stamped => {
-                    sendMarkToServer(detectedRego, property, stamped);
-                });
-                isProcessing = false;
+                sendMarkToServer(detectedRego, property, stampedB64, snapTime);
             } else {
-                triggerRedOverlay("NO PLATE DETECTED");
-                pendingFailedPhoto = b64;
-                openManualModal();
-                isProcessing = false;
+                // ANPR unreadable: Do NOT prompt manual typing, auto-assign NO REG (HH:MM)
+                const fallbackReg = "NO REG " + hhmm;
+                triggerGreenOverlay(fallbackReg);
+                statusDiv.innerText = `✔ MARKED (${fallbackReg})`;
+                sendMarkToServer(fallbackReg, property, stampedB64, snapTime);
             }
         } catch(err) {
             clearTimeout(timeoutId);
-            // Underground / Weak reception: drop straight to manual modal with zero stall
-            statusDiv.innerText = "⚡ OFFLINE: ENTER PLATE";
-            pendingFailedPhoto = b64;
-            openManualModal();
+            // Weak reception / timeout underground: Auto-cache to offline queue
+            saveMarkToOfflineQueue({
+                id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                property: property,
+                photoBytes: stampedB64,
+                snapTime: snapTime
+            });
+            triggerGreenOverlay("CACHED");
+            statusDiv.innerText = "✔ CACHED (OFFLINE - WILL AUTO-SYNC)";
+        } finally {
             isProcessing = false;
         }
     }
 
-    function applyBurnedTimestamp(b64Src, rego, type, callback) {
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height + 65;
-            const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-            
-            const now = new Date();
-            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const dayName = days[now.getDay()];
-            const dd = String(now.getDate()).padStart(2, '0');
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const hh = String(now.getHours()).padStart(2, '0');
-            const mins = String(now.getMinutes()).padStart(2, '0');
-            const dStr = `${dayName} ${dd}/${mm} ${hh}:${mins}`;
-            
-            ctx.fillStyle = type === "MARK" ? "#ffab00" : "#00e676";
-            ctx.font = "bold 32px sans-serif";
-            ctx.fillText(`${type}: ${dStr}`, 25, canvas.height - 22);
-            
-            if (rego) {
-                ctx.fillStyle = "#ffffff";
-                ctx.textAlign = "right";
-                ctx.fillText(`REGO: ${rego}`, canvas.width - 25, canvas.height - 22);
-            }
-            
-            callback(canvas.toDataURL('image/jpeg', 0.65));
-        };
-        img.src = b64Src;
-    }
-
-    function sendMarkToServer(rego, property, photoBytes) {
+    function sendMarkToServer(rego, property, photoBytes, timestamp) {
         localStorage.setItem('last_property', property);
         const payload = {
-            id: 'MARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_mark',
             property: property,
             rego: rego,
             photoBytes: photoBytes,
-            timestamp: new Date().toISOString()
+            timestamp: timestamp || new Date().toISOString()
         };
 
-        // Offline storage guarantee
-        saveMarkToOfflineQueue(payload);
-        syncPendingMarksInBackground();
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        }).catch(() => {});
     }
 
     function saveMarkToOfflineQueue(payload) {
@@ -604,27 +579,59 @@
 
         isSyncingMarks = true;
         statusDiv.innerText = `⚡ SYNCING OFFLINE MARKS (${queue.length})...`;
+
         for (let i = 0; i < queue.length; i++) {
             const item = queue[i];
+            let finalRego = "";
+
+            // Run ANPR now that we are online
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                const anprRes = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(item)
+                    body: JSON.stringify({ action: 'scan_npr', photoBytes: item.photoBytes })
                 });
-                const resJson = await res.json();
-                if (resJson && resJson.status === "SUCCESS") {
+                const anprData = await anprRes.json();
+                if (anprData && anprData.rego) {
+                    finalRego = String(anprData.rego).trim().toUpperCase();
+                }
+            } catch(e) {}
+
+            if (!finalRego) {
+                const snapD = new Date(item.snapTime || Date.now());
+                const hh = String(snapD.getHours()).padStart(2, '0');
+                const mm = String(snapD.getMinutes()).padStart(2, '0');
+                finalRego = `NO REG ${hh}:${mm}`;
+            }
+
+            try {
+                const logRes = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'log_mark',
+                        property: item.property,
+                        rego: finalRego,
+                        photoBytes: item.photoBytes,
+                        timestamp: item.snapTime
+                    })
+                });
+                const logData = await logRes.json();
+                if (logData && logData.status === "SUCCESS") {
                     let curQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
                     curQ = curQ.filter(q => q.id !== item.id);
                     localStorage.setItem('mark_offline_queue', JSON.stringify(curQ));
                 }
-            } catch(e) { break; }
+            } catch(e) {
+                break;
+            }
         }
         isSyncingMarks = false;
-        statusDiv.innerText = `READY`;
-        loadMarkingLog();
+        statusDiv.innerText = "READY";
+        if (activeTab === 'log') {
+            loadMarkingLog();
+        }
     }
-
 
     function openManualModal() {
         manualRegoModal.style.display = "flex";
@@ -647,7 +654,7 @@
 
         triggerGreenOverlay(manualRego);
         statusDiv.innerText = `✔ MARKED ${manualRego}`;
-        applyBurnedTimestamp(pendingFailedPhoto, manualRego, 'MARK', stamped => { sendMarkToServer(manualRego, property, stamped); });
+        sendMarkToServer(manualRego, property, pendingFailedPhoto, new Date().toISOString());
         pendingFailedPhoto = "";
     }
 
@@ -668,11 +675,6 @@
             redOverlay.classList.remove('show');
         }, 700);
     }
-
-    let activeTab = 'snap';
-    let logCache = [];
-    let activePropFilter = null;
-    let propertiesCache = [];
 
     function switchTab(tab) {
         activeTab = tab;
@@ -858,7 +860,6 @@
         }
     }
 
-
     function openPhotoPreview(rego, prop, url) {
         document.getElementById('previewTitle').innerText = `${rego} (${prop})`;
         const driveIdMatch = url ? String(url).match(/[-\w]{25,}/) : null;
@@ -883,18 +884,5 @@
         if (btn) btn.innerText = isZ ? "🔍 RESET" : "🔍 ZOOM 2X";
     }
 </script>
-
-<!-- PHOTO PREVIEW MODAL WITH ZOOM -->
-<div id="previewModal" class="preview-modal">
-    <div class="preview-header">
-        <button type="button" class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
-        <div style="display:flex; flex-direction:column; text-align:center;">
-            <span style="font-size:17px; font-weight:900; color:#fff;" id="previewTitle"></span>
-            <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
-        </div>
-        <button type="button" class="preview-zoom-btn" id="previewZoomBtn" onclick="toggleZoom()">🔍 ZOOM 2X</button>
-    </div>
-    <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
-</div>
 </body>
 </html>
