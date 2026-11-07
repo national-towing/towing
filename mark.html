@@ -98,16 +98,6 @@
         .vc-pass.pass-blue { background: #2979ff !important; color: #ffffff !important; }
         .vc-pass.pass-red  { background: #ff1744 !important; color: #ffffff !important; }
         
-        /* Zoom Preview Modal */
-        .preview-modal { display: none; position: fixed; inset: 0; background: #121212; z-index: 100006; flex-direction: column; }
-        .preview-modal.show { display: flex; }
-        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; }
-        .preview-back-btn { background: #2a2a2a; border: 1px solid #555; color: #ffab00; font-size: 14px; font-weight: 900; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-        .preview-zoom-btn { background: #00b0ff; color: #000; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 900; font-size: 13px; cursor: pointer; }
-        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; padding: 10px; overflow: auto; touch-action: pan-x pan-y pinch-zoom; }
-        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; transition: transform 0.2s ease; cursor: zoom-in; }
-        #previewImg.is-zoomed { transform: scale(2.2); cursor: zoom-out; }
-        
         .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
 
         /* Shared Detail/Edit Fullscreen Sheet */
@@ -237,7 +227,17 @@
         .btn-submit { flex: 1; height: 44px; border: none; border-radius: 8px; background: #00e676; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 15px; }
 
         #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 8px; color: #ffab00; flex-shrink: 0; min-height: 18px; }
-    </style>
+    
+        /* Zoom Preview Modal */
+        .preview-modal { display: none; position: fixed; inset: 0; background: #121212; z-index: 100006; flex-direction: column; }
+        .preview-modal.show { display: flex; }
+        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; }
+        .preview-back-btn { background: #2a2a2a; border: 1px solid #555; color: #ffab00; font-size: 14px; font-weight: 900; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+        .preview-zoom-btn { background: #00b0ff; color: #000; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 900; font-size: 13px; cursor: pointer; }
+        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; padding: 10px; overflow: auto; touch-action: pan-x pan-y pinch-zoom; }
+        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; transition: transform 0.2s ease; cursor: zoom-in; }
+        #previewImg.is-zoomed { transform: scale(2.2); cursor: zoom-out; }
+        </style>
 </head>
 <body>
 
@@ -627,12 +627,10 @@
                 const mm = [v.make, v.model].filter(Boolean).join(' ');
                 const desc = mm ? (v.colour ? `${mm} (${v.colour})` : mm) : (v.colour || 'Vehicle');
                 const mkd = formatTimeFriendly(v.markedTime);
-                
-                // Red "NO PASS" and Blue "PASS"
                 const passClass = (v.pass === 'YES') ? 'pass-blue' : 'pass-red';
                 const passTxt = (v.pass === 'YES') ? 'PASS' : 'NO PASS';
                 
-                const driveId = v.imageUrl ? (v.imageUrl.match(/[-\\w]{25,}/) || [''])[0] : '';
+                const driveId = v.imageUrl ? (v.imageUrl.match(/[-\w]{25,}/) || [''])[0] : '';
                 const fullImg = driveId ? `https://lh3.googleusercontent.com/d/${driveId}` : (v.imageUrl || '');
                 const thumb = fullImg 
                     ? `<img src="${fullImg}" class="vc-thumb" loading="lazy" onclick="event.stopPropagation(); openPhotoPreview('${v.rego}', '${v.property}', '${fullImg}')">` 
@@ -767,7 +765,7 @@
 
     function openPhotoPreview(rego, prop, url) {
         document.getElementById('previewTitle').innerText = `${rego} (${prop})`;
-        const driveIdMatch = url ? String(url).match(/[-\\w]{25,}/) : null;
+        const driveIdMatch = url ? String(url).match(/[-\w]{25,}/) : null;
         const img = document.getElementById('previewImg');
         img.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (url || "");
         img.classList.remove('is-zoomed');
@@ -788,7 +786,6 @@
         const isZ = img.classList.toggle('is-zoomed');
         if (btn) btn.innerText = isZ ? "🔍 RESET" : "🔍 ZOOM 2X";
     }
-
 </script>
 
 <!-- PHOTO PREVIEW MODAL WITH ZOOM -->
@@ -803,6 +800,5 @@
     </div>
     <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
 </div>
-
 </body>
 </html>

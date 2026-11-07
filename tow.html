@@ -177,44 +177,11 @@
             letter-spacing: 2px;
         }
     
-        .truck-btn-row {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            margin-top: 4px;
-        }
-        .btn-truck-half {
-            flex: 1;
-            height: 50px;
-            border-radius: 10px;
-            font-size: 19px;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 1px;
-            outline: none;
-            transition: all 0.15s ease;
-            opacity: 0.45;
-        }
-        .btn-white-3921 {
-            background: #ffffff;
-            color: #000000;
-            border: 2px solid #ffffff;
-        }
-        .btn-black-3676 {
-            background: #000000;
-            color: #ffffff;
-            border: 2px solid #555555;
-        }
-        .btn-truck-half.active {
-            opacity: 1 !important;
-            border: 3px solid #00e676 !important;
-            box-shadow: 0 0 16px rgba(0, 230, 118, 0.45);
-            transform: scale(1.02);
-        }
-
+        .truck-btn-row { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
+        .btn-truck-half { flex: 1; height: 50px; border-radius: 10px; font-size: 19px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; outline: none; transition: all 0.15s ease; opacity: 0.45; }
+        .btn-white-3921 { background: #ffffff; color: #000000; border: 2px solid #ffffff; }
+        .btn-black-3676 { background: #000000; color: #ffffff; border: 2px solid #555555; }
+        .btn-truck-half.active { opacity: 1 !important; border: 3px solid #00e676 !important; box-shadow: 0 0 16px rgba(0, 230, 118, 0.45); transform: scale(1.02); }
     </style>
 </head>
 <body>
@@ -444,7 +411,7 @@
     }
 
     function syncDropdownColors() {
-        [propertySelect, makeSelect, colourSelect, bodyTypeSelect].forEach(sel => {
+        [propertySelect, makeSelect, colourSelect, bodyTypeSelect, officerSelect].forEach(sel => {
             if (!sel.value || sel.value === "") {
                 sel.classList.add('unselected');
             } else {
@@ -477,7 +444,6 @@
     function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
     
     let selectedTruck = "";
-
     function selectTruck(truckNum) {
         selectedTruck = truckNum;
         document.getElementById('truckSelectedInput').value = truckNum;
@@ -485,7 +451,6 @@
         document.getElementById('btnTruck3676').classList.toggle('active', truckNum === '3676');
         validateForm();
     }
-
     function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
     
 
@@ -638,7 +603,7 @@
     }
 
     function setupLiveValidation() {
-        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect, ];
+        const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
         inputs.forEach(elem => {
             if (elem) {
                 elem.addEventListener('input', () => { syncDropdownColors(); validateForm(); });

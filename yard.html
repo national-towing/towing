@@ -297,14 +297,11 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">DRIVER (AUTOMATIC TRUCK ASSIGNMENT)</label>
-          <select id="editDriverSelect" class="form-select" onchange="updateDriverTruckIndicator(this.value)">
-            <option value="Brian">Brian</option>
-            <option value="Brett">Brett</option>
-            <option value="Other">Other</option>
+          <label class="form-label">TRUCK</label>
+          <select id="editTruckSelect" class="form-select">
+            <option value="3676">TRUCK 3676</option>
+            <option value="3921">TRUCK 3921</option>
           </select>
-          <input type="text" id="editDriverOther" class="form-input" placeholder="ENTER DRIVER NAME" style="display:none; margin-top:4px;">
-          <div id="truckIndicatorText" class="truck-indicator">Truck #: 3676 (Assigned to Brian)</div>
         </div>
 
         <div class="row-2">
@@ -484,7 +481,7 @@
         const markedFormatted = v.markedTime ? formatTowedDate(v.markedTime) : '';
 
         let metaTags = [];
-        if (v.driver) metaTags.push(`Driver: ${v.driver}`);
+        if (v.truck) metaTags.push(`Truck: ${v.truck}`);
         if (v.policelinkRef) metaTags.push(`Ref: ${v.policelinkRef}`);
 
         const hasFolder = Boolean(v.folderUrl);
@@ -602,17 +599,7 @@
         }
       }
 
-      const driverSel = document.getElementById('editDriverSelect');
-      const driverOther = document.getElementById('editDriverOther');
-      const currentDriver = selectedVehicle.driver || 'Brian';
-      if (currentDriver.toUpperCase().includes('BRETT')) {
-        driverSel.value = 'Brett'; driverOther.style.display = 'none';
-      } else if (currentDriver.toUpperCase().includes('BRIAN')) {
-        driverSel.value = 'Brian'; driverOther.style.display = 'none';
-      } else {
-        driverSel.value = 'Other'; driverOther.style.display = 'block'; driverOther.value = currentDriver;
-      }
-      updateDriverTruckIndicator(driverSel.value);
+      document.getElementById('editTruckSelect').value = selectedVehicle.truck || '3676';
 
       document.getElementById('editCallerPhone').value = selectedVehicle.callerPhone || '';
       document.getElementById('editPolicelinkRef').value = selectedVehicle.policelinkRef || '';
@@ -632,14 +619,7 @@
       document.getElementById('editColourOther').style.display = sel.value === 'Other' ? 'block' : 'none';
     }
 
-    function updateDriverTruckIndicator(driverVal) {
-      const text = document.getElementById('truckIndicatorText');
-      const otherInput = document.getElementById('editDriverOther');
-      if (driverVal === 'Brett') {
-        text.innerText = 'Truck #: 3921 (Assigned to Brett)';
-        text.style.color = '#ffab00';
-        otherInput.style.display = 'none';
-      } else if (driverVal === 'Brian') {
+     else if (driverVal === 'Brian') {
         text.innerText = 'Truck #: 3676 (Assigned to Brian)';
         text.style.color = '#00e676';
         otherInput.style.display = 'none';
@@ -669,8 +649,7 @@
 
       const newBodyType = document.getElementById('editBodyTypeSelect').value;
 
-      const driverSel = document.getElementById('editDriverSelect').value;
-      const newDriver = driverSel === 'Other' ? (document.getElementById('editDriverOther').value.trim() || 'Other') : driverSel;
+      const newTruck = document.getElementById('editTruckSelect').value;
 
       const newPhone = document.getElementById('editCallerPhone').value.trim().replace(/[^\d+]/g, '');
       const newRef = document.getElementById('editPolicelinkRef').value.trim();
@@ -686,7 +665,8 @@
         model: newModel,
         colour: newColour,
         bodyType: newBodyType,
-        driver: newDriver,
+        truck: newTruck, 
+        officer: "",
         callerPhone: newPhone,
         policelinkRef: newRef,
         notes: selectedVehicle.notes || ''
@@ -699,7 +679,7 @@
       selectedVehicle.model = newModel;
       selectedVehicle.colour = newColour;
       selectedVehicle.bodyType = newBodyType;
-      selectedVehicle.driver = newDriver;
+      selectedVehicle.truck = newTruck;
       selectedVehicle.callerPhone = newPhone;
       selectedVehicle.policelinkRef = newRef;
 
@@ -889,3 +869,4 @@ Thank you`;
   </script>
 </body>
 </html>
+

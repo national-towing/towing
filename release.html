@@ -269,15 +269,7 @@
         </div>
     </div>
 
-    <div class="section-title">OFFICE USE</div>
     
-    <label>RELEASED BY</label>
-    <select id="officerSelect" onchange="checkOfficerOther(this)">
-        <option value="Brian" selected>Brian</option>
-        <option value="Brett">Brett</option>
-        <option value="OTHER">Other...</option>
-    </select>
-    <input type="text" id="officerOtherInput" placeholder="ENTER OFFICER NAME" style="display:none; margin-top:4px;" autocomplete="off">
 
     <button class="submit-btn" id="submitBtn" disabled>PROCESS RELEASE</button>
     <div id="status"></div>
@@ -588,7 +580,7 @@
     }
 
     function setupLiveValidation() {
-        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, releaseFeeInput, storageFeeInput, officerSelect, officerOtherInput];
+        const inputs = [vehicleSelect, svnInput, regoInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput, releaseFeeInput, storageFeeInput];
         inputs.forEach(elem => {
             if (elem) {
                 elem.addEventListener('input', validateForm);
@@ -669,7 +661,7 @@
         if (procOverlay) procOverlay.style.display = 'flex';
 
         const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
-        const finalOfficer = officerSelect.value === "OTHER" ? officerOtherInput.value.trim() : officerSelect.value;
+        
 
         const payload = {
             action: 'process_release',
@@ -686,7 +678,7 @@
             ownerEmail: "", 
             releaseFee: releaseFeeInput.value,
             storageFee: storageFeeInput.value,
-            officer: finalOfficer,
+            officer: "",
             idPhotos: idPhotos,
             ownerSigBytes: ownerSig,
             officerSigBytes: "" 
