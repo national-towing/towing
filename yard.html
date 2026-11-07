@@ -59,13 +59,12 @@
     .rego-text { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #facc15; flex-shrink: 0; }
     .prop-text { font-size: 18px; font-weight: 900; color: #aaa; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* Compact, discreet top-right On-Site Release button */
-    .btn-onsite-top {
+    .btn-onsite-pill {
       background: #2a2212; border: 1px solid #ffab00; color: #ffab00; font-size: 11px;
-      font-weight: 900; padding: 5px 9px; border-radius: 6px; text-decoration: none;
+      font-weight: 900; padding: 4px 8px; border-radius: 6px; text-decoration: none;
       text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0;
     }
-    .btn-onsite-top:active { background: #ffab00; color: #000; transform: scale(0.96); }
+    .btn-onsite-pill:active { background: #ffab00; color: #000; transform: scale(0.96); }
 
     .card-body { display: flex; gap: 12px; align-items: center; cursor: pointer; }
     
@@ -95,7 +94,6 @@
     }
     .notes-box:active { background: #222; }
 
-    /* Primary bottom action buttons */
     .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
     .action-row.has-folder { grid-template-columns: 0.9fr 1fr 1fr; }
     .btn-action {
@@ -458,7 +456,7 @@
               <span class="rego-text">${v.rego}</span>
               <span class="prop-text">${v.property || 'GENERAL'}</span>
             </div>
-            <a href="release.html?rego=${encodeURIComponent(v.rego)}&mode=onsite" class="btn-onsite-top" onclick="event.stopPropagation();">ON-SITE REL</a>
+            <a href="release.html?rego=${encodeURIComponent(v.rego)}&mode=onsite" class="btn-onsite-pill" onclick="event.stopPropagation();">ON-SITE REL</a>
           </div>
 
           <div class="card-body" onclick="openEditModalByIndex(${idx})">
