@@ -584,7 +584,7 @@
       document.getElementById('editColourOther').style.display = sel.value === 'Other' ? 'block' : 'none';
     }
 
-    function saveVehicleDetailsFromModal() {
+    async function saveVehicleDetailsFromModal() {
       if (!selectedVehicle) return;
 
       const newRego = document.getElementById('editRego').value.trim().toUpperCase();
@@ -623,25 +623,44 @@
         notes: selectedVehicle.notes || ''
       };
 
-      selectedVehicle.rego = newRego;
-      selectedVehicle.property = newProperty;
-      selectedVehicle.towedTime = newTowedTime;
-      selectedVehicle.make = newMake;
-      selectedVehicle.model = newModel;
-      selectedVehicle.colour = newColour;
-      selectedVehicle.bodyType = newBodyType;
-      selectedVehicle.truck = newTruck;
-      selectedVehicle.callerPhone = newPhone;
-      selectedVehicle.policelinkRef = newRef;
+      const saveBtn = document.querySelector('.btn-m-save');
+      const origText = saveBtn.innerText;
+      saveBtn.innerText = "SAVING TO CLOUD...";
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = "0.5";
 
-      renderCards(displayedInventory);
-      closeEditModal();
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        
+        if (result && result.status === "SUCCESS") {
+            selectedVehicle.rego = newRego;
+            selectedVehicle.property = newProperty;
+            selectedVehicle.towedTime = newTowedTime;
+            selectedVehicle.make = newMake;
+            selectedVehicle.model = newModel;
+            selectedVehicle.colour = newColour;
+            selectedVehicle.bodyType = newBodyType;
+            selectedVehicle.truck = newTruck;
+            selectedVehicle.callerPhone = newPhone;
+            selectedVehicle.policelinkRef = newRef;
 
-      fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).catch(err => console.warn("Background update sync failed:", err));
+            renderCards(displayedInventory);
+            closeEditModal();
+        } else {
+            alert("⚠️ Failed to update Yard Log: " + (result.message || "Server Error"));
+        }
+      } catch(err) {
+        alert("⚠️ Network Error: Could not reach the server to save changes.");
+      } finally {
+        saveBtn.innerText = origText;
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = "1";
+      }
     }
 
     function updateModalPhoneBtn() {
