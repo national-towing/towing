@@ -35,13 +35,10 @@
         }
         
         .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
-        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-tow); letter-spacing: 2px; text-align: center; line-height: 1.2; padding-top: 4px; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: var(--c-tow); letter-spacing: 2px; text-align: center; line-height: 1.2; padding-top: 4px; cursor: pointer; }
         .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
         .icon-btn:active { transform: scale(0.92); }
 
-        
-
-        /* 3x2 Grid Navigation */
         .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
         .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tile:active { transform: scale(0.96); }
@@ -77,7 +74,7 @@
         .row-2 { display: flex; gap: 8px; }
         .row-2 > div { flex: 1; }
 
-        /* SOLID BLUE / TRANSITION TO VERIFIED */
+        /* Comparison Button */
         .comp-btn {
             background: #0088cc; border: 2px solid #00b0ff; color: #fff;
             font-size: 17px; font-weight: 900; border-radius: 12px; height: 54px;
@@ -102,7 +99,7 @@
             color: #00e676; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 4px;
         }
 
-        /* PERMANENT SOLID GREEN CONDITION BUTTON */
+        /* Condition Snap Button */
         .cond-snap-btn {
             background: #00a854; border: 2px solid #00e676; color: #000;
             font-size: 17px; font-weight: 900; border-radius: 12px; height: 54px;
@@ -137,7 +134,7 @@
 
         #status { text-align: center; font-weight: 900; font-size: 14px; margin-top: 10px; min-height: 22px; color: #ffab00; }
 
-        /* GHOST ALIGNMENT MODAL */
+        /* Ghost Alignment Viewfinder Modal */
         .overlay-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 100005; flex-direction: column; }
         .overlay-modal.show { display: flex; }
         .modal-header { height: 54px; background: #1e1e1e; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; }
@@ -163,7 +160,7 @@
         .btn-snap-live { background: #00e676; color: #000; }
         .btn-snap-native { background: #00b0ff; color: #000; }
 
-        /* FULLSCREEN SUCCESS OVERLAY */
+        /* Fullscreen Success Overlay */
         #successOverlay {
             display: none; position: fixed; inset: 0;
             background-color: rgba(0, 230, 118, 0.96); z-index: 999999; flex-direction: column;
@@ -187,10 +184,9 @@
 <body>
 
 <div class="header-box">
-    <h1>TOW</h1>
+    <h1 id="diagnosticTrigger">TOW</h1>
     <div class="icon-btn" onclick="window.location.reload(true)">🔄</div>
 </div>
-
 
 <div class="nav-grid-3x2">
     <a href="mark.html" class="nav-tile t-mark">MARK</a>
@@ -302,7 +298,7 @@
     </div>
     <input type="hidden" id="truckSelectedInput" value="">
 
-    <!-- 1. SOLID BLUE COMPARISON BUTTON -->
+    <!-- Comparison Button -->
     <label>SIDE-BY-SIDE COMPARISON (VERIFICATION)</label>
     <button type="button" class="comp-btn" id="compBtn" onclick="openComparisonWorkflow()">
         <span id="compBtnText">📷 ALIGN & SNAP COMPARISON</span>
@@ -313,7 +309,7 @@
     </div>
     <input type="file" id="nativeCompInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativeCompPhoto(this)">
 
-    <!-- 2. SOLID GREEN CONDITION PHOTOS BUTTON -->
+    <!-- Condition Photos Button -->
     <label>CONDITION PHOTOS</label>
     <button type="button" class="cond-snap-btn" id="condSnapBtn" onclick="triggerNativeConditionSnap()">
         📷 SNAP COND PHOTOS
@@ -331,7 +327,7 @@
     <div id="status"></div>
 </div>
 
-<!-- GHOST ALIGNMENT VIEWFINDER MODAL -->
+<!-- Ghost Alignment Viewfinder Modal -->
 <div id="overlayModal" class="overlay-modal">
     <div class="modal-header">
         <span class="modal-title" id="modalRegoTitle">ALIGN & VERIFY TOW</span>
@@ -358,6 +354,23 @@
     <button class="ok-btn" onclick="window.location.href='tow.html';">OK</button>
 </div>
 
+<!-- Multi-Snap Camera Viewfinder Modal -->
+<div id="condVidModal" class="overlay-modal" style="z-index:100010;">
+    <div class="modal-header">
+        <button type="button" class="torch-btn" id="condTorchBtn" onclick="toggleCondTorch()">🔦 TORCH</button>
+        <div style="color:#00e676; font-weight:900; text-transform:uppercase;">MULTI-SNAP</div>
+        <button type="button" class="torch-btn" style="color:#fff; border-color:#fff;" onclick="closeCondVidModal()">✔ DONE (<span id="multiSnapCount">0</span>)</button>
+    </div>
+    <div class="viewfinder-container">
+        <video id="condVideoElem" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+        <div class="thumb-gallery" id="modalThumbGallery" style="position:absolute; bottom:120px; left:0; width:100%; padding:0 10px; min-height:80px; overflow-x:auto;"></div>
+        <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:84px; height:84px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="snapCondFrame()">
+            <div style="width:68px; height:68px; background:#00e676; border-radius:50%;"></div>
+        </div>
+        <div id="condFlashIndicator" style="display:none; position:absolute; inset:0; background:#fff; z-index:10; opacity:0.8;"></div>
+    </div>
+</div>
+
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
 
@@ -370,8 +383,6 @@
     const colourSelect = document.getElementById('colourSelect');
     const colourOtherInput = document.getElementById('colourOtherInput');
     const bodyTypeSelect = document.getElementById('bodyTypeSelect');
-    const officerSelect = document.getElementById('officerSelect');
-    const officerOtherInput = document.getElementById('officerOtherInput');
 
     const compBtn = document.getElementById('compBtn');
     const compBtnText = document.getElementById('compBtnText');
@@ -389,7 +400,6 @@
     const thumbGallery = document.getElementById('thumbGallery');
     const submitBtn = document.getElementById('submitBtn');
     const statusDiv = document.getElementById('status');
-// Queue badge dispensed with - seamless background sync active
     const successOverlay = document.getElementById('successOverlay');
     const successRego = document.getElementById('successRego');
 
@@ -403,7 +413,7 @@
 
     function handleFieldFocus(input) {
         const val = input.value.trim().toUpperCase();
-        if (["MODEL", "REGO", "VEHICLE", "UNKNOWN", "ENTER MAKE", "ENTER COLOUR", "ENTER DRIVER NAME"].includes(val)) {
+        if (["MODEL", "REGO", "VEHICLE", "UNKNOWN", "ENTER MAKE", "ENTER COLOUR"].includes(val)) {
             input.value = "";
         } else if (input.value) {
             input.select();
@@ -411,23 +421,36 @@
     }
 
     function syncDropdownColors() {
-        [propertySelect, makeSelect, colourSelect, bodyTypeSelect, officerSelect].forEach(sel => {
-            if (!sel.value || sel.value === "") {
-                sel.classList.add('unselected');
-            } else {
-                sel.classList.remove('unselected');
+        [propertySelect, makeSelect, colourSelect, bodyTypeSelect].forEach(sel => {
+            if (sel) {
+                if (!sel.value || sel.value === "") {
+                    sel.classList.add('unselected');
+                } else {
+                    sel.classList.remove('unselected');
+                }
             }
         });
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         loadProperties();
-        updateQueueUI();
         readUrlParamsAndPopulate();
         checkExistingCompPhoto();
         setupLiveValidation();
         syncDropdownColors();
         setupGhostSlider();
+
+        // 3-Tap Force Sync diagnostic trigger
+        const diagTrigger = document.getElementById('diagnosticTrigger');
+        if (diagTrigger) {
+            diagTrigger.addEventListener('click', (e) => {
+                if (e.detail === 3) {
+                    statusDiv.style.color = "#ffab00";
+                    statusDiv.innerText = "🛠️ DIAGNOSTIC FORCE SYNC STARTED...";
+                    syncPendingTowsInBackground();
+                }
+            });
+        }
 
         window.addEventListener('online', syncPendingTowsInBackground);
         window.addEventListener('focus', syncPendingTowsInBackground);
@@ -435,14 +458,12 @@
             if (document.visibilityState === 'visible') syncPendingTowsInBackground();
         });
         syncPendingTowsInBackground();
-        setInterval(syncPendingTowsInBackground, 8000);
+        setInterval(syncPendingTowsInBackground, 10000);
     });
 
     regoInput.addEventListener('input', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
     regoInput.addEventListener('change', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
 
-    function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
-    
     let selectedTruck = "";
     function selectTruck(truckNum) {
         selectedTruck = truckNum;
@@ -451,8 +472,9 @@
         document.getElementById('btnTruck3676').classList.toggle('active', truckNum === '3676');
         validateForm();
     }
+
+    function checkMakeOther(s) { makeOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
     function checkColourOther(s) { colourOtherInput.style.display = s.value === "Other" ? 'block' : 'none'; syncDropdownColors(); validateForm(); }
-    
 
     function readUrlParamsAndPopulate() {
         const params = new URLSearchParams(window.location.search);
@@ -656,7 +678,7 @@
     }
 
     // ============================================================
-    // 1. HYBRID GHOST ALIGNMENT & NATIVE COMPARISON
+    // 1. GHOST ALIGNMENT & NATIVE COMPARISON
     // ============================================================
     function openComparisonWorkflow() {
         const rego = regoInput.value.trim().toUpperCase() || "VEHICLE";
@@ -718,7 +740,6 @@
         }
     }
 
-    // IN-APP ALIGNED SNAP
     function snapLiveGhostPhoto() {
         statusDiv.style.color = "#ffab00";
         statusDiv.innerText = "⚡ FREEZING & STITCHING SIDE-BY-SIDE...";
@@ -739,7 +760,6 @@
         });
     }
 
-    // NATIVE CAMERA LAUNCH
     function launchNativeFromGhost() {
         closeOverlayModal();
         nativeCompInput.value = "";
@@ -766,9 +786,7 @@
         const rego = regoInput.value.trim().toUpperCase() || "VEHICLE";
         try {
             localStorage.setItem('pending_comp_' + rego, stitchedB64);
-        } catch(err) {
-            console.warn("Storage warning, caching in memory");
-        }
+        } catch(err) {}
         compPreviewImg.src = stitchedB64;
         compPreviewWrap.style.display = "block";
         compBtn.classList.add("comp-ready");
@@ -790,7 +808,6 @@
         }
     }
 
-    // BULLETPROOF ASPECT-RATIO PRESERVING SIDE-BY-SIDE STITCHER
     function drawCover(ctx, img, dx, dy, dw, dh) {
         const imgRatio = img.width / img.height;
         const targetRatio = dw / dh;
@@ -876,9 +893,8 @@
     }
 
     // ============================================================
-    // 2. CONDITION PHOTOS ENGINE
+    // 2. CONDITION MULTI-SNAP CAMERA ENGINE
     // ============================================================
-    
     let condStream = null;
     let condTorch = false;
     let tempSnapCount = 0;
@@ -891,7 +907,6 @@
         document.getElementById('multiSnapCount').innerText = tempSnapCount;
         document.getElementById('modalThumbGallery').innerHTML = "";
         
-        // Populate modal with existing thumbs
         conditionPhotos.forEach(src => addThumbToModal(src));
 
         try {
@@ -933,7 +948,6 @@
         
         const b64 = canvas.toDataURL('image/jpeg', 0.65);
         
-        // Flash screen
         const flash = document.getElementById('condFlashIndicator');
         flash.style.display = 'block';
         setTimeout(() => flash.style.display = 'none', 100);
@@ -966,7 +980,7 @@
             condStream = null;
         }
         document.getElementById('condVidModal').style.display = 'none';
-        renderThumbs(); // Sync main screen
+        renderThumbs();
     }
 
     function triggerNativeConditionSnap() {
@@ -985,45 +999,6 @@
         });
     }
 
-    function compressAndAddPhoto(file) {
-        statusDiv.style.color = "#ffab00";
-        statusDiv.innerText = "⚡ COMPRESSING CONDITION PHOTO...";
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const maxDim = 800;
-                let w = img.width, h = img.height;
-                if (w > h) {
-                    if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
-                } else {
-                    if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
-                }
-                canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-
-                const fastB64 = canvas.toDataURL('image/jpeg', 0.55);
-                applyBurnedTimestamp(fastB64, "COND", stamped => {
-                    conditionPhotos.push(stamped);
-                    renderThumbs();
-                });
-                if (navigator.vibrate) navigator.vibrate(40);
-
-                if (conditionPhotos.length === 1 && (!regoInput.value || !makeSelect.value || !modelInput.value)) {
-                    triggerStandaloneAiClassification(fastB64);
-                } else {
-                    statusDiv.innerText = "";
-                }
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    
     function applyBurnedTimestamp(b64Src, type, callback) {
         const img = new Image();
         img.onload = function() {
@@ -1061,6 +1036,44 @@
         img.src = b64Src;
     }
 
+    function compressAndAddPhoto(file) {
+        statusDiv.style.color = "#ffab00";
+        statusDiv.innerText = "⚡ COMPRESSING CONDITION PHOTO...";
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxDim = 800;
+                let w = img.width, h = img.height;
+                if (w > h) {
+                    if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                } else {
+                    if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+                }
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+
+                const fastB64 = canvas.toDataURL('image/jpeg', 0.55);
+                applyBurnedTimestamp(fastB64, "COND", function(stamped) {
+                    conditionPhotos.push(stamped);
+                    renderThumbs();
+                });
+                if (navigator.vibrate) navigator.vibrate(40);
+
+                if (conditionPhotos.length === 1 && (!regoInput.value || !makeSelect.value || !modelInput.value)) {
+                    triggerStandaloneAiClassification(fastB64);
+                } else {
+                    statusDiv.innerText = "";
+                }
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
     function renderThumbs() {
         thumbGallery.innerHTML = "";
         conditionPhotos.forEach((src, idx) => {
@@ -1083,8 +1096,6 @@
             wrap.appendChild(del);
             thumbGallery.appendChild(wrap);
         });
-
-        // Button stays permanently solid green with static text
         validateForm();
     }
 
@@ -1161,7 +1172,7 @@
     }
 
     // ============================================================
-    // 3. OFFLINE STORAGE & TOW SUBMISSION
+    // 3. STORAGE & SUBMISSION
     // ============================================================
     submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1176,7 +1187,6 @@
 
         const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
         const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
-        const driver = selectedTruck;
         const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
 
         const payload = {
@@ -1192,7 +1202,6 @@
             officer: selectedTruck,
             truck: selectedTruck,
             photoBytes: conditionPhotos.length > 0 ? conditionPhotos[0] : "",
-            photos: conditionPhotos,
             comparisonPhoto: compB64,
             timestamp: new Date().toISOString()
         };
@@ -1217,15 +1226,29 @@
 
     function saveToOfflineQueue(payload) {
         try {
-            let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-            if (!queue.some(item => item.id === payload.id)) {
-                queue.push(payload);
+            const safePayload = JSON.parse(JSON.stringify(payload));
+            if (safePayload.photos) delete safePayload.photos;
+
+            let queue = [];
+            try { queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]"); } catch(e){}
+            
+            if (!queue.some(item => item.id === safePayload.id)) {
+                queue.push(safePayload);
                 localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
             }
         } catch(e) {
-            console.error("Quota fallback triggered:", e);
+            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                localStorage.removeItem('cached_run_data');
+                localStorage.removeItem('cached_properties');
+                try {
+                    let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+                    const safePayload = JSON.parse(JSON.stringify(payload));
+                    if (safePayload.photos) delete safePayload.photos;
+                    queue.push(safePayload);
+                    localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
+                } catch(retryErr) {}
+            }
         }
-        updateQueueUI();
     }
 
     function removeFromOfflineQueue(id) {
@@ -1234,11 +1257,6 @@
             queue = queue.filter(item => item.id !== id);
             localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
         } catch(e) {}
-        updateQueueUI();
-    }
-
-    function updateQueueUI() {
-        // UI banner dispensed with - syncing occurs silently in background
     }
 
     let isSyncingQueue = false;
@@ -1249,7 +1267,7 @@
             queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
         } catch(e) { return; }
         
-        if (queue.length === 0) { updateQueueUI(); return; }
+        if (queue.length === 0) return;
 
         isSyncingQueue = true;
         statusDiv.style.color = "#ffab00";
@@ -1257,50 +1275,48 @@
 
         for (let i = 0; i < queue.length; i++) {
             const item = queue[i];
+            if (item.photos) delete item.photos;
+
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
+
                 const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(item)
+                    body: JSON.stringify(item),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
+
                 const resJson = await res.json();
                 if (resJson && resJson.status === "SUCCESS") {
                     removeFromOfflineQueue(item.id);
                     statusDiv.style.color = "#00e676";
                     statusDiv.innerText = "✔ BASEMENT TOW SYNCED TO MASTER LOG";
-                    setTimeout(() => { statusDiv.innerText = ""; }, 3000);
+                    await new Promise(r => setTimeout(r, 2000));
+                } else {
+                    statusDiv.style.color = "#ff1744";
+                    statusDiv.innerText = "⚠️ SYNC REJECTED: " + (resJson.message || "Server Error");
+                    if (resJson.message && resJson.message.includes("Missing REGO")) {
+                        removeFromOfflineQueue(item.id);
+                    } else {
+                        await new Promise(r => setTimeout(r, 4000));
+                        break;
+                    }
                 }
-            } catch(err) { break; }
+            } catch(err) {
+                statusDiv.style.color = "#ff1744";
+                statusDiv.innerText = "⚠️ NETWORK STALLED. WILL RETRY SHORTLY...";
+                break; 
+            }
         }
         isSyncingQueue = false;
-        updateQueueUI();
-    }
-
-    async function processOfflineQueue() {
-        statusDiv.innerText = "⚡ FORCING OFFLINE QUEUE SYNC...";
-        await syncPendingTowsInBackground();
+        
+        let finalQueue = [];
+        try { finalQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]"); } catch(e){}
+        if (finalQueue.length === 0) statusDiv.innerText = "";
     }
 </script>
-
-<!-- CONDITION MULTI-SNAP MODAL -->
-<div id="condVidModal" class="overlay-modal" style="z-index:100010;">
-    <div class="modal-header">
-        <button type="button" class="torch-btn" id="condTorchBtn" onclick="toggleCondTorch()">🔦 TORCH</button>
-        <div style="color:#00e676; font-weight:900; text-transform:uppercase;">MULTI-SNAP</div>
-        <button type="button" class="torch-btn" style="color:#fff; border-color:#fff;" onclick="closeCondVidModal()">✔ DONE (<span id="multiSnapCount">0</span>)</button>
-    </div>
-    <div class="viewfinder-container">
-        <video id="condVideoElem" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
-        
-        <div class="thumb-gallery" id="modalThumbGallery" style="position:absolute; bottom:120px; left:0; width:100%; padding:0 10px; min-height:80px; overflow-x:auto;"></div>
-        
-        <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:84px; height:84px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="snapCondFrame()">
-            <div style="width:68px; height:68px; background:#00e676; border-radius:50%;"></div>
-        </div>
-        <div id="condFlashIndicator" style="display:none; position:absolute; inset:0; background:#fff; z-index:10; opacity:0.8;"></div>
-    </div>
-</div>
-
 </body>
 </html>
-
