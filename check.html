@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>National Towing - Vehicle Check</title>
+  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: #121212; color: #fff; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      padding: 20px 16px; padding-top: max(24px, env(safe-area-inset-top));
+    }
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 { font-size: 26px; font-weight: 900; color: #ffab00; letter-spacing: 1px; text-transform: uppercase; }
+    .header p { font-size: 13px; color: #888; font-weight: 700; margin-top: 4px; }
+
+    .card {
+      background: #1e1e1e; border: 1.5px solid #333; border-radius: 16px;
+      width: 100%; max-width: 440px; padding: 20px; display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    label { font-size: 11px; font-weight: 900; text-transform: uppercase; color: #aaa; letter-spacing: 0.5px; }
+
+    .rego-input {
+      width: 100%; height: 56px; border-radius: 12px; border: 2px solid #444;
+      background: #2a2a2a; color: #facc15; font-size: 26px; font-weight: 900;
+      text-align: center; text-transform: uppercase; outline: none; letter-spacing: 2px;
+    }
+    .rego-input:focus { border-color: #00b0ff; }
+
+    .btn-submit {
+      width: 100%; height: 54px; border: none; border-radius: 12px;
+      background: #00b0ff; color: #000; font-size: 18px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Results */
+    .result-box { display: none; flex-direction: column; gap: 14px; border-radius: 12px; padding: 16px; }
+    
+    /* Found Case */
+    .result-found { background: #16241a; border: 2px solid #00e676; }
+    .result-found-title { font-size: 18px; font-weight: 900; color: #00e676; text-transform: uppercase; }
+    .result-found-desc { font-size: 14px; color: #ddd; font-weight: 600; line-height: 1.4; }
+
+    /* Not Found Case */
+    .result-notfound { background: #261b12; border: 2px solid #ffab00; }
+    .result-notfound-title { font-size: 17px; font-weight: 900; color: #ffab00; text-transform: uppercase; }
+    .result-notfound-desc { font-size: 13.5px; color: #ccc; font-weight: 600; line-height: 1.45; }
+
+    .phone-input {
+      width: 100%; height: 50px; border-radius: 10px; border: 1.5px solid #444;
+      background: #222; color: #fff; font-size: 18px; font-weight: 800;
+      text-align: center; outline: none; margin-top: 4px;
+    }
+    .phone-input:focus { border-color: #00e676; }
+
+    .btn-sms-send {
+      width: 100%; height: 48px; border: none; border-radius: 10px;
+      background: #00e676; color: #000; font-size: 15px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+    }
+    .btn-sms-send:active { transform: scale(0.98); }
+
+    .btn-call {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; height: 50px; border-radius: 10px; text-decoration: none;
+      background: #2a2a2a; border: 1.5px solid #ffab00; color: #ffab00;
+      font-size: 16px; font-weight: 900; text-transform: uppercase;
+    }
+    .btn-call:active { background: #ffab00; color: #000; }
+
+    .footer-note { font-size: 11px; color: #666; text-align: center; margin-top: 20px; max-width: 400px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>National Towing</h1>
+    <p>Holding Yard Vehicle Status Check</p>
+  </div>
+
+  <div class="card">
+    <label>Enter Vehicle Registration</label>
+    <input type="text" id="regoInput" class="rego-input" placeholder="REGO" maxlength="10" autocomplete="off" autocorrect="off">
+    <button type="button" id="btnCheck" class="btn-submit" onclick="checkVehicleStatus()">CHECK VEHICLE</button>
+
+    <!-- RESULT 1: TOW CONFIRMED -->
+    <div id="boxFound" class="result-box result-found">
+      <div class="result-found-title">✔ Vehicle Confirmed Towed</div>
+      <div class="result-found-desc" id="foundVehicleMeta"></div>
+      <div class="result-found-desc">
+        Your car has been towed. Enter your phone number for collection details or call National Towing on 0450 605 370 for further information.
+      </div>
+
+      <div id="smsInputSection" style="display:flex; flex-direction:column; gap:8px;">
+        <label>Your Mobile Number</label>
+        <input type="tel" id="ownerPhone" class="phone-input" placeholder="04xx xxx xxx">
+        <button type="button" id="btnSendSms" class="btn-sms-send" onclick="submitOwnerPhone()">SEND COLLECTION DETAILS SMS</button>
+      </div>
+
+      <div id="smsSuccessNotice" style="display:none; color:#00e676; font-size:13px; font-weight:900; text-align:center; padding:6px 0;">
+        ✔ Collection details sent via SMS.
+      </div>
+
+      <a href="tel:0450605370" class="btn-call">📞 Call 0450 605 370</a>
+    </div>
+
+    <!-- RESULT 2: NOT CURRENTLY IN HOLDING YARD -->
+    <div id="boxNotFound" class="result-box result-notfound">
+      <div class="result-notfound-title">Vehicle Not on Yard Record</div>
+      <div class="result-notfound-desc">
+        Our records do not currently indicate we have towed your car, however, this may be due to the fact the car has not yet been received into our holding yard. Please call 0450 605 370 to confirm details.
+      </div>
+      <a href="tel:0450605370" class="btn-call">📞 Call 0450 605 370</a>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Holding Yard: 4 Lau Place, Ashmore QLD 4214<br>
+    Open Monday – Sunday | Ph: 0450 605 370
+  </div>
+
+  <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+    let activeRego = "";
+
+    async function checkVehicleStatus() {
+      const rego = document.getElementById('regoInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!rego || rego.length < 2) {
+        alert("Please enter a valid registration plate.");
+        return;
+      }
+
+      activeRego = rego;
+      const btn = document.getElementById('btnCheck');
+      btn.innerText = "CHECKING YARD...";
+      btn.disabled = true;
+
+      document.getElementById('boxFound').style.display = 'none';
+      document.getElementById('boxNotFound').style.display = 'none';
+      document.getElementById('smsSuccessNotice').style.display = 'none';
+      document.getElementById('smsInputSection').style.display = 'flex';
+
+      try {
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=public_check_tow&rego=${encodeURIComponent(rego)}&_t=${Date.now()}`);
+        const data = await res.json();
+
+        if (data && data.found) {
+          const mm = [data.make, data.model].filter(Boolean).join(' ');
+          const desc = mm ? (data.colour ? `${mm} (${data.colour})` : mm) : (data.colour || '');
+          document.getElementById('foundVehicleMeta').innerText = `Vehicle: ${data.rego} ${desc ? '• ' + desc : ''}`;
+          document.getElementById('boxFound').style.display = 'flex';
+        } else {
+          document.getElementById('boxNotFound').style.display = 'flex';
+        }
+      } catch(e) {
+        document.getElementById('boxNotFound').style.display = 'flex';
+      } finally {
+        btn.innerText = "CHECK VEHICLE";
+        btn.disabled = false;
+      }
+    }
+
+    async function submitOwnerPhone() {
+      const phoneInput = document.getElementById('ownerPhone');
+      const cleanPhone = phoneInput.value.trim().replace(/[^\d+]/g, '');
+
+      if (!cleanPhone || cleanPhone.length < 8) {
+        alert("Please enter a valid Australian mobile number (e.g. 04xx xxx xxx).");
+        return;
+      }
+
+      const btn = document.getElementById('btnSendSms');
+      btn.innerText = "DISPATCHING SMS...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'owner_submit_contact',
+            rego: activeRego,
+            phone: cleanPhone
+          })
+        });
+        const resJson = await res.json();
+
+        if (resJson && resJson.status === "SUCCESS") {
+          document.getElementById('smsInputSection').style.display = 'none';
+          document.getElementById('smsSuccessNotice').style.display = 'block';
+        } else {
+          alert("Error sending details: " + (resJson.message || "Please call operations."));
+        }
+      } catch(e) {
+        alert("Could not reach dispatch server. Please call 0450 605 370 directly.");
+      } finally {
+        btn.innerText = "SEND COLLECTION DETAILS SMS";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
