@@ -94,15 +94,22 @@
     }
     .notes-box:active { background: #222; }
 
+    /* Action Grid */
     .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
-    .action-row.has-folder { grid-template-columns: 0.9fr 1fr 1fr; }
     .btn-action {
-      height: 48px; border: none; border-radius: 10px; font-size: 15px; font-weight: 900;
+      height: 46px; border: none; border-radius: 10px; font-size: 14px; font-weight: 900;
       cursor: pointer; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center;
       gap: 5px; text-decoration: none; text-transform: uppercase;
     }
     .btn-folder { background: #2a2a2a; border: 1.5px solid #00b0ff; color: #00b0ff; }
     .btn-folder:active { background: #1f364d; transform: scale(0.96); }
+    
+    /* Policelink Button */
+    .btn-pl { background: #1e3a8a; border: 1.5px solid #3b82f6; color: #fff; }
+    .btn-pl:active { background: #1d4ed8; transform: scale(0.96); }
+    .btn-pl.pl-done { background: #0d2818; border: 1.5px solid var(--c-rel); color: var(--c-rel); }
+    .btn-pl.pl-done:active { background: #1b4d2e; }
+
     .btn-sms { background: #0284c7; color: #fff; }
     .btn-sms:active { background: #0369a1; }
     .btn-rel { background: var(--c-rel); color: #000; }
@@ -449,6 +456,9 @@
         if (v.policelinkRef) metaTags.push(`Ref: ${v.policelinkRef}`);
 
         const hasFolder = Boolean(v.folderUrl);
+        const plLabel = v.policelinkRef ? `✔ PL: ${v.policelinkRef}` : `🚔 POLICELINK`;
+        const plClass = v.policelinkRef ? `btn-pl pl-done` : `btn-pl`;
+        const plSpanStyle = !hasFolder ? `style="grid-column: span 2;"` : ``;
 
         card.innerHTML = `
           <div class="card-row-top" onclick="openEditModalByIndex(${idx})">
@@ -475,8 +485,9 @@
             <span style="font-size:10px; color:#888;">NOTE ✎</span>
           </div>
 
-          <div class="action-row ${hasFolder ? 'has-folder' : ''}">
+          <div class="action-row">
             ${hasFolder ? `<a href="${v.folderUrl}" target="_blank" class="btn-action btn-folder" onclick="event.stopPropagation();">📁 FOLDER</a>` : ''}
+            <button type="button" class="btn-action ${plClass}" ${plSpanStyle} onclick="event.stopPropagation(); launchPolicelinkFlow(${idx})">${plLabel}</button>
             <button class="btn-action btn-sms" onclick="event.stopPropagation(); openSmsModalByIndex(${idx})">💬 SMS</button>
             <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel" onclick="event.stopPropagation();">RELEASE ➔</a>
           </div>
@@ -496,6 +507,57 @@
         (v.notes && v.notes.toUpperCase().includes(q))
       );
       renderCards(displayedInventory);
+    }
+
+    /* Step B: Policelink Flow Launcher */
+    function launchPolicelinkFlow(idx) {
+      const vehicle = displayedInventory[idx];
+      if (!vehicle) {
+        alert("Vehicle details not found.");
+        return;
+      }
+
+      let pDate = vehicle.policelinkDate;
+      let pTime = vehicle.policelinkTime;
+      if (!pDate || !pTime) {
+        const raw = vehicle.rawTowedDate || vehicle.towedTime || "";
+        const slashMatch = String(raw).match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})/);
+        if (slashMatch) {
+          pDate = String(slashMatch[1]).padStart(2, '0') + '/' + String(slashMatch[2]).padStart(2, '0') + '/' + slashMatch[3];
+          pTime = String(slashMatch[4]).padStart(2, '0') + ':' + String(slashMatch[5]).padStart(2, '0') + ':00';
+        } else {
+          const now = new Date();
+          pDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+          pTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':00';
+        }
+      }
+
+      const payload = {
+        rego: vehicle.rego || '',
+        state: vehicle.state || 'QLD',
+        date: pDate,
+        time: pTime,
+        property: vehicle.property || '',
+        propertyAddress: vehicle.policelinkAddress || vehicle.property || '',
+        yardAddress: "2 Hinde Street, Ashm",
+        make: vehicle.make || '',
+        model: vehicle.model || '',
+        colour: vehicle.colour || 'White',
+        bodyType: vehicle.bodyType || 'Sedan',
+        occupierConsent: vehicle.occupierConsent || ((vehicle.property || 'Property') + ' BC'),
+        companyName: "National Car Parking and Towing Solutions",
+        companyPhone: "0450605370",
+        companyEmail: "Info@nationaltowing.com.au"
+      };
+
+      const jsonStr = JSON.stringify(payload);
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonStr).catch(() => {});
+      }
+
+      const launchUrl = "https://www.police.qld.gov.au/policelink-reporting/tow-notification-launch#NT_DATA=" + encodeURIComponent(jsonStr);
+      window.open(launchUrl, '_blank');
     }
 
     function openEditModalByIndex(idx) {
