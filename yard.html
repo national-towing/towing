@@ -510,58 +510,74 @@
     }
 
     /* Step B: Policelink Flow Launcher */
-    function launchPolicelinkFlow(idx) {
-      const vehicle = displayedInventory[idx];
-      if (!vehicle) {
-        alert("Vehicle details not found.");
-        return;
-      }
-
-      let pDate = vehicle.policelinkDate;
-      let pTime = vehicle.policelinkTime;
-      
-      const raw = vehicle.rawTowedDate || vehicle.towedTime || "";
-      const m = String(raw).match(/(\d{1,2})[-/](\d{1,2})(?:[-/](\d{2,4}))?\s+(\d{1,2}):(\d{2})/);
-      if (m) {
-        const dd = String(m[1]).padStart(2, '0');
-        const mm = String(m[2]).padStart(2, '0');
-        const yyyy = m[3] ? (m[3].length === 2 ? '20' + m[3] : m[3]) : '2026';
-        pDate = `${dd}/${mm}/${yyyy}`;
-        pTime = `${String(m[4]).padStart(2, '0')}:${String(m[5]).padStart(2, '0')}:00`;
-      } else if (!pDate || !pTime) {
-        const now = new Date();
-        pDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
-        pTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':00';
-      }
-
-      const payload = {
-        rego: vehicle.rego || '',
-        state: vehicle.state || 'QLD',
-        date: pDate,
-        time: pTime,
-        property: vehicle.property || '',
-        propertyAddress: vehicle.policelinkAddress || vehicle.property || '',
-        yardAddress: "2 Hinde Street, Ashm",
-        make: vehicle.make || '',
-        model: vehicle.model || '',
-        colour: vehicle.colour || 'White',
-        bodyType: vehicle.bodyType || 'Sedan',
-        occupierConsent: vehicle.occupierConsent || ((vehicle.property || 'Property') + ' BC'),
-        companyName: "National Car Parking and Towing Solutions",
-        companyPhone: "0450605370",
-        companyEmail: "Info@nationaltowing.com.au"
-      };
-
-      const jsonStr = JSON.stringify(payload);
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(jsonStr).catch(() => {});
-      }
-
-      const launchUrl = "https://www.police.qld.gov.au/policelink-reporting/tow-notification-launch#NT_DATA=" + encodeURIComponent(jsonStr);
-      window.open(launchUrl, '_blank');
+  function launchPolicelinkFlow(idx) {
+    const vehicle = displayedInventory[idx];
+    if (!vehicle) {
+      alert("Vehicle details not found.");
+      return;
     }
 
+    let pDate = vehicle.policelinkDate;
+    let pTime = vehicle.policelinkTime;
+
+    // Extract logged time from strings like "Mon 09-11 12:56"
+    const raw = vehicle.rawTowedDate || vehicle.towedTime || "";
+    const m = String(raw).match(/(\d{1,2})[-/](\d{1,2})(?:[-/](\d{2,4}))?\s+(\d{1,2}):(\d{2})/);
+    if (m) {
+      const dd = String(m[1]).padStart(2, '0');
+      const mm = String(m[2]).padStart(2, '0');
+      const yyyy = m[3] ? (m[3].length === 2 ? '20' + m[3] : m[3]) : '2026';
+      pDate = `${dd}/${mm}/${yyyy}`;
+      pTime = `${String(m[4]).padStart(2, '0')}:${String(m[5]).padStart(2, '0')}:00`;
+    } else if (!pDate || !pTime) {
+      const now = new Date();
+      pDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+      pTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':00';
+    }
+
+    const payload = {
+      rego: vehicle.rego || '',
+      state: vehicle.state || 'QLD',
+      date: pDate,
+      time: pTime,
+      property: vehicle.property || '',
+      propertyAddress: vehicle.policelinkAddress || vehicle.property || '',
+      yardAddress: "2 Hinde Street, Ashm",
+      make: vehicle.make || '',
+      model: vehicle.model || '',
+      colour: vehicle.colour || 'White',
+      bodyType: vehicle.bodyType || 'Sedan',
+      occupierConsent: vehicle.occupierConsent || ((vehicle.property || 'Property') + ' Body Corporate'),
+      companyName: "National Car Parking and Towing Solutions",
+      companyPhone: "0450605370",
+      companyEmail: "Info@nationaltowing.com.au"
+    };
+
+    const jsonStr = JSON.stringify(payload);
+
+    // Cross-Platform Clipboard Copy (iOS Safari, Android Chrome, Desktop)
+    let copied = false;
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = jsonStr;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      copied = document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch (e) {}
+
+    if (!copied && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(jsonStr).catch(() => {});
+    }
+
+    // Standard HTTPS launcher (compatible with both iOS and Android)
+    const launchUrl = "https://www.police.qld.gov.au/policelink-reporting/tow-notification-launch";
+    window.open(launchUrl, '_blank');
+  }
+    
     function openEditModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
       if (!selectedVehicle) return;
