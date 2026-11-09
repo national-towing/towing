@@ -49,7 +49,7 @@
     /* Found Case */
     .result-found { background: #16241a; border: 2px solid #00e676; }
     .result-found-title { font-size: 18px; font-weight: 900; color: #00e676; text-transform: uppercase; }
-    .result-found-desc { font-size: 14px; color: #ddd; font-weight: 600; line-height: 1.4; }
+    .result-found-desc { font-size: 14px; color: #ddd; font-weight: 600; line-height: 1.45; }
 
     /* Not Found Case */
     .result-notfound { background: #261b12; border: 2px solid #ffab00; }
@@ -101,13 +101,13 @@
         Your car has been towed. Enter your phone number for collection details or call National Towing on 0450 605 370 for further information.
       </div>
 
-      <div id="smsInputSection" style="display:flex; flex-direction:column; gap:8px;">
+      <div id="smsInputSectionFound" style="display:flex; flex-direction:column; gap:8px;">
         <label>Your Mobile Number</label>
-        <input type="tel" id="ownerPhone" class="phone-input" placeholder="04xx xxx xxx">
-        <button type="button" id="btnSendSms" class="btn-sms-send" onclick="submitOwnerPhone()">SEND COLLECTION DETAILS SMS</button>
+        <input type="tel" id="ownerPhoneFound" class="phone-input" placeholder="04xx xxx xxx">
+        <button type="button" class="btn-sms-send" onclick="submitOwnerPhone('ownerPhoneFound')">SEND CONFIRMATION SMS</button>
       </div>
 
-      <div id="smsSuccessNotice" style="display:none; color:#00e676; font-size:13px; font-weight:900; text-align:center; padding:6px 0;">
+      <div id="smsSuccessFound" style="display:none; color:#00e676; font-size:13px; font-weight:900; text-align:center; padding:6px 0;">
         ✔ Collection details sent via SMS.
       </div>
 
@@ -118,8 +118,19 @@
     <div id="boxNotFound" class="result-box result-notfound">
       <div class="result-notfound-title">Vehicle Not on Yard Record</div>
       <div class="result-notfound-desc">
-        Our records do not currently indicate we have towed your car, however, this may be due to the fact the car has not yet been received into our holding yard. Please call 0450 605 370 to confirm details.
+        Our records do not yet indicate we have towed your car, however, this may be due to the vehicle being in transit or not yet been received into our holding yard. Please call 0450 605 370 to confirm details.
       </div>
+
+      <div id="smsInputSectionNotFound" style="display:flex; flex-direction:column; gap:8px;">
+        <label>Receive SMS Notice</label>
+        <input type="tel" id="ownerPhoneNotFound" class="phone-input" placeholder="04xx xxx xxx">
+        <button type="button" class="btn-sms-send" style="background:#ffab00;" onclick="submitOwnerPhone('ownerPhoneNotFound')">SEND SMS NOTICE TO MY PHONE</button>
+      </div>
+
+      <div id="smsSuccessNotFound" style="display:none; color:#ffab00; font-size:13px; font-weight:900; text-align:center; padding:6px 0;">
+        ✔ Notice sent via SMS.
+      </div>
+
       <a href="tel:0450605370" class="btn-call">📞 Call 0450 605 370</a>
     </div>
   </div>
@@ -148,8 +159,10 @@
 
       document.getElementById('boxFound').style.display = 'none';
       document.getElementById('boxNotFound').style.display = 'none';
-      document.getElementById('smsSuccessNotice').style.display = 'none';
-      document.getElementById('smsInputSection').style.display = 'flex';
+      document.getElementById('smsSuccessFound').style.display = 'none';
+      document.getElementById('smsSuccessNotFound').style.display = 'none';
+      document.getElementById('smsInputSectionFound').style.display = 'flex';
+      document.getElementById('smsInputSectionNotFound').style.display = 'flex';
 
       try {
         const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=public_check_tow&rego=${encodeURIComponent(rego)}&_t=${Date.now()}`);
@@ -171,18 +184,14 @@
       }
     }
 
-    async function submitOwnerPhone() {
-      const phoneInput = document.getElementById('ownerPhone');
+    async function submitOwnerPhone(inputId) {
+      const phoneInput = document.getElementById(inputId);
       const cleanPhone = phoneInput.value.trim().replace(/[^\d+]/g, '');
 
       if (!cleanPhone || cleanPhone.length < 8) {
         alert("Please enter a valid Australian mobile number (e.g. 04xx xxx xxx).");
         return;
       }
-
-      const btn = document.getElementById('btnSendSms');
-      btn.innerText = "DISPATCHING SMS...";
-      btn.disabled = true;
 
       try {
         const res = await fetch(GOOGLE_SCRIPT_URL, {
@@ -197,16 +206,18 @@
         const resJson = await res.json();
 
         if (resJson && resJson.status === "SUCCESS") {
-          document.getElementById('smsInputSection').style.display = 'none';
-          document.getElementById('smsSuccessNotice').style.display = 'block';
+          if (inputId === 'ownerPhoneFound') {
+            document.getElementById('smsInputSectionFound').style.display = 'none';
+            document.getElementById('smsSuccessFound').style.display = 'block';
+          } else {
+            document.getElementById('smsInputSectionNotFound').style.display = 'none';
+            document.getElementById('smsSuccessNotFound').style.display = 'block';
+          }
         } else {
-          alert("Error sending details: " + (resJson.message || "Please call operations."));
+          alert("Notice: " + (resJson.message || "Please call operations."));
         }
       } catch(e) {
         alert("Could not reach dispatch server. Please call 0450 605 370 directly.");
-      } finally {
-        btn.innerText = "SEND COLLECTION DETAILS SMS";
-        btn.disabled = false;
       }
     }
   </script>
