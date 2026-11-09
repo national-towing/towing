@@ -583,15 +583,8 @@
       window.open("https://" + pimsUrl, '_blank');
     }
   }
-    if (isIOS) {
-      // "x-safari-https://" instructs iOS to bypass the in-app frame and launch real Safari directly
-      window.location.href = "x-safari-https://" + targetUrl;
-    } else {
-      // Android / PC Chrome opens normally in a real browser tab
-      window.open("https://" + targetUrl, '_blank');
-    }
-  }
     
+  function openEditModalByIndex(idx) {
     function openEditModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
       if (!selectedVehicle) return;
