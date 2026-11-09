@@ -14,11 +14,11 @@
     body {
       background: #121212; color: #fff; min-height: 100vh;
       display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-      padding: 20px 16px; padding-top: max(24px, env(safe-area-inset-top));
+      padding: 24px 16px; padding-top: max(32px, env(safe-area-inset-top));
     }
     .header { text-align: center; margin-bottom: 24px; }
     .header h1 { font-size: 26px; font-weight: 900; color: #ffab00; letter-spacing: 1px; text-transform: uppercase; }
-    .header p { font-size: 13px; color: #888; font-weight: 700; margin-top: 4px; }
+    .header p { font-size: 13px; color: #888; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
     .card {
       background: #1e1e1e; border: 1.5px solid #333; border-radius: 16px;
@@ -43,15 +43,15 @@
     .btn-submit:active { transform: scale(0.98); }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Results */
+    /* Result Containers */
     .result-box { display: none; flex-direction: column; gap: 14px; border-radius: 12px; padding: 16px; }
     
-    /* Found Case */
+    /* Confirmed Tow */
     .result-found { background: #16241a; border: 2px solid #00e676; }
     .result-found-title { font-size: 18px; font-weight: 900; color: #00e676; text-transform: uppercase; }
     .result-found-desc { font-size: 14px; color: #ddd; font-weight: 600; line-height: 1.45; }
 
-    /* Not Found Case */
+    /* Inconclusive / Not on Record */
     .result-notfound { background: #261b12; border: 2px solid #ffab00; }
     .result-notfound-title { font-size: 17px; font-weight: 900; color: #ffab00; text-transform: uppercase; }
     .result-notfound-desc { font-size: 13.5px; color: #ccc; font-weight: 600; line-height: 1.45; }
@@ -74,18 +74,16 @@
       display: flex; align-items: center; justify-content: center; gap: 8px;
       width: 100%; height: 50px; border-radius: 10px; text-decoration: none;
       background: #2a2a2a; border: 1.5px solid #ffab00; color: #ffab00;
-      font-size: 16px; font-weight: 900; text-transform: uppercase;
+      font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;
     }
     .btn-call:active { background: #ffab00; color: #000; }
-
-    .footer-note { font-size: 11px; color: #666; text-align: center; margin-top: 20px; max-width: 400px; }
   </style>
 </head>
 <body>
 
   <div class="header">
     <h1>National Towing</h1>
-    <p>Holding Yard Vehicle Status Check</p>
+    <p>Vehicle Status Check</p>
   </div>
 
   <div class="card">
@@ -93,7 +91,7 @@
     <input type="text" id="regoInput" class="rego-input" placeholder="REGO" maxlength="10" autocomplete="off" autocorrect="off">
     <button type="button" id="btnCheck" class="btn-submit" onclick="checkVehicleStatus()">CHECK VEHICLE</button>
 
-    <!-- RESULT 1: TOW CONFIRMED -->
+    <!-- RESULT 1: CONFIRMED TOW -->
     <div id="boxFound" class="result-box result-found">
       <div class="result-found-title">✔ Vehicle Confirmed Towed</div>
       <div class="result-found-desc" id="foundVehicleMeta"></div>
@@ -104,40 +102,24 @@
       <div id="smsInputSectionFound" style="display:flex; flex-direction:column; gap:8px;">
         <label>Your Mobile Number</label>
         <input type="tel" id="ownerPhoneFound" class="phone-input" placeholder="04xx xxx xxx">
-        <button type="button" class="btn-sms-send" onclick="submitOwnerPhone('ownerPhoneFound')">SEND CONFIRMATION SMS</button>
+        <button type="button" id="btnSendSms" class="btn-sms-send" onclick="submitOwnerPhone()">SEND CONFIRMATION SMS</button>
       </div>
 
       <div id="smsSuccessFound" style="display:none; color:#00e676; font-size:13px; font-weight:900; text-align:center; padding:6px 0;">
-        ✔ Collection details sent via SMS.
+        ✔ Confirmation sent via SMS.
       </div>
 
       <a href="tel:0450605370" class="btn-call">📞 Call 0450 605 370</a>
     </div>
 
-    <!-- RESULT 2: NOT CURRENTLY IN HOLDING YARD -->
+    <!-- RESULT 2: INCONCLUSIVE / NOT IN YARD -->
     <div id="boxNotFound" class="result-box result-notfound">
-      <div class="result-notfound-title">Vehicle Not on Yard Record</div>
+      <div class="result-notfound-title">Vehicle Not on Record</div>
       <div class="result-notfound-desc">
-        Our records do not yet indicate we have towed your car, however, this may be due to the vehicle being in transit or not yet been received into our holding yard. Please call 0450 605 370 to confirm details.
+        Our records do not yet indicate we have towed your car, however, this may be due to the vehicle being in transit or not yet been received into our holding yard. Please call National Towing to confirm details.
       </div>
-
-      <div id="smsInputSectionNotFound" style="display:flex; flex-direction:column; gap:8px;">
-        <label>Receive SMS Notice</label>
-        <input type="tel" id="ownerPhoneNotFound" class="phone-input" placeholder="04xx xxx xxx">
-        <button type="button" class="btn-sms-send" style="background:#ffab00;" onclick="submitOwnerPhone('ownerPhoneNotFound')">SEND SMS NOTICE TO MY PHONE</button>
-      </div>
-
-      <div id="smsSuccessNotFound" style="display:none; color:#ffab00; font-size:13px; font-weight:900; text-align:center; padding:6px 0;">
-        ✔ Notice sent via SMS.
-      </div>
-
       <a href="tel:0450605370" class="btn-call">📞 Call 0450 605 370</a>
     </div>
-  </div>
-
-  <div class="footer-note">
-    Holding Yard: 4 Lau Place, Ashmore QLD 4214<br>
-    Open Monday – Sunday | Ph: 0450 605 370
   </div>
 
   <script>
@@ -154,15 +136,13 @@
 
       activeRego = rego;
       const btn = document.getElementById('btnCheck');
-      btn.innerText = "CHECKING YARD...";
+      btn.innerText = "CHECKING STATUS...";
       btn.disabled = true;
 
       document.getElementById('boxFound').style.display = 'none';
       document.getElementById('boxNotFound').style.display = 'none';
       document.getElementById('smsSuccessFound').style.display = 'none';
-      document.getElementById('smsSuccessNotFound').style.display = 'none';
       document.getElementById('smsInputSectionFound').style.display = 'flex';
-      document.getElementById('smsInputSectionNotFound').style.display = 'flex';
 
       try {
         const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=public_check_tow&rego=${encodeURIComponent(rego)}&_t=${Date.now()}`);
@@ -184,14 +164,18 @@
       }
     }
 
-    async function submitOwnerPhone(inputId) {
-      const phoneInput = document.getElementById(inputId);
+    async function submitOwnerPhone() {
+      const phoneInput = document.getElementById('ownerPhoneFound');
       const cleanPhone = phoneInput.value.trim().replace(/[^\d+]/g, '');
 
       if (!cleanPhone || cleanPhone.length < 8) {
         alert("Please enter a valid Australian mobile number (e.g. 04xx xxx xxx).");
         return;
       }
+
+      const btn = document.getElementById('btnSendSms');
+      btn.innerText = "DISPATCHING SMS...";
+      btn.disabled = true;
 
       try {
         const res = await fetch(GOOGLE_SCRIPT_URL, {
@@ -206,18 +190,16 @@
         const resJson = await res.json();
 
         if (resJson && resJson.status === "SUCCESS") {
-          if (inputId === 'ownerPhoneFound') {
-            document.getElementById('smsInputSectionFound').style.display = 'none';
-            document.getElementById('smsSuccessFound').style.display = 'block';
-          } else {
-            document.getElementById('smsInputSectionNotFound').style.display = 'none';
-            document.getElementById('smsSuccessNotFound').style.display = 'block';
-          }
+          document.getElementById('smsInputSectionFound').style.display = 'none';
+          document.getElementById('smsSuccessFound').style.display = 'block';
         } else {
           alert("Notice: " + (resJson.message || "Please call operations."));
         }
       } catch(e) {
         alert("Could not reach dispatch server. Please call 0450 605 370 directly.");
+      } finally {
+        btn.innerText = "SEND CONFIRMATION SMS";
+        btn.disabled = false;
       }
     }
   </script>
