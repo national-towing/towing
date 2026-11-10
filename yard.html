@@ -573,8 +573,8 @@
       navigator.clipboard.writeText(jsonStr).catch(() => {});
     }
 
-    // Direct link back to the official QPS Gateway to ensure session token loads
-    const pimsUrl = "www.police.qld.gov.au/policelink-reporting/tow-notification-launch";
+   // Direct Deep-Link to Screen 1 of QPS Form
+    const pimsUrl = "pims2.police.qld.gov.au/GTConnect/UnifiedAcceptor/QPSWebFramework.Main/site/wss#!create-report/CreateCase/CreateCaseAction/CaseType/TowNotificationOccurrenceCase";
 
     // Direct Safari breakout for iOS Home Screen App vs. Standard Android/Desktop
     if (window.navigator.standalone || /iPhone|iPad|iPod/.test(navigator.userAgent)) {
