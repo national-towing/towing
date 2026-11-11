@@ -509,86 +509,95 @@
       renderCards(displayedInventory);
     }
 
-    /* Step B: Policelink Flow Launcher */
-  function launchPolicelinkFlow(idx) {
-    const vehicle = displayedInventory[idx];
-    if (!vehicle) {
-      alert("Vehicle details not found.");
-      return;
+    /* Step B: Policelink Headless Bot Launcher */
+    async function launchPolicelinkFlow(idx) {
+        const vehicle = displayedInventory[idx];
+        if (!vehicle) return;
+
+        // Find the button inside the DOM to update its UI
+        const cardElements = document.querySelectorAll('.yard-card');
+        const targetCard = cardElements[idx];
+        const btnElement = targetCard ? targetCard.querySelector('.btn-pl') : null;
+        
+        let originalText = "🚔 POLICELINK";
+        if (btnElement) {
+            originalText = btnElement.innerHTML;
+            btnElement.innerHTML = "⏳ BOT WORKING (15s)...";
+            btnElement.style.background = "#ffab00";
+            btnElement.style.color = "#000";
+            btnElement.style.pointerEvents = "none";
+        }
+
+        let pDate = vehicle.policelinkDate;
+        let pTime = vehicle.policelinkTime;
+        const raw = vehicle.rawTowedDate || vehicle.towedTime || "";
+        const m = String(raw).match(/(\d{1,2})[-/](\d{1,2})(?:[-/](\d{2,4}))?\s+(\d{1,2}):(\d{2})/);
+        if (m) {
+            pDate = `${String(m[1]).padStart(2, '0')}/${String(m[2]).padStart(2, '0')}/${m[3] ? (m[3].length === 2 ? '20' + m[3] : m[3]) : '2026'}`;
+            pTime = `${String(m[4]).padStart(2, '0')}:${String(m[5]).padStart(2, '0')}:00`;
+        } else if (!pDate || !pTime) {
+            const now = new Date();
+            pDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+            pTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':00';
+        }
+
+        const payload = {
+            rego: vehicle.rego || '',
+            state: vehicle.state || 'QLD',
+            date: pDate,
+            time: pTime,
+            property: vehicle.property || '',
+            propertyAddress: vehicle.policelinkAddress || vehicle.property || '',
+            yardAddress: "2 Hinde Street, Ashm",
+            make: vehicle.make || '',
+            model: vehicle.model || '',
+            colour: vehicle.colour || 'White',
+            bodyType: vehicle.bodyType || 'Sedan'
+        };
+
+        try {
+            // Ping the Headless HP Mini Bot securely over Tailscale
+            const res = await fetch("https://ashmorehomeserver.tail394009.ts.net/api/lodge-tow", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await res.json();
+
+            if (result.success) {
+                if (btnElement) {
+                    btnElement.innerHTML = "✔ PL: " + result.ref;
+                    btnElement.style.background = "#00e676";
+                    btnElement.style.color = "#000";
+                }
+                
+                // Fire silent webhook to update Master Log Col 30
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: "save_yard_details", rowIdx: vehicle.rowIdx, rego: vehicle.rego, policelinkRef: result.ref })
+                });
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (err) {
+            if (btnElement) {
+                btnElement.innerHTML = "✖ SERVER OFFLINE";
+                btnElement.style.background = "#ff1744";
+                btnElement.style.color = "#fff";
+                setTimeout(() => {
+                    btnElement.innerHTML = originalText;
+                    btnElement.style.background = "";
+                    btnElement.style.color = "";
+                    btnElement.style.pointerEvents = "auto";
+                }, 5000);
+            }
+            alert("Bot Server Unreachable or Failed. Check Tailscale and PowerShell on HP Mini.");
+        }
     }
-
-    let pDate = vehicle.policelinkDate;
-    let pTime = vehicle.policelinkTime;
-
-    // Extract logged time from strings like "Mon 09-11 12:56"
-    const raw = vehicle.rawTowedDate || vehicle.towedTime || "";
-    const m = String(raw).match(/(\d{1,2})[-/](\d{1,2})(?:[-/](\d{2,4}))?\s+(\d{1,2}):(\d{2})/);
-    if (m) {
-      const dd = String(m[1]).padStart(2, '0');
-      const mm = String(m[2]).padStart(2, '0');
-      const yyyy = m[3] ? (m[3].length === 2 ? '20' + m[3] : m[3]) : '2026';
-      pDate = `${dd}/${mm}/${yyyy}`;
-      pTime = `${String(m[4]).padStart(2, '0')}:${String(m[5]).padStart(2, '0')}:00`;
-    } else if (!pDate || !pTime) {
-      const now = new Date();
-      pDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
-      pTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':00';
-    }
-
-    const payload = {
-      rego: vehicle.rego || '',
-      state: vehicle.state || 'QLD',
-      date: pDate,
-      time: pTime,
-      property: vehicle.property || '',
-      propertyAddress: vehicle.policelinkAddress || vehicle.property || '',
-      yardAddress: "2 Hinde Street, Ashm",
-      make: vehicle.make || '',
-      model: vehicle.model || '',
-      colour: vehicle.colour || 'White',
-      bodyType: vehicle.bodyType || 'Sedan',
-      occupierConsent: vehicle.occupierConsent || ((vehicle.property || 'Property') + ' Body Corporate'),
-      companyName: "National Car Parking and Towing Solutions",
-      companyPhone: "0450605370",
-      companyEmail: "Info@nationaltowing.com.au"
-    };
-
-    const jsonStr = JSON.stringify(payload);
-
-    // Cross-Platform Clipboard Copy (iOS Safari, Android Chrome, Desktop)
-    let copied = false;
-    try {
-      const ta = document.createElement("textarea");
-      ta.value = jsonStr;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      copied = document.execCommand("copy");
-      document.body.removeChild(ta);
-    } catch (e) {}
-
-    if (!copied && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(jsonStr).catch(() => {});
-    }
-
-   // Direct Deep-Link to Screen 1 of QPS Form
-    const pimsUrl = "pims2.police.qld.gov.au/GTConnect/UnifiedAcceptor/QPSWebFramework.Main/site/wss#!create-report/CreateCase/CreateCaseAction/CaseType/TowNotificationOccurrenceCase";
-
-   // Direct Safari breakout for iOS Home Screen App vs. Standard Android/Desktop
-    if (window.navigator.standalone || /iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      window.location.href = "x-safari-https://" + pimsUrl;
-    } else {
-      window.open("https://" + pimsUrl, '_blank');
-    }
-  }
     
-  function openEditModalByIndex(idx) {
-    
-  function openEditModalByIndex(idx) {
-    
-   function openEditModalByIndex(idx) {
+    function openEditModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
       if (!selectedVehicle) return;
 
