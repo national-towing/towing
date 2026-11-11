@@ -576,12 +576,17 @@
    // Direct Deep-Link to Screen 1 of QPS Form
     const pimsUrl = "pims2.police.qld.gov.au/GTConnect/UnifiedAcceptor/QPSWebFramework.Main/site/wss#!create-report/CreateCase/CreateCaseAction/CaseType/TowNotificationOccurrenceCase";
 
-    // Direct Safari breakout for iOS Home Screen App vs. Standard Android/Desktop
+   // Direct Safari breakout for iOS Home Screen App vs. Standard Android/Desktop
     if (window.navigator.standalone || /iPhone|iPad|iPod/.test(navigator.userAgent)) {
       window.location.href = "x-safari-https://" + pimsUrl;
     } else {
       window.open("https://" + pimsUrl, '_blank');
     }
+  }
+    
+  function openEditModalByIndex(idx) {
+    
+  function openEditModalByIndex(idx) {
     
    function openEditModalByIndex(idx) {
       selectedVehicle = displayedInventory[idx];
