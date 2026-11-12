@@ -494,7 +494,7 @@
 
           <div class="action-row">
             ${hasFolder ? `<a href="${v.folderUrl}" target="_blank" class="btn-action btn-folder" onclick="event.stopPropagation();">📁 FOLDER</a>` : ''}
-            <button type="button" class="btn-action ${plClass}" ${plSpanStyle} onclick="event.stopPropagation(); launchPolicelinkFlow(${idx})">${plLabel}</button>
+            <button type="button" class="btn-action ${plClass}" ${plSpanStyle} ${isPlDone ? 'disabled' : ''} onclick="event.stopPropagation(); launchPolicelinkFlow(${idx})">${plLabel}</button>
             <button class="btn-action btn-sms" onclick="event.stopPropagation(); openSmsModalByIndex(${idx})">💬 SMS</button>
             <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel" onclick="event.stopPropagation();">RELEASE ➔</a>
           </div>
@@ -587,6 +587,7 @@
           btnElement.style.background = "";
           btnElement.style.color = "";
           btnElement.style.pointerEvents = "none";
+          btnElement.disabled = true;
         }
         fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
