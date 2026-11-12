@@ -107,10 +107,7 @@
     /* Policelink Button */
     .btn-pl { background: #1e3a8a; border: 1.5px solid #3b82f6; color: #fff; }
     .btn-pl:active { background: #1d4ed8; transform: scale(0.96); }
-    .btn-pl.pl-done { background: #0d2818; border: 1.5px solid var(--c-rel); color: var(--c-rel); }
-    .btn-pl.pl-done:active { background: #1b4d2e; }
-    .btn-pl.pl-done { background: #0d2818; border: 1.5px solid var(--c-rel); color: var(--c-rel); }
-    .btn-pl.pl-done:active { background: #1b4d2e; }
+    .btn-pl.pl-done { background: #0d2818; border: 1.5px solid var(--c-rel); color: var(--c-rel); pointer-events: none; }
     .btn-pl.pl-manual { background: #ff1744; border: 1.5px solid #ff5252; color: #fff; }
     .btn-pl.pl-manual:active { background: #d50000; }
 
@@ -524,6 +521,10 @@
     const vehicle = displayedInventory[idx];
     if (!vehicle) return;
 
+    // 🛑 SAFETY LOCK: If already successfully submitted, do absolutely nothing
+    const isPlDone = Boolean(vehicle.policelinkRef) && vehicle.policelinkRef !== 'FAILED_1' && vehicle.policelinkRef !== 'FAILED_MANUAL';
+    if (isPlDone) return;
+
     // If already failed twice, open QPS Policelink directly for manual entry
     if (vehicle.policelinkRef === 'FAILED_MANUAL') {
       window.open("https://www.police.qld.gov.au/policelink-reporting/tow-notification-launch", "_blank");
@@ -585,7 +586,7 @@
           btnElement.innerHTML = "✔ PL: " + refVal;
           btnElement.style.background = "";
           btnElement.style.color = "";
-          btnElement.style.pointerEvents = "auto";
+          btnElement.style.pointerEvents = "none";
         }
         fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
