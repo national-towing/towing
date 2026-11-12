@@ -351,7 +351,7 @@
 <div id="successOverlay">
     <h1 id="successRego">VEHICLE TOWED</h1>
     <p>Secured and syncing in background.</p>
-    <button class="ok-btn" onclick="window.location.href='tow.html';">OK</button>
+    <button class="ok-btn" onclick="resetTowForm()">OK</button>
 </div>
 
 <!-- Multi-Snap Camera Viewfinder Modal -->
@@ -452,13 +452,17 @@
             });
         }
 
-        window.addEventListener('online', syncPendingTowsInBackground);
-        window.addEventListener('focus', syncPendingTowsInBackground);
+        window.addEventListener('online', () => { syncPendingTowsInBackground(); processPolicelinkBotQueue(); });
+        window.addEventListener('focus', () => { syncPendingTowsInBackground(); processPolicelinkBotQueue(); });
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') syncPendingTowsInBackground();
+            if (document.visibilityState === 'visible') {
+                syncPendingTowsInBackground();
+                processPolicelinkBotQueue();
+            }
         });
         syncPendingTowsInBackground();
-        setInterval(syncPendingTowsInBackground, 10000);
+        processPolicelinkBotQueue();
+        setInterval(() => { syncPendingTowsInBackground(); processPolicelinkBotQueue(); }, 10000);
     });
 
     regoInput.addEventListener('input', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
@@ -1174,7 +1178,7 @@
     // ============================================================
     // 3. STORAGE & SUBMISSION
     // ============================================================
-    submitBtn.addEventListener('click', (e) => {
+   submitBtn.addEventListener('click', (e) => {
         e.preventDefault();
         if (!validateForm() || isSubmitting) return;
 
@@ -1188,11 +1192,12 @@
         const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
         const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
         const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
+        const propName = propertySelect.value || targetProperty || 'GENERAL';
 
         const payload = {
             id: 'TOW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_tow',
-            property: propertySelect.value || targetProperty || 'GENERAL',
+            property: propName,
             rego: rego,
             state: stateSelect.value,
             make: finalMake,
@@ -1206,6 +1211,36 @@
             timestamp: new Date().toISOString()
         };
 
+        // Resolve shortform property address for QPS Geocoder
+        let resolvedPropAddress = propName;
+        try {
+            const cachedProps = JSON.parse(localStorage.getItem('cached_properties') || '[]');
+            const matchedProp = cachedProps.find(p => p && p.name && p.name.toUpperCase() === propName.toUpperCase());
+            if (matchedProp && matchedProp.policelinkAddress) {
+                resolvedPropAddress = matchedProp.policelinkAddress;
+            }
+        } catch(err) {}
+
+        const nowD = new Date();
+        const plDate = String(nowD.getDate()).padStart(2, '0') + '/' + String(nowD.getMonth() + 1).padStart(2, '0') + '/' + nowD.getFullYear();
+        const plTime = String(nowD.getHours()).padStart(2, '0') + ':' + String(nowD.getMinutes()).padStart(2, '0') + ':00';
+
+        const plPayload = {
+            id: 'PL_' + Date.now() + '_' + rego,
+            rego: rego,
+            state: stateSelect.value || 'QLD',
+            date: plDate,
+            time: plTime,
+            property: propName,
+            propertyAddress: resolvedPropAddress,
+            yardAddress: "2 Hinde Street, Ashm",
+            make: finalMake,
+            model: modelInput.value.trim(),
+            colour: finalColour || 'White',
+            bodyType: bodyTypeSelect.value || 'Sedan',
+            inFlightAt: 0
+        };
+
         try {
             let blacklisted = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
             blacklisted[rego] = Date.now();
@@ -1217,13 +1252,19 @@
             localStorage.removeItem('pending_comp_' + rego);
         } catch(err) {}
 
+        // 1. Save & sync tow record immediately
         saveToOfflineQueue(payload);
         syncPendingTowsInBackground();
 
+        // 2. Fire Policelink Bot non-blocking in background
+        queuePolicelinkBot(plPayload);
+        processPolicelinkBotQueue();
+
+        // 3. Immediately display completion overlay so operator can log next tow right away
         successRego.innerText = rego + " LOGGED";
         successOverlay.style.display = "flex";
     });
-
+    
     function saveToOfflineQueue(payload) {
         try {
             const safePayload = JSON.parse(JSON.stringify(payload));
@@ -1316,6 +1357,117 @@
         let finalQueue = [];
         try { finalQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]"); } catch(e){}
         if (finalQueue.length === 0) statusDiv.innerText = "";
+    }
+    // ============================================================
+    // 4. NON-BLOCKING BACKGROUND POLICELINK BOT QUEUE
+    // ============================================================
+    function queuePolicelinkBot(plPayload) {
+        try {
+            let plQueue = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]");
+            if (!plQueue.some(item => item.rego === plPayload.rego)) {
+                plQueue.push(plPayload);
+                localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+            }
+        } catch(e) {}
+    }
+
+    function removePolicelinkJob(id) {
+        try {
+            let plQueue = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]");
+            plQueue = plQueue.filter(item => item.id !== id);
+            localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+        } catch(e) {}
+    }
+
+    async function savePlStatusToYardLog(rego, refStatus) {
+        // Retry up to 4 times (3s apart) in case Yard_Log row is still being written
+        for (let attempt = 0; attempt < 4; attempt++) {
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'save_yard_details',
+                        rego: rego,
+                        policelinkRef: refStatus
+                    })
+                });
+                const json = await res.json();
+                if (json && json.status === "SUCCESS") return true;
+            } catch(e) {}
+            await new Promise(r => setTimeout(r, 3000));
+        }
+        return false;
+    }
+
+    let isProcessingPlQueue = false;
+    async function processPolicelinkBotQueue() {
+        if (isProcessingPlQueue || !navigator.onLine) return;
+        let plQueue = [];
+        try {
+            plQueue = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]");
+        } catch(e) { return; }
+
+        if (plQueue.length === 0) return;
+        isProcessingPlQueue = true;
+
+        for (let i = 0; i < plQueue.length; i++) {
+            const job = plQueue[i];
+            // Skip if another tab/reload started this job within the last 45 seconds
+            if (job.inFlightAt && (Date.now() - job.inFlightAt) < 45000) continue;
+
+            try {
+                job.inFlightAt = Date.now();
+                localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+
+                const res = await fetch("https://ashmorehomeserver.tail394009.ts.net/api/lodge-tow", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(job)
+                });
+                const result = await res.json();
+
+                if (result && result.success) {
+                    removePolicelinkJob(job.id);
+                    await savePlStatusToYardLog(job.rego, result.ref || "SUBMITTED");
+                } else {
+                    throw new Error((result && result.error) || "Bot error");
+                }
+            } catch(err) {
+                // First attempt failed -> remove from auto-queue and flag FAILED_1 so Yard App shows Blue Retry button
+                removePolicelinkJob(job.id);
+                await savePlStatusToYardLog(job.rego, "FAILED_1");
+            }
+        }
+
+        isProcessingPlQueue = false;
+    }
+    function resetTowForm() {
+        isSubmitting = false;
+        regoInput.value = "";
+        modelInput.value = "";
+        makeSelect.selectedIndex = 0;
+        makeOtherInput.value = "";
+        makeOtherInput.style.display = "none";
+        colourSelect.selectedIndex = 0;
+        colourOtherInput.value = "";
+        colourOtherInput.style.display = "none";
+        bodyTypeSelect.selectedIndex = 0;
+
+        conditionPhotos = [];
+        renderThumbs();
+
+        compPreviewWrap.style.display = "none";
+        compPreviewImg.src = "";
+        compBtn.classList.remove("comp-ready");
+        compBtnText.innerText = "📷 ALIGN & SNAP COMPARISON";
+        cachedMarkImageUrl = "";
+        cachedMarkedTimestamp = "";
+
+        syncDropdownColors();
+        validateForm();
+        successOverlay.style.display = "none";
+        window.scrollTo(0, 0);
     }
 </script>
 </body>
