@@ -109,6 +109,10 @@
     .btn-pl:active { background: #1d4ed8; transform: scale(0.96); }
     .btn-pl.pl-done { background: #0d2818; border: 1.5px solid var(--c-rel); color: var(--c-rel); }
     .btn-pl.pl-done:active { background: #1b4d2e; }
+    .btn-pl.pl-done { background: #0d2818; border: 1.5px solid var(--c-rel); color: var(--c-rel); }
+    .btn-pl.pl-done:active { background: #1b4d2e; }
+    .btn-pl.pl-manual { background: #ff1744; border: 1.5px solid #ff5252; color: #fff; }
+    .btn-pl.pl-manual:active { background: #d50000; }
 
     .btn-sms { background: #0284c7; color: #fff; }
     .btn-sms:active { background: #0369a1; }
@@ -456,8 +460,14 @@
         if (v.policelinkRef) metaTags.push(`Ref: ${v.policelinkRef}`);
 
         const hasFolder = Boolean(v.folderUrl);
-        const plLabel = v.policelinkRef ? `✔ PL: ${v.policelinkRef}` : `🚔 POLICELINK`;
-        const plClass = v.policelinkRef ? `btn-pl pl-done` : `btn-pl`;
+        const isPlManual = v.policelinkRef === 'FAILED_MANUAL';
+        const isPlDone = Boolean(v.policelinkRef) && v.policelinkRef !== 'FAILED_1' && !isPlManual;
+        const plLabel = isPlManual
+          ? `✖ Submit PL Manually`
+          : (isPlDone ? `✔ PL: ${v.policelinkRef}` : `🚔 POLICELINK`);
+        const plClass = isPlManual
+          ? `btn-pl pl-manual`
+          : (isPlDone ? `btn-pl pl-done` : `btn-pl`);
         const plSpanStyle = !hasFolder ? `style="grid-column: span 2;"` : ``;
 
         card.innerHTML = `
@@ -509,18 +519,22 @@
       renderCards(displayedInventory);
     }
 
-  /* Step B: Policelink Headless Bot Launcher */
+  /* Step B: Policelink Headless Bot Launcher (Retry + Manual Fallback) */
   async function launchPolicelinkFlow(idx) {
     const vehicle = displayedInventory[idx];
     if (!vehicle) return;
+
+    // If already failed twice, open QPS Policelink directly for manual entry
+    if (vehicle.policelinkRef === 'FAILED_MANUAL') {
+      window.open("https://www.police.qld.gov.au/policelink-reporting/tow-notification-launch", "_blank");
+      return;
+    }
 
     const cardElements = document.querySelectorAll('.yard-card');
     const targetCard = cardElements[idx];
     const btnElement = targetCard ? targetCard.querySelector('.btn-pl') : null;
     
-    let originalText = "🚔 POLICELINK";
     if (btnElement) {
-      originalText = btnElement.innerHTML;
       btnElement.innerHTML = "⏳ BOT WORKING (15s)...";
       btnElement.style.background = "#ffab00";
       btnElement.style.color = "#000";
@@ -564,32 +578,38 @@
       const result = await res.json();
 
       if (result.success) {
+        const refVal = result.ref || "SUBMITTED";
+        vehicle.policelinkRef = refVal;
         if (btnElement) {
-          btnElement.innerHTML = "✔ PL: " + result.ref;
-          btnElement.style.background = "#00e676";
-          btnElement.style.color = "#000";
+          btnElement.className = "btn-action btn-pl pl-done";
+          btnElement.innerHTML = "✔ PL: " + refVal;
+          btnElement.style.background = "";
+          btnElement.style.color = "";
+          btnElement.style.pointerEvents = "auto";
         }
         fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: "save_yard_details", rowIdx: vehicle.rowIdx, rego: vehicle.rego, policelinkRef: result.ref })
+          body: JSON.stringify({ action: "save_yard_details", rowIdx: vehicle.rowIdx, rego: vehicle.rego, policelinkRef: refVal })
         });
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || "Bot submission failed");
       }
     } catch (err) {
+      // Retry failed -> lock to Red Manual state
+      vehicle.policelinkRef = "FAILED_MANUAL";
       if (btnElement) {
-        btnElement.innerHTML = "✖ SERVER OFFLINE";
-        btnElement.style.background = "#ff1744";
-        btnElement.style.color = "#fff";
-        setTimeout(() => {
-          btnElement.innerHTML = originalText;
-          btnElement.style.background = "";
-          btnElement.style.color = "";
-          btnElement.style.pointerEvents = "auto";
-        }, 5000);
+        btnElement.className = "btn-action btn-pl pl-manual";
+        btnElement.innerHTML = "✖ Submit PL Manually";
+        btnElement.style.background = "";
+        btnElement.style.color = "";
+        btnElement.style.pointerEvents = "auto";
       }
-      alert("Bot Server Unreachable or Failed. Check Tailscale and PowerShell on HP Mini.");
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: "save_yard_details", rowIdx: vehicle.rowIdx, rego: vehicle.rego, policelinkRef: "FAILED_MANUAL" })
+      }).catch(() => {});
     }
   }
 
