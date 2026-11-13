@@ -489,18 +489,20 @@
             clearTimeout(timeoutId);
             const data = await res.json();
             const detectedRego = data && data.rego ? String(data.rego).trim().toUpperCase() : "";
+            const detectedState = data && data.state ? String(data.state).trim().toUpperCase() : "QLD";
 
             if (detectedRego) {
                 triggerGreenOverlay(detectedRego);
+                statusDiv.style.color = "#00e676";
                 statusDiv.innerText = `✔ MARKED ${detectedRego}`;
-                sendMarkToServer(detectedRego, property, stampedB64, snapTime);
-                scheduleMarkReset();
+                sendMarkToServer(detectedRego, property, stampedB64, snapTime, detectedState);
+                scheduleMarkReset(false);
             } else {
-                // ANPR unreadable online: Dispatch as AUTO; server Plate Recognizer + Gemini will process
-                triggerGreenOverlay("MARKED");
-                statusDiv.innerText = `✔ MARKED (AUTO-ANPR ACTIVE)`;
-                sendMarkToServer("AUTO", property, stampedB64, snapTime);
-                scheduleMarkReset();
+                // ANPR unreadable: Flash Red Cross alert, still preserve photo + timestamp as NO REG HH:MM
+                triggerRedOverlay("NO PLATE DETECTED", 1400);
+                statusDiv.innerHTML = `<span style="color:#ff1744;">⚠️ NO PLATE READ — SAVED AS NO REG</span> <button type="button" onclick="switchTab('log')" style="background:#ff1744;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-weight:900;font-size:11px;margin-left:6px;cursor:pointer;">EDIT IN LOG</button>`;
+                sendMarkToServer("AUTO", property, stampedB64, snapTime, "QLD");
+                scheduleMarkReset(true);
             }
         } catch(err) {
             clearTimeout(timeoutId);
@@ -519,12 +521,13 @@
         }
     }
 
-    function sendMarkToServer(rego, property, photoBytes, timestamp) {
+    function sendMarkToServer(rego, property, photoBytes, timestamp, state) {
         localStorage.setItem('last_property', property);
         const payload = {
             action: 'log_mark',
             property: property,
             rego: rego || "AUTO",
+            state: state || "QLD",
             photoBytes: photoBytes,
             timestamp: timestamp || new Date().toISOString()
         };
@@ -547,7 +550,7 @@
 
     let isSyncingMarks = false;
     async function syncPendingMarksInBackground() {
-        if (isSyncingMarks || !navigator.onLine) return;
+        if (isSyncingMarks) return; // Ignore navigator.onLine (iOS Safari lies about it)
         let queue = [];
         try {
             queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
@@ -561,6 +564,9 @@
             const item = queue[i];
 
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout prevents silent hangs
+                
                 // Single resilient call: Server executes ANPR + Gemini AI directly on Google cloud fiber
                 const logRes = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -569,10 +575,13 @@
                         action: 'log_mark',
                         property: item.property,
                         rego: item.rego || "AUTO",
+                        state: item.state || "QLD",
                         photoBytes: item.photoBytes,
                         timestamp: item.snapTime
-                    })
+                    }),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
                 const logData = await logRes.json();
                 if (logData && logData.status === "SUCCESS") {
                     let curQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
@@ -594,14 +603,17 @@
     }
 
     let markResetTimer = null;
-    function scheduleMarkReset() {
+    function scheduleMarkReset(keepWarning) {
         clearTimeout(markResetTimer);
         markResetTimer = setTimeout(() => {
             lastSnapPreview.style.display = "none";
             lastSnapPreview.src = "";
             nativeCamInput.value = "";
-            statusDiv.innerText = "READY";
-        }, 1100);
+            if (!keepWarning) {
+                statusDiv.style.color = "#ffab00";
+                statusDiv.innerText = "READY";
+            }
+        }, 1200);
     }
 
     function triggerGreenOverlay(rego) {
@@ -613,13 +625,13 @@
         }, 700);
     }
 
-    function triggerRedOverlay(msg) {
+    function triggerRedOverlay(msg, durationMs) {
         redText.innerText = msg || "NO PLATE DETECTED";
         redOverlay.classList.add('show');
         if (navigator.vibrate) navigator.vibrate([150, 60, 150]);
         setTimeout(() => {
             redOverlay.classList.remove('show');
-        }, 700);
+        }, durationMs || 700);
     }
 
     function switchTab(tab) {

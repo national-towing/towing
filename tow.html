@@ -323,6 +323,9 @@
 
     <div class="thumb-gallery" id="thumbGallery"></div>
 
+    <button type="button" class="cond-snap-btn" id="confirmNoPassBtn" onclick="toggleNoPassConfirm()" style="background:#1e1e1e; border:2px solid #555; color:#555; margin-top:24px;">
+        CONFIRM NO PASS
+    </button>
     <button class="submit-btn" id="submitBtn" disabled>LOG TOW</button>
     <div id="status"></div>
 </div>
@@ -411,6 +414,7 @@
     let cachedMarkedTimestamp = "";
     let overlayStream = null;
     let isTorchOn = false;
+    let noPassConfirmed = false;
 
     function handleFieldFocus(input) {
         const val = input.value.trim().toUpperCase();
@@ -466,7 +470,7 @@
         setInterval(() => { syncPendingTowsInBackground(); processPolicelinkBotQueue(); }, 10000);
     });
 
-    regoInput.addEventListener('input', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
+    regoInput.addEventListener('input', () => { checkExistingCompPhoto(); autoPopulateFromCache(); if(noPassConfirmed) toggleNoPassConfirm(); });
     regoInput.addEventListener('change', () => { checkExistingCompPhoto(); autoPopulateFromCache(); });
 
     let selectedTruck = "";
@@ -561,6 +565,25 @@
         const curRego = regoInput.value.trim().toUpperCase();
         if (!curRego) return;
         try {
+            // Check offline marks first (Basement workflow)
+            const markQueue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+            const foundOffline = markQueue.find(m => String(m.rego).trim().toUpperCase() === curRego);
+            if (foundOffline && foundOffline.photoBytes) {
+                if (!cachedMarkImageUrl) cachedMarkImageUrl = foundOffline.photoBytes;
+                if (!cachedMarkedTimestamp && foundOffline.snapTime) {
+                    const d = new Date(foundOffline.snapTime);
+                    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                    cachedMarkedTimestamp = `${days[d.getDay()]} ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                }
+                if (foundOffline.property && (!propertySelect.value || propertySelect.value === "")) {
+                    for (let i = 0; i < propertySelect.options.length; i++) {
+                        if (propertySelect.options[i].value.toUpperCase() === foundOffline.property.toUpperCase()) {
+                            propertySelect.selectedIndex = i; break;
+                        }
+                    }
+                }
+            }
+
             const cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || '[]');
             const found = cachedRun.find(c => String(c.rego).trim().toUpperCase() === curRego);
             if (found) {
@@ -629,6 +652,23 @@
         validateForm();
     }
 
+    
+    function toggleNoPassConfirm() {
+        noPassConfirmed = !noPassConfirmed;
+        const btn = document.getElementById('confirmNoPassBtn');
+        if (noPassConfirmed) {
+            btn.style.background = "#0d2818";
+            btn.style.borderColor = "#00e676";
+            btn.style.color = "#00e676";
+            btn.innerHTML = "✔ NO PASS CONFIRMED";
+        } else {
+            btn.style.background = "#1e1e1e";
+            btn.style.borderColor = "#555";
+            btn.style.color = "#555";
+            btn.innerHTML = "CONFIRM NO PASS";
+        }
+        validateForm();
+    }
     function setupLiveValidation() {
         const inputs = [propertySelect, regoInput, makeSelect, makeOtherInput, modelInput, colourSelect, colourOtherInput, bodyTypeSelect];
         inputs.forEach(elem => {
@@ -676,6 +716,10 @@
         if (conditionPhotos.length === 0) {
             isValid = false;
         }
+        
+        if (!noPassConfirmed) {
+            isValid = false;
+        }
 
         submitBtn.disabled = !isValid;
         submitBtn.style.opacity = isValid ? "1" : "0.5";
@@ -690,8 +734,12 @@
         document.getElementById('modalRegoTitle').innerText = `${rego} - ALIGN & VERIFY`;
 
         if (cachedMarkImageUrl) {
-            const driveIdMatch = cachedMarkImageUrl.match(/[-\w]{25,}/);
-            ghostImage.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : cachedMarkImageUrl;
+            if (cachedMarkImageUrl.startsWith('data:image')) {
+                ghostImage.src = cachedMarkImageUrl;
+            } else {
+                const driveIdMatch = cachedMarkImageUrl.match(/[-\w]{25,}/);
+                ghostImage.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : cachedMarkImageUrl;
+            }
             ghostImage.style.display = "block";
         } else {
             ghostImage.style.display = "none";
@@ -1128,6 +1176,13 @@
 
             if (anprRes && anprRes.rego && (!regoInput.value || regoInput.value.trim() === "")) {
                 regoInput.value = anprRes.rego.trim().toUpperCase();
+                if (anprRes.state && (!stateSelect.value || stateSelect.value === "")) {
+                    for (let i = 0; i < stateSelect.options.length; i++) {
+                        if (stateSelect.options[i].value === anprRes.state.toUpperCase()) {
+                            stateSelect.selectedIndex = i; break;
+                        }
+                    }
+                }
             }
 
             if (aiRes && aiRes.status === "SUCCESS" && aiRes.result) {
@@ -1209,6 +1264,7 @@
             officer: selectedTruck,
             truck: selectedTruck,
             photoBytes: conditionPhotos.length > 0 ? conditionPhotos[0] : "",
+            photos: conditionPhotos,
             comparisonPhoto: compB64,
             timestamp: new Date().toISOString()
         };
@@ -1461,6 +1517,7 @@
         isProcessingPlQueue = false;
     }
     function resetTowForm() {
+        if (noPassConfirmed) toggleNoPassConfirm();
         isSubmitting = false;
         initialLoadedRego = "";
         regoInput.value = "";
