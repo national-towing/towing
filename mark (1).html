@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta id="themeColor" name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>MARK</title>
+    
+    <link rel="apple-touch-icon" href="icon-mark.png?v=1002">
+    <link rel="icon" type="image/png" href="icon-mark.png?v=1002">
+    <link rel="manifest" href="manifest-mark.json?v=1002">
+
+    <style>
+        :root {
+            --c-mark: #2979ff;
+            --c-run: #ffab00;
+            --c-tow: #ff1744;
+            --c-admin: #ab47bc;
+            --c-yard: #00b0ff;
+            --c-rel: #00e676;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { 
+            background: #121212; 
+            color: #fff; 
+            min-height: 100vh; 
+            padding: 12px; 
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(30px, env(safe-area-inset-bottom));
+        }
+
+        .header-box { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 440px; margin: 0 auto 10px auto; }
+        .header-box h1 { margin: 0; font-size: 38px; font-weight: 900; color: #ffab00; letter-spacing: 2px; text-align: center; line-height: 1.2; }
+
+        .icon-btn { position: absolute; right: 0; background: #2a2a2a; border: 1px solid #444; border-radius: 10px; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        .icon-btn:active { transform: scale(0.92); }
+
+        .nav-grid-3x2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 14px auto; }
+        .nav-tile { height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; text-decoration: none; color: #000; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-tile:active { transform: scale(0.96); }
+        .t-mark  { background: var(--c-mark); color: #fff; box-shadow: 0 0 0 2px #fff; }
+        .t-run   { background: var(--c-run); color: #000; }
+        .t-tow   { background: var(--c-tow); color: #fff; }
+        .t-admin { background: var(--c-admin); color: #fff; }
+        .t-yard  { background: var(--c-yard); color: #000; }
+        .t-rel   { background: var(--c-rel); color: #000; }
+
+        .card { 
+            background: #1e1e1e; 
+            border-radius: 18px; 
+            padding: 12px; 
+            width: 100%; 
+            max-width: 440px; 
+            border: 1px solid #333; 
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .sub-nav-bar { display: flex; width: 100%; max-width: 440px; background: #1e1e1e; border-radius: 10px; border: 1px solid #333; margin-bottom: 8px; overflow: hidden; flex-shrink: 0; }
+        .sub-tab { flex: 1; height: 40px; border: none; background: transparent; color: #888; font-size: 13px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
+        .sub-tab.active { background: var(--c-mark); color: #fff; }
+        
+        .search-bar-wrap { width: 100%; max-width: 440px; margin: 0 auto 10px auto; display: flex; gap: 8px; flex-shrink: 0; }
+        .search-input { flex: 1; height: 44px; background: #1e1e1e; border: 1px solid #333; border-radius: 10px; padding: 0 12px; color: #fff; font-size: 14px; font-weight: 700; outline: none; }
+        .search-input:focus { border-color: var(--c-mark); }
+
+        .list-container { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-bottom: 20px; }
+
+        .group-tile { background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .group-name { font-size: 16px; font-weight: 900; color: #fff; text-transform: uppercase; }
+        .group-count { background: #2979ff; color: #fff; font-size: 14px; font-weight: 900; padding: 4px 12px; border-radius: 8px; }
+
+        .veh-card { background: #1e1e1e; border: 1px solid #333; border-left: 5px solid #2979ff; border-radius: 12px; padding: 12px; display: flex; gap: 12px; cursor: pointer; }
+        .veh-card:active { background: #2f2f2f; }
+        .vc-thumb { width: 70px; height: 70px; border-radius: 8px; background: #000; border: 1.5px solid #444; object-fit: cover; flex-shrink: 0; }
+        .vc-details { display: flex; flex-direction: column; justify-content: center; gap: 3px; flex: 1; min-width: 0; }
+        .vc-rego { font-family: monospace; font-size: 22px; font-weight: 900; color: #fff; line-height: 1; }
+        .vc-prop { font-size: 12px; font-weight: 800; color: #aaa; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vc-time { font-size: 11px; font-weight: 800; color: #ffab00; }
+        .vc-mmct { font-size: 11px; font-weight: 700; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vc-pass { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; width: fit-content; margin-top: 2px; }
+        .vc-pass.pass-blue { background: #2979ff !important; color: #ffffff !important; }
+        .vc-pass.pass-red  { background: #ff1744 !important; color: #ffffff !important; }
+
+        .btn-back { background: #2a2a2a; border: 1px solid #444; color: #ffab00; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; align-self: flex-start; margin-bottom: 4px; text-transform: uppercase; }
+
+        .modal-sheet { display: none; position: fixed; inset: 0; background: #121212; z-index: 9999; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #1e1e1e; border-bottom: 1px solid #333; flex-shrink: 0; padding-top: max(16px, env(safe-area-inset-top)); }
+        .modal-title { font-size: 16px; font-weight: 900; color: var(--c-mark); text-transform: uppercase; }
+        .btn-close { background: none; border: none; font-size: 24px; color: #aaa; cursor: pointer; line-height: 1; }
+        .modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; display: flex; flex-direction: column; gap: 12px; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+        
+        .f-field { display: flex; flex-direction: column; gap: 4px; }
+        .f-label { font-size: 11px; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .f-input { width: 100%; height: 44px; background: #242424; border: 1px solid #444; border-radius: 8px; padding: 0 12px; color: #fff; font-size: 15px; font-weight: 700; outline: none; -webkit-appearance: none; }
+        .f-input:focus { border-color: var(--c-mark); }
+        .f-rego { font-family: monospace; font-size: 20px; text-transform: uppercase; color: #ffab00; }
+
+        .modal-footer { padding: 16px; background: #1e1e1e; border-top: 1px solid #333; display: flex; gap: 8px; flex-shrink: 0; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+        .btn-cancel-modal { flex: 1; height: 48px; background: #333; border: none; color: #fff; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+        .btn-submit-modal { flex: 2; height: 48px; background: #00e676; border: none; color: #000; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 15px; }
+
+        .loading-box { text-align: center; padding: 30px; color: #888; font-weight: 800; font-size: 14px; }
+        .wrapper { width: 100%; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+        .prop-select-wrap { width: 100%; margin-bottom: 10px; flex-shrink: 0; }
+        select {
+            width: 100%; height: 48px; padding: 0 12px; border-radius: 10px; border: 1.5px solid #444;
+            background: #2a2a2a; color: #fff; font-size: 17px; font-weight: 900; outline: none;
+            -webkit-appearance: none;
+        }
+        select:focus { border-color: var(--c-mark); }
+
+        .camera-trigger-box {
+            width: 100%; flex: 1; min-height: 380px; background: #111; border-radius: 14px;
+            border: 2.5px dashed #444; overflow: hidden; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; position: relative; cursor: pointer; user-select: none;
+        }
+        .camera-trigger-box:active { background: #181818; border-color: var(--c-mark); }
+
+        .cam-icon-circle {
+            width: 105px; height: 105px; background: #2a2a2a; border: 3.5px solid var(--c-mark);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 48px; color: #fff; box-shadow: 0 8px 26px rgba(41, 121, 255, 0.35); margin-bottom: 14px;
+        }
+
+        .cam-launch-title { font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase; }
+        .cam-launch-sub { font-size: 12px; font-weight: 800; color: #888; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+        .preview-img-display { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 12px; }
+
+        .full-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.15s ease-in-out;
+        }
+        .full-overlay.green { background: rgba(0, 230, 118, 0.96); }
+        .full-overlay.red { background: rgba(255, 23, 68, 0.96); }
+        .full-overlay.show { opacity: 1; }
+        .full-overlay-symbol { font-size: 130px; color: #fff; line-height: 1; text-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+        .full-overlay-text { font-size: 30px; font-weight: 950; color: #000; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; }
+
+        #status { text-align: center; font-weight: 900; font-size: 13px; margin-top: 8px; color: #ffab00; flex-shrink: 0; min-height: 18px; }
+
+        /* Zoom Preview Modal */
+        .preview-modal { display: none; position: fixed; inset: 0; background: #121212; z-index: 100006; flex-direction: column; }
+        .preview-modal.show { display: flex; }
+        .preview-header { height: 60px; background: #1e1e1e; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; }
+        .preview-back-btn { background: #2a2a2a; border: 1px solid #555; color: #ffab00; font-size: 14px; font-weight: 900; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+        .preview-zoom-btn { background: #00b0ff; color: #000; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 900; font-size: 13px; cursor: pointer; }
+        .preview-body { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; padding: 10px; overflow: auto; touch-action: pan-x pan-y pinch-zoom; }
+        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; transition: transform 0.2s ease; cursor: zoom-in; }
+        #previewImg.is-zoomed { transform: scale(2.2); cursor: zoom-out; }
+    </style>
+</head>
+<body>
+
+<div class="full-overlay green" id="greenOverlay">
+    <div class="full-overlay-symbol">✔</div>
+    <div class="full-overlay-text" id="greenText">MARKED</div>
+</div>
+<div class="full-overlay red" id="redOverlay">
+    <div class="full-overlay-symbol">✖</div>
+    <div class="full-overlay-text" id="redText">NO PLATE DETECTED</div>
+</div>
+
+<div class="header-box">
+    <h1>MARK</h1>
+    <div class="icon-btn" onclick="window.location.reload(true)">🔄</div>
+</div>
+
+<div class="nav-grid-3x2">
+    <a href="mark.html" class="nav-tile t-mark">MARK</a>
+    <a href="run.html" class="nav-tile t-run">RUN</a>
+    <a href="tow.html" class="nav-tile t-tow">TOW</a>
+    <a href="admin.html" class="nav-tile t-admin">ADMIN</a>
+    <a href="yard.html" class="nav-tile t-yard">YARD</a>
+    <a href="release.html" class="nav-tile t-rel">REL</a>
+</div>
+
+<div class="sub-nav-bar">
+    <button class="sub-tab active" id="tabBtnSnap" onclick="switchTab('snap')">📸 SNAP</button>
+    <button class="sub-tab" id="tabBtnLog" onclick="switchTab('log')">📋 LOG (<span id="lblMarkCount">0</span>)</button>
+</div>
+
+<!-- ==================== VIEW 1: SNAP ==================== -->
+<div id="viewSnap" class="wrapper" style="display:flex;">
+    <div class="card" style="flex: 1; margin: 0; min-height: 0;">
+        <div class="prop-select-wrap">
+            <select id="propertySelect"><option value="">LOADING PROPERTIES...</option></select>
+        </div>
+
+        <div class="camera-trigger-box" onclick="launchNativeCamera()">
+            <img id="lastSnapPreview" class="preview-img-display" alt="Mark Preview">
+            <div class="cam-icon-circle">📷</div>
+            <div class="cam-launch-title">SNAP VEHICLE</div>
+            <div class="cam-launch-sub">Hardware Flash & Night Mode</div>
+        </div>
+
+        <input type="file" id="nativeCamInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativePhoto(this)">
+
+        <div id="status">READY</div>
+    </div>
+</div>
+
+<!-- ==================== VIEW 2: LOG ==================== -->
+<div id="viewLog" class="wrapper" style="display:none;">
+    <div class="search-bar-wrap">
+        <input type="text" id="logSearch" class="search-input" placeholder="Search plate or property..." oninput="filterLogList()">
+    </div>
+    <div class="list-container" id="logList">
+        <div class="loading-box">Loading marked vehicles...</div>
+    </div>
+</div>
+
+<!-- ==================== EDIT MARK MODAL ==================== -->
+<div id="editMarkModal" class="modal-sheet">
+    <div class="modal-header">
+        <div class="modal-title" id="editMarkTitle">EDIT MARK</div>
+        <button class="btn-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <form class="modal-body" onsubmit="submitEditMark(event)">
+        <input type="hidden" id="eRowIdx">
+        <input type="hidden" id="eOrigRego">
+        
+        <div class="f-field">
+            <label class="f-label">Registration</label>
+            <input type="text" id="eRego" class="f-input f-rego" required>
+        </div>
+        <div class="f-field">
+            <label class="f-label">Property</label>
+            <select id="eProperty" class="f-input" required></select>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Make</label>
+                <input type="text" id="eMake" class="f-input">
+            </div>
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Model</label>
+                <input type="text" id="eModel" class="f-input">
+            </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Colour</label>
+                <input type="text" id="eColour" class="f-input">
+            </div>
+            <div class="f-field" style="flex:1;">
+                <label class="f-label">Body</label>
+                <input type="text" id="eBody" class="f-input">
+            </div>
+        </div>
+    </form>
+    <div class="modal-footer">
+        <button type="button" class="btn-cancel-modal" onclick="closeEditModal()">CANCEL</button>
+        <button type="button" id="btnSaveEdit" class="btn-submit-modal" onclick="document.querySelector('#editMarkModal form').requestSubmit()">SAVE CHANGES ✔</button>
+    </div>
+</div>
+
+<!-- PHOTO PREVIEW MODAL WITH ZOOM -->
+<div id="previewModal" class="preview-modal">
+    <div class="preview-header">
+        <button type="button" class="preview-back-btn" onclick="closePhotoPreview()">← BACK</button>
+        <div style="display:flex; flex-direction:column; text-align:center;">
+            <span style="font-size:17px; font-weight:900; color:#fff;" id="previewTitle"></span>
+            <span style="font-size:11px; color:#aaa;" id="previewMeta"></span>
+        </div>
+        <button type="button" class="preview-zoom-btn" id="previewZoomBtn" onclick="toggleZoom()">🔍 ZOOM 2X</button>
+    </div>
+    <div class="preview-body" onclick="toggleZoom()"><img id="previewImg" alt="Mark Photo"></div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+
+    const propertySelect = document.getElementById('propertySelect');
+    const nativeCamInput = document.getElementById('nativeCamInput');
+    const lastSnapPreview = document.getElementById('lastSnapPreview');
+    const statusDiv = document.getElementById('status');
+    const greenOverlay = document.getElementById('greenOverlay');
+    const redOverlay = document.getElementById('redOverlay');
+    const greenText = document.getElementById('greenText');
+    const redText = document.getElementById('redText');
+
+    let isProcessing = false;
+    let activeTab = 'snap';
+    let logCache = [];
+    let activePropFilter = null;
+    let propertiesCache = [];
+    let syncDebounceTimer = null;
+
+    propertySelect.addEventListener('change', () => {
+        if (propertySelect.value) {
+            localStorage.setItem('last_property', propertySelect.value.trim());
+        }
+    });
+
+    window.addEventListener('load', () => {
+        loadProperties();
+        
+        function scheduleSync() {
+            clearTimeout(syncDebounceTimer);
+            // Allow 3.0s for mobile cellular antenna to handshake before dispatching requests
+            syncDebounceTimer = setTimeout(syncPendingMarksInBackground, 3000);
+        }
+
+        window.addEventListener('online', scheduleSync);
+        window.addEventListener('focus', scheduleSync);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') scheduleSync();
+        });
+        scheduleSync();
+        setInterval(scheduleSync, 12000);
+    });
+
+    async function loadProperties() {
+        const cached = localStorage.getItem('cached_properties');
+        if (cached) {
+            try { populatePropertyDropdown(JSON.parse(cached)); } catch(e) {}
+        }
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    localStorage.setItem('cached_properties', JSON.stringify(data));
+                    populatePropertyDropdown(data);
+                }
+            }
+        } catch(e) {}
+    }
+
+    function populatePropertyDropdown(properties) {
+        propertiesCache = properties;
+        propertySelect.innerHTML = "<option value=''>-- SELECT PROPERTY --</option>";
+        const savedProp = (localStorage.getItem('last_property') || '').trim().toUpperCase();
+        let matched = false;
+
+        properties.forEach(p => {
+            const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+            if (propName) {
+                const opt = document.createElement('option');
+                opt.value = propName;
+                opt.innerText = propName;
+                if (savedProp && propName.toUpperCase() === savedProp) {
+                    opt.selected = true;
+                    matched = true;
+                }
+                propertySelect.appendChild(opt);
+            }
+        });
+
+        if (matched && propertySelect.value) {
+            localStorage.setItem('last_property', propertySelect.value);
+        }
+    }
+
+    function launchNativeCamera() {
+        if (isProcessing) return;
+        const prop = propertySelect.value;
+        if (!prop) {
+            statusDiv.innerText = "⚠️ SELECT PROPERTY FIRST";
+            triggerRedOverlay("SELECT PROPERTY");
+            return;
+        }
+        nativeCamInput.value = "";
+        nativeCamInput.click();
+    }
+
+    function applyBurnedTimestamp(b64Src, callback) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height + 65;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            
+            const now = new Date();
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const dayName = days[now.getDay()];
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const dStr = `${dayName} ${dd}/${mm} ${hh}:${mins}`;
+            
+            ctx.fillStyle = "#ffab00";
+            ctx.font = "bold 32px sans-serif";
+            ctx.fillText(`MARKED: ${dStr}`, 25, canvas.height - 22);
+            
+            callback(canvas.toDataURL('image/jpeg', 0.65));
+        };
+        img.src = b64Src;
+    }
+
+    function handleNativePhoto(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const prop = propertySelect.value;
+
+        isProcessing = true;
+        statusDiv.innerText = "⚡ COMPRESSING...";
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxDim = 960;
+                let w = img.width;
+                let h = img.height;
+
+                if (w > h) {
+                    if (w > maxDim) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    }
+                } else {
+                    if (h > maxDim) {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                }
+
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+
+                const fastB64 = canvas.toDataURL('image/jpeg', 0.65);
+                lastSnapPreview.src = fastB64;
+                lastSnapPreview.style.display = "block";
+
+                // Indelible timestamp burned immediately into pixel buffer
+                applyBurnedTimestamp(fastB64, function(stampedB64) {
+                    processMarkSnap(stampedB64, prop);
+                });
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function processMarkSnap(stampedB64, property) {
+        const snapTime = new Date().toISOString();
+
+        // 1. If Offline (Underground in Basement): Never stall, never prompt manual entry
+        if (!navigator.onLine) {
+            saveMarkToOfflineQueue({
+                id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                property: property,
+                photoBytes: stampedB64,
+                snapTime: snapTime
+            });
+            triggerGreenOverlay("CACHED");
+            statusDiv.innerText = "✔ CACHED (OFFLINE - AUTO-SYNC ON SURFACE)";
+            scheduleMarkReset();
+            isProcessing = false;
+            return;
+        }
+
+        // 2. If Online: Attempt fast cloud ANPR (generous 12s ceiling for GAS)
+        statusDiv.innerText = "🔍 SCANNING PLATE...";
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'scan_npr', photoBytes: stampedB64 }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            const data = await res.json();
+            const detectedRego = data && data.rego ? String(data.rego).trim().toUpperCase() : "";
+
+            if (detectedRego) {
+                triggerGreenOverlay(detectedRego);
+                statusDiv.style.color = "#00e676";
+                statusDiv.innerText = `✔ MARKED ${detectedRego}`;
+                sendMarkToServer(detectedRego, property, stampedB64, snapTime);
+                scheduleMarkReset(false);
+            } else {
+                // ANPR unreadable: Flash Red Cross alert, still preserve photo + timestamp as NO REG HH:MM
+                triggerRedOverlay("NO PLATE DETECTED", 1400);
+                statusDiv.innerHTML = `<span style="color:#ff1744;">⚠️ NO PLATE READ — SAVED AS NO REG</span> <button type="button" onclick="switchTab('log')" style="background:#ff1744;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-weight:900;font-size:11px;margin-left:6px;cursor:pointer;">EDIT IN LOG</button>`;
+                sendMarkToServer("AUTO", property, stampedB64, snapTime);
+                scheduleMarkReset(true);
+            }
+        } catch(err) {
+            clearTimeout(timeoutId);
+            // Weak reception / timeout: Cache locally to guarantee zero lost vehicles
+            saveMarkToOfflineQueue({
+                id: 'MARK_OFF_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                property: property,
+                photoBytes: stampedB64,
+                snapTime: snapTime
+            });
+            triggerGreenOverlay("CACHED");
+            statusDiv.innerText = "✔ CACHED (AUTO-SYNCING IN BACKGROUND)";
+            scheduleMarkReset();
+        } finally {
+            isProcessing = false;
+        }
+    }
+
+    function sendMarkToServer(rego, property, photoBytes, timestamp) {
+        localStorage.setItem('last_property', property);
+        const payload = {
+            action: 'log_mark',
+            property: property,
+            rego: rego || "AUTO",
+            photoBytes: photoBytes,
+            timestamp: timestamp || new Date().toISOString()
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        }).catch(() => {});
+    }
+
+    function saveMarkToOfflineQueue(payload) {
+        try {
+            let queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+            queue.push(payload);
+            localStorage.setItem('mark_offline_queue', JSON.stringify(queue));
+        } catch(e) {}
+    }
+
+    let isSyncingMarks = false;
+    async function syncPendingMarksInBackground() {
+        if (isSyncingMarks || !navigator.onLine) return;
+        let queue = [];
+        try {
+            queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+        } catch(e) { return; }
+        if (queue.length === 0) return;
+
+        isSyncingMarks = true;
+        statusDiv.innerText = `⚡ SYNCING OFFLINE MARKS (${queue.length})...`;
+
+        for (let i = 0; i < queue.length; i++) {
+            const item = queue[i];
+
+            try {
+                // Single resilient call: Server executes ANPR + Gemini AI directly on Google cloud fiber
+                const logRes = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'log_mark',
+                        property: item.property,
+                        rego: item.rego || "AUTO",
+                        photoBytes: item.photoBytes,
+                        timestamp: item.snapTime
+                    })
+                });
+                const logData = await logRes.json();
+                if (logData && logData.status === "SUCCESS") {
+                    let curQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+                    curQ = curQ.filter(q => q.id !== item.id);
+                    localStorage.setItem('mark_offline_queue', JSON.stringify(curQ));
+                } else {
+                    break; // Server error, keep in queue and retry next cycle
+                }
+            } catch(e) {
+                // Radio still warming up, leave queue untouched
+                break;
+            }
+        }
+        isSyncingMarks = false;
+        statusDiv.innerText = "READY";
+        if (activeTab === 'log') {
+            loadMarkingLog();
+        }
+    }
+
+    let markResetTimer = null;
+    function scheduleMarkReset(keepWarning) {
+        clearTimeout(markResetTimer);
+        markResetTimer = setTimeout(() => {
+            lastSnapPreview.style.display = "none";
+            lastSnapPreview.src = "";
+            nativeCamInput.value = "";
+            if (!keepWarning) {
+                statusDiv.style.color = "#ffab00";
+                statusDiv.innerText = "READY";
+            }
+        }, 1200);
+    }
+
+    function triggerGreenOverlay(rego) {
+        greenText.innerText = rego || "MARKED";
+        greenOverlay.classList.add('show');
+        if (navigator.vibrate) navigator.vibrate(80);
+        setTimeout(() => {
+            greenOverlay.classList.remove('show');
+        }, 700);
+    }
+
+    function triggerRedOverlay(msg, durationMs) {
+        redText.innerText = msg || "NO PLATE DETECTED";
+        redOverlay.classList.add('show');
+        if (navigator.vibrate) navigator.vibrate([150, 60, 150]);
+        setTimeout(() => {
+            redOverlay.classList.remove('show');
+        }, durationMs || 700);
+    }
+
+    function switchTab(tab) {
+        activeTab = tab;
+        document.getElementById('tabBtnSnap').classList.toggle('active', tab === 'snap');
+        document.getElementById('tabBtnLog').classList.toggle('active', tab === 'log');
+        document.getElementById('viewSnap').style.display = tab === 'snap' ? 'flex' : 'none';
+        document.getElementById('viewLog').style.display = tab === 'log' ? 'flex' : 'none';
+
+        if (tab === 'log') {
+            loadMarkingLog();
+        }
+    }
+
+    async function loadMarkingLog() {
+        const list = document.getElementById('logList');
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_marking_log");
+            logCache = await res.json();
+            document.getElementById('lblMarkCount').innerText = logCache.length;
+            renderLogList(logCache);
+        } catch(e) {
+            list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading marking log.</div>`;
+        }
+    }
+
+    function formatTimeFriendly(raw) {
+        if (!raw) return '';
+        const s = String(raw);
+        const m = s.match(/([A-Za-z]{3})\s*(\d{1,2})[-/](\d{1,2})\s+(\d{1,2}):(\d{2})/);
+        if (m) return `${m[1]} ${m[2]}/${m[3]} ${m[4]}:${m[5]}`;
+        return s.substring(0, 16);
+    }
+
+    function renderLogList(items) {
+        const list = document.getElementById('logList');
+        if (!items || items.length === 0) {
+            list.innerHTML = `<div class="loading-box">NO MARKED VEHICLES</div>`;
+            return;
+        }
+
+        if (activePropFilter) {
+            const filtered = items.filter(v => (v.property || 'GENERAL').toUpperCase() === activePropFilter);
+            
+            let html = `<button class="btn-back" onclick="clearLogFilter()">◀ BACK TO PROPERTIES</button>`;
+            html += `<div style="font-size:15px; font-weight:900; color:#2979ff; margin:4px 0 10px 0; text-transform:uppercase;">${activePropFilter} (${filtered.length})</div>`;
+            
+            html += filtered.map(v => {
+                const mm = [v.make, v.model].filter(Boolean).join(' ');
+                const desc = mm ? (v.colour ? `${mm} (${v.colour})` : mm) : (v.colour || 'Vehicle');
+                const mkd = formatTimeFriendly(v.markedTime);
+                const passClass = (v.pass === 'YES') ? 'pass-blue' : 'pass-red';
+                const passTxt = (v.pass === 'YES') ? 'PASS' : 'NO PASS';
+                
+                const driveId = v.imageUrl ? (v.imageUrl.match(/[-\w]{25,}/) || [''])[0] : '';
+                const fullImg = driveId ? `https://lh3.googleusercontent.com/d/${driveId}` : (v.imageUrl || '');
+                const thumb = fullImg 
+                    ? `<img src="${fullImg}" class="vc-thumb" loading="lazy" onclick="event.stopPropagation(); openPhotoPreview('${v.rego}', '${v.property}', '${fullImg}')">` 
+                    : `<div class="vc-thumb" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;">NO IMG</div>`;
+
+                return `
+                <div class="veh-card" onclick="openEditModal(${v.rowIdx}, '${v.rego}')">
+                    ${thumb}
+                    <div class="vc-details">
+                        <div class="vc-rego">${v.rego}</div>
+                        <div class="vc-time">MKD: ${mkd}</div>
+                        <div class="vc-mmct">${desc}</div>
+                        <div class="vc-pass ${passClass}">${passTxt}</div>
+                    </div>
+                </div>
+            `}).join('');
+            list.innerHTML = html;
+        } else {
+            const grouped = {};
+            items.forEach(v => {
+                const prop = (v.property || 'GENERAL').toUpperCase();
+                grouped[prop] = (grouped[prop] || 0) + 1;
+            });
+            
+            const sortedProps = Object.keys(grouped).sort();
+            list.innerHTML = sortedProps.map(prop => `
+                <div class="group-tile" onclick="setLogFilter('${prop.replace(/'/g, "\'")}')">
+                    <span class="group-name">${prop}</span>
+                    <span class="group-count">${grouped[prop]}</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    function setLogFilter(propName) {
+        activePropFilter = propName;
+        filterLogList();
+    }
+
+    function clearLogFilter() {
+        activePropFilter = null;
+        document.getElementById('logSearch').value = "";
+        filterLogList();
+    }
+
+    function filterLogList() {
+        const q = document.getElementById('logSearch').value.trim().toUpperCase();
+        let filtered = logCache;
+        if (q) {
+            filtered = logCache.filter(v => 
+                (v.rego && v.rego.toUpperCase().includes(q)) || (v.property && v.property.toUpperCase().includes(q))
+            );
+            activePropFilter = "SEARCH RESULTS"; 
+        } else if (activePropFilter === "SEARCH RESULTS") {
+            activePropFilter = null;
+        }
+        renderLogList(filtered);
+    }
+
+    function openEditModal(rowIdx, rego) {
+        const v = logCache.find(x => x.rowIdx === rowIdx && x.rego === rego);
+        if (!v) return;
+
+        document.getElementById('editMarkTitle').innerText = "EDIT: " + v.rego;
+        document.getElementById('eRowIdx').value = v.rowIdx;
+        document.getElementById('eOrigRego').value = v.rego;
+        document.getElementById('eRego').value = v.rego;
+        
+        const propSel = document.getElementById('eProperty');
+        propSel.innerHTML = "";
+        propertiesCache.forEach(p => {
+            const propName = (typeof p === 'object' && p !== null) ? (p.name || p.property || p[0] || Object.values(p)[0]) : p;
+            if (propName) {
+                const opt = document.createElement('option');
+                opt.value = propName; opt.innerText = propName;
+                if (propName.toUpperCase() === (v.property || 'GENERAL').toUpperCase()) opt.selected = true;
+                propSel.appendChild(opt);
+            }
+        });
+        
+        document.getElementById('eMake').value = v.make || "";
+        document.getElementById('eModel').value = v.model || "";
+        document.getElementById('eColour').value = v.colour || "";
+        document.getElementById('eBody').value = v.bodyType || "";
+        
+        document.getElementById('editMarkModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editMarkModal').style.display = 'none';
+    }
+
+    async function submitEditMark(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveEdit');
+        btn.innerText = "SAVING...";
+        btn.disabled = true;
+
+        const payload = {
+            action: "edit_mark",
+            rowIdx: document.getElementById('eRowIdx').value,
+            origRego: document.getElementById('eOrigRego').value,
+            rego: document.getElementById('eRego').value.trim().toUpperCase(),
+            property: document.getElementById('eProperty').value,
+            make: document.getElementById('eMake').value.trim(),
+            model: document.getElementById('eModel').value.trim(),
+            colour: document.getElementById('eColour').value.trim(),
+            bodyType: document.getElementById('eBody').value.trim()
+        };
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === "SUCCESS") {
+                closeEditModal();
+                loadMarkingLog();
+            } else {
+                alert("Error: " + (result.message || "Failed to save"));
+            }
+        } catch(err) {
+            alert("Network error.");
+        } finally {
+            btn.innerText = "SAVE CHANGES ✔";
+            btn.disabled = false;
+        }
+    }
+
+    function openPhotoPreview(rego, prop, url) {
+        document.getElementById('previewTitle').innerText = `${rego} (${prop})`;
+        const driveIdMatch = url ? String(url).match(/[-\w]{25,}/) : null;
+        const img = document.getElementById('previewImg');
+        img.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : (url || "");
+        img.classList.remove('is-zoomed');
+        const btn = document.getElementById('previewZoomBtn');
+        if (btn) btn.innerText = "🔍 ZOOM 2X";
+        document.getElementById('previewModal').classList.add('show');
+    }
+
+    function closePhotoPreview() { 
+        const img = document.getElementById('previewImg');
+        img.classList.remove('is-zoomed');
+        document.getElementById('previewModal').classList.remove('show'); 
+    }
+
+    function toggleZoom() {
+        const img = document.getElementById('previewImg');
+        const btn = document.getElementById('previewZoomBtn');
+        const isZ = img.classList.toggle('is-zoomed');
+        if (btn) btn.innerText = isZ ? "🔍 RESET" : "🔍 ZOOM 2X";
+    }
+</script>
+</body>
+</html>
