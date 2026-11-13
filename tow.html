@@ -406,6 +406,7 @@
     let conditionPhotos = [];
     let isSubmitting = false;
     let targetProperty = "";
+    let initialLoadedRego = "";
     let cachedMarkImageUrl = "";
     let cachedMarkedTimestamp = "";
     let overlayStream = null;
@@ -492,7 +493,7 @@
         const urlMkd = (params.get('mkd') || '').trim();
         const shouldOpenComp = params.get('openComp') === "1";
 
-        if (urlRego) regoInput.value = urlRego;
+        if (urlRego) { regoInput.value = urlRego; initialLoadedRego = urlRego; }
         if (urlProp) targetProperty = decodeURIComponent(urlProp).toUpperCase();
         if (urlImg) cachedMarkImageUrl = decodeURIComponent(urlImg);
         if (urlMkd) cachedMarkedTimestamp = decodeURIComponent(urlMkd);
@@ -803,7 +804,7 @@
     function checkExistingCompPhoto() {
         const rego = regoInput.value.trim().toUpperCase();
         if (!rego) return;
-        const existing = localStorage.getItem('pending_comp_' + rego);
+        const existing = localStorage.getItem('pending_comp_' + rego) || (initialLoadedRego ? localStorage.getItem('pending_comp_' + initialLoadedRego) : '');
         if (existing) {
             compPreviewImg.src = existing;
             compPreviewWrap.style.display = "block";
@@ -1191,13 +1192,14 @@
 
         const finalMake = makeSelect.value === "Other" ? makeOtherInput.value.trim() : makeSelect.value;
         const finalColour = colourSelect.value === "Other" ? colourOtherInput.value.trim() : colourSelect.value;
-        const compB64 = localStorage.getItem('pending_comp_' + rego) || "";
+        const compB64 = localStorage.getItem('pending_comp_' + rego) || (initialLoadedRego ? localStorage.getItem('pending_comp_' + initialLoadedRego) : '') || "";
         const propName = propertySelect.value || targetProperty || 'GENERAL';
 
         const payload = {
             id: 'TOW_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             action: 'log_tow',
             property: propName,
+            origRego: initialLoadedRego || rego,
             rego: rego,
             state: stateSelect.value,
             make: finalMake,
@@ -1246,10 +1248,19 @@
             blacklisted[rego] = Date.now();
             localStorage.setItem('towed_blacklist', JSON.stringify(blacklisted));
 
+            if (initialLoadedRego && initialLoadedRego !== rego) {
+                blacklisted[initialLoadedRego] = Date.now();
+                localStorage.setItem('towed_blacklist', JSON.stringify(blacklisted));
+            }
+
             let cachedRun = JSON.parse(localStorage.getItem('cached_run_data') || "[]");
-            cachedRun = cachedRun.filter(item => String(item.rego).trim().toUpperCase() !== rego);
+            cachedRun = cachedRun.filter(item => {
+                const r = String(item.rego).trim().toUpperCase();
+                return r !== rego && (!initialLoadedRego || r !== initialLoadedRego);
+            });
             localStorage.setItem('cached_run_data', JSON.stringify(cachedRun));
             localStorage.removeItem('pending_comp_' + rego);
+            if (initialLoadedRego) localStorage.removeItem('pending_comp_' + initialLoadedRego);
         } catch(err) {}
 
         // 1. Save & sync tow record immediately
@@ -1423,7 +1434,8 @@
                 const res = await fetch("https://ashmorehomeserver.tail394009.ts.net/api/lodge-tow", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(job)
+                    body: JSON.stringify(job),
+                    keepalive: true
                 });
                 const result = await res.json();
 
@@ -1434,6 +1446,12 @@
                     throw new Error((result && result.error) || "Bot error");
                 }
             } catch(err) {
+                // If aborted due to page navigation, leave in queue for yard.html to complete
+                if (err && err.name === 'AbortError' || document.visibilityState === 'hidden') {
+                    job.inFlightAt = 0;
+                    localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+                    break;
+                }
                 // First attempt failed -> remove from auto-queue and flag FAILED_1 so Yard App shows Blue Retry button
                 removePolicelinkJob(job.id);
                 await savePlStatusToYardLog(job.rego, "FAILED_1");
@@ -1444,6 +1462,7 @@
     }
     function resetTowForm() {
         isSubmitting = false;
+        initialLoadedRego = "";
         regoInput.value = "";
         modelInput.value = "";
         makeSelect.selectedIndex = 0;

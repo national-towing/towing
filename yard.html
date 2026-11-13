@@ -358,6 +358,8 @@
     window.addEventListener('DOMContentLoaded', () => {
       fetchYardInventory();
       loadPropertyList();
+      resumePendingPolicelinkJobs();
+      setInterval(resumePendingPolicelinkJobs, 8000);
     });
 
     async function loadPropertyList() {
@@ -456,16 +458,23 @@
         if (v.truck) metaTags.push(`Truck: ${v.truck}`);
         if (v.policelinkRef) metaTags.push(`Ref: ${v.policelinkRef}`);
 
+        let plQueue = [];
+        try { plQueue = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]"); } catch(e) {}
+        const activePlJob = plQueue.find(j => String(j.rego || '').trim().toUpperCase() === String(v.rego || '').trim().toUpperCase());
+
         const hasFolder = Boolean(v.folderUrl);
         const isPlManual = v.policelinkRef === 'FAILED_MANUAL';
         const isPlDone = Boolean(v.policelinkRef) && v.policelinkRef !== 'FAILED_1' && !isPlManual;
+        const isPlWorking = !isPlDone && !isPlManual && Boolean(activePlJob);
         const plLabel = isPlManual
           ? `✖ Submit PL Manually`
-          : (isPlDone ? `✔ PL: ${v.policelinkRef}` : `🚔 POLICELINK`);
+          : (isPlDone ? `✔ PL: ${v.policelinkRef}` : (isPlWorking ? `⏳ BOT WORKING (15s)...` : `🚔 POLICELINK`));
         const plClass = isPlManual
           ? `btn-pl pl-manual`
           : (isPlDone ? `btn-pl pl-done` : `btn-pl`);
-        const plSpanStyle = !hasFolder ? `style="grid-column: span 2;"` : ``;
+        const plInlineStyle = isPlWorking
+          ? `style="${!hasFolder ? 'grid-column: span 2;' : ''} background:#ffab00; color:#000; pointer-events:none;"`
+          : (!hasFolder ? `style="grid-column: span 2;"` : ``);
 
         card.innerHTML = `
           <div class="card-row-top" onclick="openEditModalByIndex(${idx})">
@@ -494,7 +503,7 @@
 
           <div class="action-row">
             ${hasFolder ? `<a href="${v.folderUrl}" target="_blank" class="btn-action btn-folder" onclick="event.stopPropagation();">📁 FOLDER</a>` : ''}
-            <button type="button" class="btn-action ${plClass}" ${plSpanStyle} ${isPlDone ? 'disabled' : ''} onclick="event.stopPropagation(); launchPolicelinkFlow(${idx})">${plLabel}</button>
+            <button type="button" class="btn-action ${plClass}" ${plInlineStyle} ${(isPlDone || isPlWorking) ? 'disabled' : ''} onclick="event.stopPropagation(); launchPolicelinkFlow(${idx})">${plLabel}</button>
             <button class="btn-action btn-sms" onclick="event.stopPropagation(); openSmsModalByIndex(${idx})">💬 SMS</button>
             <a href="release.html?rego=${encodeURIComponent(v.rego)}" class="btn-action btn-rel" onclick="event.stopPropagation();">RELEASE ➔</a>
           </div>
@@ -515,6 +524,66 @@
       );
       renderCards(displayedInventory);
     }
+
+  let isResumingPl = false;
+  async function resumePendingPolicelinkJobs() {
+    if (isResumingPl || !navigator.onLine) return;
+    let plQueue = [];
+    try { plQueue = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]"); } catch(e) { return; }
+    if (plQueue.length === 0) return;
+
+    isResumingPl = true;
+    for (let i = 0; i < plQueue.length; i++) {
+      const job = plQueue[i];
+      // If tow.html already fired it within last 30s, just refresh yard inventory to pick up saved ref
+      if (job.inFlightAt && (Date.now() - job.inFlightAt) < 30000) {
+        const match = yardInventory.find(v => String(v.rego).trim().toUpperCase() === String(job.rego).trim().toUpperCase());
+        if (match && match.policelinkRef && match.policelinkRef !== 'FAILED_1' && match.policelinkRef !== 'FAILED_MANUAL') {
+          plQueue = plQueue.filter(q => q.id !== job.id);
+          localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+        } else {
+          fetchYardInventory();
+        }
+        continue;
+      }
+
+      try {
+        job.inFlightAt = Date.now();
+        localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+
+        const res = await fetch("https://ashmorehomeserver.tail394009.ts.net/api/lodge-tow", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(job),
+          keepalive: true
+        });
+        const result = await res.json();
+        if (result && result.success) {
+          const refVal = result.ref || "SUBMITTED";
+          plQueue = plQueue.filter(q => q.id !== job.id);
+          localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: "save_yard_details", rego: job.rego, policelinkRef: refVal })
+          });
+          fetchYardInventory();
+        } else {
+          throw new Error((result && result.error) || "Bot failed");
+        }
+      } catch(e) {
+        plQueue = plQueue.filter(q => q.id !== job.id);
+        localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: "save_yard_details", rego: job.rego, policelinkRef: "FAILED_1" })
+        }).catch(() => {});
+        fetchYardInventory();
+      }
+    }
+    isResumingPl = false;
+  }
 
   /* Step B: Policelink Headless Bot Launcher (Retry + Manual Fallback) */
   async function launchPolicelinkFlow(idx) {

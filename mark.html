@@ -469,6 +469,7 @@
             });
             triggerGreenOverlay("CACHED");
             statusDiv.innerText = "✔ CACHED (OFFLINE - AUTO-SYNC ON SURFACE)";
+            scheduleMarkReset();
             isProcessing = false;
             return;
         }
@@ -493,11 +494,13 @@
                 triggerGreenOverlay(detectedRego);
                 statusDiv.innerText = `✔ MARKED ${detectedRego}`;
                 sendMarkToServer(detectedRego, property, stampedB64, snapTime);
+                scheduleMarkReset();
             } else {
                 // ANPR unreadable online: Dispatch as AUTO; server Plate Recognizer + Gemini will process
                 triggerGreenOverlay("MARKED");
                 statusDiv.innerText = `✔ MARKED (AUTO-ANPR ACTIVE)`;
                 sendMarkToServer("AUTO", property, stampedB64, snapTime);
+                scheduleMarkReset();
             }
         } catch(err) {
             clearTimeout(timeoutId);
@@ -510,6 +513,7 @@
             });
             triggerGreenOverlay("CACHED");
             statusDiv.innerText = "✔ CACHED (AUTO-SYNCING IN BACKGROUND)";
+            scheduleMarkReset();
         } finally {
             isProcessing = false;
         }
@@ -587,6 +591,17 @@
         if (activeTab === 'log') {
             loadMarkingLog();
         }
+    }
+
+    let markResetTimer = null;
+    function scheduleMarkReset() {
+        clearTimeout(markResetTimer);
+        markResetTimer = setTimeout(() => {
+            lastSnapPreview.style.display = "none";
+            lastSnapPreview.src = "";
+            nativeCamInput.value = "";
+            statusDiv.innerText = "READY";
+        }, 1100);
     }
 
     function triggerGreenOverlay(rego) {
