@@ -96,12 +96,14 @@
         .tile-mid-content { flex: 1; min-width: 0; }
         .car-tile:active { transform: scale(0.98); }
         .tile-ready { border-color: #ff1744; background: #2a1215; }
+        .tile-check { border-color: #e040fb; background: #260a30; }
         .tile-wait { border-color: #ffab00; background: #2a2212; }
         .tile-pass { border-color: #29b6f6; background: #0d212d; }
 
         .rego-header-line { display: flex; align-items: baseline; gap: 12px; }
         .car-rego { font-size: 32px; font-weight: 900; letter-spacing: 1px; line-height: 1; }
         .tile-ready .car-rego { color: #ff1744; }
+        .tile-check .car-rego { color: #e040fb; }
         .tile-wait .car-rego { color: #ffab00; }
         .tile-pass .car-rego { color: #29b6f6; }
 
@@ -117,6 +119,7 @@
         }
         .badge:active { transform: scale(0.94); }
         .badge-ready { background: #ff1744; color: #fff; }
+        .badge-check { background: #e040fb; color: #fff; }
         .badge-wait { background: #ffab00; color: #000; }
         .badge-pass { background: #29b6f6; color: #000; }
 
@@ -128,6 +131,7 @@
         .hud-flash-pass { background: rgba(41, 182, 246, 0.98); }
         .hud-flash-nomark { background: rgba(0, 230, 118, 0.98); }
         .hud-flash-wait { background: rgba(255, 171, 0, 0.98); }
+        .hud-flash-check { background: rgba(224, 64, 251, 0.98); border: 4px solid #fff; }
         .hud-flash-fuzzy { background: rgba(255, 150, 0, 0.98); border: 4px solid #fff; }
         .hud-flash-noplate { background: rgba(20, 20, 20, 0.98); border: 4px solid #ff1744; }
 
@@ -324,7 +328,7 @@
             if (item.pass === "YES") {
                 status = "PASS";
             } else if (expMs > 0 && nowMs >= expMs) {
-                status = "READY";
+                status = item.pass === "CHECK" ? "CHECK" : "READY";
             }
 
             propertyGroups[prop].push({
@@ -353,8 +357,8 @@
 
     function renderSummaryView() {
         const sortedProps = Object.keys(propertyGroups).sort((a, b) => {
-            const redA = propertyGroups[a].filter(c => c.status === "READY").length;
-            const redB = propertyGroups[b].filter(c => c.status === "READY").length;
+            const redA = propertyGroups[a].filter(c => c.status === "READY" || c.status === "CHECK").length;
+            const redB = propertyGroups[b].filter(c => c.status === "READY" || c.status === "CHECK").length;
             if (redB !== redA) return redB - redA;
 
             const orangeA = propertyGroups[a].filter(c => c.status === "WAIT").length;
@@ -372,7 +376,7 @@
         container.innerHTML = "";
 
         sortedProps.forEach(prop => {
-            const redCount = propertyGroups[prop].filter(c => c.status === "READY").length;
+            const redCount = propertyGroups[prop].filter(c => c.status === "READY" || c.status === "CHECK").length;
             const orangeCount = propertyGroups[prop].filter(c => c.status === "WAIT").length;
             const blueCount = propertyGroups[prop].filter(c => c.status === "PASS").length;
 
@@ -420,9 +424,10 @@
         const getRank = (st) => {
             const s = String(st || '').toUpperCase();
             if (s === 'READY') return 1;
-            if (s === 'WAIT') return 2;
-            if (s === 'PASS') return 3;
-            return 4;
+            if (s === 'CHECK') return 2;
+            if (s === 'WAIT') return 3;
+            if (s === 'PASS') return 4;
+            return 5;
         };
 
         cars.sort((a, b) => {
@@ -456,7 +461,7 @@
                     <div class="car-time-exp">EXP: ${car.expiryTimeStr}</div>
                 </div>
                 <div class="tile-right-box">
-                    <button type="button" class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : car.status}</button>
+                    <button type="button" class="badge badge-${car.status.toLowerCase()}">${car.status === "READY" ? "TOW" : (car.status === "CHECK" ? "CHECK PASS" : car.status)}</button>
                 </div>
             `;
             
@@ -590,6 +595,11 @@
         if (exactMatch) {
             lastMatchedTowVehicle = exactMatch;
             if (exactMatch.status === "PASS") flashResultOverlay("pass", cleanRego, `PASS ON FILE (${exactMatch.property})`, false);
+            else if (exactMatch.status === "CHECK") {
+                playTowAlertSiren();
+                if (navigator.vibrate) try { navigator.vibrate([250, 100, 250, 100, 400]); } catch(e){}
+                flashResultOverlay("check", cleanRego, `CHECK PASS (${exactMatch.property})\nPOSSIBLE MATCH ON FILE`, false);
+            }
             else if (exactMatch.status === "READY") {
                 playTowAlertSiren();
                 if (navigator.vibrate) try { navigator.vibrate([250, 100, 250, 100, 400]); } catch(e){}
@@ -619,6 +629,10 @@
 
         if (type === 'tow') {
             iconEl.innerText = "🚨"; statusEl.innerText = "TOW";
+            towActionBtn.style.display = "block";
+            towActionBtn.innerText = "🚨 LOAD TOW APP";
+        } else if (type === 'check') {
+            iconEl.innerText = "⚠️"; statusEl.innerText = "CHECK PASS";
             towActionBtn.style.display = "block";
             towActionBtn.innerText = "🚨 LOAD TOW APP";
         } else if (type === 'fuzzy') {
