@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mark-app-v70001';
+const CACHE_NAME = 'mark-app-v70003';
 const ASSETS = [
   './',
   './Mark.html',
