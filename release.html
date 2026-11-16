@@ -328,8 +328,19 @@
     let idPhotos = [];
     let ownerSigConfirmed = false;
     let isSubmittingRelease = false;
+    const isOnsiteMode = (new URLSearchParams(window.location.search).get('mode') || '').trim().toLowerCase() === 'onsite';
 
     window.addEventListener('DOMContentLoaded', () => {
+        if (isOnsiteMode) {
+            const hdr = document.querySelector('.header-box h1');
+            if (hdr) {
+                hdr.innerText = 'ON-SITE REL';
+                hdr.style.color = '#ffab00';
+                hdr.style.fontSize = '32px';
+            }
+            if (releaseFeeInput) releaseFeeInput.value = '186.05';
+            if (storageFeeInput) storageFeeInput.value = '0.00';
+        }
         loadYardVehicles();
         initCamera();
         initSignatureCanvas('ownerSigCanvas');
@@ -666,6 +677,8 @@
 
         const payload = {
             action: 'process_release',
+            releaseType: isOnsiteMode ? 'ON-SITE RELEASE' : 'STANDARD RELEASE',
+            mode: isOnsiteMode ? 'onsite' : 'standard',
             rego: regoInput.value.trim().toUpperCase(),
             svnNumber: svnInput.value.trim(),
             make: makeInput.value.trim(),
