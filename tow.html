@@ -383,6 +383,75 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
+
+    const TowingDB = {
+        dbPromise: null,
+        open() {
+            if (this.dbPromise) return this.dbPromise;
+            this.dbPromise = new Promise((resolve, reject) => {
+                if (!window.indexedDB) return reject(new Error("No IndexedDB"));
+                const req = indexedDB.open('TowingOfflineDB', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('tow_queue')) {
+                        db.createObjectStore('tow_queue', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('mark_photos')) {
+                        db.createObjectStore('mark_photos', { keyPath: 'rego' });
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e.target.error);
+            });
+            return this.dbPromise;
+        },
+        async put(storeName, value) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readwrite');
+                    tx.objectStore(storeName).put(value);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch(e) { return false; }
+        },
+        async get(storeName, key) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readonly');
+                    const req = tx.objectStore(storeName).get(key);
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch(e) { return null; }
+        },
+        async getAll(storeName) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readonly');
+                    const req = tx.objectStore(storeName).getAll();
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch(e) { return []; }
+        },
+        async delete(storeName, key) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readwrite');
+                    tx.objectStore(storeName).delete(key);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch(e) { return false; }
+        }
+    };
+
 
     const propertySelect = document.getElementById('propertySelect');
     const regoInput = document.getElementById('regoInput');
@@ -636,10 +705,15 @@
         const cached = localStorage.getItem('cached_properties');
         if (cached) { try { populatePropertiesUI(JSON.parse(cached)); } catch(e) {} }
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties");
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_properties", { signal: controller.signal });
+            clearTimeout(timeoutId);
             const data = await res.json();
-            localStorage.setItem('cached_properties', JSON.stringify(data));
-            populatePropertiesUI(data);
+            if (Array.isArray(data) && data.length > 0) {
+                localStorage.setItem('cached_properties', JSON.stringify(data));
+                populatePropertiesUI(data);
+            }
         } catch(e) {}
     }
 
@@ -736,16 +810,52 @@
     // ============================================================
     // 1. GHOST ALIGNMENT & NATIVE COMPARISON
     // ============================================================
-    function openComparisonWorkflow() {
+    async function resolveLocalMarkPhoto(rego) {
+        if (cachedMarkImageUrl && cachedMarkImageUrl.startsWith('data:image')) {
+            return cachedMarkImageUrl;
+        }
+        const cleanR = String(rego || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const cleanInit = String(initialLoadedRego || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (cleanR) {
+            const cachedRec = await TowingDB.get('mark_photos', cleanR);
+            if (cachedRec && cachedRec.dataUrl) {
+                cachedMarkImageUrl = cachedRec.dataUrl;
+                return cachedRec.dataUrl;
+            }
+        }
+        if (cleanInit && cleanInit !== cleanR) {
+            const cachedInit = await TowingDB.get('mark_photos', cleanInit);
+            if (cachedInit && cachedInit.dataUrl) {
+                cachedMarkImageUrl = cachedInit.dataUrl;
+                return cachedInit.dataUrl;
+            }
+        }
+        try {
+            const markQueue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+            const foundOff = markQueue.find(m => {
+                const mr = String(m.rego || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                return mr && (mr === cleanR || (cleanInit && mr === cleanInit));
+            });
+            if (foundOff && foundOff.photoBytes) {
+                cachedMarkImageUrl = foundOff.photoBytes;
+                return foundOff.photoBytes;
+            }
+        } catch(e) {}
+        return cachedMarkImageUrl || "";
+    }
+
+    async function openComparisonWorkflow() {
         const rego = regoInput.value.trim().toUpperCase() || "VEHICLE";
         document.getElementById('modalRegoTitle').innerText = `${rego} - ALIGN & VERIFY`;
 
-        if (cachedMarkImageUrl) {
-            if (cachedMarkImageUrl.startsWith('data:image')) {
-                ghostImage.src = cachedMarkImageUrl;
+        const resolvedSrc = await resolveLocalMarkPhoto(rego);
+
+        if (resolvedSrc) {
+            if (resolvedSrc.startsWith('data:image')) {
+                ghostImage.src = resolvedSrc;
             } else {
-                const driveIdMatch = cachedMarkImageUrl.match(/[-\w]{25,}/);
-                ghostImage.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : cachedMarkImageUrl;
+                const driveIdMatch = resolvedSrc.match(/[-\w]{25,}/);
+                ghostImage.src = driveIdMatch ? "https://lh3.googleusercontent.com/d/" + driveIdMatch[0] : resolvedSrc;
             }
             ghostImage.style.display = "block";
         } else {
@@ -886,7 +996,16 @@
         ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
     }
 
-    function stitchSideBySide(markSrc, towSrc, mkdTime, callback) {
+    async function stitchSideBySide(markSrc, towSrc, mkdTime, callback) {
+        const curRego = regoInput.value.trim().toUpperCase();
+        const localSrc = await resolveLocalMarkPhoto(curRego);
+        if (localSrc && localSrc.startsWith('data:image')) {
+            markSrc = localSrc;
+        } else if (markSrc && !markSrc.startsWith('data:image')) {
+            const driveIdMatch = markSrc.match(/[-\w]{25,}/);
+            if (driveIdMatch) markSrc = "https://lh3.googleusercontent.com/d/" + driveIdMatch[0];
+        }
+
         const nowD = new Date();
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const dayName = days[nowD.getDay()];
@@ -899,7 +1018,9 @@
         towImg.onload = function() {
             if (markSrc) {
                 const markImg = new Image();
-                markImg.crossOrigin = "anonymous";
+                if (!markSrc.startsWith('data:')) {
+                    markImg.crossOrigin = "anonymous";
+                }
                 markImg.onload = function() {
                     const canvas = document.createElement('canvas');
                     canvas.width = 1200; canvas.height = 800;
@@ -1156,6 +1277,11 @@
             wrap.appendChild(del);
             thumbGallery.appendChild(wrap);
         });
+        if (condSnapBtn) {
+            condSnapBtn.innerHTML = conditionPhotos.length > 0
+                ? `📷 SNAP COND PHOTOS (${conditionPhotos.length})`
+                : `📷 SNAP COND PHOTOS`;
+        }
         validateForm();
     }
 
@@ -1327,9 +1453,10 @@
             if (initialLoadedRego) localStorage.removeItem('pending_comp_' + initialLoadedRego);
         } catch(err) {}
 
-        // 1. Save & sync tow record immediately
-        saveToOfflineQueue(payload);
-        syncPendingTowsInBackground();
+        // 1. Save full payload (with ALL condition photos) to IndexedDB & sync immediately
+        saveToOfflineQueue(payload).then(() => {
+            syncPendingTowsInBackground();
+        });
 
         // 2. Fire Policelink Bot non-blocking in background
         queuePolicelinkBot(plPayload);
@@ -1340,34 +1467,24 @@
         successOverlay.style.display = "flex";
     });
     
-    function saveToOfflineQueue(payload) {
-        try {
-            const safePayload = JSON.parse(JSON.stringify(payload));
-            if (safePayload.photos) delete safePayload.photos;
-
-            let queue = [];
-            try { queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]"); } catch(e){}
-            
-            if (!queue.some(item => item.id === safePayload.id)) {
-                queue.push(safePayload);
-                localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
-            }
-        } catch(e) {
-            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                localStorage.removeItem('cached_run_data');
-                localStorage.removeItem('cached_properties');
-                try {
-                    let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-                    const safePayload = JSON.parse(JSON.stringify(payload));
-                    if (safePayload.photos) delete safePayload.photos;
-                    queue.push(safePayload);
+    async function saveToOfflineQueue(payload) {
+        // Store full payload (ALL condition photos + comparison photo) in IndexedDB
+        const savedInDb = await TowingDB.put('tow_queue', payload);
+        if (!savedInDb) {
+            // Fallback to localStorage only if IndexedDB is blocked
+            try {
+                let queue = [];
+                try { queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]"); } catch(e){}
+                if (!queue.some(item => item.id === payload.id)) {
+                    queue.push(payload);
                     localStorage.setItem('tow_offline_queue', JSON.stringify(queue));
-                } catch(retryErr) {}
-            }
+                }
+            } catch(e) {}
         }
     }
 
-    function removeFromOfflineQueue(id) {
+    async function removeFromOfflineQueue(id) {
+        await TowingDB.delete('tow_queue', id);
         try {
             let queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
             queue = queue.filter(item => item.id !== id);
@@ -1377,11 +1494,14 @@
 
     let isSyncingQueue = false;
     async function syncPendingTowsInBackground() {
-        if (isSyncingQueue || !navigator.onLine) return;
-        let queue = [];
+        if (isSyncingQueue) return;
+        let queue = await TowingDB.getAll('tow_queue');
         try {
-            queue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
-        } catch(e) { return; }
+            const lsQueue = JSON.parse(localStorage.getItem('tow_offline_queue') || "[]");
+            lsQueue.forEach(lsItem => {
+                if (!queue.some(q => q.id === lsItem.id)) queue.push(lsItem);
+            });
+        } catch(e) {}
         
         if (queue.length === 0) return;
 
@@ -1391,11 +1511,10 @@
 
         for (let i = 0; i < queue.length; i++) {
             const item = queue[i];
-            if (item.photos) delete item.photos;
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 20000);
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
 
                 const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -1407,7 +1526,7 @@
 
                 const resJson = await res.json();
                 if (resJson && resJson.status === "SUCCESS") {
-                    removeFromOfflineQueue(item.id);
+                    await removeFromOfflineQueue(item.id);
                     statusDiv.style.color = "#00e676";
                     statusDiv.innerText = "✔ BASEMENT TOW SYNCED TO MASTER LOG";
                     await new Promise(r => setTimeout(r, 2000));

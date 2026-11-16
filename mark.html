@@ -284,6 +284,53 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
+
+    const TowingDB = {
+        dbPromise: null,
+        open() {
+            if (this.dbPromise) return this.dbPromise;
+            this.dbPromise = new Promise((resolve, reject) => {
+                if (!window.indexedDB) return reject(new Error("No IndexedDB"));
+                const req = indexedDB.open('TowingOfflineDB', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('tow_queue')) {
+                        db.createObjectStore('tow_queue', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('mark_photos')) {
+                        db.createObjectStore('mark_photos', { keyPath: 'rego' });
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e.target.error);
+            });
+            return this.dbPromise;
+        },
+        async put(storeName, value) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readwrite');
+                    tx.objectStore(storeName).put(value);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch(e) { return false; }
+        },
+        async get(storeName, key) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readonly');
+                    const req = tx.objectStore(storeName).get(key);
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch(e) { return null; }
+        }
+    };
+
 
     const propertySelect = document.getElementById('propertySelect');
     const nativeCamInput = document.getElementById('nativeCamInput');
@@ -490,19 +537,19 @@
             clearTimeout(timeoutId);
             const data = await res.json();
             const detectedRego = data && data.rego ? String(data.rego).trim().toUpperCase() : "";
-            const detectedState = data && data.state ? String(data.state).trim().toUpperCase() : "QLD";
 
             if (detectedRego) {
+                TowingDB.put('mark_photos', { rego: detectedRego.replace(/[^A-Z0-9]/g, ''), dataUrl: stampedB64, ts: Date.now() });
                 triggerGreenOverlay(detectedRego);
                 statusDiv.style.color = "#00e676";
                 statusDiv.innerText = `✔ MARKED ${detectedRego}`;
-                sendMarkToServer(detectedRego, property, stampedB64, snapTime, detectedState);
+                sendMarkToServer(detectedRego, property, stampedB64, snapTime);
                 scheduleMarkReset(false);
             } else {
                 // ANPR unreadable: Flash Red Cross alert, still preserve photo + timestamp as NO REG HH:MM
                 triggerRedOverlay("NO PLATE DETECTED", 1400);
                 statusDiv.innerHTML = `<span style="color:#ff1744;">⚠️ NO PLATE READ — SAVED AS NO REG</span> <button type="button" onclick="switchTab('log')" style="background:#ff1744;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-weight:900;font-size:11px;margin-left:6px;cursor:pointer;">EDIT IN LOG</button>`;
-                sendMarkToServer("AUTO", property, stampedB64, snapTime, "QLD");
+                sendMarkToServer("AUTO", property, stampedB64, snapTime);
                 scheduleMarkReset(true);
             }
         } catch(err) {
@@ -522,13 +569,12 @@
         }
     }
 
-    function sendMarkToServer(rego, property, photoBytes, timestamp, state) {
+    function sendMarkToServer(rego, property, photoBytes, timestamp) {
         localStorage.setItem('last_property', property);
         const payload = {
             action: 'log_mark',
             property: property,
             rego: rego || "AUTO",
-            state: state || "QLD",
             photoBytes: photoBytes,
             timestamp: timestamp || new Date().toISOString()
         };
@@ -551,7 +597,7 @@
 
     let isSyncingMarks = false;
     async function syncPendingMarksInBackground() {
-        if (isSyncingMarks) return; // Ignore navigator.onLine (iOS Safari lies about it)
+        if (isSyncingMarks || !navigator.onLine) return;
         let queue = [];
         try {
             queue = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
@@ -565,9 +611,6 @@
             const item = queue[i];
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout prevents silent hangs
-                
                 // Single resilient call: Server executes ANPR + Gemini AI directly on Google cloud fiber
                 const logRes = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -576,13 +619,10 @@
                         action: 'log_mark',
                         property: item.property,
                         rego: item.rego || "AUTO",
-                        state: item.state || "QLD",
                         photoBytes: item.photoBytes,
                         timestamp: item.snapTime
-                    }),
-                    signal: controller.signal
+                    })
                 });
-                clearTimeout(timeoutId);
                 const logData = await logRes.json();
                 if (logData && logData.status === "SUCCESS") {
                     let curQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
@@ -647,15 +687,53 @@
         }
     }
 
+    function mergeOfflineMarksIntoLog(serverItems) {
+        const merged = Array.isArray(serverItems) ? serverItems.slice() : [];
+        try {
+            const offQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+            offQ.slice().reverse().forEach((item, idx) => {
+                merged.unshift({
+                    rowIdx: -1 - idx,
+                    property: item.property || 'GENERAL',
+                    rego: item.rego || 'PENDING SYNC',
+                    markedTime: formatTimeFriendly(item.snapTime || ''),
+                    pass: 'NO',
+                    imageUrl: item.photoBytes || ''
+                });
+            });
+        } catch(e) {}
+        return merged;
+    }
+
     async function loadMarkingLog() {
         const list = document.getElementById('logList');
+        const cached = localStorage.getItem('cached_marking_log');
+        if (cached) {
+            try {
+                logCache = mergeOfflineMarksIntoLog(JSON.parse(cached));
+                document.getElementById('lblMarkCount').innerText = logCache.length;
+                renderLogList(logCache);
+            } catch(e) {}
+        }
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_marking_log");
-            logCache = await res.json();
-            document.getElementById('lblMarkCount').innerText = logCache.length;
-            renderLogList(logCache);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_marking_log", { signal: controller.signal });
+            clearTimeout(timeoutId);
+            const fresh = await res.json();
+            if (Array.isArray(fresh)) {
+                localStorage.setItem('cached_marking_log', JSON.stringify(fresh));
+                logCache = mergeOfflineMarksIntoLog(fresh);
+                document.getElementById('lblMarkCount').innerText = logCache.length;
+                renderLogList(logCache);
+            }
         } catch(e) {
-            list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading marking log.</div>`;
+            if (!cached) {
+                logCache = mergeOfflineMarksIntoLog([]);
+                document.getElementById('lblMarkCount').innerText = logCache.length;
+                if (logCache.length > 0) renderLogList(logCache);
+                else list.innerHTML = `<div class="loading-box" style="color:#ffab00;">OFFLINE — NO CACHED LOG</div>`;
+            }
         }
     }
 
@@ -689,8 +767,9 @@
                 if (v.pass === 'YES') { passClass = 'pass-blue'; passTxt = 'PASS'; }
                 else if (v.pass === 'CHECK') { passClass = 'pass-check'; passTxt = 'CHECK PASS'; }
                 
-                const driveId = v.imageUrl ? (v.imageUrl.match(/[-\w]{25,}/) || [''])[0] : '';
-                const fullImg = driveId ? `https://lh3.googleusercontent.com/d/${driveId}` : (v.imageUrl || '');
+                const isDataUrl = v.imageUrl && String(v.imageUrl).startsWith('data:image');
+                const driveId = (!isDataUrl && v.imageUrl) ? (v.imageUrl.match(/[-\w]{25,}/) || [''])[0] : '';
+                const fullImg = isDataUrl ? v.imageUrl : (driveId ? `https://lh3.googleusercontent.com/d/${driveId}` : (v.imageUrl || ''));
                 const thumb = fullImg 
                     ? `<img src="${fullImg}" class="vc-thumb" loading="lazy" onclick="event.stopPropagation(); openPhotoPreview('${v.rego}', '${v.property}', '${fullImg}')">` 
                     : `<div class="vc-thumb" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;">NO IMG</div>`;

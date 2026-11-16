@@ -189,6 +189,7 @@
 </button>
 <input type="file" id="runNativeCam" capture="environment" accept="image/*" style="display:none;" onchange="handleRunNativeScan(this)">
 
+<div id="offlineRunBanner" style="display:none; width:100%; max-width:440px; background:#2a2212; border:1px solid #ffab00; color:#ffab00; font-size:11px; font-weight:900; text-align:center; padding:6px; border-radius:8px; margin-bottom:10px; letter-spacing:0.5px;">⚡ OFFLINE CACHE ACTIVE</div>
 <div class="container" id="runContainer">
     <div class="empty-msg">LOADING RUN...</div>
 </div>
@@ -225,6 +226,53 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoWD84FAwprSdWAZlm4YeyjU9ps3kTW_XXN_QMkTJxvm-LMrnFIZ2RzDLDShbV5ATK8g/exec";
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
+
+    const TowingDB = {
+        dbPromise: null,
+        open() {
+            if (this.dbPromise) return this.dbPromise;
+            this.dbPromise = new Promise((resolve, reject) => {
+                if (!window.indexedDB) return reject(new Error("No IndexedDB"));
+                const req = indexedDB.open('TowingOfflineDB', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('tow_queue')) {
+                        db.createObjectStore('tow_queue', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('mark_photos')) {
+                        db.createObjectStore('mark_photos', { keyPath: 'rego' });
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e.target.error);
+            });
+            return this.dbPromise;
+        },
+        async put(storeName, value) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readwrite');
+                    tx.objectStore(storeName).put(value);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch(e) { return false; }
+        },
+        async get(storeName, key) {
+            try {
+                const db = await this.open();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(storeName, 'readonly');
+                    const req = tx.objectStore(storeName).get(key);
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch(e) { return null; }
+        }
+    };
+
 
     let rawData = [];
     let propertyGroups = {};
@@ -270,23 +318,120 @@
         loadTowRun();
     });
 
-    async function loadTowRun() {
+    function getActiveTowedBlacklist() {
         try {
-            // Anti-cache query parameter ensures instant retrieval of the 11 marked vehicles
-            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_run&_t=" + Date.now());
-            rawData = await res.json();
-            localStorage.setItem('cached_run_data', JSON.stringify(rawData));
-            parseAndRenderRun(rawData);
-        } catch(e) {
-            const cached = localStorage.getItem('cached_run_data');
-            if (cached) {
+            const bl = JSON.parse(localStorage.getItem('towed_blacklist') || "{}");
+            const now = Date.now();
+            let changed = false;
+            for (const k in bl) {
+                if (now - bl[k] > 24 * 60 * 60 * 1000) {
+                    delete bl[k];
+                    changed = true;
+                }
+            }
+            if (changed) localStorage.setItem('towed_blacklist', JSON.stringify(bl));
+            return bl;
+        } catch(e) { return {}; }
+    }
+
+    function mergeOfflineMarksIntoRun(baseList) {
+        const list = Array.isArray(baseList) ? baseList.slice() : [];
+        const seen = new Set(list.map(c => String(c.rego || '').trim().toUpperCase()));
+        try {
+            const offQ = JSON.parse(localStorage.getItem('mark_offline_queue') || "[]");
+            offQ.forEach(m => {
+                const r = String(m.rego || '').trim().toUpperCase();
+                if (r && !seen.has(r)) {
+                    seen.add(r);
+                    list.unshift({
+                        property: m.property || "GENERAL",
+                        rego: r,
+                        markedTime: m.snapTime || "",
+                        expiryTime: "",
+                        pass: "NO",
+                        imageUrl: m.photoBytes || ""
+                    });
+                }
+            });
+        } catch(e) {}
+        return list;
+    }
+
+    async function precacheRunMarkPhotos(items) {
+        if (!Array.isArray(items)) return;
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const cleanR = String(item.rego || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const rawUrl = item.imageUrl || item.image || "";
+            if (!cleanR || !rawUrl) continue;
+            if (rawUrl.startsWith('data:image')) {
+                await TowingDB.put('mark_photos', { rego: cleanR, dataUrl: rawUrl, ts: Date.now() });
+                continue;
+            }
+            const existing = await TowingDB.get('mark_photos', cleanR);
+            if (existing && existing.dataUrl && (Date.now() - (existing.ts || 0)) < 24 * 60 * 60 * 1000) continue;
+
+            const driveIdMatch = rawUrl.match(/[-\w]{25,}/);
+            const fetchUrl = driveIdMatch ? ("https://lh3.googleusercontent.com/d/" + driveIdMatch[0]) : rawUrl;
+            try {
+                const resp = await fetch(fetchUrl);
+                if (!resp.ok) continue;
+                const blob = await resp.blob();
+                const dataUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result || "");
+                    reader.onerror = () => resolve("");
+                    reader.readAsDataURL(blob);
+                });
+                if (dataUrl && String(dataUrl).startsWith('data:image')) {
+                    await TowingDB.put('mark_photos', { rego: cleanR, dataUrl: dataUrl, ts: Date.now() });
+                }
+            } catch(e) {}
+        }
+    }
+
+    async function loadTowRun() {
+        const banner = document.getElementById('offlineRunBanner');
+        // 1. Instant Cache-First Render (0ms underground in basements)
+        const cached = localStorage.getItem('cached_run_data');
+        if (cached) {
+            try {
                 rawData = JSON.parse(cached);
                 parseAndRenderRun(rawData);
+            } catch(e) {}
+        }
+
+        // 2. Fetch fresh run data with 8s timeout so weak signal never hangs
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_run&_t=" + Date.now(), { signal: controller.signal });
+            clearTimeout(timeoutId);
+            const freshData = await res.json();
+            if (Array.isArray(freshData)) {
+                rawData = freshData;
+                localStorage.setItem('cached_run_data', JSON.stringify(rawData));
+                if (banner) banner.style.display = 'none';
+                parseAndRenderRun(rawData);
+                precacheRunMarkPhotos(rawData);
+            }
+        } catch(e) {
+            if (banner) banner.style.display = 'block';
+            if (!cached) {
+                const mergedOnly = mergeOfflineMarksIntoRun([]);
+                if (mergedOnly.length > 0) parseAndRenderRun(mergedOnly);
+                else document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>OFFLINE — NO CACHED RUN</div>";
             }
         }
     }
 
     function parseAndRenderRun(data) {
+        const blacklist = getActiveTowedBlacklist();
+        data = mergeOfflineMarksIntoRun(data).filter(item => {
+            const r = String(item.rego || '').trim().toUpperCase();
+            return !!r && !blacklist[r];
+        });
+
         if (!data || !Array.isArray(data) || data.length === 0) {
             document.getElementById('runContainer').innerHTML = "<div class='empty-msg'>NO CARS ON RUN</div>";
             return;
@@ -295,11 +440,6 @@
         const now = new Date();
         const nowMs = now.getTime();
         const currentYear = now.getFullYear();
-
-        data = data.filter(item => {
-            const r = String(item.rego || '').trim().toUpperCase();
-            return !!r;
-        });
 
         propertyGroups = {};
         data.forEach(item => {
