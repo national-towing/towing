@@ -51,15 +51,28 @@
         .t-yard  { background: var(--c-yard); color: #000; }
         .t-rel   { background: var(--c-rel); color: #000; }
 
-        /* Sub-Nav Switcher */
-        .sub-nav-bar { display: flex; width: 100%; max-width: 440px; background: #1e1e1e; border-radius: 10px; border: 1px solid #333; margin-bottom: 12px; overflow: hidden; flex-shrink: 0; }
-        .sub-tab { flex: 1; height: 40px; border: none; background: transparent; color: #888; font-size: 13px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
-        .sub-tab.active { background: var(--c-admin); color: #fff; }
+        /* Sub-Nav Switcher (Mirrors 3-column grid layout above) */
+        .sub-nav-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 440px; margin: 0 auto 12px auto; flex-shrink: 0; }
+        .sub-tab { height: 40px; border: 1px solid #333; border-radius: 8px; background: #1e1e1e; color: #888; font-size: 13px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .sub-tab:active { transform: scale(0.96); }
+        .sub-tab.active { background: var(--c-admin); color: #fff; border-color: #fff; box-shadow: 0 0 0 1px #fff; }
 
         /* Search & Actions */
         .search-bar-wrap { width: 100%; max-width: 440px; margin: 0 auto 10px auto; display: flex; gap: 8px; flex-shrink: 0; }
         .search-input { flex: 1; height: 44px; background: #1e1e1e; border: 1px solid #333; border-radius: 10px; padding: 0 12px; color: #fff; font-size: 14px; font-weight: 700; outline: none; }
+        .search-input::placeholder { color: #888888; opacity: 1; }
         .search-input:focus { border-color: var(--c-admin); }
+
+        /* Archive Cards */
+        .arch-card { background: #1e1e1e; border: 1px solid #333; border-left: 5px solid #00b0ff; border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; text-decoration: none; color: #fff; cursor: pointer; }
+        .arch-card:active { transform: scale(0.98); background: #262626; }
+        .arch-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+        .arch-top { display: flex; align-items: baseline; gap: 8px; }
+        .arch-rego { font-family: monospace; font-size: 22px; font-weight: 900; color: #fff; }
+        .arch-prop { font-size: 12px; font-weight: 900; color: #ffab00; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .arch-meta { font-size: 11px; color: #aaa; font-weight: 700; }
+        .arch-folder-pill { background: #00b0ff; color: #000; font-size: 11px; font-weight: 900; padding: 8px 12px; border-radius: 8px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+        .arch-folder-pill.no-folder { background: #333; color: #777; }
         .btn-action-primary { height: 44px; padding: 0 16px; background: #00e676; color: #000; border: none; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; text-transform: uppercase; white-space: nowrap; }
         
         .list-container { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-bottom: 20px; }
@@ -164,8 +177,9 @@
 </div>
 
 <div class="sub-nav-bar">
-    <button class="sub-tab active" id="tabBtnPasses" onclick="switchAdminTab('passes')">🎫 PASSES (<span id="lblPassCount">0</span>)</button>
-    <button class="sub-tab" id="tabBtnProps" onclick="switchAdminTab('props')">🏢 PROPERTIES (<span id="lblPropCount">0</span>)</button>
+    <button class="sub-tab active" id="tabBtnPasses" onclick="switchAdminTab('passes')">🎫 PASS (<span id="lblPassCount">0</span>)</button>
+    <button class="sub-tab" id="tabBtnProps" onclick="switchAdminTab('props')">🏢 PROP (<span id="lblPropCount">0</span>)</button>
+    <button class="sub-tab" id="tabBtnArch" onclick="switchAdminTab('arch')">📁 ARCH (<span id="lblArchCount">0</span>)</button>
 </div>
 
 <!-- ==================== VIEW 1: PASSES ==================== -->
@@ -187,6 +201,16 @@
     </div>
     <div class="list-container" id="propList">
         <div class="loading-box">Loading properties...</div>
+    </div>
+</div>
+
+<!-- ==================== VIEW 3: ARCHIVE ==================== -->
+<div id="viewArch" class="wrapper" style="display:none;">
+    <div class="search-bar-wrap">
+        <input type="text" id="archSearch" class="search-input" placeholder="Search REGO" oninput="filterArchiveList()" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="list-container" id="archList">
+        <div class="loading-box">Loading release archive...</div>
     </div>
 </div>
 
@@ -252,17 +276,27 @@
     let activeTab = "passes";
     let passesCache = [];
     let propertiesCache = [];
+    let archiveCache = [];
     let propHeaders = [];
     let currentPropRowIdx = null;
     let activePropFilter = null;
 
     window.addEventListener('load', () => {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('tab') === 'props' || params.get('tab') === 'properties') {
+        const t = (params.get('tab') || '').toLowerCase();
+        if (t === 'props' || t === 'properties') {
             switchAdminTab('props');
+        } else if (t === 'arch' || t === 'archive') {
+            switchAdminTab('arch');
         } else {
             loadPasses();
             loadPropertiesDropdown();
+            try {
+                const cachedArch = JSON.parse(localStorage.getItem('cached_release_archive') || '[]');
+                if (Array.isArray(cachedArch) && cachedArch.length > 0) {
+                    document.getElementById('lblArchCount').innerText = cachedArch.length;
+                }
+            } catch(e) {}
         }
     });
 
@@ -270,19 +304,28 @@
         activeTab = tab;
         document.getElementById('tabBtnPasses').classList.toggle('active', tab === 'passes');
         document.getElementById('tabBtnProps').classList.toggle('active', tab === 'props');
+        document.getElementById('tabBtnArch').classList.toggle('active', tab === 'arch');
         document.getElementById('viewPasses').style.display = tab === 'passes' ? 'flex' : 'none';
         document.getElementById('viewProps').style.display = tab === 'props' ? 'flex' : 'none';
+        document.getElementById('viewArch').style.display = tab === 'arch' ? 'flex' : 'none';
 
         if (tab === 'passes') {
             loadPasses();
-        } else {
+        } else if (tab === 'props') {
             loadPropertiesData();
+        } else if (tab === 'arch') {
+            loadReleaseArchive();
+            setTimeout(() => {
+                const inp = document.getElementById('archSearch');
+                if (inp) inp.focus();
+            }, 100);
         }
     }
 
     function refreshActiveTab() {
         if (activeTab === 'passes') loadPasses();
-        else loadPropertiesData();
+        else if (activeTab === 'props') loadPropertiesData();
+        else if (activeTab === 'arch') loadReleaseArchive();
     }
 
     function closeModal(id) {
@@ -684,6 +727,88 @@
             btn.innerText = "SAVE PROPERTY ✔";
             btn.disabled = false;
         }
+    }
+
+    /* ==================== RELEASE ARCHIVE CONTROLLER ==================== */
+    async function loadReleaseArchive() {
+        const list = document.getElementById('archList');
+        const cached = localStorage.getItem('cached_release_archive');
+        if (cached && archiveCache.length === 0) {
+            try {
+                archiveCache = JSON.parse(cached);
+                document.getElementById('lblArchCount').innerText = archiveCache.length;
+                filterArchiveList();
+            } catch(e) {}
+        }
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + "?action=get_release_archive&_t=" + Date.now());
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                archiveCache = data;
+                localStorage.setItem('cached_release_archive', JSON.stringify(data));
+                document.getElementById('lblArchCount').innerText = archiveCache.length;
+                filterArchiveList();
+            }
+        } catch(e) {
+            if (archiveCache.length === 0) {
+                list.innerHTML = `<div class="loading-box" style="color:#ff1744;">Error loading release archive.</div>`;
+            }
+        }
+    }
+
+    function filterArchiveList() {
+        const q = (document.getElementById('archSearch').value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!q) {
+            renderArchiveList(archiveCache);
+            return;
+        }
+        const filtered = archiveCache.filter(item => {
+            const r = String(item.rego || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            return r.includes(q);
+        });
+        renderArchiveList(filtered);
+    }
+
+    function renderArchiveList(items) {
+        const list = document.getElementById('archList');
+        if (!items || items.length === 0) {
+            list.innerHTML = `<div class="loading-box">NO ARCHIVED VEHICLES FOUND</div>`;
+            return;
+        }
+
+        list.innerHTML = items.map(item => {
+            const mm = [item.make, item.model].filter(Boolean).join(' ');
+            const desc = mm ? (item.colour ? `${mm} (${item.colour})` : mm) : (item.colour || '');
+            const subLine = [desc, item.releasedTime ? `REL: ${item.releasedTime}` : ''].filter(Boolean).join(' • ');
+
+            if (item.folderUrl) {
+                return `
+                    <a href="${item.folderUrl}" target="_blank" rel="noopener noreferrer" class="arch-card">
+                        <div class="arch-info">
+                            <div class="arch-top">
+                                <span class="arch-rego">${item.rego}</span>
+                                <span class="arch-prop">${item.property || 'GENERAL'}</span>
+                            </div>
+                            ${subLine ? `<div class="arch-meta">${subLine}</div>` : ''}
+                        </div>
+                        <span class="arch-folder-pill">📁 FOLDER ➔</span>
+                    </a>
+                `;
+            } else {
+                return `
+                    <div class="arch-card" style="opacity:0.6; cursor:default;">
+                        <div class="arch-info">
+                            <div class="arch-top">
+                                <span class="arch-rego">${item.rego}</span>
+                                <span class="arch-prop">${item.property || 'GENERAL'}</span>
+                            </div>
+                            ${subLine ? `<div class="arch-meta">${subLine}</div>` : ''}
+                        </div>
+                        <span class="arch-folder-pill no-folder">NO FOLDER</span>
+                    </div>
+                `;
+            }
+        }).join('');
     }
 </script>
 </body>
