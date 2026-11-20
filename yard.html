@@ -466,16 +466,22 @@
         const hasFolder = Boolean(v.folderUrl);
         const isPlManual = v.policelinkRef === 'FAILED_MANUAL';
         const isPlDone = Boolean(v.policelinkRef) && v.policelinkRef !== 'FAILED_1' && !isPlManual;
-        const isPlWorking = !isPlDone && !isPlManual && Boolean(activePlJob);
+        const isPlWorking = !isPlDone && !isPlManual && Boolean(activePlJob) && (activePlJob.inFlightAt > 0);
+        const isPlQueued = !isPlDone && !isPlManual && Boolean(activePlJob) && (!activePlJob.inFlightAt || activePlJob.inFlightAt === 0);
+        
         const plLabel = isPlManual
           ? `✖ Submit PL Manually`
-          : (isPlDone ? `✔ PL: ${v.policelinkRef}` : (isPlWorking ? `⏳ BOT WORKING (15s)...` : `🚔 POLICELINK`));
+          : (isPlDone ? `✔ PL: ${v.policelinkRef}` : (isPlWorking ? `⏳ BOT WORKING (15s)...` : (isPlQueued ? `⏳ PL: QUEUED — TAP TO SYNC` : `🚔 POLICELINK`)));
         const plClass = isPlManual
           ? `btn-pl pl-manual`
           : (isPlDone ? `btn-pl pl-done` : `btn-pl`);
-        const plInlineStyle = isPlWorking
-          ? `style="${!hasFolder ? 'grid-column: span 2;' : ''} background:#ffab00; color:#000; pointer-events:none;"`
-          : (!hasFolder ? `style="grid-column: span 2;"` : ``);
+        
+        let plInlineStyle = (!hasFolder ? `style="grid-column: span 2;"` : ``);
+        if (isPlWorking) {
+            plInlineStyle = `style="${!hasFolder ? 'grid-column: span 2;' : ''} background:#ffab00; color:#000; pointer-events:none;"`;
+        } else if (isPlQueued) {
+            plInlineStyle = `style="${!hasFolder ? 'grid-column: span 2;' : ''} background:#2a2212; border: 2px solid #ffab00; color:#ffab00;"`;
+        }
 
         card.innerHTML = `
           <div class="card-row-top" onclick="openEditModalByIndex(${idx})">
@@ -536,6 +542,14 @@
     isResumingPl = true;
     for (let i = 0; i < plQueue.length; i++) {
       const job = plQueue[i];
+      
+      // Auto-refresh the UI to show active syncing state
+      const targetCard = yardInventory.find(v => String(v.rego).trim().toUpperCase() === String(job.rego).trim().toUpperCase());
+      if (targetCard && (!job.inFlightAt || job.inFlightAt === 0)) {
+          job.inFlightAt = Date.now();
+          localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+          renderCards(displayedInventory);
+      }
       // If tow.html already fired it within last 30s, just refresh yard inventory to pick up saved ref
       if (job.inFlightAt && (Date.now() - job.inFlightAt) < 30000) {
         const match = yardInventory.find(v => String(v.rego).trim().toUpperCase() === String(job.rego).trim().toUpperCase());
@@ -573,13 +587,20 @@
           throw new Error((result && result.error) || "Bot failed");
         }
       } catch(e) {
-        plQueue = plQueue.filter(q => q.id !== job.id);
-        localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
-        fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: "save_yard_details", rego: job.rego, policelinkRef: "FAILED_1" })
-        }).catch(() => {});
+        if (!navigator.onLine || (e.message && e.message.includes("fetch"))) {
+            // Keep in queue safely for later
+            job.inFlightAt = 0;
+            localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+        } else {
+            // Hard reject
+            plQueue = plQueue.filter(q => q.id !== job.id);
+            localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+            fetch(GOOGLE_SCRIPT_URL, {
+              method: "POST",
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: "save_yard_details", rego: job.rego, policelinkRef: "FAILED_1" })
+            }).catch(() => {});
+        }
         fetchYardInventory();
       }
     }
@@ -640,6 +661,15 @@
     };
 
     try {
+      // First, add it to the pending queue safely in case the network drops mid-request
+      let plQueue = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]");
+      if (!plQueue.some(item => item.rego === payload.rego)) {
+          payload.id = 'PL_MANUAL_' + Date.now() + '_' + payload.rego;
+          payload.inFlightAt = Date.now();
+          plQueue.push(payload);
+          localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
+      }
+
       const res = await fetch("https://ashmorehomeserver.tail394009.ts.net/api/lodge-tow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -651,6 +681,12 @@
       if (result.success) {
         const refVal = result.ref || "SUBMITTED";
         vehicle.policelinkRef = refVal;
+        
+        // Remove from queue
+        let curQ = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]");
+        curQ = curQ.filter(q => q.rego !== payload.rego);
+        localStorage.setItem('pl_bot_queue', JSON.stringify(curQ));
+
         if (btnElement) {
           btnElement.className = "btn-action btn-pl pl-done";
           btnElement.innerHTML = "✔ PL: " + refVal;
@@ -668,12 +704,31 @@
         throw new Error(result.error || "Bot submission failed");
       }
     } catch (err) {
-      // Retry failed -> lock to Red Manual state
+      // If purely offline or network stalled, gracefully revert to queued state
+      if (!navigator.onLine || (err.message && err.message.includes("fetch"))) {
+         let curQ = JSON.parse(localStorage.getItem('pl_bot_queue') || "[]");
+         const j = curQ.find(q => q.rego === payload.rego);
+         if (j) {
+             j.inFlightAt = 0;
+             localStorage.setItem('pl_bot_queue', JSON.stringify(curQ));
+         }
+         if (btnElement) {
+             btnElement.innerHTML = "⏳ PL: QUEUED — TAP TO SYNC";
+             btnElement.style.background = "#2a2212";
+             btnElement.style.border = "2px solid #ffab00";
+             btnElement.style.color = "#ffab00";
+             btnElement.style.pointerEvents = "auto";
+         }
+         return;
+      }
+
+      // Hard server failure -> lock to Red Manual state
       vehicle.policelinkRef = "FAILED_MANUAL";
       if (btnElement) {
         btnElement.className = "btn-action btn-pl pl-manual";
         btnElement.innerHTML = "✖ Submit PL Manually";
         btnElement.style.background = "";
+        btnElement.style.border = "1.5px solid #ff5252";
         btnElement.style.color = "";
         btnElement.style.pointerEvents = "auto";
       }

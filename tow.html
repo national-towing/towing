@@ -1460,7 +1460,11 @@
 
         // 2. Fire Policelink Bot non-blocking in background
         queuePolicelinkBot(plPayload);
-        processPolicelinkBotQueue();
+        
+        // If online, process PL queue immediately. If offline, the queue stores it safely.
+        if (navigator.onLine) {
+            processPolicelinkBotQueue();
+        }
 
         // 3. Immediately display completion overlay so operator can log next tow right away
         successRego.innerText = rego + " LOGGED";
@@ -1629,13 +1633,13 @@
                     throw new Error((result && result.error) || "Bot error");
                 }
             } catch(err) {
-                // If aborted due to page navigation, leave in queue for yard.html to complete
-                if (err && err.name === 'AbortError' || document.visibilityState === 'hidden') {
+                // If aborted due to page navigation, network loss, or timeout, leave in queue to safely retry on surface
+                if (err && err.name === 'AbortError' || document.visibilityState === 'hidden' || !navigator.onLine || err.message.includes('fetch')) {
                     job.inFlightAt = 0;
                     localStorage.setItem('pl_bot_queue', JSON.stringify(plQueue));
                     break;
                 }
-                // First attempt failed -> remove from auto-queue and flag FAILED_1 so Yard App shows Blue Retry button
+                // True terminal server rejection (not a network issue) -> flag FAILED_1 for Yard manual fallback
                 removePolicelinkJob(job.id);
                 await savePlStatusToYardLog(job.rego, "FAILED_1");
             }
