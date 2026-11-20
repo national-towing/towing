@@ -1,4 +1,4 @@
-const CACHE_NAME = 'towing-app-shell-v80001';
+const CACHE_NAME = 'towing-app-shell-v80002';
 const APP_SHELL = [
   './',
   './mark.html',
