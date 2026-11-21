@@ -608,7 +608,7 @@
             const handleSelect = (e) => {
                 e.stopPropagation();
                 if (car.status === "PASS") {
-                    window.location.href = `admin.html`;
+                    window.location.href = `passes.html`;
                 } else {
                     navigateToTow(car);
                 }
@@ -725,7 +725,23 @@
             allVehicles.forEach(c => {
                 const r = c.rego.replace(/[^A-Z0-9]/g, '');
                 const dist = levenshtein(r, cleanRego);
-                if (dist <= 2 && dist < minDistance) {
+                
+                let isFuzzy = (dist <= 1);
+                
+                // Damerau-Levenshtein Transposition check for 2-character swaps
+                if (dist === 2 && r.length === cleanRego.length) {
+                    let diffs = [];
+                    for (let i = 0; i < r.length; i++) {
+                        if (r[i] !== cleanRego[i]) diffs.push(i);
+                    }
+                    if (diffs.length === 2 && diffs[1] === diffs[0] + 1) {
+                        if (r[diffs[0]] === cleanRego[diffs[1]] && r[diffs[1]] === cleanRego[diffs[0]]) {
+                            isFuzzy = true;
+                        }
+                    }
+                }
+
+                if (isFuzzy && dist < minDistance) {
                     minDistance = dist;
                     fuzzyMatch = c;
                 }
