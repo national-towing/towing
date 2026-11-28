@@ -811,6 +811,10 @@
     // 1. GHOST ALIGNMENT & NATIVE COMPARISON
     // ============================================================
     async function resolveLocalMarkPhoto(rego) {
+        // When online, prefer the current server Drive photo from Run/URL (which updates if marked twice) over stale IndexedDB cache
+        if (navigator.onLine && cachedMarkImageUrl && !cachedMarkImageUrl.startsWith('data:image')) {
+            return cachedMarkImageUrl;
+        }
         if (cachedMarkImageUrl && cachedMarkImageUrl.startsWith('data:image')) {
             return cachedMarkImageUrl;
         }

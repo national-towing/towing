@@ -615,11 +615,7 @@
         }
 
         mark(vehicleSelect, vehicleSelect && vehicleSelect.value !== "");
-        mark(svnInput, svnInput && svnInput.value.trim() !== "");
         mark(regoInput, regoInput && regoInput.value.trim() !== "");
-        mark(colourInput, colourInput && colourInput.value.trim() !== "");
-        mark(makeInput, makeInput && makeInput.value.trim() !== "");
-        mark(modelInput, modelInput && modelInput.value.trim() !== "");
 
         const isPlaceholder = (val) => !val || ["NOT PROVIDED", "NOT SPECIFIED", "N/A", "NONE", "UNKNOWN"].includes(String(val).trim().toUpperCase());
 
@@ -629,18 +625,34 @@
         const phoneClean = (ownerPhoneInput && ownerPhoneInput.value) ? ownerPhoneInput.value.replace(/[^\d+]/g, '') : "";
         const phoneValid = phoneClean.length >= 8;
 
-        mark(ownerNameInput, nameValid);
-        mark(idNumInput, idValid);
-        mark(ownerAddressInput, addrValid);
-        mark(ownerPhoneInput, phoneValid);
-
-        // Owner details unlock the signature block
-        const idDetailsComplete = nameValid && idValid && addrValid && phoneValid;
-        if (idDetailsComplete) {
-            ownerSigWrapper.classList.remove('section-disabled');
+        if (isOnsiteMode) {
+            // On-Site Release: all remaining fields (including Policelink Ref, Make/Model/Colour, Owner & Signature) are optional
+            [svnInput, colourInput, makeInput, modelInput, ownerNameInput, idNumInput, ownerAddressInput, ownerPhoneInput].forEach(el => {
+                if (el) { el.classList.remove('field-missing'); el.classList.add('field-valid'); }
+            });
+            if (vehicleSelect && vehicleSelect.value !== "") {
+                ownerSigWrapper.classList.remove('section-disabled');
+            } else {
+                ownerSigWrapper.classList.add('section-disabled');
+            }
         } else {
-            ownerSigWrapper.classList.add('section-disabled');
-            if (ownerSigConfirmed) clearSig('ownerSigCanvas');
+            mark(svnInput, svnInput && svnInput.value.trim() !== "");
+            mark(colourInput, colourInput && colourInput.value.trim() !== "");
+            mark(makeInput, makeInput && makeInput.value.trim() !== "");
+            mark(modelInput, modelInput && modelInput.value.trim() !== "");
+            mark(ownerNameInput, nameValid);
+            mark(idNumInput, idValid);
+            mark(ownerAddressInput, addrValid);
+            mark(ownerPhoneInput, phoneValid);
+
+            // Owner details unlock the signature block
+            const idDetailsComplete = nameValid && idValid && addrValid && phoneValid;
+            if (idDetailsComplete) {
+                ownerSigWrapper.classList.remove('section-disabled');
+            } else {
+                ownerSigWrapper.classList.add('section-disabled');
+                if (ownerSigConfirmed) clearSig('ownerSigCanvas');
+            }
         }
 
         mark(releaseFeeInput, releaseFeeInput && releaseFeeInput.value !== "");
@@ -650,7 +662,7 @@
             mark(officerOtherInput, officerOtherInput && officerOtherInput.value.trim() !== "");
         }
 
-        if (!ownerSigConfirmed) isValid = false;
+        if (!isOnsiteMode && !ownerSigConfirmed) isValid = false;
         
         submitBtn.disabled = !isValid || isSubmittingRelease;
         submitBtn.style.opacity = (isValid && !isSubmittingRelease) ? "1" : "0.5";
@@ -672,7 +684,7 @@
         const procOverlay = document.getElementById('processingOverlay');
         if (procOverlay) procOverlay.style.display = 'flex';
 
-        const ownerSig = document.getElementById('ownerSigCanvas').toDataURL('image/png');
+        const ownerSig = ownerSigConfirmed ? document.getElementById('ownerSigCanvas').toDataURL('image/png') : "";
         
 
         const payload = {
@@ -721,7 +733,10 @@
                     document.querySelector('#successOverlay p').innerText = "This vehicle was previously released.\nInvoice: " + (resData.invoiceNum || "Unknown");
                 } else {
                     successRego.innerText = payload.rego + " RELEASED";
-                    document.querySelector('#successOverlay p').innerText = "Tax Invoice Sent via SMS & Archived to Google Drive.";
+                    const hasSmsPhone = payload.ownerPhone && payload.ownerPhone.replace(/[^\d+]/g, '').length >= 8;
+                    document.querySelector('#successOverlay p').innerText = hasSmsPhone
+                        ? "Tax Invoice Sent via SMS & Archived to Google Drive."
+                        : "Tax Invoice Archived to Google Drive.";
                 }
                 
                 if (resData.pdfUrl) {
